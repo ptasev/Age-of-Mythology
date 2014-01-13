@@ -1,0 +1,133 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+LittleEndian();
+
+typedef uint16 hfloat <read=hfloatRead>;
+
+string hfloatRead( const hfloat &v )
+{
+   uint32 dataValue;
+   float  fValue;
+   
+   dataValue = 0;
+   
+   if (v & 0x7C00)
+   {
+      dataValue = ((v & 0x7C00) + 0x1C000) << 13;
+   }
+   
+   dataValue |= ((v & 0x8000) << 16) | ((v & 0x03FF) << 13);
+   
+   string s;
+   SPrintf( s, "%x", dataValue );
+   SScanf( s, "%x", fValue );
+   SPrintf( s, "%f", fValue );
+   return s;
+}
+
+    typedef enum {
+        NONE1        = 0x8000,
+        TRANSPCOLOR  = 0x4000,
+        NONE2        = 0x2000,
+        NONE3        = 0x1000,
+        MOVINGTEX    = 0x0800,
+        NOTFIRSTMESH = 0x0400,
+        NONE4        = 0x0200,
+        ATTACHPOINTS = 0x0100,
+        NONE5        = 0x0080,
+        MATERIALS    = 0x0040,
+        CHANGINGCOL  = 0x0020,
+        NONE7        = 0x0010,
+        NONE8        = 0x0008,
+        NONE9        = 0x0004,
+        TEXTURE      = 0x0002,
+        VERTCOLOR    = 0x0001
+    } MeP;
+    typedef enum {
+        SFX          = 0x1C000000, 
+        GLOW         = 0x00200000,
+        MATNONE1     = 0x00800000,
+        PLAYERCOLOR  = 0x00040000,
+        SOLIDCOLOR   = 0x00020000,
+        MATTEXTURE   = 0x00000030
+    } MaP;
+
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        hfloat val;
+} Vector <optimize=true>;
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        int val;
+} VectorInt <optimize=true>;
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        int16 val;
+} VectorInt16 <optimize=true>;
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        float val;
+} VectorFloat <optimize=true>;
+
+int magic;
+int numMeshes;
+int numMaterials;
+
+if (numMeshes > 1) {
+    float animTime;
+}
+
+struct Mesh {
+    int16 numVertices;
+    int16 numFaces;
+    int16 flags;
+
+    VectorFloat vertices(3)[numVertices];
+    VectorFloat normals(3)[numVertices];
+
+    if (!((flags & NOTFIRSTMESH) == NOTFIRSTMESH) || ((flags & MOVINGTEX) == MOVINGTEX)) 
+    {
+        if ((flags & TEXTURE) == TEXTURE) {
+            VectorFloat texVert(2)[numVertices];
+        }
+    }
+
+    if (!((flags & NOTFIRSTMESH) == NOTFIRSTMESH)) 
+    {
+        if ((flags & MATERIALS) == MATERIALS)
+        {
+            int faceMat[numFaces];
+        }
+
+        VectorInt16 faces(3)[numFaces];
+    }
+
+    if ((flags & ATTACHPOINTS) == ATTACHPOINTS)
+    {
+        int numAttachpoints;
+
+        struct Attachpoint {
+            string name;
+            VectorFloat xVector(3);
+            VectorFloat yVector(3);
+            VectorFloat zVector(3);
+            VectorFloat position(3);
+        } attachpoints[numAttachpoints] <optimize=false>;
+    }
+} meshes[numMeshes] <optimize=false>;
+
+struct Material {
+    int id;
+    int flags;
+    string name;
+} mats[numMaterials] <optimize=false>;

@@ -1,0 +1,106 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File:    brg.bt
+// Author:  Petar Tasev
+// Revision:1.0
+// Purpose: Highlight brg files from AoM game.
+//--------------------------------------
+LittleEndian();
+
+char magic[4];
+int unknown;
+int numMaterials;
+int unknown2;
+int numMeshes;
+int64 unknown3;
+
+char asetHeader[4];
+int numFrames;
+char unkown4[24];
+
+local int meshID = 0;
+
+struct Mesh {
+    char meshHead[4];
+    int16 meshFormat;
+    int16 unknown01b;
+    int16 numVertices;
+    int16 numFaces;
+    int unknown02;
+    char unknown03[36];
+    char unknown04[6];
+    char unknown05;
+    char unknown06;
+    char unknown07[24];
+    byte vertices[6*numVertices];
+    byte normals[6*numVertices];
+
+    if (unknown05 == 64 || (numMeshes > 1 && (unknown05 == 64 || unknown05 == 97 || (unknown05 == 66 && (unknown06 == 4 || unknown06 == 5)) && unknown02 != 256))) {
+        
+    } else {
+        byte textureCoords[4 * numVertices];
+    }
+
+    if (meshID == 0) {
+        byte faceMats[2 * numFaces];
+        byte faces[6 * numFaces];
+        byte vertexMats[2 * numVertices];
+    }
+
+    char unknown09[24];
+    int16 unknown09a;
+    int16 unknown09e;
+
+    if (!unknown09a) {
+        int unknown09b;
+        int unknown09c;
+        int unknown09d;
+    }
+
+    if (unknown05 == 97 || unknown06 == 200 || unknown06 == 204 || unknown06 == 72 || (unknown06 == 76 && unknown05 != 98)) {
+        char unknown0a[4 * numVertices];
+    }
+
+    if (unknown06 & 1) {
+        int16 count1;
+        int16 count2;
+        int16 unknown10;
+
+        struct Attachpoint {
+            char xVector[6];
+            char yVector[6];
+            char zVector[6];
+            char position[6];
+        } attachpoints[count1] <optimize=false>;
+        char unknown11[12 * count1];
+        int unknown12[2 * count2];
+        
+        local int count;
+        local int i;
+        for (i = 0; i < 2 * count2; i+=2) {
+            count += unknown12[i];
+        }
+        char unknown13[count];
+        // count stuff
+
+        if (!unknown09a && unknown09c) {
+            char unknown14[4 * unknown09c];
+        }
+    }
+
+    meshID++;
+} item[numMeshes] <optimize=false>;
+
+struct Material {
+    char mtrlHead[4];
+    int16 id;
+    char unknown01[10];
+    int nameLength;
+    char unknown02[36];
+    char unknown03[12];
+    
+    char name[nameLength];
+    char unknown04[4];
+    
+} material[numMaterials] <optimize=false>;

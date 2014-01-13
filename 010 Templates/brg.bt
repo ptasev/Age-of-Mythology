@@ -1,0 +1,275 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File:    brg.bt
+// Author:  Petar Tasev
+// Revision:1.0
+// Purpose: Highlight brg files from AoM game.
+//--------------------------------------
+LittleEndian();
+
+typedef uint16 hfloat <read=h2floatRead>;
+
+string h2floatRead( const hfloat &v )
+{
+   byte currData[2];
+   ConvertDataToBytes(v, currData);
+
+   byte data[4];
+   data[0] = 0;
+   data[1] = 0;
+   data[2] = currData[0];
+   data[3] = currData[1];
+   float  fValue;
+   //fValue = (float)data;
+   fValue = ConvertBytesToFloat(data);
+   
+   string s;
+   //SPrintf( s, "%x", data );
+   //SScanf( s, "%x", fValue );
+   SPrintf( s, "%f", fValue );
+   return s;
+}
+string hfloatRead( const hfloat &v )
+{
+   uint32 dataValue;
+   float  fValue;
+   
+   dataValue = 0;
+   
+   if (v & 0x7C00)
+   {
+      dataValue = ((v & 0x7C00) + 0x1C000) << 13;
+   }
+   
+   dataValue |= ((v & 0x8000) << 16) | ((v & 0x03FF) << 13);
+   
+   string s;
+   SPrintf( s, "%x", dataValue );
+   SScanf( s, "%x", fValue );
+   SPrintf( s, "%f", fValue );
+   return s;
+}
+/*
+    typedef enum {
+        NONE1        = 0x80000028,
+        TRANSPCOLOR  = 0x40000028,
+        NONE2        = 0x20000028,
+        NONE3        = 0x10000028,
+        MOVINGTEX    = 0x08000028,
+        NOTFIRSTMESH = 0x04000028,
+        NONE4        = 0x02000028,
+        ATTACHPOINTS = 0x01000028,
+        NONE5        = 0x00800028,
+        MATERIALS    = 0x00400028,
+        CHANGINGCOL  = 0x00200028,
+        NONE7        = 0x00100028,
+        NONE8        = 0x00080028,
+        NONE9        = 0x00040028,
+        TEXTURE      = 0x00020028,
+        VERTCOLOR    = 0x00010028
+    } MeP;
+*/
+    typedef enum {
+        NONE1        = 0x8000,
+        TRANSPCOLOR  = 0x4000,
+        NONE2        = 0x2000,
+        NONE3        = 0x1000,
+        MOVINGTEX    = 0x0800,
+        NOTFIRSTMESH = 0x0400,
+        NONE4        = 0x0200,
+        ATTACHPOINTS = 0x0100,
+        NONE5        = 0x0080,
+        MATERIALS    = 0x0040,
+        CHANGINGCOL  = 0x0020,
+        NONE7        = 0x0010,
+        NONE8        = 0x0008,
+        NONE9        = 0x0004,
+        TEXTURE      = 0x0002,
+        VERTCOLOR    = 0x0001
+    } MeP;
+    typedef enum {
+        SFX          = 0x1C000000, 
+        GLOW         = 0x00200000,
+        MATNONE1     = 0x00800000,
+        PLAYERCOLOR  = 0x00040000,
+        SOLIDCOLOR   = 0x00020000,
+        MATTEXTURE   = 0x00000030
+    } MaP;
+
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        hfloat val;
+} Vector <optimize=true>;
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        int16 val;
+} VectorInt16 <optimize=true>;
+typedef struct (int size) {
+    local int tmp;
+    for (tmp = 0; tmp < size; tmp++)
+        float val;
+} VectorFloat <optimize=true>;
+
+struct {
+    struct HEADER {
+        char magic[4];
+        int unknown01;
+        int numMaterials;
+        int unknown02;
+        int numMeshes;
+        int space;
+        int unknown03;
+    } header;
+
+    if (header.numMeshes > 1) {
+        struct {
+            char asetHead[4];
+            int numFrames;
+            float frameStep;
+            float animTime;
+            float frequency;
+            float spf;
+            float fps;
+            int space;
+        } asetHeader;
+    }
+
+    local int meshID = 0;
+
+    struct Mesh {
+        char meshHead[4];
+        int16 meshFormat;
+        int16 meshFormat2; // 4 -- (1 frame/unknown09[4] = 0), 1(5) -- Projectile?, 8(12) -- Animated
+        int16 numVertices;
+        int16 numFaces;
+        int unknown02;
+        float unknown03[8]; // [4] seems to be always same as meshX below
+        float groundZ;
+        int16 unknown04[3];
+        int16 properties; //unknown05/06
+            local byte unknown05 = properties;
+            local byte unknown06 = properties >> 8;
+        VectorFloat negativeMeshPos(3);
+        VectorFloat meshPos(3);
+        Vector vertices(3)[numVertices];
+        Vector normals(3)[numVertices];
+
+        local int i = 0;
+
+        //if (MATERIALS || (numMeshes > 1 && (MATERIALS | TEXTURE || unknown05 == 97 || (unknown05 == 66 && (unknown06 == 4 || unknown06 == 5)) && unknown02 != 256))) {
+                
+        //} else {
+        //    byte textureCoords[4 * numVertices];
+        //}
+
+        if (!((properties & NOTFIRSTMESH) == NOTFIRSTMESH) || ((properties & MOVINGTEX) == MOVINGTEX)) {
+            if ((properties & TEXTURE) == TEXTURE) {
+                // UV
+                Vector texVert(2)[numVertices];
+            }
+        }
+        if (!((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) {
+            if ((properties & MATERIALS) == MATERIALS) {
+                int16 faceMat[numFaces];
+                //VectorInt16 faceMat(1)[numFaces];
+                //for (i = 0; i < numFaces; i++) {
+                //    int16 faceMat;
+                //}
+            }
+
+            VectorInt16 faceVert(3)[numFaces];
+
+            if ((properties & MATERIALS) == MATERIALS) {
+                int16 vertMat[numVertices];
+                //VectorInt16 vertMat(1)[numVertices];
+                //for (i = 0; i < numVertices; i++) {
+                //    int16 vertexMat;
+                //}
+            }
+        }
+
+        int unknown09[4];//[24];
+        float animTime;
+        int unknown09Const;
+        int16 checkSpace; //09a
+        int16 unknown09e;
+
+        if (!checkSpace) {
+            float unknown09b;
+            int lenSpace; //09c
+            int unknown09d;
+        }
+          //Mat-VeC-ChCol   || None-TransP-MovT || ""-NotFirstMesh  || TransP-MovT     ||  TransP-MovT-Not && Mat-Tex-ChCol
+        if (unknown05 == 97 || unknown06 == 200 || unknown06 == 204 || unknown06 == 72 || (unknown06 == 76 && unknown05 != 98)) {
+            byte unknown0a[4 * numVertices];
+        }
+        if ((properties & TRANSPCOLOR) == TRANSPCOLOR) {
+            //byte unknown0a[4 * numVertices];
+        }
+
+        if ((properties & ATTACHPOINTS) == ATTACHPOINTS) {
+            //if (!((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) {
+                int16 numMatrix;
+                int16 numIndex;
+                int16 unknown10; //always 1?
+            //}
+
+            Vector xVector(3)[numMatrix];
+            Vector yVector(3)[numMatrix];
+            Vector zVector(3)[numMatrix];
+            Vector position(3)[numMatrix];
+            Vector unknown11a(3)[numMatrix];
+            Vector unknown11b(3)[numMatrix];
+            //hfloat unknown11[6 * numMatrix];
+
+            local int32 numPoints = 0;
+            for (i = 0; i < numIndex; i++) {
+                int numDupli;
+                int empty;
+                numPoints += numDupli;
+            }
+            //unknown12
+
+            byte pointIndex[numPoints]; //unknown13
+
+            if (!checkSpace && lenSpace) {
+                float unknown14[lenSpace];
+            }
+        }
+
+        meshID++;
+    } item[header.numMeshes] <optimize=false>;
+
+    if ((item[0].properties & MATERIALS) == MATERIALS) {
+        struct Material {
+            char mtrlHead[4];
+            int id;
+            int properties;
+            int unknown01b;
+            int nameLength;
+            VectorFloat color(3); //unknown02 [36 bytes]
+            VectorFloat specular(3);
+            VectorFloat reflection(3);
+            VectorFloat ambient(3); //unknown03 [12 bytes]
+    
+            char name[nameLength];
+            float alpha; //unknown04
+
+            if ((properties & SOLIDCOLOR) == SOLIDCOLOR) {
+                float unknown05;
+            }
+
+            if ((properties & SFX) == SFX) {
+                byte numSFX;
+                struct MatSFX {
+                    byte sfxId;
+                    int16 sfxNameLength;
+                    char sfxName[sfxNameLength];
+                } sfx[numSFX] <optimize=false>;
+            }
+        } material[header.numMaterials] <optimize=false>;
+    }
+} file;
