@@ -21,12 +21,9 @@ string h2floatRead( const hfloat &v )
    data[2] = currData[0];
    data[3] = currData[1];
    float  fValue;
-   //fValue = (float)data;
    fValue = ConvertBytesToFloat(data);
    
    string s;
-   //SPrintf( s, "%x", data );
-   //SScanf( s, "%x", fValue );
    SPrintf( s, "%f", fValue );
    return s;
 }
@@ -90,16 +87,17 @@ string hfloatRead( const hfloat &v )
     } MeshFlags <read=readMeshFlags>;
 
     typedef enum <uint16> {
-        NOLOOPANIMATE  = 0x0020, // don't animate Last-First frame
-        FORMATNONE1  = 0x0010, // haven't seen used
-        ANIMATED  = 0x0008, // maybe means Animated
-        HASMATERIAL  = 0x0004, // uses materials
-        ANIMATEDUV  = 0x0002, // Animated UV
-        ROTATE       = 0x0001 // rotates with the player view
+        NOLOOPANIMATE   = 0x0020, // don't animate Last-First frame
+        FORMATNONE1     = 0x0010, // haven't seen used
+        ANIMATED        = 0x0008, // maybe means Animated
+        HASMATERIAL     = 0x0004, // uses materials
+        ANIMATEDUV      = 0x0002, // Animated UV
+        ROTATE          = 0x0001 // rotates with the player view
     } MeshFormat;
 
     typedef enum <uint> {
         SFX          = 0x1C000000,
+        REFLECTTEX   = 0x04000000, // use reflective texture
         MATNONE3     = 0x02000000, // ulfsark death
         MATNONE4     = 0x01000000, // low poly ulfsark death
         MATNONE1     = 0x00800000,
@@ -187,8 +185,9 @@ struct {
         MeshFormat meshFormat;
         int16 numVertices;
         int16 numFaces;
-        int unknown02; // 0 -- ??, 1 -- ??, 256 -- variable anim time
-        float unknown03[4]; // [3] seems to be always same as one of meshPos
+        int specialProp;
+        VectorFloat hitboxPos(3);
+        float unknown03;
         VectorFloat unknown03Const(3); // always 0 for all 3
         VectorFloat groundPos(3);
         int16 unknown04; // always 40
@@ -217,25 +216,29 @@ struct {
             }
         }
 
-        int16 numIndex0; // same as values in attachpoints, could be unused now
-        int16 numMatrix0; // same as values in attachpoints, could be unused
-        int unknown091; // still need to figure out
-        int unknown09Unused; // always 0
-        int lastMaterialIndex; // still not sure but definitely dealing with materials in the mesh
-        //int16 unknown09Unused2; // always 0
+        int16 numIndex0 <comment="Unused">; // same as values in attachpoints, could be unused now
+        int16 numMatrix0 <comment="Unused">; // same as values in attachpoints, could be unused
+        int unknown091 <comment="Still need to figure out">; // still need to figure out
+        int unknown09Unused <comment="Always 0">; // always 0
+        int lastMaterialIndex <comment="Still need to figure out">; // still not sure but definitely dealing with materials in the mesh
         float animTime; // this is what really matters for the animation length of the model
-        int unknown09Const; // always the same value, one for aom, one for tt models
-        int16 checkSpace; //09a, always 0
-        hfloat unknown09e; // 0 for almost everything, but a few models
+        int unknown09Const <comment="Always 191738312, 1032824281 for TT">; // always the same value, one for aom, one for tt models
+        int16 checkSpace <comment="Always 0">; // always 0
+        hfloat unknown09e <comment="Unused">; // 0 for almost everything, could be unused now
 
         if (!checkSpace) {
-            float unknown09b; // some sort of timing multiplier, adjustment
+            float timeMult; // some sort of timing multiplier, adjustment
             int lenSpace; //09c
-            int numMaterialsUsed; // how man materials are used in a mesh
+            int numMaterialsUsed; // how many materials are used in a mesh
         }
 
         if ((((properties & TRANSPCOLOR) == TRANSPCOLOR || (properties & CHANGINGCOL) == CHANGINGCOL) && !((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) || (properties & VERTCOLOR) == VERTCOLOR) {
-            byte unknown0a[4 * numVertices];
+            struct VertColor {
+                ubyte R;
+                ubyte G;
+                ubyte B;
+                ubyte A;
+            } vertexColor[numVertices];
         }
 
         if ((properties & ATTACHPOINTS) == ATTACHPOINTS) {
@@ -286,7 +289,7 @@ frame[3] plays from 2.1 to 3.0 -> duration = 0.9
             char mtrlHead[4];
             int id;
             BrgMatFlag properties;
-            int unknown01b;
+            int unknown01b; // always 0
             int nameLength;
             VectorFloat color(3); //unknown02 [36 bytes]
             VectorFloat specular(3);
@@ -296,7 +299,7 @@ frame[3] plays from 2.1 to 3.0 -> duration = 0.9
             char name[nameLength];
 
             if ((properties & SOLIDCOLOR) == SOLIDCOLOR) {
-                float unknown05;
+                float specularLevel;
             }
             if (maHasFlag(properties, MATNONE2))
             {
@@ -306,10 +309,10 @@ frame[3] plays from 2.1 to 3.0 -> duration = 0.9
 
             float alpha; //unknown04
 
-            if ((properties & SFX) == SFX) {
-                byte numSFX;
+            if ((properties & REFLECTTEX) == REFLECTTEX) {
+                byte numSFX; // always 1
                 struct MatSFX {
-                    byte sfxId;
+                    byte sfxId; // always 30/40 for tt
                     int16 sfxNameLength;
                     char sfxName[sfxNameLength];
                 } sfx[numSFX] <optimize=false>;
