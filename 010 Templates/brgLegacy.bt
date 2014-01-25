@@ -21,9 +21,12 @@ string h2floatRead( const hfloat &v )
    data[2] = currData[0];
    data[3] = currData[1];
    float  fValue;
+   //fValue = (float)data;
    fValue = ConvertBytesToFloat(data);
    
    string s;
+   //SPrintf( s, "%x", data );
+   //SScanf( s, "%x", fValue );
    SPrintf( s, "%f", fValue );
    return s;
 }
@@ -87,17 +90,16 @@ string hfloatRead( const hfloat &v )
     } MeshFlags <read=readMeshFlags>;
 
     typedef enum <uint16> {
-        NOLOOPANIMATE   = 0x0020, // don't animate Last-First frame
-        FORMATNONE1     = 0x0010, // haven't seen used
-        ANIMATED        = 0x0008, // maybe means Animated
-        HASMATERIAL     = 0x0004, // uses materials
-        ANIMATEDUV      = 0x0002, // Animated UV
-        ROTATE          = 0x0001 // rotates with the player view
-    } MeshFormat;
+        NOLOOPANIMATE  = 0x0020, // don't animate Last-First frame
+        FORMATNONE1  = 0x0010, // haven't seen used
+        ANIMATED  = 0x0008, // maybe means Animated
+        HASMATERIAL  = 0x0004, // uses materials
+        ANIMATEDUV  = 0x0002, // Animated UV
+        ROTATE       = 0x0001 // rotates with the player view
+    } MeshFormat <read=readMeshFlags>;
 
     typedef enum <uint> {
         SFX          = 0x1C000000,
-        REFLECTTEX   = 0x04000000, // use reflective texture
         MATNONE3     = 0x02000000, // ulfsark death
         MATNONE4     = 0x01000000, // low poly ulfsark death
         MATNONE1     = 0x00800000,
@@ -178,82 +180,102 @@ struct {
     }
 
     local int meshID = 0;
+    local string ttttt = EnumToString(VERTCOLOR);
 
     struct Mesh {
         char meshHead[4];
         int16 version; // always 22
-        MeshFormat meshFormat;
+        int16 meshFormat2; // 4 -- (1 frame/animTime = 0), 1(5) -- Rotate View, 8(12) -- Animated, (6) -- animUV, (36), (44), (13)
         int16 numVertices;
         int16 numFaces;
-        int specialProp;
-        VectorFloat objectCenter(3);
-        float unknown03 <comment="Could be longest axis length of boundingBoxMax">;
-        VectorFloat objectPos(3) <comment="Always 0">; // always 0 for all 3
-        VectorFloat groundPos(3);
-        int16 unknown04 <comment="Always 40">; // always 40
-        MeshFlags properties;
-        VectorFloat boundingBoxMin(3);
-        VectorFloat boundingBoxMax(3);
-        Vector vertices(3)[numVertices];
-        Vector normals(3)[numVertices];
+        int unknown02; // 0, 1, 256 -- variable anim time,
+        float unknown03[8]; // [4] seems to be always same as meshX below
+        float groundZ;
+        byte unknown04[6]; // 0 for u02 == 1, 
+        MeshFlags properties; //unknown05/06
+            local byte unknown05 = properties;
+            local byte unknown06 = properties >> 8;
+        VectorFloat negativeMeshPos(3);
+        VectorFloat meshPos(3);
+        VectorFloat vertices(3)[numVertices];
+        VectorFloat normals(3)[numVertices];
 
         local int i = 0;
 
+        //if (MAT(64) || (numMeshes > 1 && (MAT(64) || (Changing | VertColor)(97) || ((MAT | TEX)(66) && ((NotFirst)(4) || (NotFirst | Attach)(5)) ) && unknown02 != 256))) {
+                
+        //} else {
+        //    byte textureCoords[4 * numVertices];
+        //}
+
         if (!((properties & NOTFIRSTMESH) == NOTFIRSTMESH) || ((properties & MOVINGTEX) == MOVINGTEX)) {
             if ((properties & TEXTURE) == TEXTURE) {
-                Vector texVert(2)[numVertices];
+                // UV
+                VectorFloat texVert(2)[numVertices];
             }
         }
         if (!((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) {
             if ((properties & MATERIALS) == MATERIALS) {
                 int16 faceMat[numFaces];
+                //VectorInt16 faceMat(1)[numFaces];
+                //for (i = 0; i < numFaces; i++) {
+                //    int16 faceMat;
+                //}
             }
 
             VectorInt16 faceVert(3)[numFaces];
 
             if ((properties & MATERIALS) == MATERIALS) {
                 int16 vertMat[numVertices];
+                //VectorInt16 vertMat(1)[numVertices];
+                //for (i = 0; i < numVertices; i++) {
+                //    int16 vertexMat;
+                //}
             }
         }
 
-        int16 numIndex0 <comment="Unused">; // same as values in attachpoints, could be unused now
-        int16 numMatrix0 <comment="Unused">; // same as values in attachpoints, could be unused
-        int unknown091 <comment="Still need to figure out">; // still need to figure out
-        int unknown09Unused <comment="Always 0">; // always 0
-        int lastMaterialIndex <comment="Still need to figure out">; // still not sure but definitely dealing with materials in the mesh
-        float animTime; // this is what really matters for the animation length of the model
-        int unknown09Const <comment="Always 191738312, 1032824281 for TT">; // always the same value, one for aom, one for tt models
-        int16 checkSpace <comment="Always 0">; // always 0
-        hfloat unknown09e <comment="Unused">; // 0 for almost everything, could be unused now
-        float timeMult; // some sort of timing multiplier, adjustment?
-        int lenSpace; //09c
-        int numMaterialsUsed; // how many materials are used in a mesh
+        //int unknown09[3];//[24];
+        int16 numIndex0; // same as values in attachpoints
+        int16 numMatrix0; // same as values in attachpoints
+        int unknown091;
+        int unknown092; // always seems to be 0
+        int16 unknown093a; // seems to be numMaterialsUsed - 1
+        int16 unknown093b;
+        float animTime;
+        int unknown09Const; // always the same value, one for aom, one for tt models
+        int16 checkSpace; //09a
+        int16 unknown09e; // always seems to be 0
+
+        if (!checkSpace) {
+            float unknown09b; // always seems to be 1
+            int lenSpace; //09c
+            int numMaterialsUsed;
+        }
 
         if ((((properties & TRANSPCOLOR) == TRANSPCOLOR || (properties & CHANGINGCOL) == CHANGINGCOL) && !((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) || (properties & VERTCOLOR) == VERTCOLOR) {
-            struct VertColor {
-                ubyte R;
-                ubyte G;
-                ubyte B;
-                ubyte A;
-            } vertexColor[numVertices];
+            byte unknown0a[4 * numVertices];
         }
 
         if ((properties & ATTACHPOINTS) == ATTACHPOINTS) {
-            int16 numMatrix <comment="This is number of bones">;
-            int16 numIndex;
-            int16 unknown10 <comment="Always 1">;
+            //if (!((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) {
+                int16 numMatrix;
+                int16 numIndex;
+                int16 unknown10; //always 1?
+            //}
 
-            Vector xVector(3)[numMatrix];
-            Vector yVector(3)[numMatrix];
-            Vector zVector(3)[numMatrix];
-            Vector position(3)[numMatrix];
-            Vector boundingBoxMina(3)[numMatrix];
-            Vector boundingBoxMaxa(3)[numMatrix];
+            VectorFloat xVector(3)[numMatrix];
+            VectorFloat yVector(3)[numMatrix];
+            VectorFloat zVector(3)[numMatrix];
+            VectorFloat position(3)[numMatrix];
+            VectorFloat unknown11a(3)[numMatrix];
+            VectorFloat unknown11b(3)[numMatrix];
+            //hfloat unknown11[6 * numMatrix];
 
             local int32 numPoints = 0;
             struct AttachNameIndex {
                 int numAttach;
                 int id;
+                //numPoints += numAttach;
             } attachNameIndex[numIndex] <optimize=true>;
             for (i = 0; i < numIndex; i++) {
                 numPoints += attachNameIndex[i].numAttach;
@@ -261,32 +283,43 @@ struct {
             //unknown12
 
             byte pointIndex[numPoints]; //unknown13
-        }
 
-        // checkSpace is always 0 anyway, this block happens only on first frames, with variable anim set in specialProps
-        if (!checkSpace && lenSpace) {
-            float variableSpeed[lenSpace] <comment="mesh[x].StartTime = animTime * varSpeed[x]">;
+            if (!checkSpace && lenSpace) {
+                float variableSpeed[lenSpace]; // frame[x].fEndofPlaytime = mAnimationDuration * mVariableSpeed[x]
+/*----------
+- example:
+hNumberofFrames = 4
+mAnimationDuration = 3.0
+mVariableSpeed = {0.2, 0.6, 0.7, 1.0}
+- then:
+frame[0] plays from 0.0 to 0.6 -> duration = 0.6
+frame[1] plays from 0.6 to 1.8 -> duration = 1.2
+frame[2] plays from 1.8 to 2.1 -> duration = 0.3
+frame[3] plays from 2.1 to 3.0 -> duration = 0.9
+----------*/
+            }
+            VectorFloat ttttttt(3)[numFaces];
         }
 
         meshID++;
     } item[header.numMeshes] <optimize=false>;
 
     if ((item[0].properties & MATERIALS) == MATERIALS) {
-        struct Material { // STILL HAVEN'T THOROUGHLY LOOKED AT MATERIALS
+        struct Material {
             char mtrlHead[4];
             int id;
             BrgMatFlag properties;
-            int unknown01b <comment="Always 0">; // always 0
+            int unknown01b;
             int nameLength;
             VectorFloat color(3); //unknown02 [36 bytes]
-            VectorFloat ambient(3);
             VectorFloat specular(3);
-            VectorFloat selfIllumination(3); //unknown03 [12 bytes]
+            VectorFloat reflection(3);
+            VectorFloat ambient(3); //unknown03 [12 bytes]
     
             char name[nameLength];
 
             if ((properties & SOLIDCOLOR) == SOLIDCOLOR) {
-                float specularLevel;
+                float unknown05;
             }
             if (maHasFlag(properties, MATNONE2))
             {
@@ -296,10 +329,10 @@ struct {
 
             float alpha; //unknown04
 
-            if ((properties & REFLECTTEX) == REFLECTTEX) {
-                byte numSFX <comment="Always 0">; // always 1
+            if ((properties & SFX) == SFX) {
+                byte numSFX;
                 struct MatSFX {
-                    byte sfxId <comment="Always 30, 40 for TT">; // always 30/40 for tt
+                    byte sfxId;
                     int16 sfxNameLength;
                     char sfxName[sfxNameLength];
                 } sfx[numSFX] <optimize=false>;

@@ -166,12 +166,12 @@ fn import =
 				positionVector = [X, Y, Z]
 				
 				dummy name:aName transform:(matrix3 xVector yVector zVector positionVector) boxsize:[0.5, 0.5, 0.5]
-				--append attachpoints (dummy name:aName transform:(matrix3 xVector yVector zVector positionVector))
 			)
 		)
 		
 		append meshes (mesh vertices:vertices normals:normals faces:faces materialIDS:faceMats tverts:texVerts)
 		
+		--print (getNormal $Object001.mesh 1)
 		for fid = 1 to meshes[i].numfaces do
 		(
 			--setFaceMatID meshes[i] fid faceMats[fid]
@@ -184,7 +184,7 @@ fn import =
 			setTVFace meshes[i] tvFix (getFace meshes[i] tvFix)
 		)
 		
-		update meshes[i]
+		--update meshes[i] normals:false
 	)
 	
 	if (numMaterials > 0) do

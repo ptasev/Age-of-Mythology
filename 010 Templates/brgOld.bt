@@ -37,7 +37,7 @@ struct Mesh {
     byte normals[6*numVertices];
 
     if (unknown05 == 64 || (numMeshes > 1 && (unknown05 == 64 || unknown05 == 97 || (unknown05 == 66 && (unknown06 == 4 || unknown06 == 5)) && unknown02 != 256))) {
-        
+        // no tex coords
     } else {
         byte textureCoords[4 * numVertices];
     }

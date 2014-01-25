@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMBrgEditor", "AoMBrgEditor\AoMBrgEditor.csproj", "{3B38591C-D355-4124-BBE7-C6098E01B2C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMEngineLibrary", "..\AoMEngineLibrary\AoMEngineLibrary\AoMEngineLibrary.csproj", "{6DBC106C-7292-4872-A41A-EB7CEEEF0092}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +17,10 @@ Global
 		{3B38591C-D355-4124-BBE7-C6098E01B2C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B38591C-D355-4124-BBE7-C6098E01B2C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B38591C-D355-4124-BBE7-C6098E01B2C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

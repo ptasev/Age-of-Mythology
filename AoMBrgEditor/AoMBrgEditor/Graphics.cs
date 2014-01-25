@@ -6,7 +6,7 @@ using System.Xml;
 using System.Windows.Forms;
 using MiscUtil.IO;
 using MiscUtil.Conversion;
-
+/*
 namespace AoMBrgEditor
 {
     #region PSSG
@@ -1642,3 +1642,4 @@ namespace AoMBrgEditor
     }
     #endregion
 }
+*/
