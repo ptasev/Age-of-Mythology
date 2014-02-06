@@ -86,6 +86,10 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.numVertsLabel = new System.Windows.Forms.Label();
+            this.numVertsMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.numFacesLabel = new System.Windows.Forms.Label();
+            this.numFacesMaxTextBox = new MaxCustomControls.MaxTextBox();
             this.materialPanel.SuspendLayout();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
@@ -309,7 +313,7 @@
             // 
             // timeMultMaxTextBox
             // 
-            this.timeMultMaxTextBox.Location = new System.Drawing.Point(68, 94);
+            this.timeMultMaxTextBox.Location = new System.Drawing.Point(66, 143);
             this.timeMultMaxTextBox.Name = "timeMultMaxTextBox";
             this.timeMultMaxTextBox.Size = new System.Drawing.Size(87, 20);
             this.timeMultMaxTextBox.TabIndex = 11;
@@ -317,7 +321,7 @@
             // timeMultLabel
             // 
             this.timeMultLabel.AutoSize = true;
-            this.timeMultLabel.Location = new System.Drawing.Point(6, 97);
+            this.timeMultLabel.Location = new System.Drawing.Point(3, 146);
             this.timeMultLabel.Name = "timeMultLabel";
             this.timeMultLabel.Size = new System.Drawing.Size(53, 13);
             this.timeMultLabel.TabIndex = 10;
@@ -325,7 +329,7 @@
             // 
             // liuMaxTextBox
             // 
-            this.liuMaxTextBox.Location = new System.Drawing.Point(68, 146);
+            this.liuMaxTextBox.Location = new System.Drawing.Point(66, 195);
             this.liuMaxTextBox.Name = "liuMaxTextBox";
             this.liuMaxTextBox.ReadOnly = true;
             this.liuMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -334,7 +338,7 @@
             // liuLabel
             // 
             this.liuLabel.AutoSize = true;
-            this.liuLabel.Location = new System.Drawing.Point(6, 149);
+            this.liuLabel.Location = new System.Drawing.Point(3, 198);
             this.liuLabel.Name = "liuLabel";
             this.liuLabel.Size = new System.Drawing.Size(24, 13);
             this.liuLabel.TabIndex = 8;
@@ -468,6 +472,10 @@
             // 
             // generalDataGroupBox
             // 
+            this.generalDataGroupBox.Controls.Add(this.numFacesLabel);
+            this.generalDataGroupBox.Controls.Add(this.numFacesMaxTextBox);
+            this.generalDataGroupBox.Controls.Add(this.numVertsLabel);
+            this.generalDataGroupBox.Controls.Add(this.numVertsMaxTextBox);
             this.generalDataGroupBox.Controls.Add(this.updateSettingsButton);
             this.generalDataGroupBox.Controls.Add(this.timeMultMaxTextBox);
             this.generalDataGroupBox.Controls.Add(this.timeMultLabel);
@@ -501,7 +509,7 @@
             // 
             // u091MaxTextBox
             // 
-            this.u091MaxTextBox.Location = new System.Drawing.Point(68, 120);
+            this.u091MaxTextBox.Location = new System.Drawing.Point(66, 169);
             this.u091MaxTextBox.Name = "u091MaxTextBox";
             this.u091MaxTextBox.Size = new System.Drawing.Size(87, 20);
             this.u091MaxTextBox.TabIndex = 7;
@@ -509,7 +517,7 @@
             // u091Label
             // 
             this.u091Label.AutoSize = true;
-            this.u091Label.Location = new System.Drawing.Point(6, 123);
+            this.u091Label.Location = new System.Drawing.Point(3, 172);
             this.u091Label.Name = "u091Label";
             this.u091Label.Size = new System.Drawing.Size(33, 13);
             this.u091Label.TabIndex = 6;
@@ -517,7 +525,7 @@
             // 
             // animTimeMaxTextBox
             // 
-            this.animTimeMaxTextBox.Location = new System.Drawing.Point(68, 68);
+            this.animTimeMaxTextBox.Location = new System.Drawing.Point(66, 117);
             this.animTimeMaxTextBox.Name = "animTimeMaxTextBox";
             this.animTimeMaxTextBox.ReadOnly = true;
             this.animTimeMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -526,7 +534,7 @@
             // animTimeLabel
             // 
             this.animTimeLabel.AutoSize = true;
-            this.animTimeLabel.Location = new System.Drawing.Point(6, 71);
+            this.animTimeLabel.Location = new System.Drawing.Point(3, 120);
             this.animTimeLabel.Name = "animTimeLabel";
             this.animTimeLabel.Size = new System.Drawing.Size(56, 13);
             this.animTimeLabel.TabIndex = 4;
@@ -534,7 +542,7 @@
             // 
             // numMatMaxTextBox
             // 
-            this.numMatMaxTextBox.Location = new System.Drawing.Point(68, 42);
+            this.numMatMaxTextBox.Location = new System.Drawing.Point(66, 91);
             this.numMatMaxTextBox.Name = "numMatMaxTextBox";
             this.numMatMaxTextBox.ReadOnly = true;
             this.numMatMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -543,7 +551,7 @@
             // numMatLabel
             // 
             this.numMatLabel.AutoSize = true;
-            this.numMatLabel.Location = new System.Drawing.Point(6, 45);
+            this.numMatLabel.Location = new System.Drawing.Point(3, 94);
             this.numMatLabel.Name = "numMatLabel";
             this.numMatLabel.Size = new System.Drawing.Size(40, 13);
             this.numMatLabel.TabIndex = 2;
@@ -552,7 +560,7 @@
             // numMeshLabel
             // 
             this.numMeshLabel.AutoSize = true;
-            this.numMeshLabel.Location = new System.Drawing.Point(6, 19);
+            this.numMeshLabel.Location = new System.Drawing.Point(3, 68);
             this.numMeshLabel.Name = "numMeshLabel";
             this.numMeshLabel.Size = new System.Drawing.Size(43, 13);
             this.numMeshLabel.TabIndex = 1;
@@ -560,7 +568,7 @@
             // 
             // numMeshMaxTextBox
             // 
-            this.numMeshMaxTextBox.Location = new System.Drawing.Point(68, 16);
+            this.numMeshMaxTextBox.Location = new System.Drawing.Point(66, 65);
             this.numMeshMaxTextBox.Name = "numMeshMaxTextBox";
             this.numMeshMaxTextBox.ReadOnly = true;
             this.numMeshMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -643,6 +651,40 @@
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // numVertsLabel
+            // 
+            this.numVertsLabel.AutoSize = true;
+            this.numVertsLabel.Location = new System.Drawing.Point(3, 16);
+            this.numVertsLabel.Name = "numVertsLabel";
+            this.numVertsLabel.Size = new System.Drawing.Size(41, 13);
+            this.numVertsLabel.TabIndex = 14;
+            this.numVertsLabel.Text = "# Verts";
+            // 
+            // numVertsMaxTextBox
+            // 
+            this.numVertsMaxTextBox.Location = new System.Drawing.Point(66, 13);
+            this.numVertsMaxTextBox.Name = "numVertsMaxTextBox";
+            this.numVertsMaxTextBox.ReadOnly = true;
+            this.numVertsMaxTextBox.Size = new System.Drawing.Size(87, 20);
+            this.numVertsMaxTextBox.TabIndex = 13;
+            // 
+            // numFacesLabel
+            // 
+            this.numFacesLabel.AutoSize = true;
+            this.numFacesLabel.Location = new System.Drawing.Point(3, 42);
+            this.numFacesLabel.Name = "numFacesLabel";
+            this.numFacesLabel.Size = new System.Drawing.Size(46, 13);
+            this.numFacesLabel.TabIndex = 16;
+            this.numFacesLabel.Text = "# Faces";
+            // 
+            // numFacesMaxTextBox
+            // 
+            this.numFacesMaxTextBox.Location = new System.Drawing.Point(66, 39);
+            this.numFacesMaxTextBox.Name = "numFacesMaxTextBox";
+            this.numFacesMaxTextBox.ReadOnly = true;
+            this.numFacesMaxTextBox.Size = new System.Drawing.Size(87, 20);
+            this.numFacesMaxTextBox.TabIndex = 15;
             // 
             // MaxPluginForm
             // 
@@ -736,5 +778,9 @@
         private System.Windows.Forms.Button updateSettingsButton;
         private System.Windows.Forms.Button updateMatSettingsButton;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.Label numFacesLabel;
+        private MaxCustomControls.MaxTextBox numFacesMaxTextBox;
+        private System.Windows.Forms.Label numVertsLabel;
+        private MaxCustomControls.MaxTextBox numVertsMaxTextBox;
     }
 }

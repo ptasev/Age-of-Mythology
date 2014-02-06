@@ -11,11 +11,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace AoMEngineLibrary
 {
     public partial class MaxPluginForm : MaxForm
     {
+        public static class Settings
+        {
+            private static string fileName = Application.StartupPath + "\\AoMEngineLibraryPluginSettings.xml";
+            public static string OpenFileDialogFileName;
+            public static string SaveFileDialogFileName;
+
+            public static void Read()
+            {
+                try
+                {
+                    if (!File.Exists(fileName))
+                    {
+                        return;
+                    }
+                    using (FileStream fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        XmlDocument settings = new XmlDocument();
+                        settings.Load(fs);
+                        foreach (XmlElement elem in settings.DocumentElement)
+                        {
+                            if (elem.Name == "defaultOpenDirectory")
+                            {
+                                OpenFileDialogFileName = elem.InnerText;
+                            }
+                            else if (elem.Name == "defaultSaveDirectory")
+                            {
+                                SaveFileDialogFileName = elem.InnerText;
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            public static void Write()
+            {
+
+            }
+        }
+
         public float TimeMult
         {
             get
@@ -98,6 +139,12 @@ namespace AoMEngineLibrary
             genMeshFormatGroupBox.ForeColor = uiUp.GetTextColor();
             genMeshPropsGroupBox.ForeColor = uiUp.GetTextColor();
 
+            numVertsMaxTextBox.BackColor = uiUp.GetEditControlColor();
+            numVertsMaxTextBox.ForeColor = uiUp.GetTextColor();
+            numVertsMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
+            numFacesMaxTextBox.BackColor = uiUp.GetEditControlColor();
+            numFacesMaxTextBox.ForeColor = uiUp.GetTextColor();
+            numFacesMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
             numMeshMaxTextBox.BackColor = uiUp.GetEditControlColor();
             numMeshMaxTextBox.ForeColor = uiUp.GetTextColor();
             numMeshMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
@@ -116,6 +163,8 @@ namespace AoMEngineLibrary
             liuMaxTextBox.BackColor = uiUp.GetEditControlColor();
             liuMaxTextBox.ForeColor = uiUp.GetTextColor();
             liuMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
+            liuLabel.Visible = false;
+            liuMaxTextBox.Visible = false;
             updateSettingsButton.FlatStyle = FlatStyle.Flat;
             updateSettingsButton.BackColor = uiUp.GetEditControlColor();
             updateSettingsButton.ForeColor = uiUp.GetTextColor();
@@ -134,7 +183,9 @@ namespace AoMEngineLibrary
             genMeshPropsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshProperty));
 
             // Attachpoints
-            attachpointComboBox.SelectedValueChanged += attachpointComboBox_SelectedValueChanged;
+            attachpointComboBox.SelectedIndexChanged += attachpointComboBox_SelectedIndexChanged;
+            //attachpointComboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            //attachpointComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
             attachpointComboBox.FlatStyle = FlatStyle.Flat;
             attachpointComboBox.BackColor = uiUp.GetEditControlColor();
             attachpointComboBox.ForeColor = uiUp.GetTextColor();
@@ -180,6 +231,8 @@ namespace AoMEngineLibrary
             //plugin = new MaxPlugin();
             //this.Controls.Add(plugin);
             //plugin.Dock = DockStyle.Fill;
+            Settings.Read();
+            newToolStripMenuItem_Click(this, new EventArgs());
         }
 
         private Color ContrastColor(Color color)
@@ -301,12 +354,15 @@ namespace AoMEngineLibrary
             file = new BrgFile(this);
             loadUI();
             this.Text = "ABE - Untitled";
-            isExportedToMax = false;
+            isExportedToMax = true;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //openFileDialog.FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+            if (!string.IsNullOrEmpty(Settings.OpenFileDialogFileName))
+            {
+                openFileDialog.InitialDirectory = Settings.OpenFileDialogFileName;
+            }
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -351,6 +407,10 @@ namespace AoMEngineLibrary
                 saveFileDialog.FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
                 saveFileDialog.InitialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
             }
+            if (!string.IsNullOrEmpty(Settings.SaveFileDialogFileName))
+            {
+                saveFileDialog.InitialDirectory = Settings.SaveFileDialogFileName;
+            }
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -389,6 +449,7 @@ namespace AoMEngineLibrary
                 }
 
                 file.ExportToMax();
+                //debug();
                 isExportedToMax = true;
             }
             catch (Exception ex)
@@ -403,7 +464,7 @@ namespace AoMEngineLibrary
             {
                 return;
             }
-            
+
             try
             {
                 bool objectSelected = Maxscript.QueryBoolean("classOf selection[1] == Editable_mesh");
@@ -428,39 +489,43 @@ namespace AoMEngineLibrary
                 return;
             }
             int index = attachpointListBox.IndexFromPoint(e.Location);
-            if (index != System.Windows.Forms.ListBox.NoMatches && file != null && file.Mesh.Count > 0)
+            if (index != System.Windows.Forms.ListBox.NoMatches && file != null)
             {
-                if (file.Mesh[0].attachpoints == null)
+                if (file.Mesh.Count == 0)
                 {
-                    file.Mesh[0].attachpoints = new List<BrgAttachpoint>();
+                    file.Mesh.Add(new BrgMesh(file));
                 }
                 BrgAttachpoint att = new BrgAttachpoint();
                 att.NameId = BrgAttachpoint.GetIdByName((string)attachpointListBox.Items[index]);
-                file.Mesh[0].attachpoints.Add(att);
+                file.Mesh[0].Attachpoint.Add(att);
                 //MessageBox.Show(file.Mesh[0].attachpoints.Count.ToString());
-                Maxscript.NewDummy("newDummy", att.GetMaxName(file.Mesh[0].attachpoints.Count - 1), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
+                Maxscript.NewDummy("newDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
                 loadUIAttachpoint();
                 attachpointComboBox.SelectedIndex = attachpointComboBox.Items.Count - 1;
             }
         }
-        void attachpointComboBox_SelectedValueChanged(object sender, EventArgs e)
+        void attachpointComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!isExportedToMax)
             {
-
                 return;
             }
-            if (attachpointComboBox.SelectedValue != null && file != null && file.Mesh.Count > 0)
+            if (attachpointComboBox.SelectedItem != null && file != null && file.Mesh.Count > 0)
             {
-                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)attachpointComboBox.SelectedValue).GetMaxName(attachpointComboBox.SelectedIndex));
+                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName());
                 if (Maxscript.QueryBoolean("selectDummy != undefined"))
                 {
                     Maxscript.Command("select selectDummy");
                 }
                 else
                 {
-                    file.Mesh[0].attachpoints.RemoveAt(attachpointComboBox.SelectedIndex);
-                    loadUIAttachpoint();
+                    DialogResult dlgR = MessageBox.Show("Could not find \"" + ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName() + "\"! Would you like to delete it?", "ABE",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                    if (dlgR == DialogResult.Yes)
+                    {
+                        file.Mesh[0].Attachpoint.Remove(((BrgAttachpoint)attachpointComboBox.SelectedItem).Index);
+                        loadUIAttachpoint();
+                    }
                 }
             }
         }
@@ -474,9 +539,15 @@ namespace AoMEngineLibrary
         }
         private void loadUIAttachpoint()
         {
-            attachpointComboBox.DataSource = null;
-            attachpointComboBox.DataSource = file.Mesh[0].attachpoints;
-            attachpointComboBox.DisplayMember = "Name";
+            //attachpointComboBox.DataSource = null;
+            //attachpointComboBox.DataSource = file.Mesh[0].attachpoints.Values;
+            attachpointComboBox.Items.Clear();
+            foreach (BrgAttachpoint att in file.Mesh[0].Attachpoint)
+            {
+                attachpointComboBox.Items.Add(att);
+            }
+            attachpointComboBox.ValueMember = "Index";
+            attachpointComboBox.DisplayMember = "MaxName";
         }
         private void loadUI()
         {
@@ -484,22 +555,24 @@ namespace AoMEngineLibrary
             loadUIMaterial();
 
             // General Info
+            numVertsMaxTextBox.Text = "0";
+            numFacesMaxTextBox.Text = "0";
             numMeshMaxTextBox.Text = file.Mesh.Count.ToString();
             numMatMaxTextBox.Text = file.Material.Count.ToString();
             animTimeMaxTextBox.Text = "0";
             timeMultMaxTextBox.Text = "1";
             u091MaxTextBox.Text = "0";
             liuMaxTextBox.Text = "0";
-            if (file.Mesh.Count > 1)
+
+            if (file.Mesh.Count > 0)
             {
+                numVertsMaxTextBox.Text = file.Mesh[0].vertices.Length.ToString();
+                numFacesMaxTextBox.Text = file.Mesh[0].faceVertices.Length.ToString();
                 animTimeMaxTextBox.Text = file.Mesh[0].animTime.ToString();
                 timeMultMaxTextBox.Text = file.Mesh[0].animTimeMult.ToString();
                 u091MaxTextBox.Text = file.Mesh[0].unknown091.ToString();
                 liuMaxTextBox.Text = file.Mesh[0].lastMaterialIndex.ToString();
-            }
 
-            if (file.Mesh.Count > 0)
-            {
                 // Attachpoints
                 loadUIAttachpoint();
 

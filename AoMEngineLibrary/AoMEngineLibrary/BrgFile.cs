@@ -7,6 +7,10 @@ using ManagedServices;
 using MiscUtil;
 using System.Drawing;
 using System.IO;
+using System.Globalization;
+using System.Linq;
+using System.Collections;
+using Wintellect.PowerCollections;
 
 namespace AoMEngineLibrary
 {
@@ -55,6 +59,10 @@ namespace AoMEngineLibrary
             }
         }
 
+        public static Vector3<T> operator -(Vector3<T> one)
+        {
+            return new Vector3<T>(Operator.Negate<T>(one.X), Operator.Negate<T>(one.Y), Operator.Negate<T>(one.Z));
+        }
         public static Vector3<T> operator -(Vector3<T> one, Vector3<T> two)
         {
             return new Vector3<T>(Operator.Subtract<T>(one.X, two.X), Operator.Subtract<T>(one.Y, two.Y), Operator.Subtract<T>(one.Z, two.Z));
@@ -66,6 +74,37 @@ namespace AoMEngineLibrary
         public static Vector3<T> operator /(Vector3<T> one, T two)
         {
             return new Vector3<T>(Operator.Divide<T>(one.X, two), Operator.Divide<T>(one.Y, two), Operator.Divide<T>(one.Z, two));
+        }
+
+        public static Vector3<T> CrossProduct(Vector3<T> v1, Vector3<T> v2)
+        {
+            return
+            (
+               new Vector3<T>
+               (
+                  Operator.Subtract<T>(Operator.Multiply<T>(v1.Y, v2.Z), Operator.Multiply<T>(v1.Z, v2.Y)),
+                  Operator.Subtract<T>(Operator.Multiply<T>(v1.Z, v2.X), Operator.Multiply<T>(v1.X, v2.Z)),
+                  Operator.Subtract<T>(Operator.Multiply<T>(v1.X, v2.Y), Operator.Multiply<T>(v1.Y, v2.X))
+               )
+            );
+        }
+        public static T DotProduct(Vector3<T> v1, Vector3<T> v2)
+        {
+            return
+            (
+                Operator.Add<T>(Operator.Add<T>(Operator.Multiply<T>(v1.X, v2.X), Operator.Multiply<T>(v1.Y, v2.Y)), Operator.Multiply<T>(v1.Z, v2.Z))
+            );
+        }
+        public static Vector3<T> CalcNormalOfFace(Vector3<T>[] pPositions, Vector3<T>[] pNormals)
+        {
+            Vector3<T> p0 = pPositions[1] - pPositions[0];
+            Vector3<T> p1 = pPositions[2] - pPositions[0];
+            Vector3<T> faceNormal = Vector3<T>.CrossProduct(p0, p1);
+
+            Vector3<T> vertexNormal = pNormals[0];
+            float dot = Operator.Convert<T, float>(Vector3<T>.DotProduct(faceNormal, vertexNormal));
+
+            return (dot < 0.0f) ? -faceNormal : faceNormal;
         }
     }
     public struct Vector2<T>
@@ -143,7 +182,7 @@ namespace AoMEngineLibrary
         USESPECLVL = 0x00020000, // also use specular level var
         MATNONE16 = 0x00010000, // no idea
         MATTEXURE2 = 0x00008000, // use texture for something
-        MATNONE18 = 0x00004000, // ground texture?
+        GROUNDTEXTUREOVERLAY = 0x00004000, // ground texture?
         MATNONE19 = 0x00002000, // smooth/ambient?
         LOWPLAYERCOLOROVERLAY = 0x00001000, // low player color overlay
         PLAYERCOLOROVERWHITE = 0x00000800, // high player color overlay
@@ -178,6 +217,7 @@ namespace AoMEngineLibrary
 
     public static class Maxscript
     {
+        private static CultureInfo cult = CultureInfo.InvariantCulture;
         public static bool Execute = true;
         public static bool OutputCommands = false;
         public static List<string> Output
@@ -197,6 +237,10 @@ namespace AoMEngineLibrary
         public static float QueryFloat(string command, params object[] args)
         {
             return (float)Query(command, QueryType.Float, args);
+        }
+        public static string QueryString(string command, params object[] args)
+        {
+            return (string)Query(command, QueryType.String, args);
         }
         public static Boolean QueryBoolean(string command, params object[] args)
         {
@@ -237,7 +281,11 @@ namespace AoMEngineLibrary
         }
         public static void AtTime(float time, string command, params object[] args)
         {
-            Command("at time " + time + "s (" + command + ")", args);
+            Command("at time " + time.ToString(cult) + "s (" + command + ")", args);
+        }
+        public static void SetVarAtTime(float time, string varName, string command, params object[] args)
+        {
+            Command(varName + " = at time " + time.ToString(cult) + "s (" + command + ")", args);
         }
         public static void Animate(string command, params object[] args)
         {
@@ -245,7 +293,7 @@ namespace AoMEngineLibrary
         }
         public static void AnimateAtTime(float time, string command, params object[] args)
         {
-            Command("with animate on (at time " + time + "s (" + command + "))", args);
+            Command("with animate on (at time " + time.ToString(cult) + "s (" + command + "))", args);
         }
         public static void Append(string name, object arg)
         {
@@ -258,12 +306,13 @@ namespace AoMEngineLibrary
         }
         public static string SnapshotAsMesh(string varName, string varNode, float time)
         {
-            Command("at time {0}s ({1} = snapshotAsMesh {2})", time, varName, varNode);
+            Command("{1} = at time {0}s (snapshotAsMesh {2})", time, varName, varNode);
             return varName;
         }
         public static string NewMeshLiteral(string name, string vertArray, string normArray, string faceArray, string faceMatIdArray, string texVertArray)
         {
-            return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} normals:{2} faces:{3} materialIDs:{4} tverts:{5}", name, vertArray, normArray, faceArray, faceMatIdArray, texVertArray);
+            return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} faces:{2} materialIDs:{3} tverts:{4}", name, vertArray, faceArray, faceMatIdArray, texVertArray);
+            //return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} normals:{2} faces:{3} materialIDs:{4} tverts:{5}", name, vertArray, normArray, faceArray, faceMatIdArray, texVertArray);
         }
         public static string NewMesh(string name, string vertArray, string normArray, string faceArray, string faceMatIdArray, string texVertArray)
         {
@@ -292,6 +341,11 @@ namespace AoMEngineLibrary
             return name;
         }
         #endregion
+        public static string NewBitArray(string varName)
+        {
+            Command("{0} = #{{}}", varName);
+            return varName;
+        }
         public static string NewArray(string name)
         {
             Command("{0} = #()", name);
@@ -319,7 +373,6 @@ namespace AoMEngineLibrary
 
     public class BrgFile
     {
-        public MaxPlugin ParentForm1;
         public MaxPluginForm ParentForm;
 
         public BrgHeader Header;
@@ -331,11 +384,6 @@ namespace AoMEngineLibrary
             : this(fileStream)
         {
             ParentForm = form;
-        }
-        public BrgFile(System.IO.Stream fileStream, MaxPlugin form)
-            : this(fileStream)
-        {
-            ParentForm1 = form;
         }
         public BrgFile(System.IO.Stream fileStream)
         {
@@ -465,17 +513,22 @@ namespace AoMEngineLibrary
                         }
                     }
 
-                    for (int j = 0; j < Mesh[i].attachpoints.Count; j++)
+                    foreach (BrgAttachpoint att in Mesh[i].Attachpoint)
                     {
-                        Maxscript.Command("attachpoint = getNodeByName \"{0}\"", Mesh[i].attachpoints[j].GetMaxName(j));
-                        Maxscript.Command("with animate on (at time {0}s (attachpoint.rotation = {1}))", time, Mesh[i].attachpoints[j].GetMaxTransform());
-                        Maxscript.Command("with animate on (at time {0}s (attachpoint.position = {1}))", time, Mesh[i].attachpoints[j].GetMaxPosition());
-                        Maxscript.Command("with animate on (at time {0}s (attachpoint.scale = {1}))", time, Mesh[i].attachpoints[j].GetMaxScale());
+                        Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
+                        Maxscript.Command("with animate on (at time {0}s (attachpoint.rotation = {1}))", time, att.GetMaxTransform());
+                        Maxscript.Command("with animate on (at time {0}s (attachpoint.position = {1}))", time, att.GetMaxPosition());
+                        Maxscript.Command("with animate on (at time {0}s (attachpoint.scale = {1}))", time, att.GetMaxScale());
                     }
+
+                    //Maxscript.Command("{0}.center.x = {1}", mainObject, -Mesh[i].centerPos.X);
+                    //Maxscript.Command("{0}.center.y = {1}", mainObject, -Mesh[i].centerPos.Z);
+                    //Maxscript.Command("{0}.center.z = {1}", mainObject, Mesh[i].centerPos.Y);
                 }
 
                 // Still can't figure out why it updates/overwrites normals ( geometry:false topology:false)
                 Maxscript.Command("update {0}", mainObject);
+                Maxscript.Command("max zoomext sel all");
 
                 if (Material.Count > 0)
                 {
@@ -499,17 +552,66 @@ namespace AoMEngineLibrary
             {
                 throw new Exception("No object selected!");
             }
+
+            HashSet<float> keys = new HashSet<float>();
             if (ParentForm.Flags.HasFlag(BrgMeshFlag.MOVINGTEX))
             {
-                Header.numMeshes = Maxscript.QueryInteger("{0}.Unwrap_UVW[1].keys.count", mainObject);
+                int numTexKeys = Maxscript.QueryInteger("{0}.Unwrap_UVW[1].keys.count", mainObject);
+                for (int i = 0; i < numTexKeys; i++)
+                {
+                    keys.Add(Maxscript.QueryFloat("{0}.Unwrap_UVW[1].keys[{1}].time as float", mainObject, i + 1) / 4800f);
+                }
             }
-            else
+            if (Maxscript.QueryBoolean("{0}.modifiers[#skin] != undefined", mainObject))
             {
-                Header.numMeshes = (int)Maxscript.Query("{0}.mesh[1].keys.count", Maxscript.QueryType.Integer, mainObject);
+                //System.Windows.Forms.MessageBox.Show("b1");
+                Maxscript.Command("max modify mode");
+                int numBones = Maxscript.QueryInteger("skinops.getnumberbones {0}.modifiers[#skin]", mainObject);
+                for (int i = 0; i < numBones; i++)
+                {
+                    string boneName = Maxscript.QueryString("skinops.getbonename {0}.modifiers[#skin] {1} 0", mainObject, i + 1);
+                    Maxscript.Command("boneNode = getNodeByName \"{0}\"", boneName);
+                    int numBoneKeys = Maxscript.QueryInteger("boneNode.position.controller.keys.count");
+                    //System.Windows.Forms.MessageBox.Show("b1.1");
+                    for (int j = 0; j < numBoneKeys; j++)
+                    {
+                        keys.Add(Maxscript.QueryFloat("boneNode.position.controller.keys[{0}].time as float", j + 1) / 4800f);
+                    }
+                    numBoneKeys = Maxscript.QueryInteger("boneNode.rotation.controller.keys.count");
+                    //System.Windows.Forms.MessageBox.Show("b1.2 " + numKeys);
+                    for (int j = 0; j < numBoneKeys; j++)
+                    {
+                        //System.Windows.Forms.MessageBox.Show("b1.2.1 " + String.Format("boneNode.rotation.controller.keys[{0}] as float", j + 1));
+                        keys.Add(Maxscript.QueryFloat("boneNode.rotation.controller.keys[{0}].time as float", j + 1) / 4800f);
+                    }
+                    numBoneKeys = Maxscript.QueryInteger("boneNode.scale.controller.keys.count");
+                    //System.Windows.Forms.MessageBox.Show("b1.3");
+                    for (int j = 0; j < numBoneKeys; j++)
+                    {
+                        //System.Windows.Forms.MessageBox.Show("b1.3.1");
+                        keys.Add(Maxscript.QueryFloat("boneNode.scale.controller.keys[{0}].time as float", j + 1) / 4800f);
+                    }
+                }
             }
+            int numKeys = (int)Maxscript.Query("{0}.baseobject.mesh[1].keys.count", Maxscript.QueryType.Integer, mainObject);
+            //System.Windows.Forms.MessageBox.Show(numKeys + " ");
+            for (int i = 0; i < numKeys; i++)
+            {
+                keys.Add(Maxscript.QueryFloat("{0}.baseobject.mesh[1].keys[{1}].time as float", mainObject, i + 1) / 4800f);
+            }
+            Header.numMeshes = keys.Count;
+            if (Header.numMeshes <= 0)
+            {
+                Header.numMeshes = 1;
+                keys.Add(0);
+            }
+            List<float> keyTime = new List<float>(keys);
+            keyTime.Sort();
+
+            //fixTverts(mainObject);
+
             Header.numMaterials = (int)Maxscript.Query("{0}.material.materialList.count", Maxscript.QueryType.Integer, mainObject);
             //System.Windows.Forms.MessageBox.Show(Header.numMeshes + " " + Header.numMaterials);
-
             if (Header.numMaterials > 0)
             {
                 Material = new List<BrgMaterial>(Header.numMaterials);
@@ -520,17 +622,11 @@ namespace AoMEngineLibrary
                 }
             }
 
-            if (Header.numMeshes <= 0)
-            {
-                Header.numMeshes = 1;
-            }
-            updateAsetHeader();
-
             Mesh = new List<BrgMesh>(Header.numMeshes);
             for (int i = 0; i < Header.numMeshes; i++)
             {
                 Mesh.Add(new BrgMesh(this));
-                Mesh[i].ImportFromMax(mainObject, i);//, flags, format, properties);
+                Mesh[i].ImportFromMax(mainObject, keyTime[i], i);
             }
 
             if (Mesh[0].properties.HasFlag(BrgMeshProperty.VARIABLEANIM))
@@ -538,8 +634,62 @@ namespace AoMEngineLibrary
                 Mesh[0].animTimeAdjust = new float[Mesh.Count];
                 for (int i = 0; i < Mesh.Count; i++)
                 {
-                    Mesh[0].animTimeAdjust[i] = Maxscript.QueryFloat("{0}.mesh[1].keys[{1}].time as float", mainObject, i + 1) / 4800f / Mesh[0].animTime;
+                    Mesh[0].animTimeAdjust[i] = keyTime[i] / Mesh[0].animTime;
                 }
+            }
+            updateAsetHeader();
+
+            //Maxscript.Command("delete {0}", mainObject);
+        }
+        private void fixTverts(string mainObject)
+        {
+            // Figure out the used vertices, and corresponding tex verts
+            int numVertices = (int)Maxscript.Query("{0}.numverts", Maxscript.QueryType.Integer, mainObject);
+            int numFaces = (int)Maxscript.Query("{0}.numfaces", Maxscript.QueryType.Integer, mainObject);
+            List<int> vertexMask = new List<int>(numVertices);
+            HashSet<int> verticesToBreak = new HashSet<int>();
+            for (int i = 0; i < numVertices; i++)
+            {
+                vertexMask.Add(0);
+            }
+            for (int i = 0; i < numFaces; i++)
+            {
+                Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);
+                Maxscript.Command("tFace = getTVFace {0} {1}", mainObject, i + 1);
+                int vert1 = Maxscript.QueryInteger("face[1]") - 1;
+                int vert2 = Maxscript.QueryInteger("face[2]") - 1;
+                int vert3 = Maxscript.QueryInteger("face[3]") - 1;
+                int tVert1 = Maxscript.QueryInteger("tFace[1]");
+                int tVert2 = Maxscript.QueryInteger("tFace[2]");
+                int tVert3 = Maxscript.QueryInteger("tFace[3]");
+                if (vertexMask[vert1] > 0 && vertexMask[vert1] != tVert1)
+                {
+                    verticesToBreak.Add(vert1 + 1);
+                }
+                if (vertexMask[vert2] > 0 && vertexMask[vert2] != tVert2)
+                {
+                    verticesToBreak.Add(vert2 + 1);
+                }
+                if (vertexMask[vert3] > 0 && vertexMask[vert3] != tVert3)
+                {
+                    verticesToBreak.Add(vert3 + 1);
+                }
+
+                vertexMask[vert1] = tVert1;
+                vertexMask[vert2] = tVert2;
+                vertexMask[vert3] = tVert3;
+            }
+            if (verticesToBreak.Count > 0)
+            {
+                System.Windows.Forms.MessageBox.Show("dd");
+                string vertsToBreak = Maxscript.NewBitArray("vertsToBreak");
+                foreach (int i in verticesToBreak)
+                {
+                    Maxscript.Command("{0}[{1}] = true", vertsToBreak, i);
+                    //Maxscript.Append(vertsToBreak, i);
+                }
+                Maxscript.Command("meshop.breakVerts {0} {1}", mainObject, vertsToBreak);
+                //Maxscript.Command("print {0}", vertsToBreak);
             }
         }
 
@@ -582,108 +732,33 @@ namespace AoMEngineLibrary
             AsetHeader.spf = AsetHeader.animTime / (float)AsetHeader.numFrames;
             AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
         }
-
-        public void ReadBr3(System.IO.Stream fileStream)
-        {
-            using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), fileStream))
-            {
-                reader.ReadInt32(); // BRG3
-
-                Header.numMeshes = reader.ReadInt32();
-                Header.numMaterials = reader.ReadInt32();
-
-                if (Header.numMeshes > 1)
-                {
-                    AsetHeader.numFrames = Header.numMeshes;
-                    AsetHeader.frameStep = 1f / (float)AsetHeader.numFrames;
-                    AsetHeader.animTime = reader.ReadSingle();
-                    AsetHeader.frequency = 1f / (float)AsetHeader.animTime;
-                    AsetHeader.spf = AsetHeader.animTime / (float)AsetHeader.numFrames;
-                    AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
-                }
-
-                // Copy the last mesh for every new frame
-                int numNewFrames = Header.numMeshes - Mesh.Count;
-                int lastFrameIndex = Mesh.Count - 1;
-                for (int i = 0; i < numNewFrames; i++)
-                {
-                    //Mesh.Add(new BrgMesh(Mesh[lastFrameIndex]));
-                }
-                // Load new data into mesh
-                for (int i = 0; i < Header.numMeshes; i++)
-                {
-                    Mesh[i].ReadBr3(reader);
-                }
-
-                // Copy first material for the new ones
-                int numNewMaterials = Header.numMaterials - Material.Count;
-                for (int i = 0; i < numNewMaterials; i++)
-                {
-                    Material.Add(new BrgMaterial(Material[0]));
-                }
-                // Load new data into the materials
-                for (int i = 0; i < Header.numMaterials; i++)
-                {
-                    Material[i].ReadBr3(reader);
-                }
-
-                if (reader.BaseStream.Position < reader.BaseStream.Length)
-                {
-                    throw new Exception("The end of stream was not reached!");
-                }
-            }
-        }
-        public void WriteBr3(System.IO.Stream fileStream)
-        {
-            using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), fileStream))
-            {
-                writer.Write(860312130); // BRG3
-                writer.Write(Header.numMeshes);
-                writer.Write(Header.numMaterials);
-
-                if (Header.numMeshes > 1)
-                {
-                    writer.Write(AsetHeader.animTime);
-                }
-
-                foreach (BrgMesh mesh in Mesh)
-                {
-                    mesh.WriteBr3(writer);
-                }
-
-                foreach (BrgMaterial mat in Material)
-                {
-                    mat.WriteBr3(writer);
-                }
-            }
-        }
     }
 
     public class BrgMesh
     {
         public BrgFile ParentFile;
 
-        int magic;
-        public Int16 version;
+        private int magic;
+        private Int16 version;
         public BrgMeshFormat format;
         //public Int16 numVertices;
         //public Int16 numFaces;
         public BrgMeshProperty properties;
-        Vector3<float> centerPos;
+        internal Vector3<float> centerPos;
         public float unknown03;
         public Vector3<float> position;
-        Vector3<float> groundPos;
+        private Vector3<float> groundPos;
         public Int16 unknown04;
         public BrgMeshFlag flags;
-        Vector3<float> boundingBoxMin;
-        Vector3<float> boundingBoxMax;
+        private Vector3<float> boundingBoxMin;
+        private Vector3<float> boundingBoxMax;
         public Vector3<float>[] vertices;
         public Vector3<float>[] normals;
 
         public Vector2<float>[] texVertices;
         public Int16[] faceMaterials;
         public Vector3<Int16>[] faceVertices;
-        Int16[] vertMaterials;
+        private Int16[] vertMaterials;
 
         public Int16 numIndex0;
         public Int16 numMatrix0;
@@ -703,7 +778,7 @@ namespace AoMEngineLibrary
         //public Int16 numMatrix;
         //Int16 numIndex;
         //public Int16 unknown10;
-        public List<BrgAttachpoint> attachpoints;
+        public BrgAttachpointCollection Attachpoint;
         public float[] animTimeAdjust;
 
         public BrgMesh(BrgBinaryReader reader, BrgFile file)
@@ -857,16 +932,18 @@ namespace AoMEngineLibrary
                     }
                 }
 
-                attachpoints = new List<BrgAttachpoint>(nameId.Count);
+                Attachpoint = new BrgAttachpointCollection();
                 for (int i = 0; i < nameId.Count; i++)
                 {
-                    attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
-                    attachpoints[i].NameId = nameId[i];
+                    Attachpoint.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
+                    Attachpoint[i].NameId = nameId[i];
+                    //attpts[reader.ReadByte()].NameId = nameId[i];
                 }
+                //attachpoints = new List<BrgAttachpoint>(attpts);
             }
             else
             {
-                attachpoints = new List<BrgAttachpoint>();
+                Attachpoint = new BrgAttachpointCollection();
             }
 
             // Only seen on first mesh
@@ -899,7 +976,7 @@ namespace AoMEngineLibrary
             animTimeMult = 1f;
 
             Vector2<float>[] unknown0a = new Vector2<float>[0];
-            attachpoints = new List<BrgAttachpoint>();
+            Attachpoint = new BrgAttachpointCollection();
             animTimeAdjust = new float[0];
         }
 
@@ -990,20 +1067,16 @@ namespace AoMEngineLibrary
 
             if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                writer.Write((Int16)attachpoints.Count);
+                writer.Write((Int16)Attachpoint.Count);
 
                 List<int> nameId = new List<int>();
-                int maxNameId = 0;
-                for (int i = 0; i < attachpoints.Count; i++)
+                int maxNameId = -1;
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    nameId.Add(attachpoints[i].NameId);
-                    if (i == 0)
+                    nameId.Add(att.NameId);
+                    if (att.NameId > maxNameId)
                     {
-                        maxNameId = attachpoints[i].NameId;
-                    }
-                    else if (attachpoints[i].NameId > maxNameId)
-                    {
-                        maxNameId = attachpoints[i].NameId;
+                        maxNameId = att.NameId;
                     }
                 }
                 int numIndex = (Int16)(maxNameId + 1);//(Int16)(55 - maxNameId);
@@ -1011,29 +1084,29 @@ namespace AoMEngineLibrary
                 writer.Write((Int16)1);
 
 
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    writer.WriteVector3(ref attachpoints[i].x, true, true);
+                    writer.WriteVector3(ref att.x, true, true);
                 }
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    writer.WriteVector3(ref attachpoints[i].y, true, true);
+                    writer.WriteVector3(ref att.y, true, true);
                 }
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    writer.WriteVector3(ref attachpoints[i].z, true, true);
+                    writer.WriteVector3(ref att.z, true, true);
                 }
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    writer.WriteVector3(ref attachpoints[i].position, true, true);
+                    writer.WriteVector3(ref att.position, true, true);
                 }
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    writer.WriteVector3(ref attachpoints[i].unknown11a, true, true);
+                    writer.WriteVector3(ref att.unknown11a, true, true);
                 }
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    writer.WriteVector3(ref attachpoints[i].unknown11b, true, true);
+                    writer.WriteVector3(ref att.unknown11b, true, true);
                 }
 
                 int[] dup = new int[numIndex];
@@ -1058,9 +1131,9 @@ namespace AoMEngineLibrary
 
                 List<int> nameId2 = new List<int>(nameId);
                 nameId.Sort();
-                for (int i = 0; i < attachpoints.Count; i++)
+                for (int i = 0; i < Attachpoint.Count; i++)
                 {
-                    for (int j = 0; j < attachpoints.Count; j++)
+                    for (int j = 0; j < Attachpoint.Count; j++)
                     {
                         if (nameId[i] == nameId2[j])
                         {
@@ -1127,23 +1200,26 @@ namespace AoMEngineLibrary
                 Maxscript.CommentTitle("Load Faces");
                 foreach (Vector3<Int16> face in faceVertices)
                 {
-                    Maxscript.Append(faceArray, Maxscript.NewPoint3<Int32>("fV", face.X + 1, face.Y + 1, face.Z + 1));
+                    Maxscript.Append(faceArray, Maxscript.NewPoint3<Int32>("fV", face.X + 1, face.Z + 1, face.Y + 1));
                 }
             }
 
             if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
                 Maxscript.CommentTitle("Load Attachpoints");
-                for (int i = 0; i < attachpoints.Count; i++)
+                foreach (BrgAttachpoint att in Attachpoint)
                 {
-                    string boxSize = Maxscript.NewPoint3<Int32>("boxSize", 1, 1, 1);
-                    string attachDummy = Maxscript.NewDummy("attachDummy", attachpoints[i].GetMaxName(i), attachpoints[i].GetMaxTransform(), attachpoints[i].GetMaxPosition(), boxSize, attachpoints[i].GetMaxScale());
+                    string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
                 }
             }
 
             string mainObject = "mainObj";
             Maxscript.AnimateAtTime(ParentFile.GetFrameTime(0), Maxscript.NewMeshLiteral(mainObject, vertArray, normArray, faceArray, faceMats, texVerts));
             Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
+
+            //Maxscript.Command("{0}.center.x = {1}", mainObject, -centerPos.X);
+            //Maxscript.Command("{0}.center.y = {1}", mainObject, -centerPos.Z);
+            //Maxscript.Command("{0}.center.z = {1}", mainObject, centerPos.Y);
 
             string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -groundPos.X, -groundPos.Z, groundPos.Y);
             Maxscript.Command("plane name:\"ground\" pos:{0} length:10 width:10", groundPlanePos);
@@ -1166,20 +1242,9 @@ namespace AoMEngineLibrary
 
             return mainObject;
         }
-        public void ImportFromMax(string mainObject, int meshIndex)
+        public void ImportFromMax(string mainObject, float time, int meshIndex)
         {
             UpdateSettings(meshIndex);
-            //flags = ParentFile.ParentForm.Flags;
-            if (meshIndex > 0)
-            {
-                //flags |= BrgMeshFlag.NOTFIRSTMESH;
-            }
-            //format = ParentFile.ParentForm.Format;
-            //properties = ParentFile.ParentForm.Properties;
-            if (flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
-            {
-                //properties = properties ^ BrgMeshProperty.VARIABLEANIM;
-            }
 
             centerPos.X = -(float)Maxscript.Query("{0}.center.x", Maxscript.QueryType.Float, mainObject);
             centerPos.Z = -(float)Maxscript.Query("{0}.center.y", Maxscript.QueryType.Float, mainObject);
@@ -1205,61 +1270,61 @@ namespace AoMEngineLibrary
             boundingBoxMax.Z = bBox.Y;
             boundingBoxMax.Y = bBox.Z;
 
-            float time;
-            if (ParentFile.Header.numMeshes == 1)
-            {
-                time = 0;
-            }
-            else if (flags.HasFlag(BrgMeshFlag.MOVINGTEX))
-            {
-                time = Maxscript.QueryFloat("{0}.Unwrap_UVW[1].keys[{1}].time as float", mainObject, meshIndex + 1) / 4800f;
-            }
-            else
-            {
-                time = (float)Maxscript.Query("{0}.mesh[1].keys[{1}].time as float", Maxscript.QueryType.Float, mainObject, meshIndex + 1) / 4800f;
-            }
             string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject, time);
             int numVertices = (int)Maxscript.Query("{0}.numverts", Maxscript.QueryType.Integer, mainMesh);
             int numFaces = (int)Maxscript.Query("{0}.numfaces", Maxscript.QueryType.Integer, mainMesh);
             string attachDummy = Maxscript.NewArray("attachDummy");
-            Maxscript.AtTime(time, "{0} = $helpers/atpt??* as array", attachDummy);
+            Maxscript.SetVarAtTime(time, attachDummy, "$helpers/atpt??* as array");
             int numAttachpoints = (int)Maxscript.Query("{0}.count", Maxscript.QueryType.Integer, attachDummy);
 
             // Figure out the used vertices, and corresponding tex verts
-            string vertMask = Maxscript.NewArray("vertMask");
+            setUpTVerts(mainMesh, numVertices, numFaces);
+            numVertices = Maxscript.QueryInteger("{0}.numverts", mainMesh);
+            numFaces = Maxscript.QueryInteger("{0}.numfaces", mainMesh);
+            //System.Windows.Forms.MessageBox.Show(numVertices + " " + numFaces);
+            List<int> vertexMask = new List<int>(numVertices);
             for (int i = 0; i < numVertices; i++)
             {
-                Maxscript.Append(vertMask, 0);
+                vertexMask.Add(0);
             }
             for (int i = 0; i < numFaces; i++)
             {
                 Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
                 Maxscript.Command("tFace = getTVFace {0} {1}", mainMesh, i + 1);
+                int vert1 = Maxscript.QueryInteger("face[1]") - 1;
+                int vert2 = Maxscript.QueryInteger("face[2]") - 1;
+                int vert3 = Maxscript.QueryInteger("face[3]") - 1;
+                int tVert1 = Maxscript.QueryInteger("tFace[1]");
+                int tVert2 = Maxscript.QueryInteger("tFace[2]");
+                int tVert3 = Maxscript.QueryInteger("tFace[3]");
 
-                Maxscript.Command("{0}[face[1]] = tFace[1]", vertMask);
-                Maxscript.Command("{0}[face[2]] = tFace[2]", vertMask);
-                Maxscript.Command("{0}[face[3]] = tFace[3]", vertMask);
+                vertexMask[vert1] = tVert1;
+                vertexMask[vert2] = tVert2;
+                vertexMask[vert3] = tVert3;
             }
+            //System.Windows.Forms.MessageBox.Show("asdfasdf " + numFaces);
 
-            //System.Windows.Forms.MessageBox.Show("1");
+            //System.Windows.Forms.MessageBox.Show("1 " + numVertices);
             List<Vector3<float>> verticesList = new List<Vector3<float>>(numVertices);
             List<Vector3<float>> normalsList = new List<Vector3<float>>(numVertices);
+            Dictionary<int, Int16> newVertMap = new Dictionary<int, Int16>(numVertices);
             for (int i = 0; i < numVertices; i++)
             {
                 //System.Windows.Forms.MessageBox.Show("1.1");
-                bool export = (Boolean)Maxscript.Query("{0}[{1}] > 0", Maxscript.QueryType.Boolean, vertMask, i + 1);
                 //System.Windows.Forms.MessageBox.Show("1.2");
-                if (export)
+                if (vertexMask[i] > 0)
                 {
+                    newVertMap.Add(i, (Int16)verticesList.Count);
                     //System.Windows.Forms.MessageBox.Show("1.3");
                     Maxscript.Command("vertex = getVert {0} {1}", mainMesh, i + 1);
                     //System.Windows.Forms.MessageBox.Show("1.4");
                     verticesList.Add(new Vector3<float>(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
 
                     //System.Windows.Forms.MessageBox.Show("1.5");
-                    Maxscript.Command("normal = getNormal {0} {1}", mainMesh, i + 1);
+                    Maxscript.Command("normal = normalize (getNormal {0} {1})", mainMesh, i + 1);
                     //System.Windows.Forms.MessageBox.Show("1.6");
-                    normalsList.Add(new Vector3<float>(Maxscript.QueryFloat("normal.x"), -Maxscript.QueryFloat("normal.z"), Maxscript.QueryFloat("normal.y")));
+                    normalsList.Add(new Vector3<float>(-Maxscript.QueryFloat("normal.x"), Maxscript.QueryFloat("normal.z"), -Maxscript.QueryFloat("normal.y")));
+                    //normalsList.Add(new Vector3<float>(Maxscript.QueryFloat("normal.x"), -Maxscript.QueryFloat("normal.z"), Maxscript.QueryFloat("normal.y")));
                     //System.Windows.Forms.MessageBox.Show("1.7");
                 }
             }
@@ -1274,10 +1339,9 @@ namespace AoMEngineLibrary
                     List<Vector2<float>> texVerticesList = new List<Vector2<float>>(numVertices);
                     for (int i = 0; i < numVertices; i++)
                     {
-                        bool export = (Boolean)Maxscript.Query("{0}[{1}] > 0", Maxscript.QueryType.Boolean, vertMask, i + 1);
-                        if (export)
+                        if (vertexMask[i] > 0)
                         {
-                            Maxscript.Command("tVert = getTVert {0} {1}[{2}]", mainMesh, vertMask, i + 1);
+                            Maxscript.Command("tVert = getTVert {0} {1}", mainMesh, vertexMask[i]);
                             texVerticesList.Add(new Vector2<float>(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y")));
                         }
                     }
@@ -1304,15 +1368,15 @@ namespace AoMEngineLibrary
                 for (int i = 0; i < faceVertices.Length; i++)
                 {
                     Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
-                    faceVertices[i].X = (Int16)((Int32)Maxscript.Query("face.x", Maxscript.QueryType.Integer) - 1);
-                    faceVertices[i].Y = (Int16)((Int32)Maxscript.Query("face.y", Maxscript.QueryType.Integer) - 1);
-                    faceVertices[i].Z = (Int16)((Int32)Maxscript.Query("face.z", Maxscript.QueryType.Integer) - 1);
+                    faceVertices[i].X = newVertMap[((Int32)Maxscript.Query("face.x", Maxscript.QueryType.Integer) - 1)];
+                    faceVertices[i].Y = newVertMap[((Int32)Maxscript.Query("face.z", Maxscript.QueryType.Integer) - 1)];
+                    faceVertices[i].Z = newVertMap[((Int32)Maxscript.Query("face.y", Maxscript.QueryType.Integer) - 1)];
                 }
 
                 //System.Windows.Forms.MessageBox.Show("3.2");
                 if (flags.HasFlag(BrgMeshFlag.MATERIALS))
                 {
-                    vertMaterials = new Int16[numVertices];
+                    vertMaterials = new Int16[vertices.Length];
                     for (int i = 0; i < faceVertices.Length; i++)
                     {
                         vertMaterials[faceVertices[i].X] = faceMaterials[i];
@@ -1325,7 +1389,7 @@ namespace AoMEngineLibrary
             //System.Windows.Forms.MessageBox.Show("4");
             //unknown091 = ParentFile.ParentForm.Unknown091;
             //lastMaterialIndex = ParentFile.ParentForm.LastMaterialIndex;
-            if (meshIndex == 0)
+            if (meshIndex == 0 && diffFaceMats.Count > 0)
             {
                 lastMaterialIndex = diffFaceMats.Count - 1;
                 numMaterialsUsed = diffFaceMats.Count;
@@ -1333,50 +1397,142 @@ namespace AoMEngineLibrary
             animTime = (float)Maxscript.Query("animationRange.end.ticks / 4800 as float", Maxscript.QueryType.Float);
             //animTimeMult = ParentFile.ParentForm.TimeMult;
 
-            //System.Windows.Forms.MessageBox.Show("5");
+            //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
             if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                attachpoints = new List<BrgAttachpoint>(numAttachpoints);
+                Attachpoint = new BrgAttachpointCollection();
                 for (int i = 0; i < numAttachpoints; i++)
                 {
-                    attachpoints.Add(new BrgAttachpoint());
+                    int index = Convert.ToInt32((Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1)).Substring(4, 2));
+                    index = Attachpoint.Add(index);
                     //System.Windows.Forms.MessageBox.Show("5.1");
-                    attachpoints[i].NameId = BrgAttachpoint.GetIdByName(((string)Maxscript.Query("{0}[{1}].name", Maxscript.QueryType.String, attachDummy, i + 1)).Substring(7));
+                    Attachpoint[index].NameId = BrgAttachpoint.GetIdByName(((string)Maxscript.Query("{0}[{1}].name", Maxscript.QueryType.String, attachDummy, i + 1)).Substring(7));
+                    Maxscript.Command("{0}[{1}].name = \"{2}\"", attachDummy, i + 1, Attachpoint[index].GetMaxName());
                     //System.Windows.Forms.MessageBox.Show("5.2");
-                    Maxscript.AtTime(time, "{0}Transform = {0}[{1}].rotation as matrix3", attachDummy, i + 1);
-                    Maxscript.AtTime(time, "{0}Position = {0}[{1}].position", attachDummy, i + 1);
-                    Maxscript.AtTime(time, "{0}Scale = {0}[{1}].scale", attachDummy, i + 1);
+                    Maxscript.SetVarAtTime(time, "{0}Transform", "{0}[{1}].rotation as matrix3", attachDummy, i + 1);
+                    Maxscript.SetVarAtTime(time, "{0}Position", "{0}[{1}].position", attachDummy, i + 1);
+                    Maxscript.SetVarAtTime(time, "{0}Scale", "{0}[{1}].scale", attachDummy, i + 1);
                     //System.Windows.Forms.MessageBox.Show("5.3");
-                    Maxscript.AtTime(time, "{0}BBMax = {0}[{1}].max", attachDummy, i + 1);
-                    Maxscript.AtTime(time, "{0}BBMin = {0}[{1}].min", attachDummy, i + 1);
-                    bBoxMax = new Vector3<float>(Maxscript.QueryFloat("{0}BBMax.X", attachDummy), Maxscript.QueryFloat("{0}BBMax.Y", attachDummy), Maxscript.QueryFloat("{0}BBMax.Z", attachDummy));
-                    bBoxMin = new Vector3<float>(Maxscript.QueryFloat("{0}BBMin.X", attachDummy), Maxscript.QueryFloat("{0}BBMin.Y", attachDummy), Maxscript.QueryFloat("{0}BBMin.Z", attachDummy));
-                    bBox = (bBoxMax - bBoxMin) / 2;
+                    //Maxscript.SetVarAtTime(time, "{0}BBMax", "{0}[{1}].max", attachDummy, i + 1);
+                    //Maxscript.SetVarAtTime(time, "{0}BBMin", "{0}[{1}].min", attachDummy, i + 1);
+                    //bBoxMax = new Vector3<float>(Maxscript.QueryFloat("{0}BBMax.X", attachDummy), Maxscript.QueryFloat("{0}BBMax.Y", attachDummy), Maxscript.QueryFloat("{0}BBMax.Z", attachDummy));
+                    //bBoxMin = new Vector3<float>(Maxscript.QueryFloat("{0}BBMin.X", attachDummy), Maxscript.QueryFloat("{0}BBMin.Y", attachDummy), Maxscript.QueryFloat("{0}BBMin.Z", attachDummy));
+                    Vector3<float> scale = new Vector3<float>(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
+                    //bBox = (bBoxMax - bBoxMin) / 2;
+                    bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
-                    attachpoints[i].x.X = (float)Maxscript.Query("{0}Transform[1].z", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].x.Y = (float)Maxscript.Query("{0}Transform[3].z", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].x.Z = (float)Maxscript.Query("{0}Transform[2].z", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].x.X = -(float)Maxscript.Query("{0}Transform[1].z", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].x.Y = (float)Maxscript.Query("{0}Transform[3].z", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].x.Z = -(float)Maxscript.Query("{0}Transform[2].z", Maxscript.QueryType.Float, attachDummy);
 
-                    attachpoints[i].y.X = (float)Maxscript.Query("{0}Transform[1].y", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].y.Y = (float)Maxscript.Query("{0}Transform[3].y", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].y.Z = (float)Maxscript.Query("{0}Transform[2].y", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].y.X = -(float)Maxscript.Query("{0}Transform[1].y", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].y.Y = (float)Maxscript.Query("{0}Transform[3].y", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].y.Z = -(float)Maxscript.Query("{0}Transform[2].y", Maxscript.QueryType.Float, attachDummy);
 
-                    attachpoints[i].z.X = (float)Maxscript.Query("{0}Transform[1].x", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].z.Y = (float)Maxscript.Query("{0}Transform[3].x", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].z.Z = (float)Maxscript.Query("{0}Transform[2].x", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].z.X = -(float)Maxscript.Query("{0}Transform[1].x", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].z.Y = (float)Maxscript.Query("{0}Transform[3].x", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].z.Z = -(float)Maxscript.Query("{0}Transform[2].x", Maxscript.QueryType.Float, attachDummy);
 
-                    attachpoints[i].position.X = -(float)Maxscript.Query("{0}Position.x", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].position.Z = -(float)Maxscript.Query("{0}Position.y", Maxscript.QueryType.Float, attachDummy);
-                    attachpoints[i].position.Y = (float)Maxscript.Query("{0}Position.z", Maxscript.QueryType.Float, attachDummy);
-
-                    attachpoints[i].unknown11a.X = -bBox.X;
-                    attachpoints[i].unknown11a.Z = -bBox.Y;
-                    attachpoints[i].unknown11a.Y = -bBox.Z;
-                    attachpoints[i].unknown11b.X = bBox.X;
-                    attachpoints[i].unknown11b.Z = bBox.Y;
-                    attachpoints[i].unknown11b.Y = bBox.Z;
+                    Attachpoint[index].position.X = -(float)Maxscript.Query("{0}Position.x", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].position.Z = -(float)Maxscript.Query("{0}Position.y", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoint[index].position.Y = (float)Maxscript.Query("{0}Position.z", Maxscript.QueryType.Float, attachDummy);
                     //System.Windows.Forms.MessageBox.Show("5.5");
+
+                    Attachpoint[index].unknown11a.X = -bBox.X;
+                    Attachpoint[index].unknown11a.Z = -bBox.Y;
+                    Attachpoint[index].unknown11a.Y = -bBox.Z;
+                    Attachpoint[index].unknown11b.X = bBox.X;
+                    Attachpoint[index].unknown11b.Z = bBox.Y;
+                    Attachpoint[index].unknown11b.Y = bBox.Z;
+                }
+                //System.Windows.Forms.MessageBox.Show("# Atpts: " + Attachpoint.Count);
+            }
+        }
+        private void setUpTVerts(string mainMesh, int numVertices, int numFaces)
+        {
+            // Reduce Duplicate TVerts
+            //string uniqueTVerts = Maxscript.NewArray("uTVerts");
+            //string uTVIndex = Maxscript.NewBitArray("uTVIndex");
+            //Maxscript.Command("{0}.count = meshop.getNumTverts {1}", uTVIndex, mainMesh);
+            //Maxscript.Command("for t = 1 to (meshop.getNumTverts {0}) do ( if(appendIfUnique {1} (getTVert {0} t)) do (append {2} t))", mainMesh, uniqueTVerts, uTVIndex);
+            //Maxscript.Command("for t = 1 to (meshop.getNumTverts {0}) do (appendIfUnique {1} (getTVert {0} t))", mainMesh, uniqueTVerts);
+            /*Maxscript.Command("meshop.setNumTverts {0} {1}.count", mainMesh, uniqueTVerts);
+            Maxscript.Command("for t = 1 to (meshop.getNumTverts {0}) do (setTVert {0} t {1}[t]", mainMesh, uniqueTVerts);
+            Maxscript.Command("buildTVFaces {0}", mainMesh);
+            for (int i = 1; i <= faceVertices.Length; i++)
+            {
+                Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainMesh, i);
+            }*/
+            // Figure out the used vertices, and corresponding tex verts
+            OrderedSet<int>[] vertUsage = new OrderedSet<int>[numVertices];
+            OrderedSet<int>[] faceUsage = new OrderedSet<int>[numVertices];
+            for (int i = 0; i < vertUsage.Length; i++)
+            {
+                vertUsage[i] = new OrderedSet<int>();
+            }
+            for (int i = 0; i < faceUsage.Length; i++)
+            {
+                faceUsage[i] = new OrderedSet<int>();
+            }
+
+            for (int i = 0; i < numFaces; i++)
+            {
+                Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
+                Maxscript.Command("tFace = meshop.getMapFace {0} 1 {1}", mainMesh, i + 1);
+                int vert1 = Maxscript.QueryInteger("face[1]") - 1;
+                int vert2 = Maxscript.QueryInteger("face[2]") - 1;
+                int vert3 = Maxscript.QueryInteger("face[3]") - 1;
+                int tVert1 = Maxscript.QueryInteger("tFace[1]");
+                int tVert2 = Maxscript.QueryInteger("tFace[2]");
+                int tVert3 = Maxscript.QueryInteger("tFace[3]");
+                try
+                {
+                    vertUsage[vert1].Add(tVert1);
+                    vertUsage[vert2].Add(tVert2);
+                    vertUsage[vert3].Add(tVert3);
+                    faceUsage[vert1].Add(i + 1);
+                    faceUsage[vert2].Add(i + 1);
+                    faceUsage[vert3].Add(i + 1);
+                }
+                catch { throw new Exception(vertUsage.Length + " " + faceUsage.Length + " " + i + " " + vert1 + " " + vert2 + " " + vert3); }
+            }
+
+            for (int i = 0; i < vertUsage.Length; i++)
+            {
+                if (vertUsage[i].Count > 1)
+                {
+                    Maxscript.Command("vertPos = getVert {0} {1}", mainMesh, i + 1);
+                    for (int mapV = 1; mapV < vertUsage[i].Count; mapV++)
+                    {
+                        int mapVert = vertUsage[i][mapV];
+                        //if (!Maxscript.QueryBoolean("{0}[{1}] == true", uTVIndex, mapVert))
+                          //  continue;
+                        int newIndex = Maxscript.QueryInteger("{0}.numverts", mainMesh) + 1;
+                        Maxscript.Command("setNumVerts {0} {1} true", mainMesh, newIndex);
+                        Maxscript.Command("setVert {0} {1} {2}", mainMesh, newIndex, "vertPos");
+                        for (int f = 0; f < faceUsage[i].Count; f++)
+                        {
+                            int face = faceUsage[i][f];
+                            Maxscript.Command("theFaceDef = getFace {0} {1}", mainMesh, face);
+                            Maxscript.Command("theMapFaceDef = meshOp.getMapFace {0} 1 {1}", mainMesh, face);
+                            if (Maxscript.QueryInteger("theMapFaceDef.x") == mapVert && Maxscript.QueryInteger("theFaceDef.x") == i + 1)
+                            {
+                                Maxscript.Command("theFaceDef.x = {0}", newIndex);
+                                Maxscript.Command("setFace {0} {1} theFaceDef", mainMesh, face);
+                            }
+                            if (Maxscript.QueryInteger("theMapFaceDef.y") == mapVert && Maxscript.QueryInteger("theFaceDef.y") == i + 1)
+                            {
+                                Maxscript.Command("theFaceDef.y = {0}", newIndex);
+                                Maxscript.Command("setFace {0} {1} theFaceDef", mainMesh, face);
+                            }
+                            if (Maxscript.QueryInteger("theMapFaceDef.z") == mapVert && Maxscript.QueryInteger("theFaceDef.z") == i + 1)
+                            {
+                                Maxscript.Command("theFaceDef.z = {0}", newIndex);
+                                Maxscript.Command("setFace {0} {1} theFaceDef", mainMesh, face);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1395,168 +1551,73 @@ namespace AoMEngineLibrary
             }
         }
 
-        public void ReadBr3(BrgBinaryReader reader)
+        public class BrgAttachpointCollection : IEnumerable
         {
-            Int16 numVertices = reader.ReadInt16();
-            Int16 numFaces = reader.ReadInt16();
-            flags = (BrgMeshFlag)reader.ReadInt16();
+            private BrgAttachpoint[] attachpoint;
+            public readonly static int Capacity = 100;
+            public int Count;
 
-            vertices = new Vector3<float>[numVertices];
-            for (int i = 0; i < numVertices; i++)
+            internal BrgAttachpointCollection()
             {
-                reader.ReadVector3(out vertices[i], false, false);
-            }
-            normals = new Vector3<float>[numVertices];
-            for (int i = 0; i < numVertices; i++)
-            {
-                reader.ReadVector3(out normals[i], false, false);
+                attachpoint = new BrgAttachpoint[Capacity];
             }
 
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH) || flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+            public void Add()
             {
-                if (flags.HasFlag(BrgMeshFlag.TEXTURE))
+                Add(Count, new BrgAttachpoint());
+            }
+            public int Add(int index)
+            {
+                return Add(index, new BrgAttachpoint());
+            }
+            public void Add(BrgAttachpoint att)
+            {
+                Add(Count, att);
+            }
+            public int Add(int index, BrgAttachpoint att)
+            {
+                if (Count > 100)
                 {
-                    texVertices = new Vector2<float>[numVertices];
-                    for (int i = 0; i < numVertices; i++)
+                    throw new Exception("Reached max attachpoint capacity!");
+                }
+                att.Index = index;
+                if (attachpoint[att.Index] != null)
+                {
+                    att.Index = 0;
+                    while (attachpoint[att.Index] != null)
                     {
-                        reader.ReadVector2(out texVertices[i], false);
+                        att.Index++;
                     }
                 }
+                attachpoint[att.Index] = att;
+                Count++;
+                return att.Index;
             }
-
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
+            public void Remove(int index)
             {
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                attachpoint[index] = null;
+                Count--;
+            }
+            public BrgAttachpoint this[int index]
+            {
+                get
                 {
-                    faceMaterials = new Int16[numFaces];
-                    for (int i = 0; i < numFaces; i++)
-                    {
-                        faceMaterials[i] = (Int16)reader.ReadInt32();
-                    }
-                }
-
-                faceVertices = new Vector3<Int16>[numFaces];
-                for (int i = 0; i < numFaces; i++)
-                {
-                    reader.ReadVector3(out faceVertices[i], true);
-                    faceVertices[i].X -= 1;
-                    faceVertices[i].Y -= 1;
-                    faceVertices[i].Z -= 1;
-                }
-
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
-                {
-                    vertMaterials = new Int16[numVertices];
-                    for (int i = 0; i < numFaces; i++)
-                    {
-                        vertMaterials[faceVertices[i].X] = faceMaterials[i];
-                        vertMaterials[faceVertices[i].Y] = faceMaterials[i];
-                        vertMaterials[faceVertices[i].Z] = faceMaterials[i];
-                    }
+                    return attachpoint[index];
                 }
             }
 
-            animTime = ParentFile.AsetHeader.animTime;
-
-            if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            IEnumerator IEnumerable.GetEnumerator()
             {
-                Int16 numMatrix = (Int16)reader.ReadInt32();
-
-                attachpoints = new List<BrgAttachpoint>(numMatrix);
-                for (int i = 0; i < numMatrix; i++)
-                {
-                    attachpoints.Add(new BrgAttachpoint());
-                    attachpoints[i].NameId = BrgAttachpoint.GetIdByName(reader.ReadString());
-
-                    Vector3<float> x3, y3, z3;
-                    reader.ReadVector3(out x3, true, false);
-                    reader.ReadVector3(out y3, true, false);
-                    reader.ReadVector3(out z3, true, false);
-                    reader.ReadVector3(out attachpoints[i].position, false, false);
-
-                    attachpoints[i].x.X = x3.Z;
-                    attachpoints[i].x.Y = z3.Z;
-                    attachpoints[i].x.Z = y3.Z;
-
-                    attachpoints[i].y.X = x3.Y;
-                    attachpoints[i].y.Y = z3.Y;
-                    attachpoints[i].y.Z = y3.Y;
-
-                    attachpoints[i].z.X = x3.X;
-                    attachpoints[i].z.Y = z3.X;
-                    attachpoints[i].z.Z = y3.X;
-                }
+                return GetEnumerator();
             }
-        }
-        public void WriteBr3(BrgBinaryWriter writer)
-        {
-            writer.Write(vertices.Length);
-            writer.Write(faceVertices.Length);
-            writer.Write((Int16)flags);
-
-            for (int i = 0; i < vertices.Length; i++)
+            public IEnumerator GetEnumerator()
             {
-                writer.WriteVector3(ref vertices[i], false, false);
-            }
-            for (int i = 0; i < normals.Length; i++)
-            {
-                writer.WriteVector3(ref normals[i], false, false);
-            }
-
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH) || flags.HasFlag(BrgMeshFlag.MOVINGTEX))
-            {
-                if (flags.HasFlag(BrgMeshFlag.TEXTURE))
+                foreach (BrgAttachpoint att in attachpoint)
                 {
-                    for (int i = 0; i < texVertices.Length; i++)
-                    {
-                        writer.WriteVector2(ref texVertices[i], false);
-                    }
+                    if (att != null)
+                        yield return att;
                 }
-            }
-
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
-            {
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
-                {
-                    foreach (Int16 id in faceMaterials)
-                    {
-                        writer.Write((int)id);
-                    }
-                }
-
-                foreach (Vector3<Int16> v in faceVertices)
-                {
-                    writer.Write((Int16)(v.X + 1));
-                    writer.Write((Int16)(v.Y + 1));
-                    writer.Write((Int16)(v.Z + 1));
-                }
-            }
-
-            if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
-            {
-                writer.Write((int)attachpoints.Count);
-
-                foreach (BrgAttachpoint att in attachpoints)
-                {
-                    writer.WriteString(att.Name);
-
-                    writer.Write(att.z.X);
-                    writer.Write(att.y.X);
-                    writer.Write(att.x.X);
-
-                    writer.Write(att.z.Z);
-                    writer.Write(att.y.Z);
-                    writer.Write(att.x.Z);
-
-                    writer.Write(att.z.Y);
-                    writer.Write(att.y.Y);
-                    writer.Write(att.x.Y);
-
-                    writer.WriteVector3(ref att.position, false, false);
-                    //writer.Write(-att.position.X);
-                    //writer.Write(-att.position.Z);
-                    //writer.Write(att.position.Y);
-                }
+                //return attachpoint.GetEnumerator();
             }
         }
     }
@@ -1570,6 +1631,7 @@ namespace AoMEngineLibrary
             "FOREHEAD", "TOPOFHEAD", "RIGHTHAND", "LEFTHAND", "RESERVED", "SMOKEPOINT", "ATTACHPOINT"
          };
 
+        public int Index;
         public int NameId;
         public Vector3<float> x;
         public Vector3<float> y;
@@ -1582,29 +1644,39 @@ namespace AoMEngineLibrary
         {
             get
             {
-                if (NameId >= 0 && NameId <= 55)
+                if (NameId >= 0 && NameId <= 54)
                 {
                     return AttachpointNames[54 - NameId];
                 }
                 else
                 {
+                    //return string.Empty;
                     throw new Exception("Invalid Attachpoint Name Id!");
                 }
+            }
+        }
+        public string MaxName
+        {
+            get
+            {
+                return GetMaxName();
             }
         }
 
         public BrgAttachpoint()
         {
+            Index = -1;
             NameId = -1;
-            x = new Vector3<float>(0, 0, 1);
-            y = new Vector3<float>(0, 1, 0);
+            x = new Vector3<float>(0, 1, 0);
+            y = new Vector3<float>(0, 0, -1);
             z = new Vector3<float>(-1, 0, 0);
-            position = new Vector3<float>(1.5f);
+            position = new Vector3<float>(0f);
             unknown11a = new Vector3<float>(-0.25f);
             unknown11b = new Vector3<float>(0.25f);
         }
         public BrgAttachpoint(BrgAttachpoint prev)
         {
+            Index = prev.Index;
             NameId = prev.NameId;
             x = prev.x;
             y = prev.y;
@@ -1624,25 +1696,19 @@ namespace AoMEngineLibrary
                 }
             }
 
+            //return -1;
             throw new Exception("Invalid Attachpoint Name Id!");
         }
 
         public string GetMaxTransform()
         {
-            //string xVector = Maxscript.NewPoint3<float>("xVector", this.x.X, this.y.X, this.z.X);
-            //string yVector = Maxscript.NewPoint3<float>("yVector", this.x.Z, this.y.Z, this.z.Z);
-            //string zVector = Maxscript.NewPoint3<float>("zVector", this.x.Y, this.y.Y, this.z.Y);
-            //string xVector = Maxscript.NewPoint3<float>("xVector", this.x.X, this.x.Z, this.x.Y);
-            //string yVector = Maxscript.NewPoint3<float>("yVector", this.z.X, this.z.Z, this.z.Y);
-            //string zVector = Maxscript.NewPoint3<float>("zVector", this.y.X, this.y.Z, this.y.Y);
+            //string xVector = Maxscript.NewPoint3<float>("xVector", this.z.X, this.y.X, this.x.X); // original
+            //string yVector = Maxscript.NewPoint3<float>("yVector", this.z.Z, this.y.Z, this.x.Z);
+            //string zVector = Maxscript.NewPoint3<float>("zVector", this.z.Y, this.y.Y, this.x.Y);
 
-            string xVector = Maxscript.NewPoint3<float>("xVector", this.z.X, this.y.X, this.x.X);
-            string yVector = Maxscript.NewPoint3<float>("yVector", this.z.Z, this.y.Z, this.x.Z);
+            string xVector = Maxscript.NewPoint3<float>("xVector", -this.z.X, -this.y.X, -this.x.X);
+            string yVector = Maxscript.NewPoint3<float>("yVector", -this.z.Z, -this.y.Z, -this.x.Z);
             string zVector = Maxscript.NewPoint3<float>("zVector", this.z.Y, this.y.Y, this.x.Y);
-            //string xVector = MaxHelper.NewPoint3<float>("xVector", -attachpoints[i].x.X, -attachpoints[i].z.X, attachpoints[i].y.X);
-            //string yVector = MaxHelper.NewPoint3<float>("yVector", -attachpoints[i].x.Z, -attachpoints[i].z.Z, attachpoints[i].y.Z);
-            //string zVector = MaxHelper.NewPoint3<float>("zVector", -attachpoints[i].x.Y, -attachpoints[i].z.Y, attachpoints[i].y.Y);
-            //string posVector = MaxHelper.NewPoint3<float>("posVector", -this.position.X, -this.position.Z, this.position.Y);
             string posVector = Maxscript.NewPoint3<float>("rotPosVect", 0, 0, 0);
             return Maxscript.NewMatrix3("transformMatrix", xVector, yVector, zVector, posVector);
         }
@@ -1652,15 +1718,15 @@ namespace AoMEngineLibrary
         }
         public string GetMaxBoxSize()
         {
-            return Maxscript.NewPoint3<float>("posVector", 1, 1, 1);
+            return Maxscript.NewPoint3<float>("boxSize", 1, 1, 1);
         }
         public string GetMaxScale()
         {
             return Maxscript.NewPoint3<float>("boundingScale", (this.unknown11b.X - this.unknown11a.X), (this.unknown11b.Z - this.unknown11a.Z), (this.unknown11b.Y - this.unknown11a.Y));
         }
-        public string GetMaxName(int number)
+        public string GetMaxName()
         {
-            return String.Format("atpt{0:D2}.{1}", number, this.Name);
+            return String.Format("atpt{0:D2}.{1}", Index, this.Name);
         }
     }
 

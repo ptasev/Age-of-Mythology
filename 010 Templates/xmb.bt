@@ -1,0 +1,79 @@
+//--------------------------------------
+//--- 010 Editor v5.0 Binary Template
+//
+// File:        xmb.bt
+// Author:      Petar Tasev
+// Revision:    1.0
+// Purpose:     Outline decompressed xmb file
+//--------------------------------------
+LittleEndian();
+SetBackColor(cLtGray);
+
+struct {
+    int16 magic;
+    int fileLength;
+    int16 magic2;
+    int four;
+    int seven;
+
+    //local int childElems = ReadInt(FTell());
+    //FSkip(4);
+    int numDefinitions;
+
+    //while (ReadByte(FTell()) != 88 && ReadByte(FTell() + 1) != 78) {
+    struct XmlNodeDefinition {
+        int nameLength <bgcolor=cGreen>;
+        char name[nameLength * 2] <bgcolor=cLtRed>;
+    } definition[numDefinitions] <bgcolor=cLtBlue,read=definitionName,optimize=false>;
+    //}
+
+    int numAttrDefinitions;
+    struct XmlNodeDefinition attrDefinition[numAttrDefinitions] <bgcolor=cLtBlue,read=definitionName,optimize=false>;
+
+    struct XmlNode {
+        int16 magic;
+        int length <bgcolor=cGreen>;
+
+        int valueLength <bgcolor=cGreen>;
+        char value[valueLength * 2] <bgcolor=cLtRed>;
+        int definitionIndex;
+
+        int attributeCount <bgcolor=cGreen>;
+        struct XmlAttributeNode {
+            int definitionIndex;
+            int valueLength <bgcolor=cGreen>;
+            char value[valueLength * 2] <bgcolor=cLtRed>;
+        } attributes[attributeCount] <bgcolor=cLtBlue,read=definitionAttributeNode,optimize=false>;
+
+        int childNodeCount;
+        struct XmlNode childNodes[childNodeCount] <bgcolor=cLtBlue,read=definitionNodeName,optimize=false>;
+        
+    } rootNode <bgcolor=cLtBlue,read=definitionNodeName,optimize=false>;
+} file;
+
+string definitionName(XmlNodeDefinition &node) {
+    local int i;
+    string s = "";
+    for (i = 0; i < sizeof(node.name); i+=2) {
+        s += node.name[i];
+    }
+    return s;
+}
+
+string definitionNodeName(XmlNode &node) {
+    local int i;
+    string s = "";
+    for (i = 0; i < sizeof(file.definition[node.definitionIndex].name); i+=2) {
+        s += file.definition[node.definitionIndex].name[i];
+    }
+    return s;
+}
+
+string definitionAttributeNode(XmlAttributeNode &node) {
+    local int i;
+    string s = "";
+    for (i = 0; i < sizeof(file.attrDefinition[node.definitionIndex].name); i+=2) {
+        s += file.attrDefinition[node.definitionIndex].name[i];
+    }
+    return s;
+}
