@@ -1,0 +1,62 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File:    bar.bt
+// Author:  Petar Tasev
+// Revision:1.0
+// Purpose: Highlight bar files from AoM game.
+//--------------------------------------
+LittleEndian();
+SetBackColor(cLtGray);
+
+struct {
+    struct HEADER {
+        byte unknown01[12];
+        int fileCount;
+        int definitionsLength;
+        int definitionsOffset;
+        int barFileVersion;
+    } header;
+
+    FSeek(header.definitionsOffset);
+    int EOContent;
+    local int block[header.fileCount];
+    local int last = EOContent;
+    local int data;
+    local int i;
+    for (i = 0; i < header.fileCount - 1; i++) {
+        data = ReadInt(FTell());
+        block[i] = data - last;
+        last = data;
+        FSkip(4);
+    }
+    block[i] = FileSize() - (last + header.fileCount * 4 + header.definitionsOffset);
+
+    i = 0;
+    struct Entry {
+        int offset <bgcolor=cGreen>;
+        int length;
+        //int length2 <bgcolor=cGreen>;
+        
+        int16 year;
+        byte month;
+        byte day;
+        byte hour;
+        byte minute;
+        byte second;
+        byte milisecond;
+        
+        char fileName[block[i] - 16];
+        local int64 currentPos = FTell();
+
+        FSeek(offset);
+        byte data[length] <bgcolor=cLtRed>;
+
+        FSeek(currentPos);
+        i++;
+    } entry[header.fileCount] <bgcolor=cLtBlue,read=entryName,optimize=false>;
+} file;
+
+string entryName(Entry &entry) {
+    return entry.fileName;
+}

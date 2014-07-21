@@ -80,9 +80,9 @@ string hfloatRead( const hfloat &v )
     } MeshFormat; // Core Flags B
 
     typedef enum <byte> {
-        KEYFRAME    = 0x0001, // keyframe based animation
-        NONUNIFORM  = 0x0002, // Non-uniform animation
-        SKINBONE    = 0x0004 // Skinned Animation
+        KEYFRAME    = 0x0000, // keyframe based animation
+        NONUNIFORM  = 0x0001, // Non-uniform animation
+        SKINBONE    = 0x0002 // Skinned Animation
     } MeshAnimType; // BRG Animation Type
 
     typedef enum <uint> {
@@ -155,7 +155,7 @@ struct {
         byte padding[3]; //unknown03
     } header;
 
-    if (header.numMeshes > 1) {
+    if (header.numMeshes > 1 || (header.padding[0] != 100 && header.padding[0] != 52 && header.padding[0] != 119)) {
         struct {
             char asetHead[4];
             int numFrames;
@@ -187,17 +187,45 @@ struct {
         MeshFlags properties; // Mesh Core Flags A
         VectorFloat boundingBoxMin(3);
         VectorFloat boundingBoxMax(3);
-        Vector vertices(3)[numVertices];
-        Vector normals(3)[numVertices];
 
         local int i = 0;
 
-        if (!((properties & SECONDARYMESH) == SECONDARYMESH) || ((properties & ANIMTEXCOORDS) == ANIMTEXCOORDS)) {
-            if ((properties & TEXCOORDSA) == TEXCOORDSA) {
-                Vector texVert(2)[numVertices];
+if (!((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
+{
+        if (version == 22)
+        {
+            Vector vertices(3)[numVertices];
+            Vector normals(3)[numVertices];
+        }
+        else
+        {
+            VectorFloat vertices(3)[numVertices];
+            if (version >= 13 && version <= 17)
+            {
+                int16 normals[numVertices];
+            }
+            else
+            {
+                VectorFloat normals(3)[numVertices];
             }
         }
-        if (!((properties & SECONDARYMESH) == SECONDARYMESH)) {
+
+        if (!((properties & SECONDARYMESH) == SECONDARYMESH) || ((properties & ANIMTEXCOORDS) == ANIMTEXCOORDS) || ((properties & PARTICLESYSTEM) == PARTICLESYSTEM)) 
+        {
+            if ((properties & TEXCOORDSA) == TEXCOORDSA)
+            {
+                if (version == 22)
+                {
+                    Vector texVert(2)[numVertices];
+                }
+                else
+                {
+                    VectorFloat texVert(2)[numVertices];
+                }
+            }
+        }
+        if (!((properties & SECONDARYMESH) == SECONDARYMESH) || ((properties & PARTICLESYSTEM) == PARTICLESYSTEM)) 
+        {
             if ((properties & MATERIAL) == MATERIAL) {
                 int16 faceMat[numFaces];
             }
@@ -208,44 +236,119 @@ struct {
                 int16 vertMat[numVertices];
             }
         }
+}
+
+        if (userDataEntryCount > 0 && !((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
+        {
+            struct AnimationLength
+            {
+                int animNameLength;
+                int animL0;
+                float animL1;
+                char animName[animNameLength];
+            } animationLengths[userDataEntryCount];
+        }
 
         struct {
             int16 numIndex0 <comment="Unused">; // same as values in attachpoints, could be unused now
             int16 numMatrix0 <comment="Unused">; // same as values in attachpoints, could be unused
             int16 nameLength; // ?? unknown091 (still need to figure out)
+            if (extendedHeaderSize > 6)
+            {
             int16 pointMaterial; // ??
             float pointRadius <comment="Always 0">; // unknown09Unused always 0
+            if (extendedHeaderSize > 12)
+            {
             byte materialCount;
             byte padding[3] <comment="Used to be int with matCount">; // still not sure but definitely dealing with materials in the mesh
-            float animTime <comment="this is what really matters for the animation length of the model">;
-            int materialLibraryTimestamp <comment="Always 191738312, 1032824281 for TT">; // always the same value, one for aom, one for tt models, unknown09const
-            int16 checkSpace <comment="Always 0">; // always 0
-            hfloat unknown09e <comment="Unused">; // 0 for almost everything, could be unused now
-            float exportedScaleFactor; // timeMult, some sort of timing multiplier, adjustment?
-            int nonUniformKeyCount; //09c
-            int uniqueMaterialCount; // how many materials are used in a mesh, could be byte, with 3 padding afterwards
+            local int shadowLength = padding[0] + padding[1];
+            if (extendedHeaderSize > 16)
+            {
+                float animTime <comment="this is what really matters for the animation length of the model">;
+                if (extendedHeaderSize > 20)
+                {
+                    int materialLibraryTimestamp <comment="Always 191738312, 1032824281 for TT">; // always the same value, one for aom, one for tt models, unknown09const
+                    if (extendedHeaderSize > 24)
+                    {
+                        int16 checkSpace <comment="Always 0">; // always 0
+                        if (extendedHeaderSize > 26)
+                        {
+                            hfloat unknown09e <comment="Unused">; // 0 for almost everything, could be unused now
+                            if (extendedHeaderSize > 28)
+                            {
+                                float exportedScaleFactor; // timeMult, some sort of timing multiplier, adjustment?
+                                if (extendedHeaderSize > 32)
+                                {
+                                    int nonUniformKeyCount; //09c
+                                    if (extendedHeaderSize > 36)
+                                    {
+                                        int uniqueMaterialCount; // how many materials are used in a mesh, could be byte, with 3 padding afterwards
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            }
+            }
         } extendedHeader;
 
-        if ((((properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (properties & COLORCHANNEL) == COLORCHANNEL) && !((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) || (properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
-            struct VertColor {
-                ubyte R;
-                ubyte G;
-                ubyte B;
-                ubyte A;
-            } vertexColor[numVertices];
+
+        if (((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
+        {
+            float particleData[4 * numVertices];
+            struct ParticlePoint {
+                int nameLength;
+                int unk0;
+                int unk1;
+                char name[nameLength];
+            } particlePoint[userDataEntryCount];
         }
 
-        if ((properties & ATTACHPOINTS) == ATTACHPOINTS) {
-            int16 numMatrix <comment="This is number of bones">;
-            int16 numIndex;
-            int16 unknown10 <comment="Always 1">;
+        if (version == 13)
+        {
+            char name[extendedHeader.nameLength];
+        }
 
-            Vector xVector(3)[numMatrix];
-            Vector yVector(3)[numMatrix];
-            Vector zVector(3)[numMatrix];
-            Vector position(3)[numMatrix];
-            Vector boundingBoxMina(3)[numMatrix];
-            Vector boundingBoxMaxa(3)[numMatrix];
+        if ((properties & ATTACHPOINTS) == ATTACHPOINTS || extendedHeader.numMatrix0 > 0)
+        {
+            if (version == 19 || version == 22)
+            {
+                int16 numMatrix <comment="This is number of bones">;
+                int16 numIndex;
+                int16 unknown10 <comment="Always 1">;
+            }
+            else
+            {
+                local int16 numMatrix = extendedHeader.numMatrix0;
+                local int16 numIndex = extendedHeader.numIndex0;
+            }
+
+            if (version == 22)
+            {
+                Vector xVector(3)[numMatrix];
+                Vector yVector(3)[numMatrix];
+                Vector zVector(3)[numMatrix];
+                Vector position(3)[numMatrix];
+                Vector boundingBoxMina(3)[numMatrix];
+                Vector boundingBoxMaxa(3)[numMatrix];
+            }
+            else
+            {
+                if (version < 19)
+                {
+                }
+                VectorFloat xVector(3)[numMatrix];
+                VectorFloat yVector(3)[numMatrix];
+                VectorFloat zVector(3)[numMatrix];
+                if (version == 19)
+                {
+                    VectorFloat position(3)[numMatrix];
+                }
+                VectorFloat boundingBoxMina(3)[numMatrix];
+                VectorFloat boundingBoxMaxa(3)[numMatrix];
+            }
 
             local int32 numPoints = 0;
             struct AttachNameIndex {
@@ -260,8 +363,27 @@ struct {
             byte pointIndex[numPoints]; //unknown13
         }
 
+        if ((((properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (properties & COLORCHANNEL) == COLORCHANNEL) && !((properties & SECONDARYMESH) == SECONDARYMESH)) || (properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
+            struct VertColor {
+                ubyte R;
+                ubyte G;
+                ubyte B;
+                ubyte A;
+            } vertexColor[numVertices];
+        }
+
+        if (version >= 14 && version <= 19)
+        {
+            VectorFloat faceNormals(3)[numFaces];
+        }
+
+        if (!((properties & SECONDARYMESH) == SECONDARYMESH) && extendedHeaderSize > 12)
+        {
+            byte shadow[extendedHeader.shadowLength];
+        }
+
         // checkSpace is always 0 anyway, this block happens only on first frames, with variable anim set in specialProps
-        if (!extendedHeader.checkSpace && extendedHeader.nonUniformKeyCount) {
+        if (extendedHeaderSize > 32 && extendedHeader.nonUniformKeyCount) {
             float variableSpeed[extendedHeader.nonUniformKeyCount] <comment="mesh[x].StartTime = animTime * varSpeed[x]">;
         }
 
@@ -273,7 +395,7 @@ struct {
             char mtrlHead[4];
             int id;
             BrgMatFlag properties;
-            int unknown01b <comment="Always 0">; // always 0
+            float unknown01b <comment="Always 0">; // always 0
             int nameLength;
             VectorFloat color(3); //unknown02 [36 bytes]
             VectorFloat ambient(3);

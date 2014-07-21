@@ -6,7 +6,7 @@ using System.Xml;
 using System.Windows.Forms;
 using MiscUtil.IO;
 using MiscUtil.Conversion;
-/*
+
 namespace AoMBrgEditor
 {
     #region PSSG
@@ -1254,6 +1254,26 @@ namespace AoMBrgEditor
                     header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(texelFormat), 0);
                     break;
+                case "1555":
+                    header.flags |= DDS_HEADER.Flags.DDSD_PITCH;
+                    header.pitchOrLinearSize = (uint)((ddt.Width * 16 + 7) / 8);
+                    header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_RGB | DDS_PIXELFORMAT.Flags.DDPF_ALPHAPIXELS;
+                    header.ddspf.rGBBitCount = 16;
+                    header.ddspf.rBitMask = 0x7C00;
+                    header.ddspf.gBitMask = 0x3E0;
+                    header.ddspf.bBitMask = 0x1F;
+                    header.ddspf.aBitMask = 0x8000;
+                    break;
+                case "4444":
+                    header.flags |= DDS_HEADER.Flags.DDSD_PITCH;
+                    header.pitchOrLinearSize = (uint)((ddt.Width * 16 + 7) / 8);
+                    header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_RGB | DDS_PIXELFORMAT.Flags.DDPF_ALPHAPIXELS;
+                    header.ddspf.rGBBitCount = 16;
+                    header.ddspf.rBitMask = 0xF00;
+                    header.ddspf.gBitMask = 0xF0;
+                    header.ddspf.bBitMask = 0xF;
+                    header.ddspf.aBitMask = 0xF000;
+                    break;
             }
             if (ddt.mipMap > 1)
             {
@@ -1642,4 +1662,3 @@ namespace AoMBrgEditor
     }
     #endregion
 }
-*/

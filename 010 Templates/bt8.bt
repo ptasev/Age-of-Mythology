@@ -1,0 +1,50 @@
+//--------------------------------------
+//--- 010 Editor v5.0 Binary Template
+//
+// File:    bt8.bt
+// Author:  Petar Tasev
+// Revision:1.0
+// Purpose: Outline bt8 files from AoM game
+//--------------------------------------
+LittleEndian();
+
+typedef enum <byte> { Texture = 0, Texture2 = 1, Palette = 3, BumpMap = 6, CubeMap = 8 } DdtType;
+typedef enum <byte> { Uncompressed32 = 1, Palette2 = 3, DXT1 = 4, DXT3 = 5, DXT5 = 6, Grayscale8 = 7 } DdtTexelFormat;
+
+int magic;
+
+DdtType type;
+byte alphaBits;
+int16 unknwn;
+//DdtTexelFormat format;
+int mipMap;
+int unknown;
+
+struct IMAGEOFF {
+        int index;
+        int height;
+        int width;
+        int offset;
+        int unknown;
+        int offsetEnd;
+        int unknown2;
+        int unknown3;
+    } imageOffset[mipMap];
+
+//local struct IMAGEOFF imageOffsetLast = imageOffset[mipMap-1];
+//imageOffsetLast.height /= 2;
+//imageOffsetLast.width /= 2;
+//imageOffsetLast.offset = imageOffsetLast.offset + imageOffsetLast.offsetEnd;
+//imageOffsetLast.offsetEnd = imageOffsetLast.offset + imageOffsetLast.height * imageOffsetLast.width;
+
+// More palette stuff here
+
+local int i = 0;
+struct IMAGE
+{
+    FSeek(imageOffset[i].offset);
+    byte imageData[imageOffset[i].offsetEnd - imageOffset[i].offset];
+    i++;
+} imageData[mipMap] <optimize=false>;
+
+//byte imageDataLast[imageOffsetLast.offsetEnd - imageOffsetLast.offset];

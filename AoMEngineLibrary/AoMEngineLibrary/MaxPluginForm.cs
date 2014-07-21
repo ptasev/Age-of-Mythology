@@ -64,11 +64,11 @@ namespace AoMEngineLibrary
                 return Single.Parse(timeMultMaxTextBox.Text);
             }
         }
-        public Int16 Unknown091
+        public Byte InterpolationType
         {
             get
             {
-                return Int16.Parse(u091MaxTextBox.Text);
+                return (byte)Int16.Parse(interpolationTypeMaxTextBox.Text);
             }
         }
         public Int32 LastMaterialIndex
@@ -92,11 +92,11 @@ namespace AoMEngineLibrary
                 return getCheckedListBoxSelectedEnums<BrgMeshFormat>(genMeshFormatCheckedListBox);
             }
         }
-        public BrgMeshProperty Properties
+        public BrgMeshAnimType Properties
         {
             get
             {
-                return getCheckedListBoxSelectedEnums<BrgMeshProperty>(genMeshPropsCheckedListBox);
+                return getCheckedListBoxSelectedEnums<BrgMeshAnimType>(genMeshPropsCheckedListBox);
             }
         }
         public BrgMatFlag MatFlags
@@ -157,9 +157,9 @@ namespace AoMEngineLibrary
             timeMultMaxTextBox.BackColor = uiUp.GetEditControlColor();
             timeMultMaxTextBox.ForeColor = uiUp.GetTextColor();
             timeMultMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
-            u091MaxTextBox.BackColor = uiUp.GetEditControlColor();
-            u091MaxTextBox.ForeColor = uiUp.GetTextColor();
-            u091MaxTextBox.BorderStyle = BorderStyle.FixedSingle;
+            interpolationTypeMaxTextBox.BackColor = uiUp.GetEditControlColor();
+            interpolationTypeMaxTextBox.ForeColor = uiUp.GetTextColor();
+            interpolationTypeMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
             liuMaxTextBox.BackColor = uiUp.GetEditControlColor();
             liuMaxTextBox.ForeColor = uiUp.GetTextColor();
             liuMaxTextBox.BorderStyle = BorderStyle.FixedSingle;
@@ -180,7 +180,7 @@ namespace AoMEngineLibrary
             genMeshPropsCheckedListBox.BackColor = uiUp.GetEditControlColor();
             genMeshPropsCheckedListBox.ForeColor = uiUp.GetTextColor();
             genMeshPropsCheckedListBox.BorderStyle = BorderStyle.None;
-            genMeshPropsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshProperty));
+            genMeshPropsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshAnimType));
 
             // Attachpoints
             attachpointComboBox.SelectedIndexChanged += attachpointComboBox_SelectedIndexChanged;
@@ -465,15 +465,15 @@ namespace AoMEngineLibrary
                 return;
             }
 
+            bool objectSelected = Maxscript.QueryBoolean("classOf selection[1] == Editable_mesh");
+            if (!objectSelected)
+            {
+                throw new Exception("No object selected!");
+            }
+            file.ImportFromMax(true);
+            loadUI();
             try
             {
-                bool objectSelected = Maxscript.QueryBoolean("classOf selection[1] == Editable_mesh");
-                if (!objectSelected)
-                {
-                    throw new Exception("No object selected!");
-                }
-                file.ImportFromMax(true);
-                loadUI();
             }
             catch (Exception ex)
             {
@@ -561,24 +561,28 @@ namespace AoMEngineLibrary
             numMatMaxTextBox.Text = file.Material.Count.ToString();
             animTimeMaxTextBox.Text = "0";
             timeMultMaxTextBox.Text = "1";
-            u091MaxTextBox.Text = "0";
+            interpolationTypeMaxTextBox.Text = "0";
             liuMaxTextBox.Text = "0";
+            //MessageBox.Show("1");
 
             if (file.Mesh.Count > 0)
             {
                 numVertsMaxTextBox.Text = file.Mesh[0].vertices.Length.ToString();
                 numFacesMaxTextBox.Text = file.Mesh[0].faceVertices.Length.ToString();
-                animTimeMaxTextBox.Text = file.Mesh[0].animTime.ToString();
-                timeMultMaxTextBox.Text = file.Mesh[0].animTimeMult.ToString();
-                u091MaxTextBox.Text = file.Mesh[0].unknown091.ToString();
-                liuMaxTextBox.Text = file.Mesh[0].lastMaterialIndex.ToString();
+                //MessageBox.Show("2.1");
+                animTimeMaxTextBox.Text = file.Mesh[0].extendedHeader.animTime.ToString();
+                timeMultMaxTextBox.Text = file.Mesh[0].extendedHeader.exportedScaleFactor.ToString();
+                //MessageBox.Show("2.2");
+                interpolationTypeMaxTextBox.Text = file.Mesh[0].header.interpolationType.ToString();
+                liuMaxTextBox.Text = file.Mesh[0].extendedHeader.materialCount.ToString();
+                //MessageBox.Show("2.3");
 
                 // Attachpoints
                 loadUIAttachpoint();
 
                 for (int i = 0; i < genMeshFlagsCheckedListBox.Items.Count; i++)
                 {
-                    if (file.Mesh[0].flags.HasFlag((BrgMeshFlag)genMeshFlagsCheckedListBox.Items[i]))
+                    if (file.Mesh[0].header.flags.HasFlag((BrgMeshFlag)genMeshFlagsCheckedListBox.Items[i]))
                     {
                         genMeshFlagsCheckedListBox.SetItemChecked(i, true);
                     }
@@ -589,7 +593,7 @@ namespace AoMEngineLibrary
                 }
                 for (int i = 0; i < genMeshFormatCheckedListBox.Items.Count; i++)
                 {
-                    if (file.Mesh[0].format.HasFlag((BrgMeshFormat)genMeshFormatCheckedListBox.Items[i]))
+                    if (file.Mesh[0].header.format.HasFlag((BrgMeshFormat)genMeshFormatCheckedListBox.Items[i]))
                     {
                         genMeshFormatCheckedListBox.SetItemChecked(i, true);
                     }
@@ -600,7 +604,7 @@ namespace AoMEngineLibrary
                 }
                 for (int i = 0; i < genMeshPropsCheckedListBox.Items.Count; i++)
                 {
-                    if (file.Mesh[0].properties.HasFlag((BrgMeshProperty)genMeshPropsCheckedListBox.Items[i]))
+                    if (file.Mesh[0].header.properties.HasFlag((BrgMeshAnimType)genMeshPropsCheckedListBox.Items[i]))
                     {
                         genMeshPropsCheckedListBox.SetItemChecked(i, true);
                     }

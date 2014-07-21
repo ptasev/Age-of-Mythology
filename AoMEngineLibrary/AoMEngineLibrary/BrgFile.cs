@@ -14,6 +14,13 @@ using Wintellect.PowerCollections;
 
 namespace AoMEngineLibrary
 {
+    public struct VertexColor
+    {
+        public byte R;
+        public byte G;
+        public byte B;
+        public byte A;
+    }
     public struct Vector3<T>
     {
         public T X;
@@ -122,37 +129,41 @@ namespace AoMEngineLibrary
     [Flags]
     public enum BrgMeshFlag : ushort
     {
-        NONE1 = 0x8000,
-        TRANSPCOLOR = 0x4000,
-        NONE2 = 0x2000,
-        NONE3 = 0x1000,
-        MOVINGTEX = 0x0800,
-        NOTFIRSTMESH = 0x0400,
-        NONE4 = 0x0200,
-        ATTACHPOINTS = 0x0100,
-        NONE5 = 0x0080,
-        MATERIALS = 0x0040,
-        CHANGINGCOL = 0x0020,
-        NONE7 = 0x0010,
-        NONE8 = 0x0008,
-        NONE9 = 0x0004,
-        TEXTURE = 0x0002,
-        VERTCOLOR = 0x0001
+        ANIMVERTCOLORALPHA = 0x0001, // animated vertex color alpha
+        TEXCOORDSA = 0x0002, // Mesh has first set of tex coords
+        MULTTEXCOORDS = 0x0004, // mesh has texture coords sets 2..n
+        ANIMATEDMESH = 0x0008, // Deprecated - Not used after revision 0x0008
+        RESERVED = 0x0010, // ?
+        COLORCHANNEL = 0x0020, // Mesh has a vertex color channel
+        MATERIAL = 0x0040, // Mesh has material data
+        BUMPMAPINFO = 0x0080, // Mesh has bump/normal map info
+        ATTACHPOINTS = 0x0100, // Mesh contains dummy objects
+        NOZBUFFER = 0x0200, // mesh should not be rendered with z-testing
+        SECONDARYMESH = 0x0400, // Secondary Mesh 2..n
+        ANIMTEXCOORDS = 0x0800, // Mesh contains animated tex coords
+        PARTICLESYSTEM = 0x1000, // Mesh is a Particle System
+        PARTICLEPOINTS = 0x2000, // Mesh vertices are treated as particle points with radii
+        COLORALPHACHANNEL = 0x4000, // Vertex color channel is treated as alpha channel
+        ANIMVERTCOLORSNAP = 0x8000 // Animated vertex colors snap between keyframes
     };
     [Flags]
     public enum BrgMeshFormat : ushort
     {
+        BILLBOARD = 0x0001, // rotates with the player view
+        ANIMTEXCOORDSNAP = 0x0002, // Animated UV/animated texture coords snap between keyframes
+        HASFACENORMALS = 0x0004, // has face normals
+        ANIMATED = 0x0008, // animation length included in extended header
+        KEYFRAMESNAP = 0x0010, // keyframe snap, not smooth
         NOLOOPANIMATE = 0x0020, // don't animate Last-First frame
-        FORMATNONE1 = 0x0010, // haven't seen used
-        ANIMATED = 0x0008, // maybe means Animated
-        HASMATERIAL = 0x0004, // uses materials
-        ANIMATEDUV = 0x0002, // Animated UV
-        ROTATE = 0x0001  // rotates with the player view
+        MFRESRVED0 = 0x0040, // ?
+        FACEGROUPMAP = 0x0080, // Mesh has face group list
+        STRIPPED = 0x0100  // Mesh data is stripped
     };
-    public enum BrgMeshProperty : uint
+    public enum BrgMeshAnimType : byte
     {
-        FOLLOWTERRAIN = 1,
-        VARIABLEANIM = 256
+        KEYFRAME    = 0x0000, // keyframe based animation
+        NONUNIFORM  = 0x0001, // Non-uniform animation
+        SKINBONE    = 0x0002 // Skinned Animation
     };
     [Flags]
     public enum BrgMatFlag1
@@ -194,7 +205,6 @@ namespace AoMEngineLibrary
 
     public struct BrgHeader
     {
-        public int magic;
         public int unknown01;
         public int numMaterials;
         public int unknown02;
@@ -205,7 +215,6 @@ namespace AoMEngineLibrary
 
     public struct BrgAsetHeader
     {
-        public int magic;
         public int numFrames;
         public float frameStep;
         public float animTime;
@@ -213,6 +222,53 @@ namespace AoMEngineLibrary
         public float spf;
         public float fps;
         public int space;
+    }
+
+    public struct BrgMeshHeader
+    {
+        public Int16 version;
+        public BrgMeshFormat format;
+        public Int16 numVertices;
+        public Int16 numFaces;
+        public byte interpolationType;
+        public BrgMeshAnimType properties;
+        public Int16 userDataEntryCount;
+        public Vector3<float> centerPos;
+        public float centerRadius;
+        public Vector3<float> position;
+        public Vector3<float> groundPos;
+        public Int16 extendedHeaderSize;
+        public BrgMeshFlag flags;
+        public Vector3<float> boundingBoxMin;
+        public Vector3<float> boundingBoxMax;
+    }
+
+    public struct BrgMeshExtendedHeader
+    {
+        public Int16 numIndex;
+        public Int16 numMatrix;
+        public Int16 nameLength; // unknown091
+        public Int16 pointMaterial;
+        public float pointRadius; // unknown09Unused
+        public byte materialCount; // lastMaterialIndex
+        public byte shadowNameLength0;
+        public byte shadowNameLength1;
+        public byte shadowNameLength2;
+        public float animTime;
+        public int materialLibraryTimestamp; // unknown09Const
+        //public Int16 checkSpace; //09a
+        public float unknown09e;
+        public float exportedScaleFactor; // animTimeMult
+        public int nonUniformKeyCount; //09c
+        public int uniqueMaterialCount; // numMaterialsUsed
+    }
+
+    public struct BrgUserDataEntry
+    {
+        public int dataNameLength;
+        public int dataType;
+        public object data;
+        public string dataName;
     }
 
     public static class Maxscript
@@ -311,8 +367,8 @@ namespace AoMEngineLibrary
         }
         public static string NewMeshLiteral(string name, string vertArray, string normArray, string faceArray, string faceMatIdArray, string texVertArray)
         {
-            return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} faces:{2} materialIDs:{3} tverts:{4}", name, vertArray, faceArray, faceMatIdArray, texVertArray);
-            //return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} normals:{2} faces:{3} materialIDs:{4} tverts:{5}", name, vertArray, normArray, faceArray, faceMatIdArray, texVertArray);
+            //return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} faces:{2} materialIDs:{3} tverts:{4}", name, vertArray, faceArray, faceMatIdArray, texVertArray);
+            return MaxscriptSDK.AssembleScript("mesh name:\"{0}\" vertices:{1} normals:{2} faces:{3} materialIDs:{4} tverts:{5}", name, vertArray, normArray, faceArray, faceMatIdArray, texVertArray);
         }
         public static string NewMesh(string name, string vertArray, string normArray, string faceArray, string faceMatIdArray, string texVertArray)
         {
@@ -389,40 +445,59 @@ namespace AoMEngineLibrary
         {
             using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), fileStream))
             {
-                reader.ReadHeader(ref Header);
-                if (Header.magic != EndianBitConverter.Little.ToInt32(Encoding.UTF8.GetBytes("BANG"), 0))
+                string magic = reader.ReadString(4);
+                if (magic != "BANG")
                 {
                     throw new Exception("This is not a BRG file!");
                 }
+                reader.ReadHeader(ref Header);
 
-                if (Header.numMeshes > 1)
-                {
-                    reader.ReadAsetHeader(ref AsetHeader);
-                    if (AsetHeader.magic != EndianBitConverter.Little.ToInt32(Encoding.UTF8.GetBytes("ASET"), 0))
-                    {
-                        throw new Exception("Improper ASET header!");
-                    }
-                    if (Header.numMeshes != AsetHeader.numFrames)
-                    {
-                        throw new Exception("Number of meshes does not match number of frames!");
-                    }
-                }
-
+                int asetCount = 0;
                 Mesh = new List<BrgMesh>(Header.numMeshes);
-                for (int i = 0; i < Header.numMeshes; i++)
+                Material = new List<BrgMaterial>();
+                while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
-                    Mesh.Add(new BrgMesh(reader, this));
+                    magic = reader.ReadString(4);
+                    if (magic == "ASET")
+                    {
+                        reader.ReadAsetHeader(ref AsetHeader);
+                        ++asetCount;
+                    }
+                    else if (magic == "MESI")
+                    {
+                        Mesh.Add(new BrgMesh(reader, this));
+                    }
+                    else if (magic == "MTRL")
+                    {
+                        BrgMaterial mat = new BrgMaterial(reader, this);
+                        if (!ContainsMaterialID(mat.id))
+                        {
+                            Material.Add(mat);
+                        }
+                        else
+                        {
+                            //throw new Exception("Duplicate material ids!");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("The type tag " +/* magic +*/ " is not recognized!");
+                    }
                 }
 
-                Material = new List<BrgMaterial>();
-                for (int i = 0; i < Header.numMaterials; i++)
+                if (asetCount > 1)
                 {
-                    BrgMaterial mat = new BrgMaterial(reader, this);
-                    if (!ContainsMaterialID(mat.id))
-                    {
-                        Material.Add(mat);
-                    }
-                    //Material.Add(new BrgMaterial(reader, this));
+                    throw new Exception("Multiple ASETs!");
+                }
+
+                if (Header.numMeshes < Mesh.Count)
+                {
+                    throw new Exception("Inconsistent mesh count!");
+                }
+
+                if (Header.numMaterials < Material.Count)
+                {
+                    throw new Exception("Inconsistent material count!");
                 }
 
                 if (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -434,9 +509,7 @@ namespace AoMEngineLibrary
         public BrgFile(MaxPluginForm form) 
         {
             ParentForm = form;
-            Header.magic = 1196310850;
             Header.unknown03 = 1999922179;
-            AsetHeader.magic = 1413829441;
 
             Mesh = new List<BrgMesh>();
             Material = new List<BrgMaterial>();
@@ -446,23 +519,29 @@ namespace AoMEngineLibrary
         {
             using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), fileStream))
             {
+                writer.Write(1196310850); // magic "BANG"
+
                 Header.numMeshes = Mesh.Count;
                 Header.numMaterials = Material.Count;
+                Header.unknown03 = 1999922179;
                 writer.WriteHeader(ref Header);
 
                 if (Header.numMeshes > 1)
                 {
                     updateAsetHeader();
+                    writer.Write(1413829441); // magic "ASET"
                     writer.WriteAsetHeader(ref AsetHeader);
                 }
 
                 for (int i = 0; i < Mesh.Count; i++)
                 {
+                    writer.Write(1230193997); // magic "MESI"
                     Mesh[i].Write(writer);
                 }
 
                 for (int i = 0; i < Material.Count; i++)
                 {
+                    writer.Write(1280463949); // magic "MTRL"
                     Material[i].Write(writer);
                 }
             }
@@ -472,8 +551,8 @@ namespace AoMEngineLibrary
         {
             if (Mesh.Count > 1)
             {
-                Maxscript.Command("frameRate = {0}", Math.Round(Mesh.Count / Mesh[0].animTime));
-                Maxscript.Interval(0, Mesh[0].animTime);
+                Maxscript.Command("frameRate = {0}", Math.Round(Mesh.Count / Mesh[0].extendedHeader.animTime));
+                Maxscript.Interval(0, Mesh[0].extendedHeader.animTime);
             }
             else
             {
@@ -497,11 +576,12 @@ namespace AoMEngineLibrary
                         //string moveVector = MaxHelper.NewPoint3<float>("moveVector", -movePos.X, -movePos.Z, movePos.Y);
                         //string moveVector = MaxHelper.NewPoint3<float>("moveVector", -Mesh[i].vertices[j].X, -Mesh[i].vertices[j].Z, Mesh[i].vertices[j].Y);
                         Maxscript.AnimateAtTime(time, "meshOp.setVert {0} {1} {2}", mainObject, j + 1, Maxscript.NewPoint3Literal<float>(-Mesh[i].vertices[j].X, -Mesh[i].vertices[j].Z, Mesh[i].vertices[j].Y));
+                        Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, j + 1, Maxscript.NewPoint3Literal<float>(-Mesh[i].normals[j].X, -Mesh[i].normals[j].Z, Mesh[i].normals[j].Y));
 
                         // When NOTFIRSTMESH (i aleady starts from 1)
-                        if (Mesh[i].flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+                        if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
                         {
-                            if (Mesh[i].flags.HasFlag(BrgMeshFlag.TEXTURE))
+                            if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                             {
                                 //string tVertVector = MaxHelper.NewPoint3<float>("tVertVector", Mesh[i].texVertices[j].X, Mesh[i].texVertices[j].Y, 0);
                                 //MaxHelper.Execute = false;
@@ -527,7 +607,8 @@ namespace AoMEngineLibrary
                 }
 
                 // Still can't figure out why it updates/overwrites normals ( geometry:false topology:false)
-                Maxscript.Command("update {0}", mainObject);
+                Maxscript.Command("update {0} geometry:false topology:false normals:false", mainObject);
+                Maxscript.Command("select {0}", mainObject);
                 Maxscript.Command("max zoomext sel all");
 
                 if (Material.Count > 0)
@@ -554,7 +635,7 @@ namespace AoMEngineLibrary
             }
 
             HashSet<float> keys = new HashSet<float>();
-            if (ParentForm.Flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+            if (ParentForm.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
                 int numTexKeys = Maxscript.QueryInteger("{0}.Unwrap_UVW[1].keys.count", mainObject);
                 for (int i = 0; i < numTexKeys; i++)
@@ -590,6 +671,13 @@ namespace AoMEngineLibrary
                     {
                         //System.Windows.Forms.MessageBox.Show("b1.3.1");
                         keys.Add(Maxscript.QueryFloat("boneNode.scale.controller.keys[{0}].time as float", j + 1) / 4800f);
+                    }
+                    numBoneKeys = Maxscript.QueryInteger("boneNode.controller.keys.count");
+                    //System.Windows.Forms.MessageBox.Show("b1.4");
+                    for (int j = 0; j < numBoneKeys; j++)
+                    {
+                        //System.Windows.Forms.MessageBox.Show("b1.4.1");
+                        keys.Add(Maxscript.QueryFloat("boneNode.controller.keys[{0}].time as float", j + 1) / 4800f);
                     }
                 }
             }
@@ -629,12 +717,12 @@ namespace AoMEngineLibrary
                 Mesh[i].ImportFromMax(mainObject, keyTime[i], i);
             }
 
-            if (Mesh[0].properties.HasFlag(BrgMeshProperty.VARIABLEANIM))
+            if (Mesh[0].header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
                 Mesh[0].animTimeAdjust = new float[Mesh.Count];
                 for (int i = 0; i < Mesh.Count; i++)
                 {
-                    Mesh[0].animTimeAdjust[i] = keyTime[i] / Mesh[0].animTime;
+                    Mesh[0].animTimeAdjust[i] = keyTime[i] / Mesh[0].extendedHeader.animTime;
                 }
             }
             updateAsetHeader();
@@ -695,15 +783,15 @@ namespace AoMEngineLibrary
 
         public float GetFrameTime(int meshIndex)
         {
-            if (Mesh[0].properties.HasFlag(BrgMeshProperty.VARIABLEANIM))
+            if (Mesh[0].header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
                 //System.Windows.Forms.MessageBox.Show("t1");
-                return Mesh[0].animTimeAdjust[meshIndex] * Mesh[0].animTime;
+                return Mesh[0].animTimeAdjust[meshIndex] * Mesh[0].extendedHeader.animTime;
             }
             else if (Mesh.Count > 1)
             {
                 //System.Windows.Forms.MessageBox.Show("t2");
-                return (float)meshIndex / ((float)Mesh.Count - 1f) * Mesh[0].animTime;
+                return (float)meshIndex / ((float)Mesh.Count - 1f) * Mesh[0].extendedHeader.animTime;
             }
             else
             {
@@ -727,7 +815,7 @@ namespace AoMEngineLibrary
         {
             AsetHeader.numFrames = Mesh.Count;
             AsetHeader.frameStep = 1f / (float)AsetHeader.numFrames;
-            AsetHeader.animTime = Mesh[0].animTime;
+            AsetHeader.animTime = Mesh[0].extendedHeader.animTime;
             AsetHeader.frequency = 1f / (float)AsetHeader.animTime;
             AsetHeader.spf = AsetHeader.animTime / (float)AsetHeader.numFrames;
             AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
@@ -738,20 +826,7 @@ namespace AoMEngineLibrary
     {
         public BrgFile ParentFile;
 
-        private int magic;
-        private Int16 version;
-        public BrgMeshFormat format;
-        //public Int16 numVertices;
-        //public Int16 numFaces;
-        public BrgMeshProperty properties;
-        internal Vector3<float> centerPos;
-        public float unknown03;
-        public Vector3<float> position;
-        private Vector3<float> groundPos;
-        public Int16 unknown04;
-        public BrgMeshFlag flags;
-        private Vector3<float> boundingBoxMin;
-        private Vector3<float> boundingBoxMax;
+        public BrgMeshHeader header;
         public Vector3<float>[] vertices;
         public Vector3<float>[] normals;
 
@@ -760,20 +835,11 @@ namespace AoMEngineLibrary
         public Vector3<Int16>[] faceVertices;
         private Int16[] vertMaterials;
 
-        public Int16 numIndex0;
-        public Int16 numMatrix0;
-        public int unknown091;
-        public int unknown09Unused;
-        public int lastMaterialIndex;
-        public float animTime;
-        public int unknown09Const;
-        //public Int16 checkSpace; //09a
-        public float unknown09e;
-        public float animTimeMult;
-        //public int lenSpace; //09c
-        public int numMaterialsUsed;
+        public BrgMeshExtendedHeader extendedHeader;
+        public BrgUserDataEntry[] UserDataEntries;
+        float[] particleData;
 
-        public Vector2<float>[] unknown0a;
+        public VertexColor[] vertexColors; // unknown0a
 
         //public Int16 numMatrix;
         //Int16 numIndex;
@@ -784,112 +850,119 @@ namespace AoMEngineLibrary
         public BrgMesh(BrgBinaryReader reader, BrgFile file)
         {
             ParentFile = file;
-            magic = reader.ReadInt32();
-            if (magic != EndianBitConverter.Little.ToInt32(Encoding.UTF8.GetBytes("MESI"), 0))
-            {
-                throw new Exception("Improper mesh header!");
-            }
 
-            version = reader.ReadInt16();
-            format = (BrgMeshFormat)reader.ReadInt16();
-            Int16 numVertices = reader.ReadInt16();
-            Int16 numFaces = reader.ReadInt16();
-            properties = (BrgMeshProperty)reader.ReadInt32();
+            reader.ReadMeshHeader(ref header);
 
-            reader.ReadVector3(out centerPos, true, false);
-            unknown03 = reader.ReadSingle();
-            reader.ReadVector3(out position, true, false);
-            reader.ReadVector3(out groundPos, true, false);
-
-            unknown04 = reader.ReadInt16();
-
-            flags = (BrgMeshFlag)reader.ReadInt16();
-            reader.ReadVector3(out boundingBoxMin, true);
-            reader.ReadVector3(out boundingBoxMax, true);
-
-            vertices = new Vector3<float>[numVertices];
-            for (int i = 0; i < numVertices; i++)
-            {
-                reader.ReadVector3(out vertices[i], true, true);
-            }
-            normals = new Vector3<float>[numVertices];
-            for (int i = 0; i < numVertices; i++)
-            {
-                reader.ReadVector3(out normals[i], true, true);
-            }
-
+            vertices = new Vector3<float>[0];
+            normals = new Vector3<float>[0];
             texVertices = new Vector2<float>[0];
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH) || flags.HasFlag(BrgMeshFlag.MOVINGTEX))
-            {
-                if (flags.HasFlag(BrgMeshFlag.TEXTURE))
-                {
-                    texVertices = new Vector2<float>[numVertices];
-                    for (int i = 0; i < numVertices; i++)
-                    {
-                        reader.ReadVector2(out texVertices[i], true);
-                    }
-                }
-            }
-
             faceMaterials = new Int16[0];
             faceVertices = new Vector3<short>[0];
             vertMaterials = new Int16[0];
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
+            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                vertices = new Vector3<float>[header.numVertices];
+                for (int i = 0; i < header.numVertices; i++)
                 {
-                    faceMaterials = new Int16[numFaces];
-                    for (int i = 0; i < numFaces; i++)
+                    reader.ReadVector3(out vertices[i], true, header.version == 22);
+                }
+                normals = new Vector3<float>[header.numVertices];
+                for (int i = 0; i < header.numVertices; i++)
+                {
+                    if (header.version >= 13 && header.version <= 17)
                     {
-                        faceMaterials[i] = reader.ReadInt16();
+                        reader.ReadInt16(); // No idea what this is
+                    }
+                    else // v == 18, 19 or 22
+                    {
+                        reader.ReadVector3(out normals[i], true, header.version == 22);
                     }
                 }
 
-                faceVertices = new Vector3<Int16>[numFaces];
-                for (int i = 0; i < numFaces; i++)
+                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
                 {
-                    reader.ReadVector3(out faceVertices[i]);
+                    if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                    {
+                        texVertices = new Vector2<float>[header.numVertices];
+                        for (int i = 0; i < header.numVertices; i++)
+                        {
+                            reader.ReadVector2(out texVertices[i], header.version == 22);
+                        }
+                    }
                 }
 
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
                 {
-                    vertMaterials = new Int16[numVertices];
-                    for (int i = 0; i < numVertices; i++)
+                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        vertMaterials[i] = reader.ReadInt16();
+                        faceMaterials = new Int16[header.numFaces];
+                        for (int i = 0; i < header.numFaces; i++)
+                        {
+                            faceMaterials[i] = reader.ReadInt16();
+                        }
+                    }
+
+                    faceVertices = new Vector3<Int16>[header.numFaces];
+                    for (int i = 0; i < header.numFaces; i++)
+                    {
+                        reader.ReadVector3(out faceVertices[i]);
+                    }
+
+                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        vertMaterials = new Int16[header.numVertices];
+                        for (int i = 0; i < header.numVertices; i++)
+                        {
+                            vertMaterials[i] = reader.ReadInt16();
+                        }
                     }
                 }
             }
 
-            numIndex0 = reader.ReadInt16();
-            numMatrix0 = reader.ReadInt16();
-            unknown091 = reader.ReadInt32();
-            unknown09Unused = reader.ReadInt32();
-            lastMaterialIndex = reader.ReadInt32();
-            animTime = reader.ReadSingle();
-            unknown09Const = reader.ReadInt32();
-            reader.ReadInt16(); //09a
-            unknown09e = reader.ReadHalf();
-            animTimeMult = reader.ReadSingle();
-            int lenSpace = reader.ReadInt32(); //09c
-            numMaterialsUsed = reader.ReadInt32();
-
-            unknown0a = new Vector2<float>[0];
-            if (((flags.HasFlag(BrgMeshFlag.TRANSPCOLOR) || flags.HasFlag(BrgMeshFlag.CHANGINGCOL)) && !flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
-                || flags.HasFlag(BrgMeshFlag.VERTCOLOR))
+            UserDataEntries = new BrgUserDataEntry[header.userDataEntryCount];
+            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                unknown0a = new Vector2<float>[numVertices];
-                for (int i = 0; i < numVertices; i++)
+                for (int i = 0; i < header.userDataEntryCount; i++)
                 {
-                    reader.ReadVector2(out unknown0a[i], true);
+                    UserDataEntries[i] = reader.ReadUserDataEntry(false);
                 }
             }
 
-            if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            reader.ReadMeshExtendedHeader(ref extendedHeader, header.extendedHeaderSize);
+
+            particleData = new float[0];
+            if (header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                Int16 numMatrix = reader.ReadInt16();
-                Int16 numIndex = reader.ReadInt16();
-                reader.ReadInt16();
+                particleData = new float[4 * header.numVertices];
+                for (int i = 0; i < particleData.Length; i++)
+                {
+                    particleData[i] = reader.ReadSingle();
+                }
+                for (int i = 0; i < header.userDataEntryCount; i++)
+                {
+                    UserDataEntries[i] = reader.ReadUserDataEntry(true);
+                }
+            }
+
+            if (header.version == 13)
+            {
+                reader.ReadBytes(extendedHeader.nameLength);
+            }
+
+            if (header.version >= 13 && header.version <= 18)
+            {
+                header.flags |= BrgMeshFlag.ATTACHPOINTS;
+            }
+            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            {
+                Int16 numMatrix = extendedHeader.numMatrix;
+                Int16 numIndex = extendedHeader.numIndex;
+                if (header.version == 19 || header.version == 22)
+                {
+                    numMatrix = reader.ReadInt16();
+                    numIndex = reader.ReadInt16();
+                    reader.ReadInt16();
+                }
 
                 BrgAttachpoint[] attpts = new BrgAttachpoint[numMatrix];
                 for (int i = 0; i < numMatrix; i++)
@@ -898,27 +971,30 @@ namespace AoMEngineLibrary
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].x, true, true);
+                    reader.ReadVector3(out attpts[i].x, true, header.version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].y, true, true);
+                    reader.ReadVector3(out attpts[i].y, true, header.version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].z, true, true);
+                    reader.ReadVector3(out attpts[i].z, true, header.version == 22);
+                }
+                if (header.version == 19 || header.version == 22)
+                {
+                    for (int i = 0; i < numMatrix; i++)
+                    {
+                        reader.ReadVector3(out attpts[i].position, true, header.version == 22);
+                    }
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].position, true, true);
+                    reader.ReadVector3(out attpts[i].unknown11a, true, header.version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].unknown11a, true, true);
-                }
-                for (int i = 0; i < numMatrix; i++)
-                {
-                    reader.ReadVector3(out attpts[i].unknown11b, true, true);
+                    reader.ReadVector3(out attpts[i].unknown11b, true, header.version == 22);
                 }
 
                 List<int> nameId = new List<int>();
@@ -946,23 +1022,48 @@ namespace AoMEngineLibrary
                 Attachpoint = new BrgAttachpointCollection();
             }
 
+            vertexColors = new VertexColor[0];
+            if (((header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                || header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            {
+                vertexColors = new VertexColor[header.numVertices];
+                for (int i = 0; i < header.numVertices; i++)
+                {
+                    reader.ReadVertexColor(out vertexColors[i]);
+                }
+            }
+
             // Only seen on first mesh
             animTimeAdjust = new float[0];
-            if (properties.HasFlag(BrgMeshProperty.VARIABLEANIM))
+            if (header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
-                animTimeAdjust = new float[lenSpace];
-                for (int i = 0; i < lenSpace; i++)
+                animTimeAdjust = new float[extendedHeader.nonUniformKeyCount];
+                for (int i = 0; i < extendedHeader.nonUniformKeyCount; i++)
                 {
                     animTimeAdjust[i] = reader.ReadSingle();
                 }
+            }
+
+            if (header.version >= 14 && header.version <= 19)
+            {
+                // Face Normals??
+                Vector3<float>[] legacy = new Vector3<float>[header.numFaces];
+                for (int i = 0; i < header.numFaces; i++)
+                {
+                    reader.ReadVector3(out legacy[i]);
+                }
+            }
+
+            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && header.version != 22)
+            {
+                reader.ReadBytes(extendedHeader.shadowNameLength0 + extendedHeader.shadowNameLength1);
             }
         }
         public BrgMesh(BrgFile file)
         {
             ParentFile = file;
-            magic = 1230193997;
-            version = 22;
-            unknown04 = 40;
+            header.version = 22;
+            header.extendedHeaderSize = 40;
 
             vertices = new Vector3<float>[0];
             normals = new Vector3<float>[0];
@@ -972,8 +1073,11 @@ namespace AoMEngineLibrary
             faceVertices = new Vector3<Int16>[0];
             vertMaterials = new Int16[0];
 
-            unknown09Const = 191738312;
-            animTimeMult = 1f;
+            extendedHeader.materialLibraryTimestamp = 191738312;
+            extendedHeader.exportedScaleFactor = 1f;
+
+            UserDataEntries = new BrgUserDataEntry[0];
+            particleData = new float[0];
 
             Vector2<float>[] unknown0a = new Vector2<float>[0];
             Attachpoint = new BrgAttachpointCollection();
@@ -982,90 +1086,92 @@ namespace AoMEngineLibrary
 
         public void Write(BrgBinaryWriter writer)
         {
-            writer.Write(magic);
-
-            writer.Write(version);
-            writer.Write((UInt16)format);
-            writer.Write((Int16)vertices.Length);
-            writer.Write((Int16)faceVertices.Length);
-            writer.Write((uint)properties);
-
-            writer.WriteVector3(ref centerPos, true);
-            writer.Write(boundingBoxMax.LongestAxisLength());//unknown03
-            writer.WriteVector3(ref position, true);
-            writer.WriteVector3(ref groundPos, true);
-            writer.Write(unknown04);
-            writer.Write((UInt16)flags);
-            writer.WriteVector3(ref boundingBoxMin, true);
-            writer.WriteVector3(ref boundingBoxMax, true);
-
-            for (int i = 0; i < vertices.Length; i++)
+            header.version = 22;
+            if (header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                writer.WriteVector3(ref vertices[i], true, true);
+                header.numVertices = (Int16)(particleData.Length / 4);
             }
-            for (int i = 0; i < vertices.Length; i++)
+            else
             {
-                writer.WriteVector3(ref normals[i], true, true);
+                header.numVertices = (Int16)vertices.Length;
             }
+            header.numFaces = (Int16)faceVertices.Length;
+            header.userDataEntryCount = (Int16)UserDataEntries.Length;
+            header.centerRadius = header.boundingBoxMax.LongestAxisLength();
+            header.extendedHeaderSize = 40;
+            writer.WriteMeshHeader(ref header);
 
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH) || flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                if (flags.HasFlag(BrgMeshFlag.TEXTURE))
+                for (int i = 0; i < vertices.Length; i++)
                 {
-                    for (int i = 0; i < texVertices.Length; i++)
+                    writer.WriteVector3(ref vertices[i], true, true);
+                }
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    writer.WriteVector3(ref normals[i], true, true);
+                }
+
+                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                {
+                    if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                     {
-                        writer.WriteVector2(ref texVertices[i], true);
+                        for (int i = 0; i < texVertices.Length; i++)
+                        {
+                            writer.WriteVector2(ref texVertices[i], true);
+                        }
+                    }
+                }
+
+                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                {
+                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        for (int i = 0; i < faceMaterials.Length; i++)
+                        {
+                            writer.Write(faceMaterials[i]);
+                        }
+                    }
+
+                    for (int i = 0; i < faceVertices.Length; i++)
+                    {
+                        writer.WriteVector3(ref faceVertices[i]);
+                    }
+
+                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        for (int i = 0; i < vertMaterials.Length; i++)
+                        {
+                            writer.Write(vertMaterials[i]);
+                        }
                     }
                 }
             }
 
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
+            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                for (int i = 0; i < UserDataEntries.Length; i++)
                 {
-                    for (int i = 0; i < faceMaterials.Length; i++)
-                    {
-                        writer.Write(faceMaterials[i]);
-                    }
-                }
-
-                for (int i = 0; i < faceVertices.Length; i++)
-                {
-                    writer.WriteVector3(ref faceVertices[i]);
-                }
-
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
-                {
-                    for (int i = 0; i < vertMaterials.Length; i++)
-                    {
-                        writer.Write(vertMaterials[i]);
-                    }
+                    writer.WriteUserDataEntry(ref UserDataEntries[i], false);
                 }
             }
 
-            writer.Write(numIndex0);
-            writer.Write(numMatrix0);
-            writer.Write(unknown091);
-            writer.Write(unknown09Unused);
-            writer.Write(lastMaterialIndex);
-            writer.Write(animTime);
-            writer.Write(unknown09Const);
-            writer.Write((Int16)0);
-            writer.WriteHalf(unknown09e);
-            writer.Write(animTimeMult);
-            writer.Write(animTimeAdjust.Length);
-            writer.Write(numMaterialsUsed);
+            extendedHeader.nonUniformKeyCount = animTimeAdjust.Length;
+            writer.WriteMeshExtendedHeader(ref extendedHeader);
 
-            if (((flags.HasFlag(BrgMeshFlag.TRANSPCOLOR) || flags.HasFlag(BrgMeshFlag.CHANGINGCOL)) && !flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
-                || flags.HasFlag(BrgMeshFlag.VERTCOLOR))
+            if (header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < unknown0a.Length; i++)
+                for (int i = 0; i < particleData.Length; i++)
                 {
-                    writer.WriteVector2(ref unknown0a[i], true);
+                    writer.Write(particleData[i]);
+                }
+                for (int i = 0; i < UserDataEntries.Length; i++)
+                {
+                    writer.WriteUserDataEntry(ref UserDataEntries[i], true);
                 }
             }
 
-            if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
                 writer.Write((Int16)Attachpoint.Count);
 
@@ -1079,7 +1185,7 @@ namespace AoMEngineLibrary
                         maxNameId = att.NameId;
                     }
                 }
-                int numIndex = (Int16)(maxNameId + 1);//(Int16)(55 - maxNameId);
+                Int16 numIndex = (Int16)(maxNameId + 1);//(Int16)(55 - maxNameId);
                 writer.Write((Int16)numIndex);
                 writer.Write((Int16)1);
 
@@ -1145,7 +1251,16 @@ namespace AoMEngineLibrary
                 }
             }
 
-            if (properties.HasFlag(BrgMeshProperty.VARIABLEANIM))
+            if (((header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                || header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            {
+                for (int i = 0; i < vertexColors.Length; i++)
+                {
+                    writer.WriteVertexColor(ref vertexColors[i]);
+                }
+            }
+
+            if (header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
                 for (int i = 0; i < animTimeAdjust.Length; i++)
                 {
@@ -1172,11 +1287,11 @@ namespace AoMEngineLibrary
             Maxscript.CommentTitle("Load Normals");
             foreach (Vector3<float> norm in normals)
             {
-                Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n", norm.X, norm.Z, -norm.Y));
+                Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n", -norm.X, -norm.Z, norm.Y));
             }
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH) || flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
-                if (flags.HasFlag(BrgMeshFlag.TEXTURE))
+                if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
                     Maxscript.CommentTitle("Load UVW");
                     foreach (Vector2<float> texVert in texVertices)
@@ -1186,9 +1301,9 @@ namespace AoMEngineLibrary
                 }
             }
 
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
+            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
             {
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
                     Maxscript.CommentTitle("Load Face Materials");
                     foreach (Int16 fMat in faceMaterials)
@@ -1204,7 +1319,7 @@ namespace AoMEngineLibrary
                 }
             }
 
-            if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
                 Maxscript.CommentTitle("Load Attachpoints");
                 foreach (BrgAttachpoint att in Attachpoint)
@@ -1221,7 +1336,7 @@ namespace AoMEngineLibrary
             //Maxscript.Command("{0}.center.y = {1}", mainObject, -centerPos.Z);
             //Maxscript.Command("{0}.center.z = {1}", mainObject, centerPos.Y);
 
-            string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -groundPos.X, -groundPos.Z, groundPos.Y);
+            string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -header.groundPos.X, -header.groundPos.Z, header.groundPos.Y);
             Maxscript.Command("plane name:\"ground\" pos:{0} length:10 width:10", groundPlanePos);
 
             Maxscript.CommentTitle("TVert Hack");
@@ -1231,7 +1346,7 @@ namespace AoMEngineLibrary
                 Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainObject, i);
             }
 
-            if (flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+            if (header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
                 Maxscript.Command("select {0}", mainObject);
                 Maxscript.Command("addModifier {0} (Unwrap_UVW())", mainObject);
@@ -1246,16 +1361,16 @@ namespace AoMEngineLibrary
         {
             UpdateSettings(meshIndex);
 
-            centerPos.X = -(float)Maxscript.Query("{0}.center.x", Maxscript.QueryType.Float, mainObject);
-            centerPos.Z = -(float)Maxscript.Query("{0}.center.y", Maxscript.QueryType.Float, mainObject);
-            centerPos.Y = (float)Maxscript.Query("{0}.center.z", Maxscript.QueryType.Float, mainObject);
+            header.centerPos.X = -(float)Maxscript.Query("{0}.center.x", Maxscript.QueryType.Float, mainObject);
+            header.centerPos.Z = -(float)Maxscript.Query("{0}.center.y", Maxscript.QueryType.Float, mainObject);
+            header.centerPos.Y = (float)Maxscript.Query("{0}.center.z", Maxscript.QueryType.Float, mainObject);
 
             Maxscript.Command("grnd = getNodeByName \"ground\"");
             if (!Maxscript.QueryBoolean("grnd == undefined"))
             {
-                groundPos.X = -(float)Maxscript.Query("grnd.position.x", Maxscript.QueryType.Float);
-                groundPos.Z = -(float)Maxscript.Query("grnd.position.y", Maxscript.QueryType.Float);
-                groundPos.Y = (float)Maxscript.Query("grnd.position.z", Maxscript.QueryType.Float);
+                header.groundPos.X = -(float)Maxscript.Query("grnd.position.x", Maxscript.QueryType.Float);
+                header.groundPos.Z = -(float)Maxscript.Query("grnd.position.y", Maxscript.QueryType.Float);
+                header.groundPos.Y = (float)Maxscript.Query("grnd.position.z", Maxscript.QueryType.Float);
             }
 
             Maxscript.Command("{0}BBMax = {0}.max", mainObject);
@@ -1263,12 +1378,12 @@ namespace AoMEngineLibrary
             Vector3<float> bBoxMax = new Vector3<float>(Maxscript.QueryFloat("{0}BBMax.X", mainObject), Maxscript.QueryFloat("{0}BBMax.Y", mainObject), Maxscript.QueryFloat("{0}BBMax.Z", mainObject));
             Vector3<float> bBoxMin = new Vector3<float>(Maxscript.QueryFloat("{0}BBMin.X", mainObject), Maxscript.QueryFloat("{0}BBMin.Y", mainObject), Maxscript.QueryFloat("{0}BBMin.Z", mainObject));
             Vector3<float> bBox = (bBoxMax - bBoxMin) / 2;
-            boundingBoxMin.X = -bBox.X;
-            boundingBoxMin.Z = -bBox.Y;
-            boundingBoxMin.Y = -bBox.Z;
-            boundingBoxMax.X = bBox.X;
-            boundingBoxMax.Z = bBox.Y;
-            boundingBoxMax.Y = bBox.Z;
+            header.boundingBoxMin.X = -bBox.X;
+            header.boundingBoxMin.Z = -bBox.Y;
+            header.boundingBoxMin.Y = -bBox.Z;
+            header.boundingBoxMax.X = bBox.X;
+            header.boundingBoxMax.Z = bBox.Y;
+            header.boundingBoxMax.Y = bBox.Z;
 
             string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject, time);
             int numVertices = (int)Maxscript.Query("{0}.numverts", Maxscript.QueryType.Integer, mainMesh);
@@ -1321,7 +1436,8 @@ namespace AoMEngineLibrary
                     verticesList.Add(new Vector3<float>(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
 
                     //System.Windows.Forms.MessageBox.Show("1.5");
-                    Maxscript.Command("normal = normalize (getNormal {0} {1})", mainMesh, i + 1);
+                    Maxscript.SetVarAtTime(time, "normal", "normalize (getNormal {0} {1})", mainObject, i + 1);
+                    //Maxscript.Command("normal = normalize (getNormal {0} {1})", mainMesh, i + 1);
                     //System.Windows.Forms.MessageBox.Show("1.6");
                     normalsList.Add(new Vector3<float>(-Maxscript.QueryFloat("normal.x"), Maxscript.QueryFloat("normal.z"), -Maxscript.QueryFloat("normal.y")));
                     //normalsList.Add(new Vector3<float>(Maxscript.QueryFloat("normal.x"), -Maxscript.QueryFloat("normal.z"), Maxscript.QueryFloat("normal.y")));
@@ -1332,9 +1448,9 @@ namespace AoMEngineLibrary
             normals = normalsList.ToArray();
 
             //System.Windows.Forms.MessageBox.Show("2");
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH) || flags.HasFlag(BrgMeshFlag.MOVINGTEX))
+            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
-                if (flags.HasFlag(BrgMeshFlag.TEXTURE))
+                if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
                     List<Vector2<float>> texVerticesList = new List<Vector2<float>>(numVertices);
                     for (int i = 0; i < numVertices; i++)
@@ -1351,9 +1467,9 @@ namespace AoMEngineLibrary
 
             //System.Windows.Forms.MessageBox.Show("3");
             HashSet<int> diffFaceMats = new HashSet<int>();
-            if (!flags.HasFlag(BrgMeshFlag.NOTFIRSTMESH))
+            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
             {
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
                     faceMaterials = new Int16[numFaces];
                     for (int i = 0; i < numFaces; i++)
@@ -1374,7 +1490,7 @@ namespace AoMEngineLibrary
                 }
 
                 //System.Windows.Forms.MessageBox.Show("3.2");
-                if (flags.HasFlag(BrgMeshFlag.MATERIALS))
+                if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
                     vertMaterials = new Int16[vertices.Length];
                     for (int i = 0; i < faceVertices.Length; i++)
@@ -1391,14 +1507,14 @@ namespace AoMEngineLibrary
             //lastMaterialIndex = ParentFile.ParentForm.LastMaterialIndex;
             if (meshIndex == 0 && diffFaceMats.Count > 0)
             {
-                lastMaterialIndex = diffFaceMats.Count - 1;
-                numMaterialsUsed = diffFaceMats.Count;
+                extendedHeader.materialCount = (byte)(diffFaceMats.Count - 1);
+                extendedHeader.uniqueMaterialCount = diffFaceMats.Count;
             }
-            animTime = (float)Maxscript.Query("animationRange.end.ticks / 4800 as float", Maxscript.QueryType.Float);
+            extendedHeader.animTime = (float)Maxscript.Query("animationRange.end.ticks / 4800 as float", Maxscript.QueryType.Float);
             //animTimeMult = ParentFile.ParentForm.TimeMult;
 
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
-            if (flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
                 Attachpoint = new BrgAttachpointCollection();
                 for (int i = 0; i < numAttachpoints; i++)
@@ -1539,15 +1655,15 @@ namespace AoMEngineLibrary
 
         public void UpdateSettings(int meshIndex)
         {
-            flags = ParentFile.ParentForm.Flags;
-            format = ParentFile.ParentForm.Format;
-            properties = ParentFile.ParentForm.Properties;
-            unknown091 = ParentFile.ParentForm.Unknown091;
-            animTimeMult = ParentFile.ParentForm.TimeMult;
+            header.flags = ParentFile.ParentForm.Flags;
+            header.format = ParentFile.ParentForm.Format;
+            header.properties = ParentFile.ParentForm.Properties;
+            header.interpolationType = ParentFile.ParentForm.InterpolationType;
+            extendedHeader.exportedScaleFactor = ParentFile.ParentForm.TimeMult;
             if (meshIndex > 0)
             {
-                flags |= BrgMeshFlag.NOTFIRSTMESH;
-                properties &= ~BrgMeshProperty.VARIABLEANIM;
+                header.flags |= BrgMeshFlag.SECONDARYMESH;
+                header.properties &= ~BrgMeshAnimType.NONUNIFORM;
             }
         }
 
@@ -1769,7 +1885,6 @@ namespace AoMEngineLibrary
             }
         }
 
-        int magic;
         public int id;
         public BrgMatFlag flags;
         public int unknown01b;
@@ -1787,11 +1902,6 @@ namespace AoMEngineLibrary
         public BrgMaterial(BrgBinaryReader reader, BrgFile file)
         {
             ParentFile = file;
-            magic = reader.ReadInt32();
-            if (magic != EndianBitConverter.Little.ToInt32(Encoding.UTF8.GetBytes("MTRL"), 0))
-            {
-                throw new Exception("Incorrect material header!");
-            }
 
             id = reader.ReadInt32();
             flags = (BrgMatFlag)reader.ReadInt32();
@@ -1811,7 +1921,10 @@ namespace AoMEngineLibrary
             {
                 name2 = reader.ReadString(reader.ReadInt32());
             }
-            alphaOpacity = reader.ReadSingle();
+            if (true)
+            {
+                alphaOpacity = reader.ReadSingle();
+            }
 
             if (flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
             {
@@ -1830,7 +1943,6 @@ namespace AoMEngineLibrary
         public BrgMaterial(BrgFile file)
         {
             ParentFile = file;
-            magic = 1280463949;
             id = 0;
             flags = 0;
             unknown01b = 0;
@@ -1852,7 +1964,6 @@ namespace AoMEngineLibrary
         public BrgMaterial(BrgMaterial copy)
         {
             ParentFile = copy.ParentFile;
-            magic = copy.magic;
 
             id = copy.id;
             flags = copy.flags;
@@ -2001,7 +2112,6 @@ namespace AoMEngineLibrary
 
         public void Write(BrgBinaryWriter writer)
         {
-            writer.Write(magic);
             writer.Write(id);
             writer.Write((int)flags);
 
@@ -2067,7 +2177,6 @@ namespace AoMEngineLibrary
 
         public void ReadHeader(ref BrgHeader header)
         {
-            header.magic = this.ReadInt32();
             header.unknown01 = this.ReadInt32();
             header.numMaterials = this.ReadInt32();
             header.unknown02 = this.ReadInt32();
@@ -2077,7 +2186,6 @@ namespace AoMEngineLibrary
         }
         public void ReadAsetHeader(ref BrgAsetHeader header)
         {
-            header.magic = this.ReadInt32();
             header.numFrames = this.ReadInt32();
             header.frameStep = this.ReadSingle();
             header.animTime = this.ReadSingle();
@@ -2085,6 +2193,102 @@ namespace AoMEngineLibrary
             header.spf = this.ReadSingle();
             header.fps = this.ReadSingle();
             header.space = this.ReadInt32();
+        }
+        public void ReadMeshHeader(ref BrgMeshHeader header)
+        {
+            header.version = this.ReadInt16();
+            header.format = (BrgMeshFormat)this.ReadInt16();
+            header.numVertices = this.ReadInt16();
+            header.numFaces = this.ReadInt16();
+            header.interpolationType = this.ReadByte();
+            header.properties = (BrgMeshAnimType)this.ReadByte();
+            header.userDataEntryCount = this.ReadInt16();
+            this.ReadVector3(out header.centerPos, true, false);
+            header.centerRadius = this.ReadSingle();
+            this.ReadVector3(out header.position, true, false);
+            this.ReadVector3(out header.groundPos, true, false);
+            header.extendedHeaderSize = this.ReadInt16();
+            header.flags = (BrgMeshFlag)this.ReadInt16();
+            this.ReadVector3(out header.boundingBoxMin, true);
+            this.ReadVector3(out header.boundingBoxMax, true);
+        }
+        public void ReadMeshExtendedHeader(ref BrgMeshExtendedHeader header, int extendedHeaderSize)
+        {
+            header.numIndex = this.ReadInt16();
+            header.numMatrix = this.ReadInt16();
+            header.nameLength = this.ReadInt16();
+            if (extendedHeaderSize > 6)
+            {
+                header.pointMaterial = this.ReadInt16();
+                header.pointRadius = this.ReadSingle();
+            }
+            if (extendedHeaderSize > 12)
+            {
+                header.materialCount = this.ReadByte();
+                header.shadowNameLength0 = this.ReadByte();
+                header.shadowNameLength1 = this.ReadByte();
+                header.shadowNameLength2 = this.ReadByte();
+            }
+            if (extendedHeaderSize > 16)
+            {
+                header.animTime = this.ReadSingle();
+            }
+            if (extendedHeaderSize > 20)
+            {
+                header.materialLibraryTimestamp = this.ReadInt32();
+            }
+            if (extendedHeaderSize > 24)
+            {
+                //this.ReadInt16(); //09a checkSpace
+                header.unknown09e = this.ReadSingle();
+            }
+            if (extendedHeaderSize > 28)
+            {
+                header.exportedScaleFactor = this.ReadSingle();
+            }
+            if (extendedHeaderSize > 32)
+            {
+                header.nonUniformKeyCount = this.ReadInt32(); //09c
+            }
+            if (extendedHeaderSize > 36)
+            {
+                header.uniqueMaterialCount = this.ReadInt32();
+            }
+
+            //animTime = 0f;
+            //materialLibraryTimestamp = 0;
+            //unknown09e = 0f;
+            //exportedScaleFactor = 1f;
+            //lenSpace = 0;
+            //uniqueMaterialCount = 0;
+        }
+        public BrgUserDataEntry ReadUserDataEntry(bool isParticle)
+        {
+            BrgUserDataEntry dataEntry;
+
+            dataEntry.dataNameLength = this.ReadInt32();
+            dataEntry.dataType = this.ReadInt32();
+            switch (dataEntry.dataType)
+            {
+                case 1:
+                    dataEntry.data = this.ReadInt32();
+                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength + (int)dataEntry.data);
+                    break;
+                case 2:
+                    dataEntry.data = this.ReadInt32();
+                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength);
+                    break;
+                case 3:
+                    dataEntry.data = this.ReadSingle();
+                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength);
+                    break;
+                default:
+                    dataEntry.data = this.ReadInt32();
+                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength);
+                    break;
+            }
+
+            return dataEntry;
         }
         public BrgMatSFX ReadMaterialSFX()
         {
@@ -2171,6 +2375,13 @@ namespace AoMEngineLibrary
             f[3] = h[1];
             return EndianBitConverter.Little.ToSingle(f, 0);
         }
+        public void ReadVertexColor(out VertexColor color)
+        {
+            color.R = this.ReadByte();
+            color.G = this.ReadByte();
+            color.B = this.ReadByte();
+            color.A = this.ReadByte();
+        }
         public string ReadString(byte terminator = 0x0)
         {
             string filename = "";
@@ -2199,7 +2410,6 @@ namespace AoMEngineLibrary
 
         public void WriteHeader(ref BrgHeader header)
         {
-            this.Write(header.magic);
             this.Write(header.unknown01);
             this.Write(header.numMaterials);
             this.Write(header.unknown02);
@@ -2209,7 +2419,6 @@ namespace AoMEngineLibrary
         }
         public void WriteAsetHeader(ref BrgAsetHeader header)
         {
-            this.Write(header.magic);
             this.Write(header.numFrames);
             this.Write(header.frameStep);
             this.Write(header.animTime);
@@ -2217,6 +2426,65 @@ namespace AoMEngineLibrary
             this.Write(header.spf);
             this.Write(header.fps);
             this.Write(header.space);
+        }
+        public void WriteMeshHeader(ref BrgMeshHeader header)
+        {
+            this.Write(header.version);
+            this.Write((UInt16)header.format);
+            this.Write(header.numVertices);
+            this.Write(header.numFaces);
+            this.Write((uint)header.properties);
+            this.WriteVector3(ref header.centerPos, true);
+            this.Write(header.centerRadius);//unknown03
+            this.WriteVector3(ref header.position, true);
+            this.WriteVector3(ref header.groundPos, true);
+            this.Write(header.extendedHeaderSize);
+            this.Write((UInt16)header.flags);
+            this.WriteVector3(ref header.boundingBoxMin, true);
+            this.WriteVector3(ref header.boundingBoxMax, true);
+        }
+        public void WriteMeshExtendedHeader(ref BrgMeshExtendedHeader extendedHeader)
+        {
+            this.Write(extendedHeader.numIndex);//numIndex0);
+            this.Write(extendedHeader.numMatrix);//numMatrix0);
+            this.Write(extendedHeader.nameLength);
+            this.Write(extendedHeader.pointMaterial);
+            this.Write(extendedHeader.pointRadius);
+            this.Write(extendedHeader.materialCount);
+            this.Write(extendedHeader.shadowNameLength0);
+            this.Write(extendedHeader.shadowNameLength1);
+            this.Write(extendedHeader.shadowNameLength2);
+            this.Write(extendedHeader.animTime);
+            this.Write(extendedHeader.materialLibraryTimestamp);
+            //writer.Write((Int16)0);
+            this.Write(extendedHeader.unknown09e);
+            this.Write(extendedHeader.exportedScaleFactor);
+            this.Write(extendedHeader.nonUniformKeyCount);
+            this.Write(extendedHeader.uniqueMaterialCount);
+        }
+        public void WriteUserDataEntry(ref BrgUserDataEntry dataEntry, bool isParticle)
+        {
+            this.Write(dataEntry.dataNameLength);
+            this.Write(dataEntry.dataType);
+            switch (dataEntry.dataType)
+            {
+                case 1:
+                    this.Write((Int32)dataEntry.data);
+                    this.WriteString(dataEntry.dataName, 0);
+                    break;
+                case 2:
+                    this.Write((Int32)dataEntry.data);
+                    this.WriteString(dataEntry.dataName, 0);
+                    break;
+                case 3:
+                    this.Write((Single)dataEntry.data);
+                    this.WriteString(dataEntry.dataName, 0);
+                    break;
+                default:
+                    this.Write((Int32)dataEntry.data);
+                    this.WriteString(dataEntry.dataName, 0);
+                    break;
+            }
         }
 
         #region Vector3
@@ -2290,6 +2558,13 @@ namespace AoMEngineLibrary
             byte[] f = EndianBitConverter.Little.GetBytes(half);
             this.Write(f[2]);
             this.Write(f[3]);
+        }
+        public void WriteVertexColor(ref VertexColor vertexColor)
+        {
+            this.Write(vertexColor.R);
+            this.Write(vertexColor.G);
+            this.Write(vertexColor.B);
+            this.Write(vertexColor.A);
         }
         public void WriteString(string str)
         {

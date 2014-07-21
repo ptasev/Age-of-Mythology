@@ -68,9 +68,13 @@
             this.genMeshFlagsCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.genDataPanel = new System.Windows.Forms.Panel();
             this.generalDataGroupBox = new System.Windows.Forms.GroupBox();
+            this.numFacesLabel = new System.Windows.Forms.Label();
+            this.numFacesMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.numVertsLabel = new System.Windows.Forms.Label();
+            this.numVertsMaxTextBox = new MaxCustomControls.MaxTextBox();
             this.updateSettingsButton = new System.Windows.Forms.Button();
-            this.u091MaxTextBox = new MaxCustomControls.MaxTextBox();
-            this.u091Label = new System.Windows.Forms.Label();
+            this.interpolationTypeMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.interpolationTypeLabel = new System.Windows.Forms.Label();
             this.animTimeMaxTextBox = new MaxCustomControls.MaxTextBox();
             this.animTimeLabel = new System.Windows.Forms.Label();
             this.numMatMaxTextBox = new MaxCustomControls.MaxTextBox();
@@ -86,10 +90,6 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.numVertsLabel = new System.Windows.Forms.Label();
-            this.numVertsMaxTextBox = new MaxCustomControls.MaxTextBox();
-            this.numFacesLabel = new System.Windows.Forms.Label();
-            this.numFacesMaxTextBox = new MaxCustomControls.MaxTextBox();
             this.materialPanel.SuspendLayout();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
@@ -313,7 +313,7 @@
             // 
             // timeMultMaxTextBox
             // 
-            this.timeMultMaxTextBox.Location = new System.Drawing.Point(66, 143);
+            this.timeMultMaxTextBox.Location = new System.Drawing.Point(76, 143);
             this.timeMultMaxTextBox.Name = "timeMultMaxTextBox";
             this.timeMultMaxTextBox.Size = new System.Drawing.Size(87, 20);
             this.timeMultMaxTextBox.TabIndex = 11;
@@ -323,13 +323,13 @@
             this.timeMultLabel.AutoSize = true;
             this.timeMultLabel.Location = new System.Drawing.Point(3, 146);
             this.timeMultLabel.Name = "timeMultLabel";
-            this.timeMultLabel.Size = new System.Drawing.Size(53, 13);
+            this.timeMultLabel.Size = new System.Drawing.Size(67, 13);
             this.timeMultLabel.TabIndex = 10;
-            this.timeMultLabel.Text = "Time Mult";
+            this.timeMultLabel.Text = "Export Scale";
             // 
             // liuMaxTextBox
             // 
-            this.liuMaxTextBox.Location = new System.Drawing.Point(66, 195);
+            this.liuMaxTextBox.Location = new System.Drawing.Point(76, 195);
             this.liuMaxTextBox.Name = "liuMaxTextBox";
             this.liuMaxTextBox.ReadOnly = true;
             this.liuMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -481,8 +481,8 @@
             this.generalDataGroupBox.Controls.Add(this.timeMultLabel);
             this.generalDataGroupBox.Controls.Add(this.liuMaxTextBox);
             this.generalDataGroupBox.Controls.Add(this.liuLabel);
-            this.generalDataGroupBox.Controls.Add(this.u091MaxTextBox);
-            this.generalDataGroupBox.Controls.Add(this.u091Label);
+            this.generalDataGroupBox.Controls.Add(this.interpolationTypeMaxTextBox);
+            this.generalDataGroupBox.Controls.Add(this.interpolationTypeLabel);
             this.generalDataGroupBox.Controls.Add(this.animTimeMaxTextBox);
             this.generalDataGroupBox.Controls.Add(this.animTimeLabel);
             this.generalDataGroupBox.Controls.Add(this.numMatMaxTextBox);
@@ -497,6 +497,40 @@
             this.generalDataGroupBox.TabStop = false;
             this.generalDataGroupBox.Text = "Data";
             // 
+            // numFacesLabel
+            // 
+            this.numFacesLabel.AutoSize = true;
+            this.numFacesLabel.Location = new System.Drawing.Point(3, 42);
+            this.numFacesLabel.Name = "numFacesLabel";
+            this.numFacesLabel.Size = new System.Drawing.Size(46, 13);
+            this.numFacesLabel.TabIndex = 16;
+            this.numFacesLabel.Text = "# Faces";
+            // 
+            // numFacesMaxTextBox
+            // 
+            this.numFacesMaxTextBox.Location = new System.Drawing.Point(76, 39);
+            this.numFacesMaxTextBox.Name = "numFacesMaxTextBox";
+            this.numFacesMaxTextBox.ReadOnly = true;
+            this.numFacesMaxTextBox.Size = new System.Drawing.Size(87, 20);
+            this.numFacesMaxTextBox.TabIndex = 15;
+            // 
+            // numVertsLabel
+            // 
+            this.numVertsLabel.AutoSize = true;
+            this.numVertsLabel.Location = new System.Drawing.Point(3, 16);
+            this.numVertsLabel.Name = "numVertsLabel";
+            this.numVertsLabel.Size = new System.Drawing.Size(41, 13);
+            this.numVertsLabel.TabIndex = 14;
+            this.numVertsLabel.Text = "# Verts";
+            // 
+            // numVertsMaxTextBox
+            // 
+            this.numVertsMaxTextBox.Location = new System.Drawing.Point(76, 13);
+            this.numVertsMaxTextBox.Name = "numVertsMaxTextBox";
+            this.numVertsMaxTextBox.ReadOnly = true;
+            this.numVertsMaxTextBox.Size = new System.Drawing.Size(87, 20);
+            this.numVertsMaxTextBox.TabIndex = 13;
+            // 
             // updateSettingsButton
             // 
             this.updateSettingsButton.Location = new System.Drawing.Point(3, 230);
@@ -507,25 +541,25 @@
             this.updateSettingsButton.UseVisualStyleBackColor = true;
             this.updateSettingsButton.Click += new System.EventHandler(this.updateSettingsButton_Click);
             // 
-            // u091MaxTextBox
+            // interpolationTypeMaxTextBox
             // 
-            this.u091MaxTextBox.Location = new System.Drawing.Point(66, 169);
-            this.u091MaxTextBox.Name = "u091MaxTextBox";
-            this.u091MaxTextBox.Size = new System.Drawing.Size(87, 20);
-            this.u091MaxTextBox.TabIndex = 7;
+            this.interpolationTypeMaxTextBox.Location = new System.Drawing.Point(76, 169);
+            this.interpolationTypeMaxTextBox.Name = "interpolationTypeMaxTextBox";
+            this.interpolationTypeMaxTextBox.Size = new System.Drawing.Size(87, 20);
+            this.interpolationTypeMaxTextBox.TabIndex = 7;
             // 
-            // u091Label
+            // interpolationTypeLabel
             // 
-            this.u091Label.AutoSize = true;
-            this.u091Label.Location = new System.Drawing.Point(3, 172);
-            this.u091Label.Name = "u091Label";
-            this.u091Label.Size = new System.Drawing.Size(33, 13);
-            this.u091Label.TabIndex = 6;
-            this.u091Label.Text = "U091";
+            this.interpolationTypeLabel.AutoSize = true;
+            this.interpolationTypeLabel.Location = new System.Drawing.Point(3, 172);
+            this.interpolationTypeLabel.Name = "interpolationTypeLabel";
+            this.interpolationTypeLabel.Size = new System.Drawing.Size(65, 13);
+            this.interpolationTypeLabel.TabIndex = 6;
+            this.interpolationTypeLabel.Text = "Interpolation";
             // 
             // animTimeMaxTextBox
             // 
-            this.animTimeMaxTextBox.Location = new System.Drawing.Point(66, 117);
+            this.animTimeMaxTextBox.Location = new System.Drawing.Point(76, 117);
             this.animTimeMaxTextBox.Name = "animTimeMaxTextBox";
             this.animTimeMaxTextBox.ReadOnly = true;
             this.animTimeMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -542,7 +576,7 @@
             // 
             // numMatMaxTextBox
             // 
-            this.numMatMaxTextBox.Location = new System.Drawing.Point(66, 91);
+            this.numMatMaxTextBox.Location = new System.Drawing.Point(76, 91);
             this.numMatMaxTextBox.Name = "numMatMaxTextBox";
             this.numMatMaxTextBox.ReadOnly = true;
             this.numMatMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -568,7 +602,7 @@
             // 
             // numMeshMaxTextBox
             // 
-            this.numMeshMaxTextBox.Location = new System.Drawing.Point(66, 65);
+            this.numMeshMaxTextBox.Location = new System.Drawing.Point(76, 65);
             this.numMeshMaxTextBox.Name = "numMeshMaxTextBox";
             this.numMeshMaxTextBox.ReadOnly = true;
             this.numMeshMaxTextBox.Size = new System.Drawing.Size(87, 20);
@@ -652,40 +686,6 @@
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
-            // numVertsLabel
-            // 
-            this.numVertsLabel.AutoSize = true;
-            this.numVertsLabel.Location = new System.Drawing.Point(3, 16);
-            this.numVertsLabel.Name = "numVertsLabel";
-            this.numVertsLabel.Size = new System.Drawing.Size(41, 13);
-            this.numVertsLabel.TabIndex = 14;
-            this.numVertsLabel.Text = "# Verts";
-            // 
-            // numVertsMaxTextBox
-            // 
-            this.numVertsMaxTextBox.Location = new System.Drawing.Point(66, 13);
-            this.numVertsMaxTextBox.Name = "numVertsMaxTextBox";
-            this.numVertsMaxTextBox.ReadOnly = true;
-            this.numVertsMaxTextBox.Size = new System.Drawing.Size(87, 20);
-            this.numVertsMaxTextBox.TabIndex = 13;
-            // 
-            // numFacesLabel
-            // 
-            this.numFacesLabel.AutoSize = true;
-            this.numFacesLabel.Location = new System.Drawing.Point(3, 42);
-            this.numFacesLabel.Name = "numFacesLabel";
-            this.numFacesLabel.Size = new System.Drawing.Size(46, 13);
-            this.numFacesLabel.TabIndex = 16;
-            this.numFacesLabel.Text = "# Faces";
-            // 
-            // numFacesMaxTextBox
-            // 
-            this.numFacesMaxTextBox.Location = new System.Drawing.Point(66, 39);
-            this.numFacesMaxTextBox.Name = "numFacesMaxTextBox";
-            this.numFacesMaxTextBox.ReadOnly = true;
-            this.numFacesMaxTextBox.Size = new System.Drawing.Size(87, 20);
-            this.numFacesMaxTextBox.TabIndex = 15;
-            // 
             // MaxPluginForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -759,8 +759,8 @@
         private System.Windows.Forms.CheckedListBox genMeshFlagsCheckedListBox;
         private System.Windows.Forms.Panel genDataPanel;
         private System.Windows.Forms.GroupBox generalDataGroupBox;
-        private MaxCustomControls.MaxTextBox u091MaxTextBox;
-        private System.Windows.Forms.Label u091Label;
+        private MaxCustomControls.MaxTextBox interpolationTypeMaxTextBox;
+        private System.Windows.Forms.Label interpolationTypeLabel;
         private MaxCustomControls.MaxTextBox animTimeMaxTextBox;
         private System.Windows.Forms.Label animTimeLabel;
         private MaxCustomControls.MaxTextBox numMatMaxTextBox;

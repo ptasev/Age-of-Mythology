@@ -1,4 +1,4 @@
 Age-of-Mythology
 ================
 
-NOTE: You will need miscutil if you want to build the project. Search google
+NOTE: You will need MiscUtil and PowerCollections if you want to build the project. Search google
