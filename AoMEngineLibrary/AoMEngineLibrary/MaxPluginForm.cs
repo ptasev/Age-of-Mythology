@@ -22,6 +22,7 @@ namespace AoMEngineLibrary
             private static string fileName = Application.StartupPath + "\\AoMEngineLibraryPluginSettings.xml";
             public static string OpenFileDialogFileName;
             public static string SaveFileDialogFileName;
+            public static string MtrlFolderDialogDirectory;
 
             public static void Read()
             {
@@ -44,6 +45,10 @@ namespace AoMEngineLibrary
                             else if (elem.Name == "defaultSaveDirectory")
                             {
                                 SaveFileDialogFileName = elem.InnerText;
+                            }
+                            else if (elem.Name == "defaultMtrlSaveDirectory")
+                            {
+                                MtrlFolderDialogDirectory = elem.InnerText;
                             }
                         }
                     }
@@ -402,14 +407,14 @@ namespace AoMEngineLibrary
             }
 
             //saveFileDialog.FileName = "archerTest.brg";
-            if (openFileDialog.FileName != string.Empty)
-            {
-                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
-                saveFileDialog.InitialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
-            }
             if (!string.IsNullOrEmpty(Settings.SaveFileDialogFileName))
             {
                 saveFileDialog.InitialDirectory = Settings.SaveFileDialogFileName;
+            }
+            else if (!string.IsNullOrEmpty(file.FileName))
+            {
+                saveFileDialog.FileName = Path.GetFileNameWithoutExtension(file.FileName);
+                saveFileDialog.InitialDirectory = Path.GetDirectoryName(file.FileName);
             }
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
@@ -478,6 +483,31 @@ namespace AoMEngineLibrary
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, "ABE", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void extractMTRLFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (file == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(Settings.MtrlFolderDialogDirectory))
+            {
+                folderBrowserDialog.SelectedPath = Settings.MtrlFolderDialogDirectory;
+            }
+            else if (!string.IsNullOrEmpty(file.FileName))
+            {
+                folderBrowserDialog.SelectedPath = Path.GetDirectoryName(file.FileName);
+            }
+
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                for (int i = 0; i < file.Material.Count; i++)
+                {
+                    file.Material[i].WriteExternal(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(file.FileName)) + "_" + i + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read));
+                }
             }
         }
         #endregion

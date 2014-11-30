@@ -414,7 +414,6 @@ namespace AoMEngineLibrary
         public static string Command(string command, params object[] args)
         {
             string formatCommand = MaxscriptSDK.AssembleScript(command, args);
-            //string formatCommand = String.Format(command, args);
             if (Execute)
             {
                 MaxscriptSDK.ExecuteMaxscriptCommand(formatCommand);
@@ -429,6 +428,7 @@ namespace AoMEngineLibrary
 
     public class BrgFile
     {
+        public string FileName;
         public MaxPluginForm ParentForm;
 
         public BrgHeader Header;
@@ -436,15 +436,16 @@ namespace AoMEngineLibrary
         public List<BrgMesh> Mesh;
         public List<BrgMaterial> Material;
 
-        public BrgFile(System.IO.Stream fileStream, MaxPluginForm form)
+        public BrgFile(System.IO.FileStream fileStream, MaxPluginForm form)
             : this(fileStream)
         {
             ParentForm = form;
         }
-        public BrgFile(System.IO.Stream fileStream)
+        public BrgFile(System.IO.FileStream fileStream)
         {
             using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), fileStream))
             {
+                FileName = fileStream.Name;
                 string magic = reader.ReadString(4);
                 if (magic != "BANG")
                 {
@@ -508,6 +509,7 @@ namespace AoMEngineLibrary
         }
         public BrgFile(MaxPluginForm form) 
         {
+            FileName = string.Empty;
             ParentForm = form;
             Header.unknown03 = 1999922179;
 
@@ -515,10 +517,11 @@ namespace AoMEngineLibrary
             Material = new List<BrgMaterial>();
         }
 
-        public void Write(System.IO.Stream fileStream)
+        public void Write(System.IO.FileStream fileStream)
         {
             using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), fileStream))
             {
+                FileName = fileStream.Name;
                 writer.Write(1196310850); // magic "BANG"
 
                 Header.numMeshes = Mesh.Count;
@@ -572,9 +575,6 @@ namespace AoMEngineLibrary
 
                     for (int j = 0; j < Mesh[i].vertices.Length; j++)
                     {
-                        //Vector3<float> movePos = Mesh[i].vertices[j] - Mesh[i - 1].vertices[j];
-                        //string moveVector = MaxHelper.NewPoint3<float>("moveVector", -movePos.X, -movePos.Z, movePos.Y);
-                        //string moveVector = MaxHelper.NewPoint3<float>("moveVector", -Mesh[i].vertices[j].X, -Mesh[i].vertices[j].Z, Mesh[i].vertices[j].Y);
                         Maxscript.AnimateAtTime(time, "meshOp.setVert {0} {1} {2}", mainObject, j + 1, Maxscript.NewPoint3Literal<float>(-Mesh[i].vertices[j].X, -Mesh[i].vertices[j].Z, Mesh[i].vertices[j].Y));
                         Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, j + 1, Maxscript.NewPoint3Literal<float>(-Mesh[i].normals[j].X, -Mesh[i].normals[j].Z, Mesh[i].normals[j].Y));
 
@@ -583,11 +583,6 @@ namespace AoMEngineLibrary
                         {
                             if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                             {
-                                //string tVertVector = MaxHelper.NewPoint3<float>("tVertVector", Mesh[i].texVertices[j].X, Mesh[i].texVertices[j].Y, 0);
-                                //MaxHelper.Execute = false;
-                                //string tVertCommand = MaxHelper.Command("setTVert {0}.mesh {1} {2}", mainObject, j + 1, tVertVector);
-                                //MaxHelper.Execute = true;
-                                //MaxHelper.AnimateAtTime(time, tVertCommand);
                                 Maxscript.Animate("{0}.Unwrap_UVW.SetVertexPosition {1}s {2} {3}", mainObject, time, j + 1, Maxscript.NewPoint3Literal<float>(Mesh[i].texVertices[j].X, Mesh[i].texVertices[j].Y, 0));
                             }
                         }
@@ -596,17 +591,30 @@ namespace AoMEngineLibrary
                     foreach (BrgAttachpoint att in Mesh[i].Attachpoint)
                     {
                         Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
-                        Maxscript.Command("with animate on (at time {0}s (attachpoint.rotation = {1}))", time, att.GetMaxTransform());
-                        Maxscript.Command("with animate on (at time {0}s (attachpoint.position = {1}))", time, att.GetMaxPosition());
-                        Maxscript.Command("with animate on (at time {0}s (attachpoint.scale = {1}))", time, att.GetMaxScale());
+                        Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
+                        Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
+                        Maxscript.AnimateAtTime(time, "attachpoint.scale = {0}", att.GetMaxScale());
                     }
 
-                    //Maxscript.Command("{0}.center.x = {1}", mainObject, -Mesh[i].centerPos.X);
-                    //Maxscript.Command("{0}.center.y = {1}", mainObject, -Mesh[i].centerPos.Z);
-                    //Maxscript.Command("{0}.center.z = {1}", mainObject, Mesh[i].centerPos.Y);
+                    if (((Mesh[i].header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || Mesh[i].header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !Mesh[i].header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                        || Mesh[i].header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+                    {
+                        for (int j = 0; j < Mesh[j].vertexColors.Length; j++)
+                        {
+                            if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
+                            {
+                                Maxscript.AnimateAtTime(time, "meshop.setVertAlpha {0} -2 {1} {2}", mainObject, j + 1, Mesh[i].vertexColors[j].A);
+                            }
+                            else
+                            {
+                                Maxscript.AnimateAtTime(time, "meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, j + 1, Mesh[i].vertexColors[j].R, Mesh[i].vertexColors[j].G, Mesh[i].vertexColors[j].B);
+                            }
+                        }
+                    }
                 }
 
                 // Still can't figure out why it updates/overwrites normals ( geometry:false topology:false)
+                // Seems like it was fixed in 3ds Max 2015 with setNormal command
                 Maxscript.Command("update {0} geometry:false topology:false normals:false", mainObject);
                 Maxscript.Command("select {0}", mainObject);
                 Maxscript.Command("max zoomext sel all");
@@ -1332,9 +1340,23 @@ namespace AoMEngineLibrary
             Maxscript.AnimateAtTime(ParentFile.GetFrameTime(0), Maxscript.NewMeshLiteral(mainObject, vertArray, normArray, faceArray, faceMats, texVerts));
             Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
 
-            //Maxscript.Command("{0}.center.x = {1}", mainObject, -centerPos.X);
-            //Maxscript.Command("{0}.center.y = {1}", mainObject, -centerPos.Z);
-            //Maxscript.Command("{0}.center.z = {1}", mainObject, centerPos.Y);
+            if (((header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                || header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            {
+                //Maxscript.Command("{0}.showVertexColors = true", mainObject);
+                for (int i = 0; i < vertexColors.Length; i++)
+                {
+                    if (header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
+                    {
+                        //Maxscript.Command("meshop.supportVAlphas {0}", mainObject);
+                        Maxscript.Command("meshop.setVertAlpha {0} -2 {1} {2}", mainObject, i + 1, vertexColors[i].A);
+                    }
+                    else
+                    {
+                        Maxscript.Command("meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1, vertexColors[i].R, vertexColors[i].G, vertexColors[i].B);
+                    }
+                }
+            }
 
             string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -header.groundPos.X, -header.groundPos.Z, header.groundPos.Y);
             Maxscript.Command("plane name:\"ground\" pos:{0} length:10 width:10", groundPlanePos);
@@ -1417,7 +1439,6 @@ namespace AoMEngineLibrary
                 vertexMask[vert2] = tVert2;
                 vertexMask[vert3] = tVert3;
             }
-            //System.Windows.Forms.MessageBox.Show("asdfasdf " + numFaces);
 
             //System.Windows.Forms.MessageBox.Show("1 " + numVertices);
             List<Vector3<float>> verticesList = new List<Vector3<float>>(numVertices);
@@ -1436,11 +1457,10 @@ namespace AoMEngineLibrary
                     verticesList.Add(new Vector3<float>(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
 
                     //System.Windows.Forms.MessageBox.Show("1.5");
+                    // Snapshot of Mesh recalculates normals, so do it based on time from the real object
                     Maxscript.SetVarAtTime(time, "normal", "normalize (getNormal {0} {1})", mainObject, i + 1);
-                    //Maxscript.Command("normal = normalize (getNormal {0} {1})", mainMesh, i + 1);
                     //System.Windows.Forms.MessageBox.Show("1.6");
                     normalsList.Add(new Vector3<float>(-Maxscript.QueryFloat("normal.x"), Maxscript.QueryFloat("normal.z"), -Maxscript.QueryFloat("normal.y")));
-                    //normalsList.Add(new Vector3<float>(Maxscript.QueryFloat("normal.x"), -Maxscript.QueryFloat("normal.z"), Maxscript.QueryFloat("normal.y")));
                     //System.Windows.Forms.MessageBox.Show("1.7");
                 }
             }
@@ -1503,15 +1523,12 @@ namespace AoMEngineLibrary
             }
 
             //System.Windows.Forms.MessageBox.Show("4");
-            //unknown091 = ParentFile.ParentForm.Unknown091;
-            //lastMaterialIndex = ParentFile.ParentForm.LastMaterialIndex;
             if (meshIndex == 0 && diffFaceMats.Count > 0)
             {
                 extendedHeader.materialCount = (byte)(diffFaceMats.Count - 1);
                 extendedHeader.uniqueMaterialCount = diffFaceMats.Count;
             }
             extendedHeader.animTime = (float)Maxscript.Query("animationRange.end.ticks / 4800 as float", Maxscript.QueryType.Float);
-            //animTimeMult = ParentFile.ParentForm.TimeMult;
 
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
             if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
@@ -1529,12 +1546,7 @@ namespace AoMEngineLibrary
                     Maxscript.SetVarAtTime(time, "{0}Position", "{0}[{1}].position", attachDummy, i + 1);
                     Maxscript.SetVarAtTime(time, "{0}Scale", "{0}[{1}].scale", attachDummy, i + 1);
                     //System.Windows.Forms.MessageBox.Show("5.3");
-                    //Maxscript.SetVarAtTime(time, "{0}BBMax", "{0}[{1}].max", attachDummy, i + 1);
-                    //Maxscript.SetVarAtTime(time, "{0}BBMin", "{0}[{1}].min", attachDummy, i + 1);
-                    //bBoxMax = new Vector3<float>(Maxscript.QueryFloat("{0}BBMax.X", attachDummy), Maxscript.QueryFloat("{0}BBMax.Y", attachDummy), Maxscript.QueryFloat("{0}BBMax.Z", attachDummy));
-                    //bBoxMin = new Vector3<float>(Maxscript.QueryFloat("{0}BBMin.X", attachDummy), Maxscript.QueryFloat("{0}BBMin.Y", attachDummy), Maxscript.QueryFloat("{0}BBMin.Z", attachDummy));
                     Vector3<float> scale = new Vector3<float>(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
-                    //bBox = (bBoxMax - bBoxMin) / 2;
                     bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
@@ -2038,11 +2050,29 @@ namespace AoMEngineLibrary
                 }
                 if (flags.HasFlag(BrgMatFlag.PLAYERCOLOR))
                 {
-                    Maxscript.Command("tex.filename = \"{0}\"", name + ".tga");
-                    Maxscript.Command("mat.bumpMap = tex");
+                    Maxscript.Command("pcCompTex = CompositeTextureMap()");
+
+                    Maxscript.Command("pcTex = BitmapTexture()");
+                    Maxscript.Command("pcTex.name = \"{0}\"", name);
+                    Maxscript.Command("pcTex.filename = \"{0}\"", name + ".tga");
+
+                    Maxscript.Command("pcTex2 = BitmapTexture()");
+                    Maxscript.Command("pcTex2.name = \"{0}\"", name);
+                    Maxscript.Command("pcTex2.filename = \"{0}\"", name + ".tga");
+                    Maxscript.Command("pcTex2.monoOutput = 1");
+
+                    Maxscript.Command("pcCheck = Checker()");
+                    Maxscript.Command("pcCheck.Color1 = color 0 0 255");
+                    Maxscript.Command("pcCheck.Color2 = color 0 0 255");
+
+                    Maxscript.Command("pcCompTex.mapList[1] = pcTex");
+                    Maxscript.Command("pcCompTex.mapList[2] = pcCheck");
+                    Maxscript.Command("pcCompTex.mask[2] = pcTex2");
+
+                    Maxscript.Command("mat.diffusemap = pcCompTex");
                 }
             }
-            if (flags.HasFlag(BrgMatFlag.DIFFUSETEXTURE))
+            if (flags.HasFlag(BrgMatFlag.DIFFUSETEXTURE) && !flags.HasFlag(BrgMatFlag.PLAYERCOLOR))
             {
                 //MaxHelper.Command("print {0}", name);
                 Maxscript.Command("tex.filename = \"{0}\"", name + ".tga");
@@ -2108,6 +2138,11 @@ namespace AoMEngineLibrary
                     flags |= BrgMatFlag.MATNONE25;
                 }
             }
+            else if (Maxscript.QueryBoolean("(classof mat.diffusemap) == CompositeTextureMap") && Maxscript.QueryBoolean("(classof mat.diffusemap.mapList[1]) == BitmapTexture"))
+            {
+                flags |= BrgMatFlag.MATNONE25 | BrgMatFlag.DIFFUSETEXTURE | BrgMatFlag.PLAYERCOLOR;
+                name = (string)Maxscript.Query("getFilenameFile(mat.diffusemap.mapList[1].filename)", Maxscript.QueryType.String);
+            }
         }
 
         public void Write(BrgBinaryWriter writer)
@@ -2144,6 +2179,64 @@ namespace AoMEngineLibrary
                     writer.Write(sfx[i].Id);
                     writer.WriteString(sfx[i].Name, 2);
                 }
+            }
+        }
+
+        public void WriteExternal(FileStream fileStream)
+        {
+            using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), fileStream))
+            {
+                writer.Write(1280463949); // MTRL
+                writer.Write(Encoding.UTF8.GetByteCount(name));
+
+                writer.Write(new byte[20]);
+
+                writer.WriteVector3(ref diffuse);
+                writer.WriteVector3(ref ambient);
+                writer.WriteVector3(ref specular);
+                writer.WriteVector3(ref selfIllum);
+                writer.Write(specularLevel);
+                writer.Write(alphaOpacity);
+
+                writer.Write(-1);
+                writer.Write(16777216);
+                writer.Write(65793);
+                writer.Write(10);
+                writer.Write(new byte[16]);
+
+                if (flags.HasFlag(BrgMatFlag.PLAYERCOLOR))
+                {
+                    writer.Write(4);
+                }
+                else
+                {
+                    writer.Write(0);
+                }
+
+                writer.Write(0);
+
+                if (flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
+                {
+                    writer.Write(1275068416);
+                    writer.Write(12);
+                    writer.Write(0);
+                    writer.Write(1);
+                }
+                else
+                {
+                    writer.Write(new byte[16]);
+                }
+
+                writer.Write(new byte[32]);
+                writer.Write(-1);
+                writer.Write(-1);
+                writer.Write(-1);
+                writer.Write(-1);
+                writer.Write(-1);
+                writer.Write(-1);
+                writer.Write(new byte[16]);
+
+                writer.WriteString(name);
             }
         }
 

@@ -1,0 +1,52 @@
+//--------------------------------------
+//--- 010 Editor v5.0 Binary Template
+//
+// File: mtrl.bt
+// Author: Petar Tasev
+// Revision: 1.0
+// Purpose: MTRL files from AoM:EE.
+//--------------------------------------
+LittleEndian();
+
+struct
+{
+    uint magic;
+    uint nameLength;
+    uint unk[5];    
+
+    float color[3];
+    float ambient[3];
+    float specular[3];
+    float selfIllumination[3];
+    float specularLevel;
+    float alpha;
+
+    int unk;
+    int unk;
+    int unk;
+    int unk; // Seems to be very often 10, wave has a 2 here, phoenix has 6
+
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+    int playerColor; // Val of 4 seems to be PC
+    int unk;
+    int sfx; // Has something to do with Cube Map
+    int sfx; // Has something to do with Cube Map
+    int unk;
+    int sfx; // Has something to do with Cube Map
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+
+    float unk2[3];
+    float unk3[3];
+    float unk4[4];
+    string name;
+} file;

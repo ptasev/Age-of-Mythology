@@ -90,6 +90,9 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.materialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.extractMTRLFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.materialPanel.SuspendLayout();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
@@ -643,7 +646,8 @@
             // mainMenuStrip
             // 
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.materialToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Size = new System.Drawing.Size(784, 24);
@@ -685,6 +689,21 @@
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // materialToolStripMenuItem
+            // 
+            this.materialToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.extractMTRLFilesToolStripMenuItem});
+            this.materialToolStripMenuItem.Name = "materialToolStripMenuItem";
+            this.materialToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
+            this.materialToolStripMenuItem.Text = "Material";
+            // 
+            // extractMTRLFilesToolStripMenuItem
+            // 
+            this.extractMTRLFilesToolStripMenuItem.Name = "extractMTRLFilesToolStripMenuItem";
+            this.extractMTRLFilesToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.extractMTRLFilesToolStripMenuItem.Text = "Extract MTRL Files";
+            this.extractMTRLFilesToolStripMenuItem.Click += new System.EventHandler(this.extractMTRLFilesToolStripMenuItem_Click);
             // 
             // MaxPluginForm
             // 
@@ -782,5 +801,8 @@
         private MaxCustomControls.MaxTextBox numFacesMaxTextBox;
         private System.Windows.Forms.Label numVertsLabel;
         private MaxCustomControls.MaxTextBox numVertsMaxTextBox;
+        private System.Windows.Forms.ToolStripMenuItem materialToolStripMenuItem;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+        private System.Windows.Forms.ToolStripMenuItem extractMTRLFilesToolStripMenuItem;
     }
 }

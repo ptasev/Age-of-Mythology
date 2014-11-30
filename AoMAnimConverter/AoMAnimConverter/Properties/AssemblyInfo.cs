@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AoM Engine Library")]
+[assembly: AssemblyTitle("AoMAnimConverter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Petar Tasev")]
-[assembly: AssemblyProduct("AoM Engine Library")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2014")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("AoMAnimConverter")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("dd0f7b49-ac5b-44e5-a80f-c5e5bb4c05a4")]
+[assembly: Guid("227516f6-8baf-491d-8d84-d08957153c5c")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("5.0.2014.0901")]
-[assembly: AssemblyFileVersion("5.0.2014.0901")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
