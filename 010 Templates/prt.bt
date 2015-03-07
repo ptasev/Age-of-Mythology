@@ -1,0 +1,223 @@
+//--------------------------------------
+//--- 010 Editor v5.0 Binary Template
+//
+// File:    prt.bt
+// Author:  Petar Tasev
+// Revision:1.0
+// Purpose: Highlight prt files from AoM game.
+//--------------------------------------
+LittleEndian();
+
+typedef char bool;
+
+struct PrtString
+{
+    uint32 StringLength;
+    char chars[StringLength*2];
+};
+
+struct {
+    int32 version;
+
+    struct {
+        bool TiedToEmitter;
+        bool IgnoreRotation;
+        bool EmitByMotion;
+        bool Loop;
+        bool InheritVelocity;
+        bool UseMinVelocity;
+        bool UseMaxVelocity;
+        bool AlwaysActive;
+        bool SyncWithAttackAnim;
+        byte padding[3];
+        int32 MaxParticles;
+        int32 AppearanceType;
+        float UpdateRadius;
+        float MaxParticlesVar;
+        float ParticleLife;
+        float ParticleLifeVar;
+        float GlobalFadeIn;
+        float GlobalFadeInVar;
+        float GlobalFadeOut;
+        float GlobalFadeOutVar;
+        float EmitDistance;
+        float EmitDistanceVar;
+        float EmissionRate;
+        float EmissionRateVar;
+        float InitialDormancy;
+        float InitialDormancyVar;
+        float InitialUpdate;
+        float InitialUpdateVar;
+        float EmissionTime;
+        float EmissionTimeVar;
+        float DormantTime;
+        float DormantTimeVar;
+        float InitialDistance;
+        float InitialDistanceVar;
+        float InitialVelocity;
+        float InitialVelocityVar;
+        float Acceleration;
+        float AccelerationVar;
+        float InheritInfluence;
+        float InheritInfluenceVar;
+        float MinVelocity;
+        float MinVelocityVar;
+        float MaxVelocity;
+        float MaxVelocityVar;
+    } Emitter;
+
+    struct {
+        bool StartFull;
+        bool EmitAwayFromBias;
+        bool UseSpreader;
+        byte padding;
+        int32 ShapeType;
+        float OuterXRadius;
+        float InnerXRadius;
+        float OuterYRadius;
+        float InnerYRadius;
+        float OuterZRadius;
+        float InnerZRadius;
+        float CenterHeight;
+        float OffAxis;
+        float OffAxisSpread;
+        float OffPlane;
+        float OffPlaneSpread;
+        float BiasPointHeight;
+    } Shape;
+
+    struct {
+        bool OrientByMotion;
+        byte padding[3];
+        int32 NumFiles;
+        int32 NumFrames;
+        int32 FrameWidth;
+        int32 FrameHeight;
+        int32 MaterialType;
+        uint32 Emissive;
+        uint32 Specular;
+        float SpecularExponent;
+        float FramesPerSecond;
+        float AnimationRate;
+        float AnimationRateVar;
+    } Appearance;
+
+    struct {
+        bool LoopingCycle;
+        byte padding[3];
+        int32 NumStages;
+        float Opacity;
+        float OpacityVar;
+        float CycleTime;
+        float CycleTimeVar;
+    } Opacity;
+
+    struct {
+        bool LoopingCycle;
+        byte padding[3];
+        int32 NumStages;
+        float Scale;
+        float ScaleVar;
+        float XScale;
+        float XScaleVar;
+        float YScale;
+        float YScaleVar;
+        float ZScale;
+        float ZScaleVar;
+        float CycleTime;
+        float CycleTimeVar;
+    } Scale;
+
+    struct {
+        bool UsePalette;
+        bool LoopingCycle;
+        byte padding[2];
+        int32 NumPaletteColors;
+        int32 NumStages;
+        float CycleTime;
+        float CycleTimeVar;
+        float WorldLightingInfluence;
+        uint32 Color;
+    } Color;
+
+    struct {
+        bool RandomOrientation;
+        bool Tumble;
+        bool TumbleBothDirections;
+        bool RandomAxis;
+        float InternalGravity;
+        float InternalGravityVar;
+        float InternalWindDirection;
+        float InternalWindDirectionVar;
+        float InternalWindSpeed;
+        float InternalWindSpeedVar;
+        float InternalWindDelay;
+        float InternalWindDelayVar;
+        float ExternalWindInfluence;
+        float ExternalWindInfluenceVar;
+        float ExternalWindDelay;
+        float ExternalWindDelayVar;
+        float MinAngularVelocity;
+        float MaxAngularVelocity;
+        float XAxis;
+        float XAxisVar;
+        float YAxis;
+        float YAxisVar;
+        float ZAxis;
+        float ZAxisVar;
+    } Forces;
+
+    struct {
+        int32 NumTypes;
+        int32 TerrainInteractionType;
+        float TerrainHeight;
+        float TerrainHeightVar;
+    } Collision;
+
+    struct PrtString BrgFilename;
+
+    uint32 PaletteColors[Color.NumPaletteColors];
+
+    float AppearanceWeights[Appearance.NumFiles];
+
+    struct PrtString AppearanceFiles[Appearance.NumFiles] <optimize=false>;
+
+    struct PSOpacityStage {
+        float Opacity;
+        float OpacityVar;
+        float Hold;
+        float Fade;
+    } OpacityStages[Opacity.NumStages];
+
+    struct PSScaleStage {
+        float Scale;
+        float ScaleVar;
+        float Hold;
+        float Fade;
+    } ScaleStages[Scale.NumStages];
+
+    struct PSColorStage {
+        bool UsePalette;
+        byte padding[3];
+        uint32 Color;
+        float Hold;
+        float Fade;
+    } ColorStages[Color.NumStages];
+
+    struct {
+        bool SpawnSystem;
+        bool CollideTerrain;
+        bool CollideWater;
+        bool CollideUnits;
+        int32 Result;
+        int32 NumFileNames;
+        float LingerTime;
+        float LingerTimeVar;
+        float FadeTime;
+        float FadeTimeVar;
+        float EnergyLoss;
+        float EnergyLossVar;
+        struct PrtString Name;
+        struct PrtString FileNames[NumFileNames] <optimize=false>;
+    } Collisions[Collision.NumTypes] <optimize=false>;
+} file;
