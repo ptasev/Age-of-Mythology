@@ -8,13 +8,27 @@
 //--------------------------------------
 LittleEndian();
 
-typedef char bool;
+typedef ubyte bool;
 
 struct PrtString
 {
     uint32 StringLength;
-    char chars[StringLength*2];
+    wchar_t chars[StringLength];
 };
+
+typedef struct
+{
+    ubyte R;
+    ubyte G;
+    ubyte B;
+    ubyte A;
+} RGBAColor <read=ReadRGBAColor>;
+string ReadRGBAColor( RGBAColor &a )
+{
+    string s;
+    SPrintf( s, "#%02X%02X%02X%02X", (int)a.R, (int)a.G, (int)a.B, (int)a.A );
+    return s;
+}
 
 struct {
     int32 version;
@@ -94,8 +108,8 @@ struct {
         int32 FrameWidth;
         int32 FrameHeight;
         int32 MaterialType;
-        uint32 Emissive;
-        uint32 Specular;
+        RGBAColor Emissive;
+        RGBAColor Specular;
         float SpecularExponent;
         float FramesPerSecond;
         float AnimationRate;
@@ -137,7 +151,7 @@ struct {
         float CycleTime;
         float CycleTimeVar;
         float WorldLightingInfluence;
-        uint32 Color;
+        RGBAColor Color;
     } Color;
 
     struct {
@@ -182,29 +196,29 @@ struct {
 
     struct PrtString AppearanceFiles[Appearance.NumFiles] <optimize=false>;
 
-    struct PSOpacityStage {
+    struct OpacityStage {
         float Opacity;
         float OpacityVar;
         float Hold;
         float Fade;
     } OpacityStages[Opacity.NumStages];
 
-    struct PSScaleStage {
+    struct ScaleStage {
         float Scale;
         float ScaleVar;
         float Hold;
         float Fade;
     } ScaleStages[Scale.NumStages];
 
-    struct PSColorStage {
+    struct ColorStage {
         bool UsePalette;
         byte padding[3];
-        uint32 Color;
+        RGBAColor Color;
         float Hold;
         float Fade;
     } ColorStages[Color.NumStages];
 
-    struct {
+    struct CollisionType {
         bool SpawnSystem;
         bool CollideTerrain;
         bool CollideWater;

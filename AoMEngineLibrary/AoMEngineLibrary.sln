@@ -1,22 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMEngineLibrary", "AoMEngineLibrary\AoMEngineLibrary.csproj", "{6DBC106C-7292-4872-A41A-EB7CEEEF0092}"
 EndProject
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "3dsmax", "C:\Program Files\Autodesk\3ds Max 2014\3dsmax.exe", "{B91E88D6-CC67-4D49-9126-2B9D39A5255E}"
-	ProjectSection(DebuggerProjectSystem) = preProject
-		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\Program Files\Autodesk\3ds Max 2014\3dsmax.exe
-		RemoteMachine = RADON
-		StartingDirectory = C:\Program Files\Autodesk\3ds Max 2014
-		Environment = Default
-		LaunchingEngine = 00000000-0000-0000-0000-000000000000
-		UseLegacyDebugEngines = No
-		LaunchSQLEngine = No
-		AttachLaunchAction = No
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMPrtConverter", "..\AoMPrtConverter\AoMPrtConverter\AoMPrtConverter.csproj", "{8D7F764E-74F9-4AB0-AB09-299511BD5517}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,12 +27,16 @@ Global
 		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{6DBC106C-7292-4872-A41A-EB7CEEEF0092}.Release|x64.ActiveCfg = Release|Any CPU
-		{B91E88D6-CC67-4D49-9126-2B9D39A5255E}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{B91E88D6-CC67-4D49-9126-2B9D39A5255E}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
-		{B91E88D6-CC67-4D49-9126-2B9D39A5255E}.Debug|x64.ActiveCfg = Debug|x64
-		{B91E88D6-CC67-4D49-9126-2B9D39A5255E}.Release|Any CPU.ActiveCfg = Debug|x64
-		{B91E88D6-CC67-4D49-9126-2B9D39A5255E}.Release|Mixed Platforms.ActiveCfg = Debug|x64
-		{B91E88D6-CC67-4D49-9126-2B9D39A5255E}.Release|x64.ActiveCfg = Debug|x64
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8D7F764E-74F9-4AB0-AB09-299511BD5517}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
