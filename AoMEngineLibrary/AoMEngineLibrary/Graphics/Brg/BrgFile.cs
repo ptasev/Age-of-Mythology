@@ -6,52 +6,53 @@
 
     public class BrgFile
     {
-        public string FileName;
-        public MaxPluginForm ParentForm;
+        public string FileName { get; set; }
 
-        public BrgHeader Header;
-        public BrgAsetHeader AsetHeader;
-        public List<BrgMesh> Mesh;
-        public List<BrgMaterial> Material;
-
-        public BrgFile(System.IO.FileStream fileStream, MaxPluginForm form)
-            : this(fileStream)
+        public BrgHeader Header { get; set; }
+        public BrgAsetHeader AsetHeader { get; set; }
+        public List<BrgMesh> Meshes
         {
-            ParentForm = form;
+            get;
+            set;
         }
+        public List<BrgMaterial> Materials
+        {
+            get;
+            set;
+        }
+
         public BrgFile(System.IO.FileStream fileStream)
         {
             using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), fileStream))
             {
-                FileName = fileStream.Name;
-                string magic = reader.ReadString(4);
-                if (magic != "BANG")
+                this.FileName = fileStream.Name;
+                this.Header = new BrgHeader(reader);
+                if (this.Header.Magic != "BANG")
                 {
                     throw new Exception("This is not a BRG file!");
                 }
-                reader.ReadHeader(ref Header);
 
                 int asetCount = 0;
-                Mesh = new List<BrgMesh>(Header.numMeshes);
-                Material = new List<BrgMaterial>();
+                this.Meshes = new List<BrgMesh>(this.Header.NumMeshes);
+                this.Materials = new List<BrgMaterial>();
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
-                    magic = reader.ReadString(4);
+                    string magic = reader.ReadString(4);
                     if (magic == "ASET")
                     {
-                        reader.ReadAsetHeader(ref AsetHeader);
+                        this.AsetHeader = new BrgAsetHeader(reader);
                         ++asetCount;
                     }
                     else if (magic == "MESI")
                     {
-                        Mesh.Add(new BrgMesh(reader, this));
+                        this.Meshes.Add(new BrgMesh(reader, this));
                     }
                     else if (magic == "MTRL")
                     {
                         BrgMaterial mat = new BrgMaterial(reader, this);
                         if (!ContainsMaterialID(mat.id))
                         {
-                            Material.Add(mat);
+                            Materials.Add(mat);
                         }
                         else
                         {
@@ -66,15 +67,15 @@
 
                 if (asetCount > 1)
                 {
-                    throw new Exception("Multiple ASETs!");
+                    //throw new Exception("Multiple ASETs!");
                 }
 
-                if (Header.numMeshes < Mesh.Count)
+                if (Header.NumMeshes < Meshes.Count)
                 {
                     throw new Exception("Inconsistent mesh count!");
                 }
 
-                if (Header.numMaterials < Material.Count)
+                if (Header.NumMaterials < Materials.Count)
                 {
                     throw new Exception("Inconsistent material count!");
                 }
@@ -85,55 +86,54 @@
                 }
             }
         }
-        public BrgFile(MaxPluginForm form)
+        public BrgFile()
         {
-            FileName = string.Empty;
-            ParentForm = form;
-            Header.unknown03 = 1999922179;
+            this.FileName = string.Empty;
+            this.Header = new BrgHeader();
+            this.Header.Unknown03 = 1999922179;
+            this.AsetHeader = new BrgAsetHeader();
 
-            Mesh = new List<BrgMesh>();
-            Material = new List<BrgMaterial>();
+            this.Meshes = new List<BrgMesh>();
+            this.Materials = new List<BrgMaterial>();
         }
 
         public void Write(System.IO.FileStream fileStream)
         {
             using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), fileStream))
             {
-                FileName = fileStream.Name;
-                writer.Write(1196310850); // magic "BANG"
+                this.FileName = fileStream.Name;
 
-                Header.numMeshes = Mesh.Count;
-                Header.numMaterials = Material.Count;
-                Header.unknown03 = 1999922179;
-                writer.WriteHeader(ref Header);
+                this.Header.NumMeshes = this.Meshes.Count;
+                this.Header.NumMaterials = this.Materials.Count;
+                this.Header.Write(writer);
 
-                if (Header.numMeshes > 1)
+                if (this.Header.NumMeshes > 1)
                 {
                     updateAsetHeader();
                     writer.Write(1413829441); // magic "ASET"
-                    writer.WriteAsetHeader(ref AsetHeader);
+                    this.AsetHeader.Write(writer);
                 }
 
-                for (int i = 0; i < Mesh.Count; i++)
+                for (int i = 0; i < this.Meshes.Count; i++)
                 {
                     writer.Write(1230193997); // magic "MESI"
-                    Mesh[i].Write(writer);
+                    this.Meshes[i].Write(writer);
                 }
 
-                for (int i = 0; i < Material.Count; i++)
+                for (int i = 0; i < this.Materials.Count; i++)
                 {
                     writer.Write(1280463949); // magic "MTRL"
-                    Material[i].Write(writer);
+                    this.Materials[i].Write(writer);
                 }
             }
         }
 
         public void ExportToMax()
         {
-            if (Mesh.Count > 1)
+            if (Meshes.Count > 1)
             {
-                Maxscript.Command("frameRate = {0}", Math.Round(Mesh.Count / Mesh[0].extendedHeader.animTime));
-                Maxscript.Interval(0, Mesh[0].extendedHeader.animTime);
+                Maxscript.Command("frameRate = {0}", Math.Round(Meshes.Count / Meshes[0].ExtendedHeader.AnimationLength));
+                Maxscript.Interval(0, Meshes[0].ExtendedHeader.AnimationLength);
             }
             else
             {
@@ -141,54 +141,13 @@
                 Maxscript.Interval(0, 1);
             }
 
-            if (Mesh.Count > 0)
+            if (Meshes.Count > 0)
             {
-                string mainObject = Mesh[0].ExportToMax();
-                //string firstFrameObject = MaxHelper.SnapshotAsMesh("firstFrameObject", mainObject, 0);
-
-                for (int i = 1; i < Mesh.Count; i++)
+                string mainObject = "mainObj";
+                for (int i = 0; i < Meshes.Count; i++)
                 {
                     Maxscript.CommentTitle("ANIMATE FRAME " + i);
-                    float time = GetFrameTime(i);
-
-                    for (int j = 0; j < Mesh[i].vertices.Length; j++)
-                    {
-                        Maxscript.AnimateAtTime(time, "meshOp.setVert {0} {1} {2}", mainObject, j + 1, Maxscript.NewPoint3Literal<float>(-Mesh[i].vertices[j].X, -Mesh[i].vertices[j].Z, Mesh[i].vertices[j].Y));
-                        Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, j + 1, Maxscript.NewPoint3Literal<float>(-Mesh[i].normals[j].X, -Mesh[i].normals[j].Z, Mesh[i].normals[j].Y));
-
-                        // When NOTFIRSTMESH (i aleady starts from 1)
-                        if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
-                        {
-                            if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
-                            {
-                                Maxscript.Animate("{0}.Unwrap_UVW.SetVertexPosition {1}s {2} {3}", mainObject, time, j + 1, Maxscript.NewPoint3Literal<float>(Mesh[i].texVertices[j].X, Mesh[i].texVertices[j].Y, 0));
-                            }
-                        }
-                    }
-
-                    foreach (BrgAttachpoint att in Mesh[i].Attachpoint)
-                    {
-                        Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
-                        Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
-                        Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
-                        Maxscript.AnimateAtTime(time, "attachpoint.scale = {0}", att.GetMaxScale());
-                    }
-
-                    if (((Mesh[i].header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || Mesh[i].header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !Mesh[i].header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
-                        || Mesh[i].header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
-                    {
-                        for (int j = 0; j < Mesh[j].vertexColors.Length; j++)
-                        {
-                            if (Mesh[i].header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
-                            {
-                                Maxscript.AnimateAtTime(time, "meshop.setVertAlpha {0} -2 {1} {2}", mainObject, j + 1, Mesh[i].vertexColors[j].A);
-                            }
-                            else
-                            {
-                                Maxscript.AnimateAtTime(time, "meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, j + 1, Mesh[i].vertexColors[j].R, Mesh[i].vertexColors[j].G, Mesh[i].vertexColors[j].B);
-                            }
-                        }
-                    }
+                    this.Meshes[i].ExportToMax(mainObject, GetFrameTime(i));
                 }
 
                 // Still can't figure out why it updates/overwrites normals ( geometry:false topology:false)
@@ -197,20 +156,20 @@
                 Maxscript.Command("select {0}", mainObject);
                 Maxscript.Command("max zoomext sel all");
 
-                if (Material.Count > 0)
+                if (Materials.Count > 0)
                 {
                     Maxscript.CommentTitle("LOAD MATERIALS");
-                    Maxscript.Command("matGroup = multimaterial numsubs:{0}", Material.Count);
-                    for (int i = 0; i < Material.Count; i++)
+                    Maxscript.Command("matGroup = multimaterial numsubs:{0}", Materials.Count);
+                    for (int i = 0; i < Materials.Count; i++)
                     {
-                        Maxscript.Command("matGroup[{0}] = {1}", i + 1, Material[i].ExportToMax());
-                        Maxscript.Command("matGroup.materialIDList[{0}] = {1}", i + 1, Material[i].id);
+                        Maxscript.Command("matGroup[{0}] = {1}", i + 1, Materials[i].ExportToMax());
+                        Maxscript.Command("matGroup.materialIDList[{0}] = {1}", i + 1, Materials[i].id);
                     }
                     Maxscript.Command("{0}.material = matGroup", mainObject);
                 }
             }
         }
-        public void ImportFromMax(bool execute)
+        public void ImportFromMax(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType, float exportedScaleFactor)
         {
             string mainObject = "mainObject";
             Maxscript.Command("{0} = selection[1]", mainObject);
@@ -221,8 +180,9 @@
             }
 
             HashSet<float> keys = new HashSet<float>();
-            if (ParentForm.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
+            if (flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
+                Maxscript.Command("max modify mode");
                 int numTexKeys = Maxscript.QueryInteger("{0}.Unwrap_UVW[1].keys.count", mainObject);
                 for (int i = 0; i < numTexKeys; i++)
                 {
@@ -273,10 +233,10 @@
             {
                 keys.Add(Maxscript.QueryFloat("{0}.baseobject.mesh[1].keys[{1}].time as float", mainObject, i + 1) / 4800f);
             }
-            Header.numMeshes = keys.Count;
-            if (Header.numMeshes <= 0)
+            Header.NumMeshes = keys.Count;
+            if (Header.NumMeshes <= 0)
             {
-                Header.numMeshes = 1;
+                Header.NumMeshes = 1;
                 keys.Add(0);
             }
             List<float> keyTime = new List<float>(keys);
@@ -284,31 +244,32 @@
 
             //fixTverts(mainObject);
 
-            Header.numMaterials = (int)Maxscript.Query("{0}.material.materialList.count", Maxscript.QueryType.Integer, mainObject);
+            Header.NumMaterials = (int)Maxscript.Query("{0}.material.materialList.count", Maxscript.QueryType.Integer, mainObject);
             //System.Windows.Forms.MessageBox.Show(Header.numMeshes + " " + Header.numMaterials);
-            if (Header.numMaterials > 0)
+            if (Header.NumMaterials > 0)
             {
-                Material = new List<BrgMaterial>(Header.numMaterials);
-                for (int i = 0; i < Header.numMaterials; i++)
+                Materials = new List<BrgMaterial>(Header.NumMaterials);
+                for (int i = 0; i < Header.NumMaterials; i++)
                 {
-                    Material.Add(new BrgMaterial(this));
-                    Material[i].ImportFromMax(mainObject, i);
+                    Materials.Add(new BrgMaterial(this));
+                    Materials[i].ImportFromMax(mainObject, i);
                 }
             }
 
-            Mesh = new List<BrgMesh>(Header.numMeshes);
-            for (int i = 0; i < Header.numMeshes; i++)
+            Meshes = new List<BrgMesh>(Header.NumMeshes);
+            for (int i = 0; i < Header.NumMeshes; i++)
             {
-                Mesh.Add(new BrgMesh(this));
-                Mesh[i].ImportFromMax(mainObject, keyTime[i], i);
+                Meshes.Add(new BrgMesh(this));
+                this.UpdateMeshSettings(i, flags, format, animType, interpolationType, exportedScaleFactor);
+                Meshes[i].ImportFromMax(mainObject, keyTime[i]);
             }
 
-            if (Mesh[0].header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
+            if (Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
-                Mesh[0].animTimeAdjust = new float[Mesh.Count];
-                for (int i = 0; i < Mesh.Count; i++)
+                Meshes[0].NonUniformKeys = new float[Meshes.Count];
+                for (int i = 0; i < Meshes.Count; i++)
                 {
-                    Mesh[0].animTimeAdjust[i] = keyTime[i] / Mesh[0].extendedHeader.animTime;
+                    Meshes[0].NonUniformKeys[i] = keyTime[i] / Meshes[0].ExtendedHeader.AnimationLength;
                 }
             }
             updateAsetHeader();
@@ -369,15 +330,15 @@
 
         public float GetFrameTime(int meshIndex)
         {
-            if (Mesh[0].header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
+            if (Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
                 //System.Windows.Forms.MessageBox.Show("t1");
-                return Mesh[0].animTimeAdjust[meshIndex] * Mesh[0].extendedHeader.animTime;
+                return Meshes[0].NonUniformKeys[meshIndex] * Meshes[0].ExtendedHeader.AnimationLength;
             }
-            else if (Mesh.Count > 1)
+            else if (Meshes.Count > 1)
             {
                 //System.Windows.Forms.MessageBox.Show("t2");
-                return (float)meshIndex / ((float)Mesh.Count - 1f) * Mesh[0].extendedHeader.animTime;
+                return (float)meshIndex / ((float)Meshes.Count - 1f) * Meshes[0].ExtendedHeader.AnimationLength;
             }
             else
             {
@@ -387,9 +348,9 @@
         }
         public bool ContainsMaterialID(int id)
         {
-            for (int i = 0; i < Material.Count; i++)
+            for (int i = 0; i < Materials.Count; i++)
             {
-                if (Material[i].id == id)
+                if (Materials[i].id == id)
                 {
                     return true;
                 }
@@ -399,12 +360,33 @@
         }
         private void updateAsetHeader()
         {
-            AsetHeader.numFrames = Mesh.Count;
+            AsetHeader.numFrames = Meshes.Count;
             AsetHeader.frameStep = 1f / (float)AsetHeader.numFrames;
-            AsetHeader.animTime = Mesh[0].extendedHeader.animTime;
+            AsetHeader.animTime = Meshes[0].ExtendedHeader.AnimationLength;
             AsetHeader.frequency = 1f / (float)AsetHeader.animTime;
             AsetHeader.spf = AsetHeader.animTime / (float)AsetHeader.numFrames;
             AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
+        }
+
+        public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType, float exportedScaleFactor)
+        {
+            for (int i = 0; i < this.Meshes.Count; i++)
+            {
+                UpdateMeshSettings(i, flags, format, animType, interpolationType, exportedScaleFactor);
+            }
+        }
+        public void UpdateMeshSettings(int meshIndex, BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType, float exportedScaleFactor)
+        {
+            this.Meshes[meshIndex].Header.Flags = flags;
+            this.Meshes[meshIndex].Header.Format = format;
+            this.Meshes[meshIndex].Header.AnimationType = animType;
+            this.Meshes[meshIndex].Header.InterpolationType = interpolationType;
+            this.Meshes[meshIndex].ExtendedHeader.ExportedScaleFactor = exportedScaleFactor;
+            if (meshIndex > 0)
+            {
+                this.Meshes[meshIndex].Header.Flags |= BrgMeshFlag.SECONDARYMESH;
+                this.Meshes[meshIndex].Header.AnimationType &= ~BrgMeshAnimType.NONUNIFORM;
+            }
         }
     }
 }

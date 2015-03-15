@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AoMEngineLibrary;
+using AoMEngineLibrary.Graphics.Brg;
 
 namespace AoMBrgEditor
 {
@@ -48,6 +48,20 @@ namespace AoMBrgEditor
                 try
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORSNAP)))
+                    {
+                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
+                    }
+                    if (file.Materials.Count > 0)
+                    {
+                        foreach (BrgMaterial mat in file.Materials)
+                        {
+                            if (mat.flags.HasFlag(BrgMatFlag.MATNONE25))
+                            {
+                                //output += Path.GetFileName(s) + " " + mat.flags.ToString() + Environment.NewLine;
+                            }
+                        }
+                    }
                     //file.Write(File.Open(@"C:\Users\Petar\Desktop\modelsAlphaConv\" + Path.GetFileName(s), FileMode.Create, FileAccess.Write, FileShare.Read));
                 }
                 catch (Exception ex)
@@ -61,7 +75,7 @@ namespace AoMBrgEditor
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));//, new MaxPlugin());
                     //if ((file.Mesh[0].unknown09[6] != file.Mesh[0].unknown09d - 1) && (file.Material.Count - 1 != file.Mesh[0].unknown09[6]))
-                    if (file.Mesh[0].extendedHeader.nameLength == 4)
+                    if (file.Meshes[0].ExtendedHeader.NameLength == 4)
                     {
                         //output += Path.GetFileName(s) + Environment.NewLine;
                         //output += "\tu09[0] = " + file.Mesh[0].unknown09[0];
@@ -80,22 +94,22 @@ namespace AoMBrgEditor
                         output += "\tu09[7] = " + file.Mesh[0].animTime;
                         output += Environment.NewLine;
                     }*/
-                    if ((file.Mesh[0].extendedHeader.uniqueMaterialCount - 1 != file.Mesh[0].extendedHeader.materialCount))
+                    if ((file.Meshes[0].ExtendedHeader.NumUniqueMaterials - 1 != file.Meshes[0].ExtendedHeader.NumMaterials))
                     {
                         //output += Path.GetFileName(s) + Environment.NewLine;
                         //output += "\tu09[6] = " + file.Mesh[0].unknown09[6];
                     }
-                    for (int j = 0; j < file.Mesh.Count; j++)
+                    for (int j = 0; j < file.Meshes.Count; j++)
                     {
                         //ttt.Add(file.Mesh[j].unknown09[2]);
                     }
-                    if (file.Mesh.Count > 1 && (file.Mesh[0].header.format != file.Mesh[1].header.format))
+                    if (file.Meshes.Count > 1 && (file.Meshes[0].Header.Format != file.Meshes[1].Header.Format))
                     {
                         //output += Path.GetFileName(s) + Environment.NewLine;
                     }
-                    for (int j = 0; j < file.Mesh.Count; j++)
+                    for (int j = 0; j < file.Meshes.Count; j++)
                     {
-                        if (!ttt.Contains((int)file.Mesh[j].header.format))
+                        if (!ttt.Contains((int)file.Meshes[j].Header.Format))
                         {
                             //ttt.Add(file.Mesh[j].meshFormat2);
                         }
@@ -110,9 +124,9 @@ namespace AoMBrgEditor
                     if (true)
                     {
                         bool print = false;
-                        for (int i = 0; i < file.Mesh.Count; i++)
+                        for (int i = 0; i < file.Meshes.Count; i++)
                         {
-                            if ((uint)file.Mesh[0].header.properties != 256 && (uint)file.Mesh[0].header.properties != 1 && (uint)file.Mesh[0].header.properties != 0)
+                            if ((uint)file.Meshes[0].Header.AnimationType != 256 && (uint)file.Meshes[0].Header.AnimationType != 1 && (uint)file.Meshes[0].Header.AnimationType != 0)
                             {
                                 print = true;
                             }
@@ -121,17 +135,17 @@ namespace AoMBrgEditor
                         {
                             //MessageBox.Show("ttt");
                             output += Path.GetFileName(s);
-                            output += file.Mesh[0].header.properties + " ";
+                            output += file.Meshes[0].Header.AnimationType + " ";
                             //output += "\tu09[3] = " + file.Mesh[1].unknown09Unused + Environment.NewLine;
                             //output += "\tu10 = " + Convert.ToInt32(file.Mesh[0].unknown10)  + Environment.NewLine;
                         }
                         continue;
                         //output += Path.GetFileName(s) + Environment.NewLine;
                         output += "animTime = " + file.AsetHeader.animTime;
-                        output += "\tmeshCount = " + file.Mesh.Count;
+                        output += "\tmeshCount = " + file.Meshes.Count;
                         //output += "\tmeshFormat = " + file.Mesh[0].meshFormat;
-                        output += "\tunknown01b = " + file.Mesh[0].header.format;
-                        output += "\tunknown02 = " + file.Mesh[0].header.properties;
+                        output += "\tunknown01b = " + file.Meshes[0].Header.Format;
+                        output += "\tunknown02 = " + file.Meshes[0].Header.AnimationType;
                         //output += "\tu03[0] = " + file.Mesh[0].unknown03[0];
                         //output += "\tu03[1] = " + file.Mesh[0].unknown03[1];
                         //output += "\tu03[2] = " + file.Mesh[0].unknown03[2];
@@ -140,27 +154,27 @@ namespace AoMBrgEditor
                         //output += "\tu04[5] = " + file.Mesh[0].unknown04[5];
                         //output += "\tu09[0] = " + file.Mesh[0].numIndex0;
                         //output += "\tu09[1] = " + file.Mesh[0].numMatrix0;
-                        output += "\tu09[2] = " + file.Mesh[0].extendedHeader.nameLength;
-                        output += "\tu09[3] = " + file.Mesh[0].extendedHeader.pointRadius;
-                        output += "\taTime = " + Convert.ToString(file.Mesh[0].extendedHeader.animTime);
+                        output += "\tu09[2] = " + file.Meshes[0].ExtendedHeader.NameLength;
+                        output += "\tu09[3] = " + file.Meshes[0].ExtendedHeader.PointRadius;
+                        output += "\taTime = " + Convert.ToString(file.Meshes[0].ExtendedHeader.AnimationLength);
                         //output += "\tunknown09e = " + Convert.ToInt32(file.Mesh[0].unknown09e);
                         //output += "\tunknown09b = " + Convert.ToInt32(file.Mesh[0].unknown09b);
                         //output += "\tlenSpace = " + Convert.ToInt32(file.Mesh[0].lenSpace);
-                        output += "\tu09d = " + Convert.ToInt32(file.Mesh[0].extendedHeader.uniqueMaterialCount);
+                        output += "\tu09d = " + Convert.ToInt32(file.Meshes[0].ExtendedHeader.NumUniqueMaterials);
                         //output += "\tu10 = " + Convert.ToInt32(file.Mesh[0].unknown10);
-                        output += "\tflags = " + file.Mesh[0].header.flags;
+                        output += "\tflags = " + file.Meshes[0].Header.Flags;
                         output += Environment.NewLine;
                     }
                     // MATERIALS _______________________________________________________
-                    if (file.Material.Count > 50)
+                    if (file.Materials.Count > 50)
                     {
                         bool print = false;
-                        for (int j = 0; j < file.Material.Count; j++)
+                        for (int j = 0; j < file.Materials.Count; j++)
                         {
-                            ttt.Add((int)file.Material[j].flags);
+                            ttt.Add((int)file.Materials[j].flags);
                             //if (file.Material[j].flags.HasFlag(BrgMatFlag.MATTEX2))
                             //if (file.Material[j].flags.HasFlag(BrgMatFlag.REFLECTTEX) && file.Material[j].sfx.Count > 1)
-                            if ((((int)file.Material[j].flags & 0x000000FF) != (int)BrgMatFlag.DIFFUSETEXTURE) && (((int)file.Material[j].flags & 0x000000FF) == 0))
+                            if ((((int)file.Materials[j].flags & 0x000000FF) != (int)BrgMatFlag.DIFFUSETEXTURE) && (((int)file.Materials[j].flags & 0x000000FF) == 0))
                             //if ((int)file.Material[j].flags == 0x00800000)
                             //if ((int)file.Material[j].flags == 0x00800030)
                             //if ((int)file.Material[j].flags == 0x00800800)
@@ -186,18 +200,18 @@ namespace AoMBrgEditor
                             //if (file.Material[j].flags.HasFlag(BrgMatFlag.MATNONE8))
                             {
                                 print = true;
-                                output += "id = " + file.Material[j].id;
-                                output += "\tflags = " + file.Material[j].flags;
-                                output += "\tflags78 = " + ((int)file.Material[j].flags & 0x000000FF);
-                                output += "\tu01b = " + file.Material[j].unknown01b;
-                                output += "\tname = " + file.Material[j].name;
+                                output += "id = " + file.Materials[j].id;
+                                output += "\tflags = " + file.Materials[j].flags;
+                                output += "\tflags78 = " + ((int)file.Materials[j].flags & 0x000000FF);
+                                output += "\tu01b = " + file.Materials[j].unknown01b;
+                                output += "\tname = " + file.Materials[j].name;
                                 output += Environment.NewLine;
                             }
                         }
                         if (print)
                         {
                             output += Path.GetFileName(s);
-                            output += "\t" + file.Mesh[0].header.flags + Environment.NewLine;
+                            output += "\t" + file.Meshes[0].Header.Flags + Environment.NewLine;
                         }
                     }
                 }

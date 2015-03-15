@@ -58,7 +58,7 @@ namespace AoMEngineLibrary
             }
         }
 
-        public float TimeMult
+        public float ExportedScaleFactor
         {
             get
             {
@@ -70,13 +70,6 @@ namespace AoMEngineLibrary
             get
             {
                 return (byte)Int16.Parse(interpolationTypeMaxTextBox.Text);
-            }
-        }
-        public Int32 LastMaterialIndex
-        {
-            get
-            {
-                return Int32.Parse(liuMaxTextBox.Text);
             }
         }
         public BrgMeshFlag Flags
@@ -93,7 +86,7 @@ namespace AoMEngineLibrary
                 return getCheckedListBoxSelectedEnums<BrgMeshFormat>(genMeshFormatCheckedListBox);
             }
         }
-        public BrgMeshAnimType Properties
+        public BrgMeshAnimType AnimationType
         {
             get
             {
@@ -111,7 +104,6 @@ namespace AoMEngineLibrary
         public static CuiUpdater uiUp;
         BrgFile file;
         bool isExportedToMax;
-        //public MaxPlugin plugin;
 
         public MaxPluginForm()
         {
@@ -255,7 +247,7 @@ namespace AoMEngineLibrary
         {
             if (materialListBox.SelectedIndex >= 0)
             {
-                BrgMaterial mat = file.Material[materialListBox.SelectedIndex];
+                BrgMaterial mat = file.Materials[materialListBox.SelectedIndex];
                 // Update Info
                 diffuseMaxTextBox.BackColor = mat.DiffuseColor;
                 diffuseMaxTextBox.ForeColor = ContrastColor(diffuseMaxTextBox.BackColor);
@@ -352,7 +344,7 @@ namespace AoMEngineLibrary
         #region MainMenu
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            file = new BrgFile(this);
+            file = new BrgFile();
             loadUI();
             this.Text = "ABE - Untitled";
             isExportedToMax = true;
@@ -369,7 +361,7 @@ namespace AoMEngineLibrary
             {
                 try
                 {
-                    file = new BrgFile(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read), this);
+                    file = new BrgFile(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
                     //file.ExportToMax();
                     //debug();
 
@@ -436,22 +428,23 @@ namespace AoMEngineLibrary
                 return;
             }
 
+
+            DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
+            if (dlgR == DialogResult.Yes)
+            {
+                Maxscript.Command("resetMaxFile #noprompt");
+                //Maxscript.Command("if checkForSave() do resetMaxFile #noprompt");
+            }
+            else if (dlgR == DialogResult.Cancel)
+            {
+                return;
+            }
+
+            file.ExportToMax();
+            //debug();
+            isExportedToMax = true;
             try
             {
-                DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
-                if (dlgR == DialogResult.Yes)
-                {
-                    Maxscript.Command("resetMaxFile #noprompt");
-                    //Maxscript.Command("if checkForSave() do resetMaxFile #noprompt");
-                }
-                else if (dlgR == DialogResult.Cancel)
-                {
-                    return;
-                }
-
-                file.ExportToMax();
-                //debug();
-                isExportedToMax = true;
             }
             catch (Exception ex)
             {
@@ -471,7 +464,7 @@ namespace AoMEngineLibrary
             {
                 throw new Exception("No object selected!");
             }
-            file.ImportFromMax(true);
+            file.ImportFromMax(this.Flags, this.Format, this.AnimationType, this.InterpolationType, this.ExportedScaleFactor);
             loadUI();
             try
             {
@@ -500,9 +493,9 @@ namespace AoMEngineLibrary
 
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                for (int i = 0; i < file.Material.Count; i++)
+                for (int i = 0; i < file.Materials.Count; i++)
                 {
-                    file.Material[i].WriteExternal(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(file.FileName)) + "_" + i + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read));
+                    file.Materials[i].WriteExternal(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(file.FileName)) + "_" + i + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read));
                 }
             }
         }
@@ -517,13 +510,13 @@ namespace AoMEngineLibrary
             int index = attachpointListBox.IndexFromPoint(e.Location);
             if (index != System.Windows.Forms.ListBox.NoMatches && file != null)
             {
-                if (file.Mesh.Count == 0)
+                if (file.Meshes.Count == 0)
                 {
-                    file.Mesh.Add(new BrgMesh(file));
+                    file.Meshes.Add(new BrgMesh(file));
                 }
                 BrgAttachpoint att = new BrgAttachpoint();
                 att.NameId = BrgAttachpoint.GetIdByName((string)attachpointListBox.Items[index]);
-                file.Mesh[0].Attachpoint.Add(att);
+                file.Meshes[0].Attachpoints.Add(att);
                 //MessageBox.Show(file.Mesh[0].attachpoints.Count.ToString());
                 Maxscript.NewDummy("newDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
                 loadUIAttachpoint();
@@ -536,7 +529,7 @@ namespace AoMEngineLibrary
             {
                 return;
             }
-            if (attachpointComboBox.SelectedItem != null && file != null && file.Mesh.Count > 0)
+            if (attachpointComboBox.SelectedItem != null && file != null && file.Meshes.Count > 0)
             {
                 Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName());
                 if (Maxscript.QueryBoolean("selectDummy != undefined"))
@@ -549,7 +542,7 @@ namespace AoMEngineLibrary
                         MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                     if (dlgR == DialogResult.Yes)
                     {
-                        file.Mesh[0].Attachpoint.Remove(((BrgAttachpoint)attachpointComboBox.SelectedItem).Index);
+                        file.Meshes[0].Attachpoints.Remove(((BrgAttachpoint)attachpointComboBox.SelectedItem).Index);
                         loadUIAttachpoint();
                     }
                 }
@@ -559,7 +552,7 @@ namespace AoMEngineLibrary
         private void loadUIMaterial()
         {
             materialListBox.DataSource = null;
-            materialListBox.DataSource = file.Material;
+            materialListBox.DataSource = file.Materials;
             materialListBox.DisplayMember = "EditorName";
 
         }
@@ -568,7 +561,7 @@ namespace AoMEngineLibrary
             //attachpointComboBox.DataSource = null;
             //attachpointComboBox.DataSource = file.Mesh[0].attachpoints.Values;
             attachpointComboBox.Items.Clear();
-            foreach (BrgAttachpoint att in file.Mesh[0].Attachpoint)
+            foreach (BrgAttachpoint att in file.Meshes[0].Attachpoints)
             {
                 attachpointComboBox.Items.Add(att);
             }
@@ -583,24 +576,24 @@ namespace AoMEngineLibrary
             // General Info
             numVertsMaxTextBox.Text = "0";
             numFacesMaxTextBox.Text = "0";
-            numMeshMaxTextBox.Text = file.Mesh.Count.ToString();
-            numMatMaxTextBox.Text = file.Material.Count.ToString();
+            numMeshMaxTextBox.Text = file.Meshes.Count.ToString();
+            numMatMaxTextBox.Text = file.Materials.Count.ToString();
             animTimeMaxTextBox.Text = "0";
             timeMultMaxTextBox.Text = "1";
             interpolationTypeMaxTextBox.Text = "0";
             liuMaxTextBox.Text = "0";
             //MessageBox.Show("1");
 
-            if (file.Mesh.Count > 0)
+            if (file.Meshes.Count > 0)
             {
-                numVertsMaxTextBox.Text = file.Mesh[0].vertices.Length.ToString();
-                numFacesMaxTextBox.Text = file.Mesh[0].faceVertices.Length.ToString();
+                numVertsMaxTextBox.Text = file.Meshes[0].Vertices.Length.ToString();
+                numFacesMaxTextBox.Text = file.Meshes[0].FaceVertices.Length.ToString();
                 //MessageBox.Show("2.1");
-                animTimeMaxTextBox.Text = file.Mesh[0].extendedHeader.animTime.ToString();
-                timeMultMaxTextBox.Text = file.Mesh[0].extendedHeader.exportedScaleFactor.ToString();
+                animTimeMaxTextBox.Text = file.Meshes[0].ExtendedHeader.AnimationLength.ToString();
+                timeMultMaxTextBox.Text = file.Meshes[0].ExtendedHeader.ExportedScaleFactor.ToString();
                 //MessageBox.Show("2.2");
-                interpolationTypeMaxTextBox.Text = file.Mesh[0].header.interpolationType.ToString();
-                liuMaxTextBox.Text = file.Mesh[0].extendedHeader.materialCount.ToString();
+                interpolationTypeMaxTextBox.Text = file.Meshes[0].Header.InterpolationType.ToString();
+                liuMaxTextBox.Text = file.Meshes[0].ExtendedHeader.NumMaterials.ToString();
                 //MessageBox.Show("2.3");
 
                 // Attachpoints
@@ -608,7 +601,7 @@ namespace AoMEngineLibrary
 
                 for (int i = 0; i < genMeshFlagsCheckedListBox.Items.Count; i++)
                 {
-                    if (file.Mesh[0].header.flags.HasFlag((BrgMeshFlag)genMeshFlagsCheckedListBox.Items[i]))
+                    if (file.Meshes[0].Header.Flags.HasFlag((BrgMeshFlag)genMeshFlagsCheckedListBox.Items[i]))
                     {
                         genMeshFlagsCheckedListBox.SetItemChecked(i, true);
                     }
@@ -619,7 +612,7 @@ namespace AoMEngineLibrary
                 }
                 for (int i = 0; i < genMeshFormatCheckedListBox.Items.Count; i++)
                 {
-                    if (file.Mesh[0].header.format.HasFlag((BrgMeshFormat)genMeshFormatCheckedListBox.Items[i]))
+                    if (file.Meshes[0].Header.Format.HasFlag((BrgMeshFormat)genMeshFormatCheckedListBox.Items[i]))
                     {
                         genMeshFormatCheckedListBox.SetItemChecked(i, true);
                     }
@@ -630,7 +623,7 @@ namespace AoMEngineLibrary
                 }
                 for (int i = 0; i < genMeshPropsCheckedListBox.Items.Count; i++)
                 {
-                    if (file.Mesh[0].header.properties.HasFlag((BrgMeshAnimType)genMeshPropsCheckedListBox.Items[i]))
+                    if (file.Meshes[0].Header.AnimationType.HasFlag((BrgMeshAnimType)genMeshPropsCheckedListBox.Items[i]))
                     {
                         genMeshPropsCheckedListBox.SetItemChecked(i, true);
                     }
@@ -673,18 +666,11 @@ namespace AoMEngineLibrary
                 return;
             }
 
-            for (int i = 0; i < file.Mesh.Count; i++)
-            {
-                file.Mesh[i].UpdateSettings(i);
-                if (i > 0)
-                {
-                    //file.Mesh[i].flags |= BrgMeshFlag.NOTFIRSTMESH;
-                    //file.Mesh[i].properties &= ~BrgMeshProperty.VARIABLEANIM;
-                }
-            }
+            this.file.UpdateMeshSettings(this.Flags, this.Format, this.AnimationType, this.InterpolationType, this.ExportedScaleFactor);
 
             loadUI();
         }
+
         private void updateMatSettingsButton_Click(object sender, EventArgs e)
         {
             if (file == null)

@@ -1,8 +1,9 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
     using System;
+    using XmlCommentSerialization;
 
-    public class PrtEmitter
+    public class PrtEmitter : XmlAnnotate
     {
         public bool TiedToEmitter {get;set;}
         public bool IgnoreRotation { get; set; }
@@ -14,7 +15,8 @@
         public bool AlwaysActive { get; set; }
         public bool SyncWithAttackAnim { get; set; }
         public Int32 MaxParticles { get; set; }
-        public Int32 AppearanceType { get; set; }
+        [XmlComment]
+        public PrtAppearanceType AppearanceType { get; set; }
         public float UpdateRadius { get; set; }
         public float MaxParticlesVar { get; set; }
         public float ParticleLife { get; set; }
@@ -66,7 +68,7 @@
             reader.ReadBytes(3); // 32 bit padding
 
             this.MaxParticles = reader.ReadInt32();
-            this.AppearanceType = reader.ReadInt32();
+            this.AppearanceType = (PrtAppearanceType)reader.ReadInt32();
             this.UpdateRadius = reader.ReadSingle();
             this.MaxParticlesVar = reader.ReadSingle();
             this.ParticleLife = reader.ReadSingle();
@@ -115,7 +117,7 @@
             writer.Write(new byte[3]); // 32 bit padding
 
             writer.Write(this.MaxParticles);
-            writer.Write(this.AppearanceType);
+            writer.Write((Int32)this.AppearanceType);
             writer.Write(this.UpdateRadius);
             writer.Write(this.MaxParticlesVar);
             writer.Write(this.ParticleLife);

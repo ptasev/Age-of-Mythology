@@ -10,6 +10,8 @@ namespace AoMTextEditor
 {
     public class AnimFile
     {
+        public static readonly string IndentString = "    ";
+
         public static void ConvertToXml(FileStream animFile, FileStream xmlFile)
         {
             using (TextReader reader = new StreamReader(animFile))
@@ -28,15 +30,15 @@ namespace AoMTextEditor
 
                     line = line.Trim();
 
-                    if (line.StartsWith("//"))
+                    if (line.StartsWith("//") || line.StartsWith("*/") || line.StartsWith("/*"))
                     {
                         if ((elem.Parent == null || nextLevel) && elem is XElement)
                         {
-                            ((XElement)elem).Add(new XComment(line.Substring(2)));
+                            ((XElement)elem).Add(new XComment(line));
                         }
                         else
                         {
-                            elem.AddAfterSelf(new XComment(line.Substring(2)));
+                            elem.AddAfterSelf(new XComment(line));
                             elem = elem.NextNode;
                         }
                     }
@@ -118,7 +120,7 @@ namespace AoMTextEditor
             if (node is XComment)
             {
                 writer.Write(tabs);
-                writer.WriteLine("//" + ((XComment)node).Value);
+                writer.WriteLine(((XComment)node).Value);
             }
             else if (node is XElement)
             {
@@ -134,7 +136,7 @@ namespace AoMTextEditor
                 {
                     writer.WriteLine();
                     writer.WriteLine(tabs + "{");
-                    Write(writer, ((XElement)node).FirstNode, tabs + "\t");
+                    Write(writer, ((XElement)node).FirstNode, tabs + AnimFile.IndentString);
                     writer.WriteLine(tabs + "}");
                 }
                 else if (!string.IsNullOrEmpty(((XElement)node).Value) && !string.IsNullOrWhiteSpace(((XElement)node).Value))

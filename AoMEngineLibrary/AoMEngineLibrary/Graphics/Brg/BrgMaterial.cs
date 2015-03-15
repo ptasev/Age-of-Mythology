@@ -68,10 +68,10 @@
             flags = (BrgMatFlag)reader.ReadInt32();
             unknown01b = reader.ReadInt32();
             int nameLength = reader.ReadInt32();
-            reader.ReadVector3(out diffuse);
-            reader.ReadVector3(out ambient);
-            reader.ReadVector3(out specular);
-            reader.ReadVector3(out selfIllum);
+            this.diffuse = reader.ReadVector3Single();
+            this.ambient = reader.ReadVector3Single();
+            this.specular = reader.ReadVector3Single();
+            this.selfIllum = reader.ReadVector3Single();
 
             name = reader.ReadString(nameLength);
             if (flags.HasFlag(BrgMatFlag.USESPECLVL))
@@ -82,7 +82,11 @@
             {
                 name2 = reader.ReadString(reader.ReadInt32());
             }
-            if (true)
+            if (flags.HasFlag(BrgMatFlag.USESPECLVL) && !flags.HasFlag(BrgMatFlag.DIFFUSETEXTURE))
+            {
+                alphaOpacity = 1f;
+            }
+            else
             {
                 alphaOpacity = reader.ReadSingle();
             }
@@ -302,10 +306,10 @@
             writer.Write(unknown01b);
             writer.Write(Encoding.UTF8.GetByteCount(name));
 
-            writer.WriteVector3(ref diffuse);
-            writer.WriteVector3(ref ambient);
-            writer.WriteVector3(ref specular);
-            writer.WriteVector3(ref selfIllum);
+            writer.WriteVector3(diffuse);
+            writer.WriteVector3(ambient);
+            writer.WriteVector3(specular);
+            writer.WriteVector3(selfIllum);
 
             writer.WriteString(name, 0);
 
@@ -340,10 +344,10 @@
 
                 writer.Write(new byte[20]);
 
-                writer.WriteVector3(ref diffuse);
-                writer.WriteVector3(ref ambient);
-                writer.WriteVector3(ref specular);
-                writer.WriteVector3(ref selfIllum);
+                writer.WriteVector3(diffuse);
+                writer.WriteVector3(ambient);
+                writer.WriteVector3(specular);
+                writer.WriteVector3(selfIllum);
                 writer.Write(specularLevel);
                 writer.Write(alphaOpacity);
 
@@ -387,20 +391,6 @@
 
                 writer.WriteString(name);
             }
-        }
-
-        public void ReadBr3(BrgBinaryReader reader)
-        {
-            id = reader.ReadInt32();
-            flags = (BrgMatFlag)reader.ReadInt32();
-            name = reader.ReadString((byte)0x0);
-            //nameLength = Encoding.UTF8.GetByteCount(name);
-        }
-        public void WriteBr3(BrgBinaryWriter writer)
-        {
-            writer.Write(id);
-            writer.Write((int)flags);
-            writer.WriteString(name);
         }
     }
 }

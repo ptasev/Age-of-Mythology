@@ -12,60 +12,6 @@
         {
         }
 
-        public void WriteHeader(ref BrgHeader header)
-        {
-            this.Write(header.unknown01);
-            this.Write(header.numMaterials);
-            this.Write(header.unknown02);
-            this.Write(header.numMeshes);
-            this.Write(header.space);
-            this.Write(header.unknown03);
-        }
-        public void WriteAsetHeader(ref BrgAsetHeader header)
-        {
-            this.Write(header.numFrames);
-            this.Write(header.frameStep);
-            this.Write(header.animTime);
-            this.Write(header.frequency);
-            this.Write(header.spf);
-            this.Write(header.fps);
-            this.Write(header.space);
-        }
-        public void WriteMeshHeader(ref BrgMeshHeader header)
-        {
-            this.Write(header.version);
-            this.Write((UInt16)header.format);
-            this.Write(header.numVertices);
-            this.Write(header.numFaces);
-            this.Write((uint)header.properties);
-            this.WriteVector3(ref header.centerPos, true);
-            this.Write(header.centerRadius);//unknown03
-            this.WriteVector3(ref header.position, true);
-            this.WriteVector3(ref header.groundPos, true);
-            this.Write(header.extendedHeaderSize);
-            this.Write((UInt16)header.flags);
-            this.WriteVector3(ref header.boundingBoxMin, true);
-            this.WriteVector3(ref header.boundingBoxMax, true);
-        }
-        public void WriteMeshExtendedHeader(ref BrgMeshExtendedHeader extendedHeader)
-        {
-            this.Write(extendedHeader.numIndex);//numIndex0);
-            this.Write(extendedHeader.numMatrix);//numMatrix0);
-            this.Write(extendedHeader.nameLength);
-            this.Write(extendedHeader.pointMaterial);
-            this.Write(extendedHeader.pointRadius);
-            this.Write(extendedHeader.materialCount);
-            this.Write(extendedHeader.shadowNameLength0);
-            this.Write(extendedHeader.shadowNameLength1);
-            this.Write(extendedHeader.shadowNameLength2);
-            this.Write(extendedHeader.animTime);
-            this.Write(extendedHeader.materialLibraryTimestamp);
-            //writer.Write((Int16)0);
-            this.Write(extendedHeader.unknown09e);
-            this.Write(extendedHeader.exportedScaleFactor);
-            this.Write(extendedHeader.nonUniformKeyCount);
-            this.Write(extendedHeader.uniqueMaterialCount);
-        }
         public void WriteUserDataEntry(ref BrgUserDataEntry dataEntry, bool isParticle)
         {
             this.Write(dataEntry.dataNameLength);
@@ -92,7 +38,7 @@
         }
 
         #region Vector3
-        public void WriteVector3(ref Vector3<float> v, bool isAom = true, bool isHalf = false)
+        public void WriteVector3(Vector3<float> v, bool isAom = true, bool isHalf = false)
         {
             if (isAom)
             {

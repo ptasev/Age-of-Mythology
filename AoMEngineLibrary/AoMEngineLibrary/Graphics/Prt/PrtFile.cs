@@ -4,6 +4,7 @@
     using System;
     using System.IO;
     using System.Xml.Serialization;
+    using XmlCommentSerialization;
 
     public class PrtFile
     {
@@ -119,11 +120,19 @@
 
         public void SerializeAsXml(Stream stream)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(PrtFile));
-            using (TextWriter writer = new StreamWriter(stream))
+            using (XmlCommentWriter writer = new XmlCommentWriter(stream, new System.Xml.XmlWriterSettings() { Indent = true}))
             {
+                writer.Alphabetize = true;
+                writer.Metadata = false;
+                writer.Repeat = true;
+                XmlSerializer serializer = new XmlSerializer(typeof(PrtFile));
                 serializer.Serialize(writer, this);
             }
+            //XmlSerializer serializer = new XmlSerializer(typeof(PrtFile));
+            //using (TextWriter writer = new StreamWriter(stream))
+            //{
+            //    serializer.Serialize(writer, this);
+            //}
         }
 
         public static PrtFile DeserializeAsXml(Stream stream)

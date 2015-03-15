@@ -145,17 +145,17 @@ typedef struct (int size) {
 
 struct {
     struct HEADER {
-        char magic[4];
+        char Magic[4];
         int unknown01;
-        int numMaterials;
+        int MaterialCount;
         int unknown02;
-        int numMeshes;
+        int MeshCount;
         int space;
-        byte revision;
+        byte Revision;
         byte padding[3]; //unknown03
     } header;
 
-    if (header.numMeshes > 1 || (header.padding[0] != 100 && header.padding[0] != 52 && header.padding[0] != 119)) {
+    if (header.MeshCount > 1 || (header.padding[0] != 100 && header.padding[0] != 52 && header.padding[0] != 119)) {
         struct {
             char asetHead[4];
             int numFrames;
@@ -164,7 +164,7 @@ struct {
             float frequency;
             float spf;
             float fps;
-            int space;
+            int space <comment="used to be a LOD flag">;
         } asetHeader;
     }
 
@@ -388,7 +388,7 @@ if (!((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
         }
 
         meshID++;
-    } item[header.numMeshes] <optimize=false>;
+    } item[header.MeshCount] <optimize=false>;
 
     if ((item[0].properties & MATERIAL) == MATERIAL) {
         struct Material { // STILL HAVEN'T THOROUGHLY LOOKED AT MATERIALS
@@ -423,6 +423,6 @@ if (!((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
                     char sfxName[sfxNameLength];
                 } sfx[numSFX] <optimize=false>;
             }
-        } material[header.numMaterials] <optimize=false>;
+        } material[header.MaterialCount] <optimize=false>;
     }
 } file;

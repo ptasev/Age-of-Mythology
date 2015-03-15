@@ -2,14 +2,18 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Serialization;
+    using XmlCommentSerialization;
 
-    public class PrtCollision
+    public class PrtCollision : XmlAnnotate
     {
         public Int32 NumTypes { get; set; }
-        public Int32 TerrainInteractionType { get; set; }
+        [XmlComment]
+        public PrtTerrainInteractionType TerrainInteractionType { get; set; }
         public float TerrainHeight { get; set; }
         public float TerrainHeightVar { get; set; }
 
+        [XmlArrayItem("CollisionType")]
         public List<PrtCollisionType> CollisionTypes
         {
             get;
@@ -23,7 +27,7 @@
         public PrtCollision(PrtBinaryReader reader)
         {
             this.NumTypes = reader.ReadInt32();
-            this.TerrainInteractionType = reader.ReadInt32();
+            this.TerrainInteractionType = (PrtTerrainInteractionType)reader.ReadInt32();
             this.TerrainHeight = reader.ReadSingle();
             this.TerrainHeightVar = reader.ReadSingle();
 
@@ -34,7 +38,7 @@
         {
             this.NumTypes = this.CollisionTypes.Count;
             writer.Write(this.NumTypes);
-            writer.Write(this.TerrainInteractionType);
+            writer.Write((Int32)this.TerrainInteractionType);
             writer.Write(this.TerrainHeight);
             writer.Write(this.TerrainHeightVar);
         }

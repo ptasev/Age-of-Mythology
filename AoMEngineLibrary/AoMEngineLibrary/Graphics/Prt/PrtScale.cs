@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Serialization;
 
     public class PrtScale
     {
@@ -18,6 +19,7 @@
         public float CycleTime { get; set; }
         public float CycleTimeVar { get; set; }
 
+        [XmlArrayItem("ScaleStage")]
         public List<PrtScaleStage> ScaleStages
         {
             get;

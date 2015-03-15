@@ -2,15 +2,18 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Serialization;
+    using XmlCommentSerialization;
 
-    public class PrtAppearance
+    public class PrtAppearance : XmlAnnotate
     {
         public bool OrientByMotion { get; set; }
         public Int32 NumFiles { get; set; }
         public Int32 NumFrames { get; set; }
         public Int32 FrameWidth { get; set; }
         public Int32 FrameHeight { get; set; }
-        public Int32 MaterialType { get; set; }
+        [XmlComment]
+        public PrtMaterialType MaterialType { get; set; }
         public VertexColor Emissive { get; set; }
         public VertexColor Specular { get; set; }
         public float SpecularExponent { get; set; }
@@ -18,11 +21,13 @@
         public float AnimationRate { get; set; }
         public float AnimationRateVar { get; set; }
 
+        [XmlArrayItem("Weight")]
         public List<float> AppearanceWeights
         {
             get;
             set;
         }
+        [XmlArrayItem("FileName")]
         public List<string> AppearanceFiles
         {
             get;
@@ -43,7 +48,7 @@
             this.NumFrames = reader.ReadInt32();
             this.FrameWidth = reader.ReadInt32();
             this.FrameHeight = reader.ReadInt32();
-            this.MaterialType = reader.ReadInt32();
+            this.MaterialType = (PrtMaterialType)reader.ReadInt32();
             this.Emissive = reader.ReadVertexColor();
             this.Specular = reader.ReadVertexColor();
             this.SpecularExponent = reader.ReadSingle();
@@ -65,7 +70,7 @@
             writer.Write(this.NumFrames);
             writer.Write(this.FrameWidth);
             writer.Write(this.FrameHeight);
-            writer.Write(this.MaterialType);
+            writer.Write((Int32)this.MaterialType);
             writer.WriteVertexColor(this.Emissive);
             writer.WriteVertexColor(this.Specular);
             writer.Write(this.SpecularExponent);

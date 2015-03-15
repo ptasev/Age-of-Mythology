@@ -33,17 +33,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ManagedServices, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="MaxCustomControls, Version=16.0.420.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Autodesk\3ds Max 2014\ManagedServices.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Autodesk\3ds Max 2015\MaxCustomControls.dll</HintPath>
     </Reference>
-    <Reference Include="MaxCustomControls, Version=16.2.475.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MiscUtil, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d3c42c4bfacf7596, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Autodesk\3ds Max 2014\MaxCustomControls.dll</HintPath>
-    </Reference>
-    <Reference Include="MiscUtil">
-      <HintPath>..\..\MiscUtil.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\References\MiscUtil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

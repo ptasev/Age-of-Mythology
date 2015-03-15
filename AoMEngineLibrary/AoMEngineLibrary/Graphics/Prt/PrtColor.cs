@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Serialization;
 
     public class PrtColor
     {
@@ -14,11 +15,13 @@
         public float WorldLightingInfluence { get; set; }
         public VertexColor Color { get; set; }
 
+        [XmlArrayItem("PaletteColor")]
         public List<VertexColor> PaletteColors
         {
             get;
             set;
         }
+        [XmlArrayItem("ColorStage")]
         public List<PrtColorStage> ColorStages
         {
             get;

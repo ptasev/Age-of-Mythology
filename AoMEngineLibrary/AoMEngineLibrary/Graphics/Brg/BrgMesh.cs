@@ -7,140 +7,137 @@
 
     public class BrgMesh
     {
-        public BrgFile ParentFile;
+        public BrgFile ParentFile { get; set; }
 
-        public BrgMeshHeader header;
-        public Vector3<float>[] vertices;
-        public Vector3<float>[] normals;
+        public BrgMeshHeader Header { get; set; }
+        public Vector3<Single>[] Vertices { get; set; }
+        public Vector3<Single>[] Normals { get; set; }
 
-        public Vector2<float>[] texVertices;
-        public Int16[] faceMaterials;
-        public Vector3<Int16>[] faceVertices;
-        private Int16[] vertMaterials;
+        public Vector2<Single>[] TextureCoordinates { get; set; }
+        public Int16[] FaceMaterials { get; set; }
+        public Vector3<Int16>[] FaceVertices { get; set; }
+        private Int16[] VertexMaterials { get; set; }
 
-        public BrgMeshExtendedHeader extendedHeader;
-        public BrgUserDataEntry[] UserDataEntries;
-        float[] particleData;
+        public BrgMeshExtendedHeader ExtendedHeader { get; set; }
+        public BrgUserDataEntry[] UserDataEntries { get; set; }
+        private float[] particleData;
 
-        public VertexColor[] vertexColors; // unknown0a
-
-        //public Int16 numMatrix;
-        //Int16 numIndex;
-        //public Int16 unknown10;
-        public BrgAttachpointCollection Attachpoint;
-        public float[] animTimeAdjust;
+        public VertexColor[] VertexColors { get; set; }
+        public BrgAttachpointCollection Attachpoints { get; set; }
+        public float[] NonUniformKeys { get; set; }
 
         public BrgMesh(BrgBinaryReader reader, BrgFile file)
         {
-            ParentFile = file;
+            this.ParentFile = file;
 
-            reader.ReadMeshHeader(ref header);
+            this.Header = new BrgMeshHeader(reader);
 
-            vertices = new Vector3<float>[0];
-            normals = new Vector3<float>[0];
-            texVertices = new Vector2<float>[0];
-            faceMaterials = new Int16[0];
-            faceVertices = new Vector3<short>[0];
-            vertMaterials = new Int16[0];
-            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            this.Vertices = new Vector3<float>[0];
+            this.Normals = new Vector3<float>[0];
+            this.TextureCoordinates = new Vector2<float>[0];
+            this.FaceMaterials = new Int16[0];
+            this.FaceVertices = new Vector3<short>[0];
+            this.VertexMaterials = new Int16[0];
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                vertices = new Vector3<float>[header.numVertices];
-                for (int i = 0; i < header.numVertices; i++)
+                this.Vertices = new Vector3<float>[this.Header.NumVertices];
+                for (int i = 0; i < this.Header.NumVertices; i++)
                 {
-                    reader.ReadVector3(out vertices[i], true, header.version == 22);
+                    this.Vertices[i] = reader.ReadVector3Single(true, this.Header.Version == 22);
                 }
-                normals = new Vector3<float>[header.numVertices];
-                for (int i = 0; i < header.numVertices; i++)
+                this.Normals = new Vector3<float>[this.Header.NumVertices];
+                for (int i = 0; i < this.Header.NumVertices; i++)
                 {
-                    if (header.version >= 13 && header.version <= 17)
+                    if (this.Header.Version >= 13 && this.Header.Version <= 17)
                     {
                         reader.ReadInt16(); // No idea what this is
                     }
                     else // v == 18, 19 or 22
                     {
-                        reader.ReadVector3(out normals[i], true, header.version == 22);
+                        this.Normals[i] = reader.ReadVector3Single(true, this.Header.Version == 22);
                     }
                 }
 
-                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                if ((!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    this.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) ||
+                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
+                    this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                    this.TextureCoordinates = new Vector2<float>[this.Header.NumVertices];
+                    for (int i = 0; i < this.Header.NumVertices; i++)
                     {
-                        texVertices = new Vector2<float>[header.numVertices];
-                        for (int i = 0; i < header.numVertices; i++)
+                        reader.ReadVector2(out this.TextureCoordinates[i], this.Header.Version == 22);
+                    }
+                }
+
+                if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                {
+                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        this.FaceMaterials = new Int16[this.Header.NumFaces];
+                        for (int i = 0; i < this.Header.NumFaces; i++)
                         {
-                            reader.ReadVector2(out texVertices[i], header.version == 22);
+                            this.FaceMaterials[i] = reader.ReadInt16();
+                        }
+                    }
+
+                    this.FaceVertices = new Vector3<Int16>[this.Header.NumFaces];
+                    for (int i = 0; i < this.Header.NumFaces; i++)
+                    {
+                        this.FaceVertices[i] = reader.ReadVector3Int16();
+                    }
+
+                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        this.VertexMaterials = new Int16[this.Header.NumVertices];
+                        for (int i = 0; i < this.Header.NumVertices; i++)
+                        {
+                            this.VertexMaterials[i] = reader.ReadInt16();
                         }
                     }
                 }
+            }
 
-                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+            this.UserDataEntries = new BrgUserDataEntry[this.Header.UserDataEntryCount];
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            {
+                for (int i = 0; i < this.Header.UserDataEntryCount; i++)
                 {
-                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
-                    {
-                        faceMaterials = new Int16[header.numFaces];
-                        for (int i = 0; i < header.numFaces; i++)
-                        {
-                            faceMaterials[i] = reader.ReadInt16();
-                        }
-                    }
-
-                    faceVertices = new Vector3<Int16>[header.numFaces];
-                    for (int i = 0; i < header.numFaces; i++)
-                    {
-                        reader.ReadVector3(out faceVertices[i]);
-                    }
-
-                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
-                    {
-                        vertMaterials = new Int16[header.numVertices];
-                        for (int i = 0; i < header.numVertices; i++)
-                        {
-                            vertMaterials[i] = reader.ReadInt16();
-                        }
-                    }
+                    this.UserDataEntries[i] = reader.ReadUserDataEntry(false);
                 }
             }
 
-            UserDataEntries = new BrgUserDataEntry[header.userDataEntryCount];
-            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            this.ExtendedHeader = new BrgMeshExtendedHeader(reader, this.Header.ExtendedHeaderSize);
+
+            this.particleData = new float[0];
+            if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < header.userDataEntryCount; i++)
+                this.particleData = new float[4 * this.Header.NumVertices];
+                for (int i = 0; i < this.particleData.Length; i++)
                 {
-                    UserDataEntries[i] = reader.ReadUserDataEntry(false);
+                    this.particleData[i] = reader.ReadSingle();
+                }
+                for (int i = 0; i < this.Header.UserDataEntryCount; i++)
+                {
+                    this.UserDataEntries[i] = reader.ReadUserDataEntry(true);
                 }
             }
 
-            reader.ReadMeshExtendedHeader(ref extendedHeader, header.extendedHeaderSize);
-
-            particleData = new float[0];
-            if (header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (this.Header.Version == 13)
             {
-                particleData = new float[4 * header.numVertices];
-                for (int i = 0; i < particleData.Length; i++)
-                {
-                    particleData[i] = reader.ReadSingle();
-                }
-                for (int i = 0; i < header.userDataEntryCount; i++)
-                {
-                    UserDataEntries[i] = reader.ReadUserDataEntry(true);
-                }
+                reader.ReadBytes(this.ExtendedHeader.NameLength);
             }
 
-            if (header.version == 13)
+            if (this.Header.Version >= 13 && this.Header.Version <= 18)
             {
-                reader.ReadBytes(extendedHeader.nameLength);
+                this.Header.Flags |= BrgMeshFlag.ATTACHPOINTS;
             }
-
-            if (header.version >= 13 && header.version <= 18)
+            if (this.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                header.flags |= BrgMeshFlag.ATTACHPOINTS;
-            }
-            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
-            {
-                Int16 numMatrix = extendedHeader.numMatrix;
-                Int16 numIndex = extendedHeader.numIndex;
-                if (header.version == 19 || header.version == 22)
+                Int16 numMatrix = this.ExtendedHeader.NumDummies;
+                Int16 numIndex = this.ExtendedHeader.NumNameIndexes;
+                if (this.Header.Version == 19 || this.Header.Version == 22)
                 {
                     numMatrix = reader.ReadInt16();
                     numIndex = reader.ReadInt16();
@@ -154,30 +151,30 @@
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].x, true, header.version == 22);
+                    attpts[i].XVector = reader.ReadVector3Single(true, this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].y, true, header.version == 22);
+                    attpts[i].YVector = reader.ReadVector3Single(true, this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].z, true, header.version == 22);
+                    attpts[i].ZVector = reader.ReadVector3Single(true, this.Header.Version == 22);
                 }
-                if (header.version == 19 || header.version == 22)
+                if (this.Header.Version == 19 || this.Header.Version == 22)
                 {
                     for (int i = 0; i < numMatrix; i++)
                     {
-                        reader.ReadVector3(out attpts[i].position, true, header.version == 22);
+                        attpts[i].Position = reader.ReadVector3Single(true, this.Header.Version == 22);
                     }
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].unknown11a, true, header.version == 22);
+                    attpts[i].BoundingBoxMin = reader.ReadVector3Single(true, this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    reader.ReadVector3(out attpts[i].unknown11b, true, header.version == 22);
+                    attpts[i].BoundingBoxMax = reader.ReadVector3Single(true, this.Header.Version == 22);
                 }
 
                 List<int> nameId = new List<int>();
@@ -191,176 +188,181 @@
                     }
                 }
 
-                Attachpoint = new BrgAttachpointCollection();
+                this.Attachpoints = new BrgAttachpointCollection();
                 for (int i = 0; i < nameId.Count; i++)
                 {
-                    Attachpoint.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
-                    Attachpoint[i].NameId = nameId[i];
+                    this.Attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
+                    this.Attachpoints[i].NameId = nameId[i];
                     //attpts[reader.ReadByte()].NameId = nameId[i];
                 }
                 //attachpoints = new List<BrgAttachpoint>(attpts);
             }
             else
             {
-                Attachpoint = new BrgAttachpointCollection();
+                this.Attachpoints = new BrgAttachpointCollection();
             }
 
-            vertexColors = new VertexColor[0];
-            if (((header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
-                || header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            this.VertexColors = new VertexColor[0];
+            if (((this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
+                this.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) &&
+                !this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
+                this.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
             {
-                vertexColors = new VertexColor[header.numVertices];
-                for (int i = 0; i < header.numVertices; i++)
+                this.VertexColors = new VertexColor[this.Header.NumVertices];
+                for (int i = 0; i < this.Header.NumVertices; i++)
                 {
-                    reader.ReadVertexColor(out vertexColors[i]);
+                    reader.ReadVertexColor(out this.VertexColors[i]);
                 }
             }
 
             // Only seen on first mesh
-            animTimeAdjust = new float[0];
-            if (header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
+            this.NonUniformKeys = new float[0];
+            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
-                animTimeAdjust = new float[extendedHeader.nonUniformKeyCount];
-                for (int i = 0; i < extendedHeader.nonUniformKeyCount; i++)
+                this.NonUniformKeys = new float[this.ExtendedHeader.NumNonUniformKeys];
+                for (int i = 0; i < this.ExtendedHeader.NumNonUniformKeys; i++)
                 {
-                    animTimeAdjust[i] = reader.ReadSingle();
+                    this.NonUniformKeys[i] = reader.ReadSingle();
                 }
             }
 
-            if (header.version >= 14 && header.version <= 19)
+            if (this.Header.Version >= 14 && this.Header.Version <= 19)
             {
                 // Face Normals??
-                Vector3<float>[] legacy = new Vector3<float>[header.numFaces];
-                for (int i = 0; i < header.numFaces; i++)
+                Vector3<float>[] legacy = new Vector3<float>[this.Header.NumFaces];
+                for (int i = 0; i < this.Header.NumFaces; i++)
                 {
-                    reader.ReadVector3(out legacy[i]);
+                    legacy[i] = reader.ReadVector3Single();
                 }
             }
 
-            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && header.version != 22)
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && this.Header.Version != 22)
             {
-                reader.ReadBytes(extendedHeader.shadowNameLength0 + extendedHeader.shadowNameLength1);
+                reader.ReadBytes(ExtendedHeader.ShadowNameLength0 + ExtendedHeader.ShadowNameLength1);
             }
         }
         public BrgMesh(BrgFile file)
         {
-            ParentFile = file;
-            header.version = 22;
-            header.extendedHeaderSize = 40;
+            this.ParentFile = file;
+            this.Header = new BrgMeshHeader();
+            this.Header.Version = 22;
+            this.Header.ExtendedHeaderSize = 40;
 
-            vertices = new Vector3<float>[0];
-            normals = new Vector3<float>[0];
+            this.Vertices = new Vector3<float>[0];
+            this.Normals = new Vector3<float>[0];
 
-            texVertices = new Vector2<float>[0];
-            faceMaterials = new Int16[0];
-            faceVertices = new Vector3<Int16>[0];
-            vertMaterials = new Int16[0];
+            this.TextureCoordinates = new Vector2<float>[0];
+            this.FaceMaterials = new Int16[0];
+            this.FaceVertices = new Vector3<Int16>[0];
+            this.VertexMaterials = new Int16[0];
 
-            extendedHeader.materialLibraryTimestamp = 191738312;
-            extendedHeader.exportedScaleFactor = 1f;
+            this.ExtendedHeader = new BrgMeshExtendedHeader();
+            this.ExtendedHeader.MaterialLibraryTimestamp = 191738312;
+            this.ExtendedHeader.ExportedScaleFactor = 1f;
 
-            UserDataEntries = new BrgUserDataEntry[0];
-            particleData = new float[0];
+            this.UserDataEntries = new BrgUserDataEntry[0];
+            this.particleData = new float[0];
 
-            Vector2<float>[] unknown0a = new Vector2<float>[0];
-            Attachpoint = new BrgAttachpointCollection();
-            animTimeAdjust = new float[0];
+            this.VertexColors = new VertexColor[0];
+            this.Attachpoints = new BrgAttachpointCollection();
+            this.NonUniformKeys = new float[0];
         }
 
         public void Write(BrgBinaryWriter writer)
         {
-            header.version = 22;
-            if (header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            this.Header.Version = 22;
+            if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                header.numVertices = (Int16)(particleData.Length / 4);
+                this.Header.NumVertices = (Int16)(this.particleData.Length / 4);
             }
             else
             {
-                header.numVertices = (Int16)vertices.Length;
+                this.Header.NumVertices = (Int16)this.Vertices.Length;
             }
-            header.numFaces = (Int16)faceVertices.Length;
-            header.userDataEntryCount = (Int16)UserDataEntries.Length;
-            header.centerRadius = header.boundingBoxMax.LongestAxisLength();
-            header.extendedHeaderSize = 40;
-            writer.WriteMeshHeader(ref header);
+            this.Header.NumFaces = (Int16)this.FaceVertices.Length;
+            this.Header.UserDataEntryCount = (Int16)this.UserDataEntries.Length;
+            this.Header.CenterRadius = this.Header.MaximumExtent.LongestAxisLength();
+            this.Header.ExtendedHeaderSize = 40;
+            this.Header.Write(writer);
 
-            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < vertices.Length; i++)
+                for (int i = 0; i < this.Vertices.Length; i++)
                 {
-                    writer.WriteVector3(ref vertices[i], true, true);
+                    writer.WriteVector3(this.Vertices[i], true, true);
                 }
-                for (int i = 0; i < vertices.Length; i++)
+                for (int i = 0; i < this.Vertices.Length; i++)
                 {
-                    writer.WriteVector3(ref normals[i], true, true);
+                    writer.WriteVector3(this.Normals[i], true, true);
                 }
 
-                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                if ((!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    this.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) ||
+                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
+                    this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                    for (int i = 0; i < this.TextureCoordinates.Length; i++)
                     {
-                        for (int i = 0; i < texVertices.Length; i++)
+                        writer.WriteVector2(ref this.TextureCoordinates[i], true);
+                    }
+                }
+
+                if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                {
+                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        for (int i = 0; i < this.FaceMaterials.Length; i++)
                         {
-                            writer.WriteVector2(ref texVertices[i], true);
+                            writer.Write(this.FaceMaterials[i]);
+                        }
+                    }
+
+                    for (int i = 0; i < this.FaceVertices.Length; i++)
+                    {
+                        writer.WriteVector3(ref this.FaceVertices[i]);
+                    }
+
+                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        for (int i = 0; i < this.VertexMaterials.Length; i++)
+                        {
+                            writer.Write(this.VertexMaterials[i]);
                         }
                     }
                 }
+            }
 
-                if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            {
+                for (int i = 0; i < this.UserDataEntries.Length; i++)
                 {
-                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
-                    {
-                        for (int i = 0; i < faceMaterials.Length; i++)
-                        {
-                            writer.Write(faceMaterials[i]);
-                        }
-                    }
-
-                    for (int i = 0; i < faceVertices.Length; i++)
-                    {
-                        writer.WriteVector3(ref faceVertices[i]);
-                    }
-
-                    if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
-                    {
-                        for (int i = 0; i < vertMaterials.Length; i++)
-                        {
-                            writer.Write(vertMaterials[i]);
-                        }
-                    }
+                    writer.WriteUserDataEntry(ref this.UserDataEntries[i], false);
                 }
             }
 
-            if (!header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            this.ExtendedHeader.NumNonUniformKeys = NonUniformKeys.Length;
+            this.ExtendedHeader.Write(writer);
+
+            if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < UserDataEntries.Length; i++)
+                for (int i = 0; i < this.particleData.Length; i++)
                 {
-                    writer.WriteUserDataEntry(ref UserDataEntries[i], false);
+                    writer.Write(this.particleData[i]);
+                }
+                for (int i = 0; i < this.UserDataEntries.Length; i++)
+                {
+                    writer.WriteUserDataEntry(ref this.UserDataEntries[i], true);
                 }
             }
 
-            extendedHeader.nonUniformKeyCount = animTimeAdjust.Length;
-            writer.WriteMeshExtendedHeader(ref extendedHeader);
-
-            if (header.flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (this.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                for (int i = 0; i < particleData.Length; i++)
-                {
-                    writer.Write(particleData[i]);
-                }
-                for (int i = 0; i < UserDataEntries.Length; i++)
-                {
-                    writer.WriteUserDataEntry(ref UserDataEntries[i], true);
-                }
-            }
-
-            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
-            {
-                writer.Write((Int16)Attachpoint.Count);
+                writer.Write((Int16)this.Attachpoints.Count);
 
                 List<int> nameId = new List<int>();
                 int maxNameId = -1;
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
                     nameId.Add(att.NameId);
                     if (att.NameId > maxNameId)
@@ -372,30 +374,29 @@
                 writer.Write((Int16)numIndex);
                 writer.Write((Int16)1);
 
-
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3(ref att.x, true, true);
+                    writer.WriteVector3(att.XVector, true, true);
                 }
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3(ref att.y, true, true);
+                    writer.WriteVector3(att.YVector, true, true);
                 }
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3(ref att.z, true, true);
+                    writer.WriteVector3(att.ZVector, true, true);
                 }
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3(ref att.position, true, true);
+                    writer.WriteVector3(att.Position, true, true);
                 }
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3(ref att.unknown11a, true, true);
+                    writer.WriteVector3(att.BoundingBoxMin, true, true);
                 }
-                foreach (BrgAttachpoint att in Attachpoint)
+                foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3(ref att.unknown11b, true, true);
+                    writer.WriteVector3(att.BoundingBoxMax, true, true);
                 }
 
                 int[] dup = new int[numIndex];
@@ -420,9 +421,9 @@
 
                 List<int> nameId2 = new List<int>(nameId);
                 nameId.Sort();
-                for (int i = 0; i < Attachpoint.Count; i++)
+                for (int i = 0; i < this.Attachpoints.Count; i++)
                 {
-                    for (int j = 0; j < Attachpoint.Count; j++)
+                    for (int j = 0; j < this.Attachpoints.Count; j++)
                     {
                         if (nameId[i] == nameId2[j])
                         {
@@ -434,140 +435,172 @@
                 }
             }
 
-            if (((header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
-                || header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            if (((this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
+                this.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) &&
+                !this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
+                this.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
             {
-                for (int i = 0; i < vertexColors.Length; i++)
+                for (int i = 0; i < this.VertexColors.Length; i++)
                 {
-                    writer.WriteVertexColor(ref vertexColors[i]);
+                    writer.WriteVertexColor(ref this.VertexColors[i]);
                 }
             }
 
-            if (header.properties.HasFlag(BrgMeshAnimType.NONUNIFORM))
+            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
             {
-                for (int i = 0; i < animTimeAdjust.Length; i++)
+                for (int i = 0; i < this.NonUniformKeys.Length; i++)
                 {
-                    writer.Write(animTimeAdjust[i]);
+                    writer.Write(this.NonUniformKeys[i]);
                 }
             }
         }
 
         // Only used for first key frame/mesh
-        public string ExportToMax()
+        public void ExportToMax(string mainObject, float time)
         {
-            string vertArray = Maxscript.NewArray("vertArray");
-            string normArray = Maxscript.NewArray("normArray");
-            string texVerts = Maxscript.NewArray("texVerts");
+            string vertArray = "";
+            string normArray = "";
+            string texVerts = "";
+            string faceMats = "";
+            string faceArray = "";
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            {
+                vertArray = Maxscript.NewArray("vertArray");
+                normArray = Maxscript.NewArray("normArray");
+                texVerts = Maxscript.NewArray("texVerts");
 
-            string faceMats = Maxscript.NewArray("faceMats");
-            string faceArray = Maxscript.NewArray("faceArray");
+                faceMats = Maxscript.NewArray("faceMats");
+                faceArray = Maxscript.NewArray("faceArray");
+            }
 
-            Maxscript.CommentTitle("Load Vertices");
-            foreach (Vector3<float> vert in vertices)
+            Maxscript.CommentTitle("Load Vertices/Normals/UVWs");
+            for (int i = 0; i < this.Vertices.Length; i++)
             {
-                Maxscript.Append(vertArray, Maxscript.NewPoint3<float>("v", -vert.X, -vert.Z, vert.Y));
-            }
-            Maxscript.CommentTitle("Load Normals");
-            foreach (Vector3<float> norm in normals)
-            {
-                Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n", -norm.X, -norm.Z, norm.Y));
-            }
-            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
-            {
-                if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                if (this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
-                    Maxscript.CommentTitle("Load UVW");
-                    foreach (Vector2<float> texVert in texVertices)
+                    Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
+                        Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+
+                    if (this.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) &&
+                        this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                     {
-                        Maxscript.Append(texVerts, Maxscript.NewPoint3<float>("tV", texVert.X, texVert.Y, 0));
+                        Maxscript.Animate("{0}.Unwrap_UVW.SetVertexPosition {1}s {2} {3}", mainObject, time, i + 1,
+                            Maxscript.NewPoint3Literal<float>(this.TextureCoordinates[i].X, this.TextureCoordinates[i].Y, 0));
+                    }
+
+                    if (this.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+                    {
+                        if (this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
+                        {
+                            Maxscript.AnimateAtTime(time, "meshop.setVertAlpha {0} -2 {1} {2}",
+                                mainObject, i + 1, this.VertexColors[i].A);
+                        }
+                        else if (this.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
+                        {
+                            Maxscript.AnimateAtTime(time, "meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
+                                this.VertexColors[i].R, this.VertexColors[i].G, this.VertexColors[i].B);
+                        }
+                    }
+                }
+                else
+                {
+                    Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n",
+                        -this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+
+                    if (Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                    {
+                        Maxscript.Append(texVerts, Maxscript.NewPoint3<float>("tV",
+                            this.TextureCoordinates[i].X, this.TextureCoordinates[i].Y, 0));
+                    }
+
+                    if (Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
+                    {
+                        //Maxscript.Command("meshop.supportVAlphas {0}", mainObject);
+                        Maxscript.Command("meshop.setVertAlpha {0} -2 {1} {2}",
+                            mainObject, i + 1, this.VertexColors[i].A);
+                    }
+                    else if(this.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
+                    {
+                        Maxscript.Command("meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
+                            this.VertexColors[i].R, this.VertexColors[i].G, this.VertexColors[i].B);
                     }
                 }
             }
 
-            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            Maxscript.CommentTitle("Load Attachpoints");
+            foreach (BrgAttachpoint att in Attachpoints)
             {
-                if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
+                if (this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                {
+                    Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
+                    Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
+                    Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
+                    Maxscript.AnimateAtTime(time, "attachpoint.scale = {0}", att.GetMaxScale());
+                }
+                else
+                {
+                    string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
+                }
+            }
+
+            if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            {
+                if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
                     Maxscript.CommentTitle("Load Face Materials");
-                    foreach (Int16 fMat in faceMaterials)
+                    foreach (Int16 fMat in FaceMaterials)
                     {
                         Maxscript.Append(faceMats, fMat.ToString());
                     }
                 }
 
                 Maxscript.CommentTitle("Load Faces");
-                foreach (Vector3<Int16> face in faceVertices)
+                foreach (Vector3<Int16> face in FaceVertices)
                 {
                     Maxscript.Append(faceArray, Maxscript.NewPoint3<Int32>("fV", face.X + 1, face.Z + 1, face.Y + 1));
                 }
-            }
 
-            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
-            {
-                Maxscript.CommentTitle("Load Attachpoints");
-                foreach (BrgAttachpoint att in Attachpoint)
+                Maxscript.AnimateAtTime(ParentFile.GetFrameTime(0), Maxscript.NewMeshLiteral(mainObject, vertArray, normArray, faceArray, faceMats, texVerts));
+                Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
+
+                string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -Header.HotspotPosition.X, -Header.HotspotPosition.Z, Header.HotspotPosition.Y);
+                Maxscript.Command("plane name:\"ground\" pos:{0} length:10 width:10", groundPlanePos);
+
+                Maxscript.CommentTitle("TVert Hack");
+                Maxscript.Command("buildTVFaces {0}", mainObject);
+                for (int i = 1; i <= FaceVertices.Length; i++)
                 {
-                    string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
+                    Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainObject, i);
+                }
+
+                if (Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
+                {
+                    Maxscript.Command("select {0}", mainObject);
+                    Maxscript.Command("addModifier {0} (Unwrap_UVW())", mainObject);
+
+                    Maxscript.Command("select {0}.verts", mainObject);
+                    Maxscript.Animate("{0}.Unwrap_UVW.moveSelected [0,0,0]", mainObject);
                 }
             }
-
-            string mainObject = "mainObj";
-            Maxscript.AnimateAtTime(ParentFile.GetFrameTime(0), Maxscript.NewMeshLiteral(mainObject, vertArray, normArray, faceArray, faceMats, texVerts));
-            Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
-
-            if (((header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || header.flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) && !header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
-                || header.flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
-            {
-                //Maxscript.Command("{0}.showVertexColors = true", mainObject);
-                for (int i = 0; i < vertexColors.Length; i++)
-                {
-                    if (header.flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
-                    {
-                        //Maxscript.Command("meshop.supportVAlphas {0}", mainObject);
-                        Maxscript.Command("meshop.setVertAlpha {0} -2 {1} {2}", mainObject, i + 1, vertexColors[i].A);
-                    }
-                    else
-                    {
-                        Maxscript.Command("meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1, vertexColors[i].R, vertexColors[i].G, vertexColors[i].B);
-                    }
-                }
-            }
-
-            string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -header.groundPos.X, -header.groundPos.Z, header.groundPos.Y);
-            Maxscript.Command("plane name:\"ground\" pos:{0} length:10 width:10", groundPlanePos);
-
-            Maxscript.CommentTitle("TVert Hack");
-            Maxscript.Command("buildTVFaces {0}", mainObject);
-            for (int i = 1; i <= faceVertices.Length; i++)
-            {
-                Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainObject, i);
-            }
-
-            if (header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
-            {
-                Maxscript.Command("select {0}", mainObject);
-                Maxscript.Command("addModifier {0} (Unwrap_UVW())", mainObject);
-
-                Maxscript.Command("select {0}.verts", mainObject);
-                Maxscript.Animate("{0}.Unwrap_UVW.moveSelected [0,0,0]", mainObject);
-            }
-
-            return mainObject;
         }
-        public void ImportFromMax(string mainObject, float time, int meshIndex)
+        public void ImportFromMax(string mainObject, float time)
         {
-            UpdateSettings(meshIndex);
-
-            header.centerPos.X = -(float)Maxscript.Query("{0}.center.x", Maxscript.QueryType.Float, mainObject);
-            header.centerPos.Z = -(float)Maxscript.Query("{0}.center.y", Maxscript.QueryType.Float, mainObject);
-            header.centerPos.Y = (float)Maxscript.Query("{0}.center.z", Maxscript.QueryType.Float, mainObject);
+            this.Header.CenterPosition = new Vector3<float>
+            (
+                -Maxscript.QueryFloat("{0}.center.x", mainObject),
+                Maxscript.QueryFloat("{0}.center.z", mainObject),
+                -Maxscript.QueryFloat("{0}.center.y", mainObject)
+            );
 
             Maxscript.Command("grnd = getNodeByName \"ground\"");
             if (!Maxscript.QueryBoolean("grnd == undefined"))
             {
-                header.groundPos.X = -(float)Maxscript.Query("grnd.position.x", Maxscript.QueryType.Float);
-                header.groundPos.Z = -(float)Maxscript.Query("grnd.position.y", Maxscript.QueryType.Float);
-                header.groundPos.Y = (float)Maxscript.Query("grnd.position.z", Maxscript.QueryType.Float);
+                this.Header.HotspotPosition = new Vector3<float>
+                (
+                    -Maxscript.QueryFloat("grnd.position.x"),
+                    Maxscript.QueryFloat("grnd.position.z"),
+                    -Maxscript.QueryFloat("grnd.position.y")
+                );
             }
 
             Maxscript.Command("{0}BBMax = {0}.max", mainObject);
@@ -575,12 +608,8 @@
             Vector3<float> bBoxMax = new Vector3<float>(Maxscript.QueryFloat("{0}BBMax.X", mainObject), Maxscript.QueryFloat("{0}BBMax.Y", mainObject), Maxscript.QueryFloat("{0}BBMax.Z", mainObject));
             Vector3<float> bBoxMin = new Vector3<float>(Maxscript.QueryFloat("{0}BBMin.X", mainObject), Maxscript.QueryFloat("{0}BBMin.Y", mainObject), Maxscript.QueryFloat("{0}BBMin.Z", mainObject));
             Vector3<float> bBox = (bBoxMax - bBoxMin) / 2;
-            header.boundingBoxMin.X = -bBox.X;
-            header.boundingBoxMin.Z = -bBox.Y;
-            header.boundingBoxMin.Y = -bBox.Z;
-            header.boundingBoxMax.X = bBox.X;
-            header.boundingBoxMax.Z = bBox.Y;
-            header.boundingBoxMax.Y = bBox.Z;
+            this.Header.MinimumExtent = new Vector3<float>(-bBox.X, -bBox.Z, -bBox.Y);
+            this.Header.MaximumExtent = new Vector3<float>(bBox.X, bBox.Z, bBox.Y);
 
             string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject, time);
             int numVertices = (int)Maxscript.Query("{0}.numverts", Maxscript.QueryType.Integer, mainMesh);
@@ -639,13 +668,13 @@
                     //System.Windows.Forms.MessageBox.Show("1.7");
                 }
             }
-            vertices = verticesList.ToArray();
-            normals = normalsList.ToArray();
+            Vertices = verticesList.ToArray();
+            Normals = normalsList.ToArray();
 
             //System.Windows.Forms.MessageBox.Show("2");
-            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || header.flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
-                if (header.flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                if (Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
                     List<Vector2<float>> texVerticesList = new List<Vector2<float>>(numVertices);
                     for (int i = 0; i < numVertices; i++)
@@ -656,66 +685,66 @@
                             texVerticesList.Add(new Vector2<float>(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y")));
                         }
                     }
-                    texVertices = texVerticesList.ToArray();
+                    TextureCoordinates = texVerticesList.ToArray();
                 }
             }
 
             //System.Windows.Forms.MessageBox.Show("3");
             HashSet<int> diffFaceMats = new HashSet<int>();
-            if (!header.flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
             {
-                if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
+                if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
-                    faceMaterials = new Int16[numFaces];
+                    FaceMaterials = new Int16[numFaces];
                     for (int i = 0; i < numFaces; i++)
                     {
-                        faceMaterials[i] = (Int16)(Int32)Maxscript.Query("getFaceMatID {0} {1}", Maxscript.QueryType.Integer, mainMesh, i + 1);
-                        diffFaceMats.Add(faceMaterials[i]);
+                        FaceMaterials[i] = (Int16)Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1);
+                        diffFaceMats.Add(FaceMaterials[i]);
                     }
                 }
 
                 //System.Windows.Forms.MessageBox.Show("3.1");
-                faceVertices = new Vector3<Int16>[numFaces];
-                for (int i = 0; i < faceVertices.Length; i++)
+                FaceVertices = new Vector3<Int16>[numFaces];
+                for (int i = 0; i < FaceVertices.Length; i++)
                 {
                     Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
-                    faceVertices[i].X = newVertMap[((Int32)Maxscript.Query("face.x", Maxscript.QueryType.Integer) - 1)];
-                    faceVertices[i].Y = newVertMap[((Int32)Maxscript.Query("face.z", Maxscript.QueryType.Integer) - 1)];
-                    faceVertices[i].Z = newVertMap[((Int32)Maxscript.Query("face.y", Maxscript.QueryType.Integer) - 1)];
+                    FaceVertices[i].X = newVertMap[(Maxscript.QueryInteger("face.x") - 1)];
+                    FaceVertices[i].Y = newVertMap[(Maxscript.QueryInteger("face.z") - 1)];
+                    FaceVertices[i].Z = newVertMap[(Maxscript.QueryInteger("face.y") - 1)];
                 }
 
                 //System.Windows.Forms.MessageBox.Show("3.2");
-                if (header.flags.HasFlag(BrgMeshFlag.MATERIAL))
+                if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
-                    vertMaterials = new Int16[vertices.Length];
-                    for (int i = 0; i < faceVertices.Length; i++)
+                    VertexMaterials = new Int16[Vertices.Length];
+                    for (int i = 0; i < FaceVertices.Length; i++)
                     {
-                        vertMaterials[faceVertices[i].X] = faceMaterials[i];
-                        vertMaterials[faceVertices[i].Y] = faceMaterials[i];
-                        vertMaterials[faceVertices[i].Z] = faceMaterials[i];
+                        VertexMaterials[FaceVertices[i].X] = FaceMaterials[i];
+                        VertexMaterials[FaceVertices[i].Y] = FaceMaterials[i];
+                        VertexMaterials[FaceVertices[i].Z] = FaceMaterials[i];
                     }
                 }
             }
 
             //System.Windows.Forms.MessageBox.Show("4");
-            if (meshIndex == 0 && diffFaceMats.Count > 0)
+            if (this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && diffFaceMats.Count > 0)
             {
-                extendedHeader.materialCount = (byte)(diffFaceMats.Count - 1);
-                extendedHeader.uniqueMaterialCount = diffFaceMats.Count;
+                ExtendedHeader.NumMaterials = (byte)(diffFaceMats.Count - 1);
+                ExtendedHeader.NumUniqueMaterials = diffFaceMats.Count;
             }
-            extendedHeader.animTime = (float)Maxscript.Query("animationRange.end.ticks / 4800 as float", Maxscript.QueryType.Float);
+            ExtendedHeader.AnimationLength = Maxscript.QueryFloat("animationRange.end.ticks / 4800 as float");
 
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
-            if (header.flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                Attachpoint = new BrgAttachpointCollection();
+                Attachpoints = new BrgAttachpointCollection();
                 for (int i = 0; i < numAttachpoints; i++)
                 {
                     int index = Convert.ToInt32((Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1)).Substring(4, 2));
-                    index = Attachpoint.Add(index);
+                    index = Attachpoints.Add(index);
                     //System.Windows.Forms.MessageBox.Show("5.1");
-                    Attachpoint[index].NameId = BrgAttachpoint.GetIdByName(((string)Maxscript.Query("{0}[{1}].name", Maxscript.QueryType.String, attachDummy, i + 1)).Substring(7));
-                    Maxscript.Command("{0}[{1}].name = \"{2}\"", attachDummy, i + 1, Attachpoint[index].GetMaxName());
+                    Attachpoints[index].NameId = BrgAttachpoint.GetIdByName((Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1)).Substring(7));
+                    Maxscript.Command("{0}[{1}].name = \"{2}\"", attachDummy, i + 1, Attachpoints[index].GetMaxName());
                     //System.Windows.Forms.MessageBox.Show("5.2");
                     Maxscript.SetVarAtTime(time, "{0}Transform", "{0}[{1}].rotation as matrix3", attachDummy, i + 1);
                     Maxscript.SetVarAtTime(time, "{0}Position", "{0}[{1}].position", attachDummy, i + 1);
@@ -725,29 +754,29 @@
                     bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
-                    Attachpoint[index].x.X = -(float)Maxscript.Query("{0}Transform[1].z", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].x.Y = (float)Maxscript.Query("{0}Transform[3].z", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].x.Z = -(float)Maxscript.Query("{0}Transform[2].z", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoints[index].XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
+                    Attachpoints[index].XVector.Y = Maxscript.QueryFloat("{0}Transform[3].z", attachDummy);
+                    Attachpoints[index].XVector.Z = -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy);
 
-                    Attachpoint[index].y.X = -(float)Maxscript.Query("{0}Transform[1].y", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].y.Y = (float)Maxscript.Query("{0}Transform[3].y", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].y.Z = -(float)Maxscript.Query("{0}Transform[2].y", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoints[index].YVector.X = -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy);
+                    Attachpoints[index].YVector.Y = Maxscript.QueryFloat("{0}Transform[3].y", attachDummy);
+                    Attachpoints[index].YVector.Z = -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy);
 
-                    Attachpoint[index].z.X = -(float)Maxscript.Query("{0}Transform[1].x", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].z.Y = (float)Maxscript.Query("{0}Transform[3].x", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].z.Z = -(float)Maxscript.Query("{0}Transform[2].x", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoints[index].ZVector.X = -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy);
+                    Attachpoints[index].ZVector.Y = Maxscript.QueryFloat("{0}Transform[3].x", attachDummy);
+                    Attachpoints[index].ZVector.Z = -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy);
 
-                    Attachpoint[index].position.X = -(float)Maxscript.Query("{0}Position.x", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].position.Z = -(float)Maxscript.Query("{0}Position.y", Maxscript.QueryType.Float, attachDummy);
-                    Attachpoint[index].position.Y = (float)Maxscript.Query("{0}Position.z", Maxscript.QueryType.Float, attachDummy);
+                    Attachpoints[index].Position.X = -Maxscript.QueryFloat("{0}Position.x", attachDummy);
+                    Attachpoints[index].Position.Z = -Maxscript.QueryFloat("{0}Position.y", attachDummy);
+                    Attachpoints[index].Position.Y = Maxscript.QueryFloat("{0}Position.z", attachDummy);
                     //System.Windows.Forms.MessageBox.Show("5.5");
 
-                    Attachpoint[index].unknown11a.X = -bBox.X;
-                    Attachpoint[index].unknown11a.Z = -bBox.Y;
-                    Attachpoint[index].unknown11a.Y = -bBox.Z;
-                    Attachpoint[index].unknown11b.X = bBox.X;
-                    Attachpoint[index].unknown11b.Z = bBox.Y;
-                    Attachpoint[index].unknown11b.Y = bBox.Z;
+                    Attachpoints[index].BoundingBoxMin.X = -bBox.X;
+                    Attachpoints[index].BoundingBoxMin.Z = -bBox.Y;
+                    Attachpoints[index].BoundingBoxMin.Y = -bBox.Z;
+                    Attachpoints[index].BoundingBoxMax.X = bBox.X;
+                    Attachpoints[index].BoundingBoxMax.Z = bBox.Y;
+                    Attachpoints[index].BoundingBoxMax.Y = bBox.Z;
                 }
                 //System.Windows.Forms.MessageBox.Show("# Atpts: " + Attachpoint.Count);
             }
@@ -837,20 +866,6 @@
                         }
                     }
                 }
-            }
-        }
-
-        public void UpdateSettings(int meshIndex)
-        {
-            header.flags = ParentFile.ParentForm.Flags;
-            header.format = ParentFile.ParentForm.Format;
-            header.properties = ParentFile.ParentForm.Properties;
-            header.interpolationType = ParentFile.ParentForm.InterpolationType;
-            extendedHeader.exportedScaleFactor = ParentFile.ParentForm.TimeMult;
-            if (meshIndex > 0)
-            {
-                header.flags |= BrgMeshFlag.SECONDARYMESH;
-                header.properties &= ~BrgMeshAnimType.NONUNIFORM;
             }
         }
 

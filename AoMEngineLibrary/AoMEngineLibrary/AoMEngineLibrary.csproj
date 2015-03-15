@@ -54,9 +54,11 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="XmlCommentSerialization">
+      <HintPath>..\..\References\XmlCommentSerialization.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BrgFileDeprecated.cs" />
     <Compile Include="Graphics\Brg\BrgAsetHeader.cs" />
     <Compile Include="Graphics\Brg\BrgAttachpoint.cs" />
     <Compile Include="Graphics\Brg\BrgBinaryReader.cs" />
@@ -73,8 +75,10 @@
     <Compile Include="Graphics\Brg\BrgMeshFormat.cs" />
     <Compile Include="Graphics\Brg\BrgMeshHeader.cs" />
     <Compile Include="Graphics\Brg\BrgUserDataEntry.cs" />
+    <Compile Include="Graphics\Grn\GrnFile.cs" />
     <Compile Include="Graphics\Maxscript.cs" />
     <Compile Include="Graphics\Prt\PrtAppearance.cs" />
+    <Compile Include="Graphics\Prt\PrtAppearanceType.cs" />
     <Compile Include="Graphics\Prt\PrtBinaryReader.cs" />
     <Compile Include="Graphics\Prt\PrtBinaryWriter.cs" />
     <Compile Include="Graphics\Prt\PrtCollision.cs" />
@@ -84,11 +88,14 @@
     <Compile Include="Graphics\Prt\PrtEmitter.cs" />
     <Compile Include="Graphics\Prt\PrtFile.cs" />
     <Compile Include="Graphics\Prt\PrtForces.cs" />
+    <Compile Include="Graphics\Prt\PrtMaterialType.cs" />
     <Compile Include="Graphics\Prt\PrtOpacity.cs" />
     <Compile Include="Graphics\Prt\PrtOpacityStage.cs" />
     <Compile Include="Graphics\Prt\PrtScale.cs" />
     <Compile Include="Graphics\Prt\PrtScaleStage.cs" />
     <Compile Include="Graphics\Prt\PrtShape.cs" />
+    <Compile Include="Graphics\Prt\PrtShapeType.cs" />
+    <Compile Include="Graphics\Prt\PrtTerrainInteractionType.cs" />
     <Compile Include="Graphics\Vector2.cs" />
     <Compile Include="Graphics\Vector3.cs" />
     <Compile Include="Graphics\VertexColor.cs" />

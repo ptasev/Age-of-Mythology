@@ -1,13 +1,15 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
     using System;
+    using XmlCommentSerialization;
 
-    public class PrtShape
+    public class PrtShape : XmlAnnotate
     {
         public bool StartFull { get; set; }
         public bool EmitAwayFromBias { get; set; }
         public bool UseSpreader { get; set; }
-        public Int32 ShapeType { get; set; }
+        [XmlComment]
+        public PrtShapeType ShapeType { get; set; }
         public float OuterXRadius { get; set; }
         public float InnerXRadius { get; set; }
         public float OuterYRadius { get; set; }
@@ -32,7 +34,7 @@
             this.UseSpreader = reader.ReadBoolean();
             reader.ReadByte();
 
-            this.ShapeType = reader.ReadInt32();
+            this.ShapeType = (PrtShapeType)reader.ReadInt32();
             this.OuterXRadius = reader.ReadSingle();
             this.InnerXRadius = reader.ReadSingle();
             this.OuterYRadius = reader.ReadSingle();
@@ -54,7 +56,7 @@
             writer.Write(this.UseSpreader);
             writer.Write((byte)0);
 
-            writer.Write(this.ShapeType);
+            writer.Write((Int32)this.ShapeType);
             writer.Write(this.OuterXRadius);
             writer.Write(this.InnerXRadius);
             writer.Write(this.OuterYRadius);

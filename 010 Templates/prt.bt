@@ -10,11 +10,40 @@ LittleEndian();
 
 typedef ubyte bool;
 
-struct PrtString
+typedef enum 
+{ 
+    PSPA_INVALID = -1, PSPA_BILLBOARD, PSPA_AXIAL_BILLBOARD, PSPA_UP_FACING, PSPA_GEOMETRY
+} PrtAppearanceType;
+
+typedef enum 
+{ 
+    PSES_INVALID = -1, PSES_POINT, PSES_BOX_SOLID, PSES_BOX_SURFACE, PSES_BOX_HOLLOW, PSES_ELLIPSOID_SOLID, PSES_ELLIPSOID_SURFACE, PSES_ELLIPSOID_HOLLOW, PSES_HALF_ELLIPSOID_SOLID, PSES_HALF_ELLIPSOID_SURFACE, PSES_HALF_ELLIPSOID_HOLLOW, PSES_RECTANGLE, PSES_CIRCLE
+} PrtShapeType;
+
+typedef enum 
+{ 
+    PSMS_INVALID = -1, PSMS_NORMAL, PSMS_ADDITIVE, PSMS_SUBTRACTIVE
+} PrtMaterialType;
+
+typedef enum 
+{ 
+    PSTI_INVALID = -1, PSTI_FIXED, PSTI_MIN, PSTI_MAX,
+} PrtTerrainInteractionType;
+
+typedef struct
 {
     uint32 StringLength;
-    wchar_t chars[StringLength];
-};
+    wchar_t String[StringLength];
+} PrtString <read=ReadPrtString>;
+string ReadPrtString( PrtString &a )
+{
+    if (a.StringLength == 0)
+    {
+        return "";
+    }
+
+    return (string)a.String;
+}
 
 typedef struct
 {
@@ -45,7 +74,7 @@ struct {
         bool SyncWithAttackAnim;
         byte padding[3];
         int32 MaxParticles;
-        int32 AppearanceType;
+        PrtAppearanceType AppearanceType;
         float UpdateRadius;
         float MaxParticlesVar;
         float ParticleLife;
@@ -85,7 +114,7 @@ struct {
         bool EmitAwayFromBias;
         bool UseSpreader;
         byte padding;
-        int32 ShapeType;
+        PrtShapeType ShapeType;
         float OuterXRadius;
         float InnerXRadius;
         float OuterYRadius;
@@ -107,7 +136,7 @@ struct {
         int32 NumFrames;
         int32 FrameWidth;
         int32 FrameHeight;
-        int32 MaterialType;
+        PrtMaterialType MaterialType;
         RGBAColor Emissive;
         RGBAColor Specular;
         float SpecularExponent;
@@ -183,18 +212,18 @@ struct {
 
     struct {
         int32 NumTypes;
-        int32 TerrainInteractionType;
+        PrtTerrainInteractionType TerrainInteractionType;
         float TerrainHeight;
         float TerrainHeightVar;
     } Collision;
 
-    struct PrtString BrgFilename;
+    PrtString BrgFilename;
 
     uint32 PaletteColors[Color.NumPaletteColors];
 
     float AppearanceWeights[Appearance.NumFiles];
 
-    struct PrtString AppearanceFiles[Appearance.NumFiles] <optimize=false>;
+    PrtString AppearanceFiles[Appearance.NumFiles] <optimize=false>;
 
     struct OpacityStage {
         float Opacity;
@@ -231,7 +260,7 @@ struct {
         float FadeTimeVar;
         float EnergyLoss;
         float EnergyLossVar;
-        struct PrtString Name;
-        struct PrtString FileNames[NumFileNames] <optimize=false>;
+        PrtString Name;
+        PrtString FileNames[NumFileNames] <optimize=false>;
     } Collisions[Collision.NumTypes] <optimize=false>;
 } file;

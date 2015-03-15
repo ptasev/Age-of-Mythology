@@ -1,7 +1,8 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
     using System;
-    using System.Collections.Generic; 
+    using System.Collections.Generic;
+    using System.Xml.Serialization; 
 
     public class PrtOpacity
     {
@@ -12,6 +13,7 @@
         public float CycleTime { get; set; }
         public float CycleTimeVar { get; set; }
 
+        [XmlArrayItem("OpacityStage")]
         public List<PrtOpacityStage> OpacityStages
         {
             get;

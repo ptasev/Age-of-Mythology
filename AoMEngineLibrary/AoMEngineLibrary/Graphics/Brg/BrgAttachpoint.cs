@@ -13,12 +13,12 @@
 
         public int Index;
         public int NameId;
-        public Vector3<float> x;
-        public Vector3<float> y;
-        public Vector3<float> z;
-        public Vector3<float> position;
-        public Vector3<float> unknown11a;
-        public Vector3<float> unknown11b;
+        public Vector3<float> XVector;
+        public Vector3<float> YVector;
+        public Vector3<float> ZVector;
+        public Vector3<float> Position;
+        public Vector3<float> BoundingBoxMin;
+        public Vector3<float> BoundingBoxMax;
 
         public string Name
         {
@@ -47,23 +47,23 @@
         {
             Index = -1;
             NameId = -1;
-            x = new Vector3<float>(0, 1, 0);
-            y = new Vector3<float>(0, 0, -1);
-            z = new Vector3<float>(-1, 0, 0);
-            position = new Vector3<float>(0f);
-            unknown11a = new Vector3<float>(-0.25f);
-            unknown11b = new Vector3<float>(0.25f);
+            XVector = new Vector3<float>(0, 1, 0);
+            YVector = new Vector3<float>(0, 0, -1);
+            ZVector = new Vector3<float>(-1, 0, 0);
+            Position = new Vector3<float>(0f);
+            BoundingBoxMin = new Vector3<float>(-0.25f);
+            BoundingBoxMax = new Vector3<float>(0.25f);
         }
         public BrgAttachpoint(BrgAttachpoint prev)
         {
             Index = prev.Index;
             NameId = prev.NameId;
-            x = prev.x;
-            y = prev.y;
-            z = prev.z;
-            position = prev.position;
-            unknown11a = prev.unknown11a;
-            unknown11b = prev.unknown11b;
+            XVector = prev.XVector;
+            YVector = prev.YVector;
+            ZVector = prev.ZVector;
+            Position = prev.Position;
+            BoundingBoxMin = prev.BoundingBoxMin;
+            BoundingBoxMax = prev.BoundingBoxMax;
         }
 
         public static int GetIdByName(string name)
@@ -86,15 +86,15 @@
             //string yVector = Maxscript.NewPoint3<float>("yVector", this.z.Z, this.y.Z, this.x.Z);
             //string zVector = Maxscript.NewPoint3<float>("zVector", this.z.Y, this.y.Y, this.x.Y);
 
-            string xVector = Maxscript.NewPoint3<float>("xVector", -this.z.X, -this.y.X, -this.x.X);
-            string yVector = Maxscript.NewPoint3<float>("yVector", -this.z.Z, -this.y.Z, -this.x.Z);
-            string zVector = Maxscript.NewPoint3<float>("zVector", this.z.Y, this.y.Y, this.x.Y);
+            string xVector = Maxscript.NewPoint3<float>("xVector", -this.ZVector.X, -this.YVector.X, -this.XVector.X);
+            string yVector = Maxscript.NewPoint3<float>("yVector", -this.ZVector.Z, -this.YVector.Z, -this.XVector.Z);
+            string zVector = Maxscript.NewPoint3<float>("zVector", this.ZVector.Y, this.YVector.Y, this.XVector.Y);
             string posVector = Maxscript.NewPoint3<float>("rotPosVect", 0, 0, 0);
             return Maxscript.NewMatrix3("transformMatrix", xVector, yVector, zVector, posVector);
         }
         public string GetMaxPosition()
         {
-            return Maxscript.NewPoint3<float>("posVector", -this.position.X, -this.position.Z, this.position.Y);
+            return Maxscript.NewPoint3<float>("posVector", -this.Position.X, -this.Position.Z, this.Position.Y);
         }
         public string GetMaxBoxSize()
         {
@@ -102,7 +102,7 @@
         }
         public string GetMaxScale()
         {
-            return Maxscript.NewPoint3<float>("boundingScale", (this.unknown11b.X - this.unknown11a.X), (this.unknown11b.Z - this.unknown11a.Z), (this.unknown11b.Y - this.unknown11a.Y));
+            return Maxscript.NewPoint3<float>("boundingScale", (this.BoundingBoxMax.X - this.BoundingBoxMin.X), (this.BoundingBoxMax.Z - this.BoundingBoxMin.Z), (this.BoundingBoxMax.Y - this.BoundingBoxMin.Y));
         }
         public string GetMaxName()
         {

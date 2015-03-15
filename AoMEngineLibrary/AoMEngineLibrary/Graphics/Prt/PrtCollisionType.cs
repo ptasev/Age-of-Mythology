@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Serialization;
 
     public class PrtCollisionType
     {
@@ -18,6 +19,7 @@
         float EnergyLoss { get; set; }
         float EnergyLossVar { get; set; }
         public string Name { get; set; }
+        [XmlArrayItem("FileName")]
         public List<string> FileNames { get; set; }
 
         private PrtCollisionType()
