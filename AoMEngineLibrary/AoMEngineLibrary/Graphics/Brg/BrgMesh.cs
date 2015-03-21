@@ -478,8 +478,13 @@
             {
                 if (this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
-                    Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
-                        Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+                     Maxscript.AnimateAtTime(time, "meshOp.setVert {0} {1} {2}", mainObject, i + 1, 
+                         Maxscript.NewPoint3Literal<float>(-this.Vertices[i].X, -this.Vertices[i].Z, this.Vertices[i].Y));
+                    //Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
+                    //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+                    //Maxscript.AnimateAtTime(time, "{0}.Edit_Normals.SetNormal {1} {2}", mainObject, i + 1,
+                    //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+                    //Maxscript.AnimateAtTime(time, "{0}.Edit_Normals.SetNormalExplicit {1}", mainObject, i + 1);
 
                     if (this.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) &&
                         this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
@@ -504,8 +509,11 @@
                 }
                 else
                 {
-                    Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n",
-                        -this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+                    Maxscript.Append(vertArray, Maxscript.NewPoint3<float>("v",
+                        -this.Vertices[i].X, -this.Vertices[i].Z, this.Vertices[i].Y));
+
+                    //Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n",
+                    //    -this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
 
                     if (Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                     {
@@ -524,22 +532,6 @@
                         Maxscript.Command("meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
                             this.VertexColors[i].R, this.VertexColors[i].G, this.VertexColors[i].B);
                     }
-                }
-            }
-
-            Maxscript.CommentTitle("Load Attachpoints");
-            foreach (BrgAttachpoint att in Attachpoints)
-            {
-                if (this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
-                {
-                    Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
-                    Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
-                    Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
-                    Maxscript.AnimateAtTime(time, "attachpoint.scale = {0}", att.GetMaxScale());
-                }
-                else
-                {
-                    string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
                 }
             }
 
@@ -566,11 +558,24 @@
                 string groundPlanePos = Maxscript.NewPoint3<float>("groundPlanePos", -Header.HotspotPosition.X, -Header.HotspotPosition.Z, Header.HotspotPosition.Y);
                 Maxscript.Command("plane name:\"ground\" pos:{0} length:10 width:10", groundPlanePos);
 
-                Maxscript.CommentTitle("TVert Hack");
+                Maxscript.CommentTitle("TVert Hack"); // Needed <= 3ds Max 2014; idk about 2015+
                 Maxscript.Command("buildTVFaces {0}", mainObject);
                 for (int i = 1; i <= FaceVertices.Length; i++)
                 {
                     Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainObject, i);
+                }
+
+                Maxscript.CommentTitle("Load Normals for first Frame");
+                Maxscript.Command("max modify mode");
+                //Maxscript.Command("select {0}", mainObject);
+                //Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+                for (int i = 0; i < this.Vertices.Length; i++)
+                {
+                    Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
+                        Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+                    //Maxscript.Command("{0}.Edit_Normals.SetNormal {1} {2}", mainObject, i + 1,
+                    //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
+                    //Maxscript.Command("{0}.Edit_Normals.SetNormalExplicit {1}", mainObject, i + 1);
                 }
 
                 if (Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
@@ -580,6 +585,22 @@
 
                     Maxscript.Command("select {0}.verts", mainObject);
                     Maxscript.Animate("{0}.Unwrap_UVW.moveSelected [0,0,0]", mainObject);
+                }
+            }
+
+            Maxscript.CommentTitle("Load Attachpoints");
+            foreach (BrgAttachpoint att in Attachpoints)
+            {
+                if (this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                {
+                    Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
+                    Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
+                    Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
+                    Maxscript.AnimateAtTime(time, "attachpoint.scale = {0}", att.GetMaxScale());
+                }
+                else
+                {
+                    string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
                 }
             }
         }
@@ -619,7 +640,8 @@
             int numAttachpoints = (int)Maxscript.Query("{0}.count", Maxscript.QueryType.Integer, attachDummy);
 
             // Figure out the used vertices, and corresponding tex verts
-            setUpTVerts(mainMesh, numVertices, numFaces);
+            //Dictionary<int, int> normalsMap = setUpTVerts(mainObject, time, mainMesh, numVertices, numFaces);
+            string averagedNormals = setUpTVerts(mainObject, time, mainMesh, numVertices, numFaces);
             numVertices = Maxscript.QueryInteger("{0}.numverts", mainMesh);
             numFaces = Maxscript.QueryInteger("{0}.numfaces", mainMesh);
             //System.Windows.Forms.MessageBox.Show(numVertices + " " + numFaces);
@@ -654,18 +676,29 @@
                 //System.Windows.Forms.MessageBox.Show("1.2");
                 if (vertexMask[i] > 0)
                 {
-                    newVertMap.Add(i, (Int16)verticesList.Count);
-                    //System.Windows.Forms.MessageBox.Show("1.3");
-                    Maxscript.Command("vertex = getVert {0} {1}", mainMesh, i + 1);
-                    //System.Windows.Forms.MessageBox.Show("1.4");
-                    verticesList.Add(new Vector3<float>(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
+                    try
+                    {
+                        newVertMap.Add(i, (Int16)verticesList.Count);
+                        //System.Windows.Forms.MessageBox.Show("1.3");
+                        Maxscript.Command("vertex = getVert {0} {1}", mainMesh, i + 1);
+                        //System.Windows.Forms.MessageBox.Show("1.4");
+                        verticesList.Add(new Vector3<float>(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
 
-                    //System.Windows.Forms.MessageBox.Show("1.5");
-                    // Snapshot of Mesh recalculates normals, so do it based on time from the real object
-                    Maxscript.SetVarAtTime(time, "normal", "normalize (getNormal {0} {1})", mainObject, i + 1);
-                    //System.Windows.Forms.MessageBox.Show("1.6");
-                    normalsList.Add(new Vector3<float>(-Maxscript.QueryFloat("normal.x"), Maxscript.QueryFloat("normal.z"), -Maxscript.QueryFloat("normal.y")));
-                    //System.Windows.Forms.MessageBox.Show("1.7");
+                        //System.Windows.Forms.MessageBox.Show("1.5");
+                        // Snapshot of Mesh recalculates normals, so do it based on time from the real object
+                        //Maxscript.SetVarAtTime(time, "normal", "normalize (getNormal {0} {1})", mainMesh, i + 1);
+                        //Maxscript.SetVarAtTime(time, "normal", "{0}.Edit_Normals.GetNormal {1}", mainObject, normalsMap[i]);
+                        //System.Windows.Forms.MessageBox.Show("1.6");
+                        normalsList.Add(new Vector3<float>(
+                            -Maxscript.QueryFloat("{0}[{1}].x", averagedNormals, i + 1),
+                            Maxscript.QueryFloat("{0}[{1}].z", averagedNormals, i + 1),
+                            -Maxscript.QueryFloat("{0}[{1}].y", averagedNormals, i + 1)));
+                        //System.Windows.Forms.MessageBox.Show("1.7");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Import Verts/Normals " + i.ToString(), ex);
+                    }
                 }
             }
             Vertices = verticesList.ToArray();
@@ -781,24 +814,15 @@
                 //System.Windows.Forms.MessageBox.Show("# Atpts: " + Attachpoint.Count);
             }
         }
-        private void setUpTVerts(string mainMesh, int numVertices, int numFaces)
+        private string setUpTVerts(string mainObject, float time, string mainMesh, int numVertices, int numFaces)
         {
-            // Reduce Duplicate TVerts
-            //string uniqueTVerts = Maxscript.NewArray("uTVerts");
-            //string uTVIndex = Maxscript.NewBitArray("uTVIndex");
-            //Maxscript.Command("{0}.count = meshop.getNumTverts {1}", uTVIndex, mainMesh);
-            //Maxscript.Command("for t = 1 to (meshop.getNumTverts {0}) do ( if(appendIfUnique {1} (getTVert {0} t)) do (append {2} t))", mainMesh, uniqueTVerts, uTVIndex);
-            //Maxscript.Command("for t = 1 to (meshop.getNumTverts {0}) do (appendIfUnique {1} (getTVert {0} t))", mainMesh, uniqueTVerts);
-            /*Maxscript.Command("meshop.setNumTverts {0} {1}.count", mainMesh, uniqueTVerts);
-            Maxscript.Command("for t = 1 to (meshop.getNumTverts {0}) do (setTVert {0} t {1}[t]", mainMesh, uniqueTVerts);
-            Maxscript.Command("buildTVFaces {0}", mainMesh);
-            for (int i = 1; i <= faceVertices.Length; i++)
-            {
-                Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainMesh, i);
-            }*/
+            // This function makes copies of vertices, and creates faces to use each new vertex
+            // Each vertex get copied (n-1) times, where n = # texture vertices assigned to that vertex
+
             // Figure out the used vertices, and corresponding tex verts
             OrderedSet<int>[] vertUsage = new OrderedSet<int>[numVertices];
             OrderedSet<int>[] faceUsage = new OrderedSet<int>[numVertices];
+            //Dictionary<int, int> normalsMap = new Dictionary<int, int>();
             for (int i = 0; i < vertUsage.Length; i++)
             {
                 vertUsage[i] = new OrderedSet<int>();
@@ -830,19 +854,32 @@
                 catch { throw new Exception(vertUsage.Length + " " + faceUsage.Length + " " + i + " " + vert1 + " " + vert2 + " " + vert3); }
             }
 
+            string averagedNormals = Maxscript.NewArray("averagedNormals");
             for (int i = 0; i < vertUsage.Length; i++)
             {
+                // Calculate Averaged Normals in case Edit_Normals modifier exists
+                // and a vertex has multiple normals, otherwise use regular getNormal
+                Maxscript.NewBitArray("vertexNormalIds");
+                Maxscript.AtTime(time, "{0}.modifiers[#edit_normals].ConvertVertexSelection #{{{1}}} vertexNormalIds",
+                    mainObject, i + 1);
+                Maxscript.Command("averageNormal = [0,0,0]");
+                Maxscript.AtTime(time, "for n in vertexNormalIds do averageNormal += {0}.modifiers[#edit_normals].GetNormal n", mainObject);
+                Maxscript.Command("averageNormal = normalize (averageNormal / vertexNormalIds.numberset)");
+                Maxscript.Command("{0}[{1}] = averageNormal", averagedNormals, i + 1);
+
+                // Duplicate vertices
+                //normalsMap.Add(i, i + 1);
                 if (vertUsage[i].Count > 1)
                 {
                     Maxscript.Command("vertPos = getVert {0} {1}", mainMesh, i + 1);
                     for (int mapV = 1; mapV < vertUsage[i].Count; mapV++)
                     {
                         int mapVert = vertUsage[i][mapV];
-                        //if (!Maxscript.QueryBoolean("{0}[{1}] == true", uTVIndex, mapVert))
-                        //  continue;
                         int newIndex = Maxscript.QueryInteger("{0}.numverts", mainMesh) + 1;
                         Maxscript.Command("setNumVerts {0} {1} true", mainMesh, newIndex);
                         Maxscript.Command("setVert {0} {1} {2}", mainMesh, newIndex, "vertPos");
+                        Maxscript.Command("{0}[{1}] = averageNormal", averagedNormals, newIndex);
+                        //normalsMap.Add(newIndex - 1, i + 1);
                         for (int f = 0; f < faceUsage[i].Count; f++)
                         {
                             int face = faceUsage[i][f];
@@ -867,6 +904,9 @@
                     }
                 }
             }
+
+            return averagedNormals;
+            //return normalsMap;
         }
 
         public class BrgAttachpointCollection : IEnumerable

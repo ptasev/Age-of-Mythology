@@ -1,0 +1,214 @@
+//--------------------------------------
+//--- 010 Editor v5.0 Binary Template
+//
+// File:    grn.bt
+// Author:  Petar Tasev
+// Revision:1.0
+// Purpose: Highlight prt files from AoM game.
+//--------------------------------------
+LittleEndian();
+
+struct GrnNodeContainerS;
+
+typedef enum <int32>
+{
+    GCT_FileDirectory = 0xCA5E0000,
+    GCT_DEP_StandardFrameDirectory = 0xCA5E0100,
+    GCT_NullFrameDirectory       = 0xCA5E0101,
+    GCT_VersionFrameDirectory    = 0xCA5E0102,
+    GCT_StandardFrameDirectory   = 0xCA5E0103,
+    GCT_StringTable              = 0xCA5E0200,
+    GCT_DEP_TextureMapKey        = 0xCA5E0300,
+    GCT_TextureMap               = 0xCA5E0301,
+    GCT_DEP_TexturesSection      = 0xCA5E0302,
+    GCT_TextureMapImage          = 0xCA5E0303,
+    GCT_TextureSection           = 0xCA5E0304,
+    GCT_TextureImageSection      = 0xCA5E0305,
+    GCT_DEP_ConfigurationKey     = 0xCA5E0400,
+    GCT_DEP_ConfigurationDelta   = 0xCA5E0401,
+    GCT_DEP_TransformKey         = 0xCA5E0500,
+    GCT_DEP_TransformDelta       = 0xCA5E0501,
+    GCT_DEP_BoneExtents          = 0xCA5E0502,
+    GCT_DEP_TransformExtents     = 0xCA5E0503,
+    GCT_DEP_TransformsSection    = 0xCA5E0504,
+    GCT_Skeleton                 = 0xCA5E0505,
+    GCT_Bone                     = 0xCA5E0506,
+    GCT_SkeletonSection          = 0xCA5E0507,
+    GCT_BoneSection              = 0xCA5E0508,
+    GCT_DEP_MeshKey              = 0xCA5E0600,
+    GCT_Mesh                     = 0xCA5E0601,
+    GCT_MeshSection              = 0xCA5E0602,
+    GCT_MeshVertexSet            = 0xCA5E0603,
+    GCT_MeshVertexSetSection     = 0xCA5E0604,
+    GCT_DEP_WeightsKey           = 0xCA5E0700,
+    GCT_RESERVED_Weights         = 0xCA5E0701,
+    GCT_MeshWeights              = 0xCA5E0702,
+    GCT_DEP_ScalarChannel        = 0xCA5E0800,
+    GCT_MeshVertices             = 0xCA5E0801,
+    GCT_MeshNormals              = 0xCA5E0802,
+    GCT_MeshField                = 0xCA5E0803,
+    GCT_MeshFieldSection         = 0xCA5E0804,
+    GCT_DEP_IndexSet             = 0xCA5E0900,
+    GCT_MeshTriangles            = 0xCA5E0901,
+    GCT_VectorChannel            = 0xCA5E0A00,
+    GCT_VectorChannelSection     = 0xCA5E0A01,
+    GCT_TransformChannel         = 0xCA5E0B00,
+    GCT_TransformChannelSection  = 0xCA5E0B01,
+    GCT_Form                     = 0xCA5E0C00,
+    GCT_FormSection              = 0xCA5E0C01,
+    GCT_FormBoneChannels         = 0xCA5E0C02,
+    GCT_FormMesh                 = 0xCA5E0C03,
+    GCT_FormVertexSetWeights     = 0xCA5E0C04,
+    GCT_FormPoseWeights          = 0xCA5E0C05,
+    GCT_FormMeshSection          = 0xCA5E0C06,
+    GCT_FormSkeletonSection      = 0xCA5E0C07,
+    GCT_FormSkeleton             = 0xCA5E0C08,
+    GCT_FormMeshBoneSection      = 0xCA5E0C09,
+    GCT_FormMeshBone             = 0xCA5E0C0A,
+    GCT_Material                 = 0xCA5E0D00,
+    GCT_MaterialSection          = 0xCA5E0D01,
+    GCT_MaterialSimpleDiffuseColor = 0xCA5E0D02,
+    GCT_MaterialSimpleDiffuseTexture = 0xCA5E0D03,
+    GCT_Model                    = 0xCA5E0E00,
+    GCT_ModelSection             = 0xCA5E0E01,
+    GCT_RenderPass               = 0xCA5E0E02,
+    GCT_RenderPassFieldSection   = 0xCA5E0E03,
+    GCT_RenderPassFieldAssignment = 0xCA5E0E04,
+    GCT_RenderPassFieldConstant  = 0xCA5E0E05,
+    GCT_RenderPassTriangles      = 0xCA5E0E06,
+    GCT_RenderPassSection        = 0xCA5E0E07,
+    GCT_DataExtension            = 0xCA5E0F00,
+    GCT_DataExtensionProperty    = 0xCA5E0F01,
+    GCT_DataExtensionPropertyValue = 0xCA5E0F02,
+    GCT_DataExtensionSection     = 0xCA5E0F03,
+    GCT_DataExtensionReference   = 0xCA5E0F04,
+    GCT_DataExtensionPropertySection = 0xCA5E0F05,
+    GCT_DataExtensionValueSection = 0xCA5E0F06,
+    GCT_RuntimeVersion           = 0xCA5E1000,
+    GCT_ExporterVersion          = 0xCA5E1001,
+    GCT_ModelerAxisSystem        = 0xCA5E1002,
+    GCT_VersionSection           = 0xCA5E1003,
+    GCT_DEP_SoundTrackKey        = 0xCA5E1100,
+    GCT_DEP_SoundTrackDelta      = 0xCA5E1101,
+    GCT_DEP_SoundTrackEntry      = 0xCA5E1102,
+    GCT_DEP_TextTrackKey         = 0xCA5E1103,
+    GCT_DEP_TextTrackDelta       = 0xCA5E1104,
+    GCT_DEP_TextTrackEntry       = 0xCA5E1105,
+    GCT_DEP_SoundTrackSection    = 0xCA5E1106,
+    GCT_DEP_TextTrackSection     = 0xCA5E1107,
+    GCT_Animation                = 0xCA5E1200,
+    GCT_AnimationVectorTrackSection = 0xCA5E1201,
+    GCT_AnimationVectorTrackKeys = 0xCA5E1202,
+    GCT_AnimationTransformTrackSection = 0xCA5E1203,
+    GCT_AnimationTransformTrackKeys = 0xCA5E1204,
+    GCT_AnimationSection         = 0xCA5E1205,
+    GCT_VARExtension             = 0xCA5EA000,
+    GCT_ApplicationExtension     = 0xCA5EF000,
+    GCT_NullTerminator           = 0xCA5EFFFF
+} GrnCaseType;
+
+typedef struct
+{
+    GrnCaseType CaseType;
+    uint32 NumberOfEntries;
+    uint32 FrameDirectoryCRC;
+    uint32 TotalNumberOfBytesHigh;
+    uint32 TotalNumberOfBytesLow;
+    uint32 Reserved1[3];
+
+    if (NumberOfEntries > 0)
+    {
+        struct GrnNodeContainerS ChildNodes(NumberOfEntries, 0);
+    }
+} GrnMainNode;
+
+typedef struct
+{
+    GrnCaseType CaseType;
+    uint32 FileRelativeLocationHigh;
+    uint32 FileRelativeLocationLow;
+    uint32 CRC;
+    uint32 ReadByTimeStamp;
+
+    local long CurrentPosition = FTell();
+    FSeek(FileRelativeLocationLow);
+    
+    struct
+    {
+        uint32 NumNodes;
+        uint32 Reserved;
+        uint32 OffsetToFirstSection;
+        uint32 Reserved;
+        struct GrnNodeContainerS ChildNodes(NumNodes, FileRelativeLocationLow);
+    } Section;
+
+    FSeek(CurrentPosition);
+} GrnSectionInfoNode;
+
+typedef struct
+{
+    GrnCaseType CaseType;
+    uint32 Offset;
+    uint32 NumChildNodes;
+
+    if (NumChildNodes > 0)
+    {
+        struct GrnNodeContainerS ChildNodes(NumChildNodes, 0);
+    }
+} GrnDefaultNode <read=ReadGrnDefaultNode>;
+string ReadGrnDefaultNode(GrnDefaultNode &gDN)
+{
+    return EnumToString(gDN.CaseType);
+}
+
+typedef struct GrnNodeContainerS (int32 Length, uint32 sectionOffset)
+{
+    local int32 nodeType;
+    while (Length > 0)
+    {
+        nodeType = ReadUInt(FTell());
+
+        if (nodeType == GCT_FileDirectory)
+        {
+            GrnMainNode Node;
+        }
+        else if (nodeType == GCT_VersionFrameDirectory ||
+                nodeType == GCT_StandardFrameDirectory ||
+                nodeType == GCT_NullFrameDirectory)
+        {
+            GrnSectionInfoNode Node;
+        }
+        else
+        {
+            GrnDefaultNode Node;
+            Length -= Node.NumChildNodes;
+        }
+
+        --Length;
+    }
+} GrnNodeContainer;
+
+typedef struct
+{
+    int32 NumStrings;
+    int32 StringsLength;
+    struct {string String;} Strings[NumStrings] <optimize=false>;
+    byte padding[(-StringsLength) & 3];
+} GrnStringData;
+
+struct
+{
+    byte unk000[28];
+    byte unk001[36];
+
+    GrnMainNode MainNode;
+
+    local int DataOffset = MainNode.ChildNodes.Node[1].FileRelativeLocationLow;
+
+    // First Data Node
+    FSeek(MainNode.ChildNodes.Node[1].Section.ChildNodes.Node[0].Offset + DataOffset);
+    GrnStringData Definition;
+
+    // Second Data Node
+    FSeek(MainNode.ChildNodes.Node[1].Section.ChildNodes.Node[1].Offset + DataOffset);
+} file;

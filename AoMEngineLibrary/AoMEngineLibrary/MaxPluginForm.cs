@@ -257,20 +257,20 @@ namespace AoMEngineLibrary
                 specularMaxTextBox.ForeColor = ContrastColor(specularMaxTextBox.BackColor);
                 selfIllumMaxTextBox.BackColor = mat.SelfIllumColor;
                 selfIllumMaxTextBox.ForeColor = ContrastColor(selfIllumMaxTextBox.BackColor);
-                specularLevelMaxTextBox.Text = mat.specularLevel.ToString();
-                opacityMaxTextBox.Text = mat.alphaOpacity.ToString();
-                textureMaxTextBox.Text = mat.name;
+                specularLevelMaxTextBox.Text = mat.SpecularExponent.ToString();
+                opacityMaxTextBox.Text = mat.Alpha.ToString();
+                textureMaxTextBox.Text = mat.DiffuseMap;
                 if (mat.sfx.Count > 0)
                 {
                     reflectionMaxTextBox.Text = mat.sfx[0].Name;
                 }
                 else { reflectionMaxTextBox.Text = string.Empty; }
-                unknownMaxTextBox.Text = mat.name2;
+                unknownMaxTextBox.Text = mat.BumpMap;
 
                 // Update Flags box
                 for (int i = 0; i < materialFlagsCheckedListBox.Items.Count; i++)
                 {
-                    if (mat.flags.HasFlag((BrgMatFlag)materialFlagsCheckedListBox.Items[i]))
+                    if (mat.Flags.HasFlag((BrgMatFlag)materialFlagsCheckedListBox.Items[i]))
                     {
                         materialFlagsCheckedListBox.SetItemChecked(i, true);
                     }
@@ -377,7 +377,7 @@ namespace AoMEngineLibrary
         }
         private void debug()
         {
-            using (TextWriter writer = File.CreateText("C:\\temppp.txt"))
+            using (TextWriter writer = File.CreateText(Path.GetFileName(file.FileName) + ".txt"))
             {
                 for (int i = 0; i < Maxscript.Output.Count; i++)
                 {
@@ -678,7 +678,7 @@ namespace AoMEngineLibrary
                 return;
             }
 
-            ((BrgMaterial)materialListBox.SelectedItems[0]).flags = this.MatFlags;
+            ((BrgMaterial)materialListBox.SelectedItems[0]).Flags = this.MatFlags;
         }
     }
 }

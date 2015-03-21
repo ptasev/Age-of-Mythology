@@ -75,7 +75,12 @@
     <Compile Include="Graphics\Brg\BrgMeshFormat.cs" />
     <Compile Include="Graphics\Brg\BrgMeshHeader.cs" />
     <Compile Include="Graphics\Brg\BrgUserDataEntry.cs" />
+    <Compile Include="Graphics\Grn\GrnBinaryReader.cs" />
     <Compile Include="Graphics\Grn\GrnFile.cs" />
+    <Compile Include="Graphics\Grn\GrnMainNode.cs" />
+    <Compile Include="Graphics\Grn\GrnNode.cs" />
+    <Compile Include="Graphics\Grn\GrnNodeType.cs" />
+    <Compile Include="Graphics\Grn\GrnSectionNode.cs" />
     <Compile Include="Graphics\Maxscript.cs" />
     <Compile Include="Graphics\Prt\PrtAppearance.cs" />
     <Compile Include="Graphics\Prt\PrtAppearanceType.cs" />

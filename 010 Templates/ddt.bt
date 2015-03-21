@@ -1,46 +1,74 @@
 //--------------------------------------
-//--- 010 Editor v3.1 Binary Template
+//--- 010 Editor v5.0 Binary Template
 //
-// File:    brg.bt
+// File:    ddt.bt
 // Author:  Petar Tasev
 // Revision:1.0
 // Purpose: Outline ddt files from AoM game
 //--------------------------------------
 LittleEndian();
 
-typedef enum <byte> { Texture = 0, Texture2 = 1, Palette = 3, BumpMap = 6, CubeMap = 8 } DdtType;
-typedef enum <byte> { Uncompressed32 = 1, Palette2 = 3, DXT1 = 4, DXT3 = 5, DXT5 = 6, Grayscale8 = 7 } DdtTexelFormat;
+typedef enum <byte> { NormalMap = 0, NoAlphaTest = 1, NoLowDetail = 2, DisplacementMap = 4, CubeMap = 8 } DdtProperties;
+typedef enum <byte> 
+{ 
+    Raw32 = 1,
+    Raw24 = 2,
+    BT8 = 3,
+    Dxt1 = 4,
+    Dxt1Alpha = 5,
+    Dxt3 = 6,
+    AlphaData = 7,
+    BC1 = 4,
+    BC2 = 8,
+    BC3 = 9,
+    RgbaDeflated = 10,
+    AlphaDeflated = 11,
+    Rg16Deflated = 12
+} DdtFormat;
 
-int magic;
-
-DdtType type;
-byte alphaBits;
-DdtTexelFormat format;
-byte mipMap;
-int height;
-int width;
-
-local int paletteOffs[5];
-if (format == Palette2) {
-    int numColors;
-    int unknown2;
-    int paletteOffs0;
-    int palette15Off;
-    int paletteOffs1;
-    int paletteOffs4;
-}
-
-struct IMAGEOFF {
-        int offset;
-        int len;
-    } imageOffset[mipMap];
-
-// More palette stuff here
-
-local int i = 0;
-struct IMAGE
+struct
 {
-    FSeek(imageOffset[i].offset);
-    byte imageData[imageOffset[i].len];
-    i++;
-} imageData[mipMap] <optimize=false>;
+    int MagicNumber;
+    
+    DdtProperties Properties;
+    byte AlphaBits;
+    DdtFormat Format;
+    byte MipMapLevels;
+    int Width;
+    int Height;
+    
+    if (Format == BT8) 
+    {
+        struct
+        {
+            uint32 NumColors;
+            uint32 RGB8Offset;
+            uint32 R5G6B5Offset;
+            uint32 R5G5B5Offset;
+            uint32 A1R5B5G5Offset;
+            uint32 A4R4B4G4Offset;
+        } Bt8ImageInfo;
+    }
+    
+    struct
+    {
+        struct 
+        {
+            uint32 Offset;
+            uint32 Size;
+        } ImageOffsets[MipMapLevels];
+    } ImageEntries[Properties == CubeMap ? 6 : 1];
+    
+    local int i = 0;
+    local int j = 0;
+    struct
+    {
+        struct
+        {
+            FSeek(ImageEntries[i].ImageOffsets[j].Offset);
+            byte ImageData[ImageEntries[i].ImageOffsets[j].Size];
+            j++;
+        } ImageDatas[MipMapLevels] <optimize=false>;
+        i++;
+    } Faces[Properties == CubeMap ? 6 : 1];
+} file;

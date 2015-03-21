@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AoMEngineLibrary.Graphics.Brg;
+using AoMEngineLibrary.Graphics.Grn;
 
 namespace AoMBrgEditor
 {
@@ -22,6 +23,8 @@ namespace AoMBrgEditor
 
             string output = "";
             HashSet<int> ttt = new HashSet<int>();
+            GrnFile grnFile = new GrnFile();
+            grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\lp arkan.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             /*DdtFile ddt = new DdtFile(File.Open(@"C:\Users\Petar\Desktop\aom\textures\agamemnon map.ddt", FileMode.Open, FileAccess.Read, FileShare.Read));
             Dds dds = new Dds(ddt);
             dds.Write(File.Open(@"C:\Users\Petar\Desktop\archer x arcus corpse bodya.dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
@@ -42,23 +45,24 @@ namespace AoMBrgEditor
             //@"C:\Games\Steam\SteamApps\common\Age of Mythology\models"
             //@"C:\Users\Petar\Desktop\modelsAlpha"
             //foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
-            //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
-            foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsAlpha", "*.brg", SearchOption.AllDirectories))
+            foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
+            //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsAlpha", "*.brg", SearchOption.AllDirectories))
             {
                 try
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORSNAP)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL)))
                     {
-                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
+                        //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
                     }
                     if (file.Materials.Count > 0)
                     {
                         foreach (BrgMaterial mat in file.Materials)
                         {
-                            if (mat.flags.HasFlag(BrgMatFlag.MATNONE25))
+                            //if(mat.sfx.Count > 1)
+                            if (mat.Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
                             {
-                                //output += Path.GetFileName(s) + " " + mat.flags.ToString() + Environment.NewLine;
+                                //output += Path.GetFileName(s) + " " + mat.sfx[0].Id + " " + mat.Flags.ToString() + Environment.NewLine;
                             }
                         }
                     }
@@ -171,10 +175,10 @@ namespace AoMBrgEditor
                         bool print = false;
                         for (int j = 0; j < file.Materials.Count; j++)
                         {
-                            ttt.Add((int)file.Materials[j].flags);
+                            ttt.Add((int)file.Materials[j].Flags);
                             //if (file.Material[j].flags.HasFlag(BrgMatFlag.MATTEX2))
                             //if (file.Material[j].flags.HasFlag(BrgMatFlag.REFLECTTEX) && file.Material[j].sfx.Count > 1)
-                            if ((((int)file.Materials[j].flags & 0x000000FF) != (int)BrgMatFlag.DIFFUSETEXTURE) && (((int)file.Materials[j].flags & 0x000000FF) == 0))
+                            if ((((int)file.Materials[j].Flags & 0x000000FF) != (int)BrgMatFlag.Alpha) && (((int)file.Materials[j].Flags & 0x000000FF) == 0))
                             //if ((int)file.Material[j].flags == 0x00800000)
                             //if ((int)file.Material[j].flags == 0x00800030)
                             //if ((int)file.Material[j].flags == 0x00800800)
@@ -201,10 +205,10 @@ namespace AoMBrgEditor
                             {
                                 print = true;
                                 output += "id = " + file.Materials[j].id;
-                                output += "\tflags = " + file.Materials[j].flags;
-                                output += "\tflags78 = " + ((int)file.Materials[j].flags & 0x000000FF);
+                                output += "\tflags = " + file.Materials[j].Flags;
+                                output += "\tflags78 = " + ((int)file.Materials[j].Flags & 0x000000FF);
                                 output += "\tu01b = " + file.Materials[j].unknown01b;
-                                output += "\tname = " + file.Materials[j].name;
+                                output += "\tname = " + file.Materials[j].DiffuseMap;
                                 output += Environment.NewLine;
                             }
                         }

@@ -154,6 +154,7 @@
                 // Seems like it was fixed in 3ds Max 2015 with setNormal command
                 Maxscript.Command("update {0} geometry:false topology:false normals:false", mainObject);
                 Maxscript.Command("select {0}", mainObject);
+                //Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
                 Maxscript.Command("max zoomext sel all");
 
                 if (Materials.Count > 0)
@@ -242,6 +243,11 @@
             List<float> keyTime = new List<float>(keys);
             keyTime.Sort();
 
+            if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
+            {
+                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+            }
+            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
             //fixTverts(mainObject);
 
             Header.NumMaterials = (int)Maxscript.Query("{0}.material.materialList.count", Maxscript.QueryType.Integer, mainObject);
