@@ -32,15 +32,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ManagedServices">
-      <HintPath>C:\Program Files\Autodesk\3ds Max 2014\ManagedServices.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Autodesk\3ds Max 2015\ManagedServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MaxCustomControls">
-      <HintPath>C:\Program Files\Autodesk\3ds Max 2014\MaxCustomControls.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Autodesk\MaxCustomControls.dll</HintPath>
     </Reference>
-    <Reference Include="MiscUtil">
-      <HintPath>..\..\MiscUtil.dll</HintPath>
+    <Reference Include="MiscUtil, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d3c42c4bfacf7596, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\JonSkeet.MiscUtil.0.1\lib\net35-Client\MiscUtil.dll</HintPath>
     </Reference>
     <Reference Include="PowerCollections">
       <HintPath>..\..\PowerCollections.dll</HintPath>
@@ -75,12 +75,23 @@
     <Compile Include="Graphics\Brg\BrgMeshFormat.cs" />
     <Compile Include="Graphics\Brg\BrgMeshHeader.cs" />
     <Compile Include="Graphics\Brg\BrgUserDataEntry.cs" />
+    <Compile Include="Graphics\Model\Color3D.cs" />
+    <Compile Include="Graphics\Model\Color4D.cs" />
+    <Compile Include="Graphics\Model\Animation.cs" />
+    <Compile Include="Graphics\Model\Face.cs" />
+    <Compile Include="Graphics\Model\Material.cs" />
+    <Compile Include="Graphics\Model\MeshAnimationChannel.cs" />
+    <Compile Include="Graphics\Model\ModelFile.cs" />
+    <Compile Include="Graphics\Model\ModelFileReader.cs" />
+    <Compile Include="Graphics\Model\VertexWeight.cs" />
     <Compile Include="Graphics\Grn\GrnBinaryReader.cs" />
     <Compile Include="Graphics\Grn\GrnFile.cs" />
     <Compile Include="Graphics\Grn\GrnMainNode.cs" />
     <Compile Include="Graphics\Grn\GrnNode.cs" />
     <Compile Include="Graphics\Grn\GrnNodeType.cs" />
     <Compile Include="Graphics\Grn\GrnSectionNode.cs" />
+    <Compile Include="Graphics\Model\Matrix3x3.cs" />
+    <Compile Include="Graphics\Model\Matrix4x4.cs" />
     <Compile Include="Graphics\Maxscript.cs" />
     <Compile Include="Graphics\Prt\PrtAppearance.cs" />
     <Compile Include="Graphics\Prt\PrtAppearanceType.cs" />
@@ -101,8 +112,12 @@
     <Compile Include="Graphics\Prt\PrtShape.cs" />
     <Compile Include="Graphics\Prt\PrtShapeType.cs" />
     <Compile Include="Graphics\Prt\PrtTerrainInteractionType.cs" />
+    <Compile Include="Graphics\Model\Mesh.cs" />
+    <Compile Include="Graphics\Model\Quaternion.cs" />
     <Compile Include="Graphics\Vector2.cs" />
+    <Compile Include="Graphics\Model\Vector2D.cs" />
     <Compile Include="Graphics\Vector3.cs" />
+    <Compile Include="Graphics\Model\Vector3D.cs" />
     <Compile Include="Graphics\VertexColor.cs" />
     <Compile Include="MaxPluginForm.cs">
       <SubType>Form</SubType>
@@ -127,6 +142,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\picture_save.png" />
   </ItemGroup>
   <ItemGroup>

@@ -22,7 +22,7 @@
 
         public BrgMeshExtendedHeader()
         {
-
+            this.AnimationLength = 0f;
         }
         public BrgMeshExtendedHeader(BrgBinaryReader reader, int extendedHeaderSize)
         {

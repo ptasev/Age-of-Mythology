@@ -1,5 +1,5 @@
 //--------------------------------------
-//--- 010 Editor v3.1 Binary Template
+//--- 010 Editor v5.0 Binary Template
 //
 // File:    brg.bt
 // Author:  Petar Tasev
@@ -8,110 +8,112 @@
 //--------------------------------------
 LittleEndian();
 
-typedef uint16 hfloat <read=h2floatRead>;
+typedef uint16 hfloat < read = h2floatRead >;
 
-string h2floatRead( const hfloat &v )
+string h2floatRead(const hfloat &v)
 {
-   byte currData[2];
-   ConvertDataToBytes(v, currData);
+	byte currData[2];
+	ConvertDataToBytes(v, currData);
 
-   byte data[4];
-   data[0] = 0;
-   data[1] = 0;
-   data[2] = currData[0];
-   data[3] = currData[1];
-   float  fValue;
-   fValue = ConvertBytesToFloat(data);
-   
-   string s;
-   SPrintf( s, "%f", fValue );
-   return s;
+	byte data[4];
+	data[0] = 0;
+	data[1] = 0;
+	data[2] = currData[0];
+	data[3] = currData[1];
+	float  fValue;
+	fValue = ConvertBytesToFloat(data);
+
+	string s;
+	SPrintf(s, "%f", fValue);
+	return s;
 }
-string hfloatRead( const hfloat &v )
+string hfloatRead(const hfloat &v)
 {
-   uint32 dataValue;
-   float  fValue;
-   
-   dataValue = 0;
-   
-   if (v & 0x7C00)
-   {
-      dataValue = ((v & 0x7C00) + 0x1C000) << 13;
-   }
-   
-   dataValue |= ((v & 0x8000) << 16) | ((v & 0x03FF) << 13);
-   
-   string s;
-   SPrintf( s, "%x", dataValue );
-   SScanf( s, "%x", fValue );
-   SPrintf( s, "%f", fValue );
-   return s;
+	uint32 dataValue;
+	float  fValue;
+
+	dataValue = 0;
+
+	if (v & 0x7C00)
+	{
+		dataValue = ((v & 0x7C00) + 0x1C000) << 13;
+	}
+
+	dataValue |= ((v & 0x8000) << 16) | ((v & 0x03FF) << 13);
+
+	string s;
+	SPrintf(s, "%x", dataValue);
+	SScanf(s, "%x", fValue);
+	SPrintf(s, "%f", fValue);
+	return s;
 }
 
-    typedef enum <uint16> {
-        ANIMVERTCOLORALPHA  = 0x0001, // animated vertex color alpha
-        TEXCOORDSA          = 0x0002, // Mesh has first set of tex coords
-        MULTTEXCOORDS       = 0x0004, // mesh has texture coords sets 2..n
-        ANIMATEDMESH        = 0x0008, // Deprecated - Not used after revision 0x0008
-        RESERVED            = 0x0010, // ?
-        COLORCHANNEL        = 0x0020, // Mesh has a vertex color channel
-        MATERIAL            = 0x0040, // Mesh has material data
-        BUMPMAPINFO         = 0x0080, // Mesh has bump/normal map info
-        ATTACHPOINTS        = 0x0100, // Mesh contains dummy objects
-        NOZBUFFER           = 0x0200, // mesh should not be rendered with z-testing
-        SECONDARYMESH       = 0x0400, // Secondary Mesh 2..n
-        ANIMTEXCOORDS       = 0x0800, // Mesh contains animated tex coords
-        PARTICLESYSTEM      = 0x1000, // Mesh is a Particle System
-        PARTICLEPOINTS      = 0x2000, // Mesh vertices are treated as particle points with radii
-        COLORALPHACHANNEL   = 0x4000, // Vertex color channel is treated as alpha channel
-        ANIMVERTCOLORSNAP   = 0x8000 // Animated vertex colors snap between keyframes
-    } MeshFlags <read=readMeshFlags>; // Core Flags A
+typedef enum < uint16 > {
+	ANIMVERTCOLORALPHA = 0x0001, // animated vertex color alpha
+	TEXCOORDSA = 0x0002, // Mesh has first set of tex coords
+	MULTTEXCOORDS = 0x0004, // mesh has texture coords sets 2..n
+	ANIMATEDMESH = 0x0008, // Deprecated - Not used after revision 0x0008
+	RESERVED = 0x0010, // ?
+	COLORCHANNEL = 0x0020, // Mesh has a vertex color channel
+	MATERIAL = 0x0040, // Mesh has material data
+	BUMPMAPINFO = 0x0080, // Mesh has bump/normal map info
+	ATTACHPOINTS = 0x0100, // Mesh contains dummy objects
+	NOZBUFFER = 0x0200, // mesh should not be rendered with z-testing
+	SECONDARYMESH = 0x0400, // Secondary Mesh 2..n
+	ANIMTEXCOORDS = 0x0800, // Mesh contains animated tex coords
+	PARTICLESYSTEM = 0x1000, // Mesh is a Particle System
+	PARTICLEPOINTS = 0x2000, // Mesh vertices are treated as particle points with radii
+	COLORALPHACHANNEL = 0x4000, // Vertex color channel is treated as alpha channel
+	ANIMVERTCOLORSNAP = 0x8000 // Animated vertex colors snap between keyframes
+} MeshFlags < read = readMeshFlags >; // Core Flags A
 
-    typedef enum <uint16> {
-        BILLBOARD           = 0x0001, // rotates with the player view
-        ANIMTEXCOORDSNAP    = 0x0002, // Animated UV/animated texture coords snap between keyframes
-        HASFACENORMALS      = 0x0004, // has face normals
-        ANIMATED            = 0x0008, // animation length included in extended header
-        KEYFRAMESNAP        = 0x0010, // keyframe snap, not smooth
-        NOLOOPANIMATE       = 0x0020, // don't animate Last-First frame
-        MFRESRVED0          = 0x0040, // ?
-        FACEGROUPMAP        = 0x0080, // Mesh has face group list
-        STRIPPED            = 0x0100  // Mesh data is stripped
-    } MeshFormat; // Core Flags B
+typedef enum < uint16 > {
+	BILLBOARD = 0x0001, // rotates with the player view
+	ANIMTEXCOORDSNAP = 0x0002, // Animated UV/animated texture coords snap between keyframes
+	HASFACENORMALS = 0x0004, // has face normals
+	ANIMATED = 0x0008, // animation length included in extended header
+	KEYFRAMESNAP = 0x0010, // keyframe snap, not smooth
+	NOLOOPANIMATE = 0x0020, // don't animate Last-First frame
+	MFRESRVED0 = 0x0040, // ?
+	FACEGROUPMAP = 0x0080, // Mesh has face group list
+	STRIPPED = 0x0100  // Mesh data is stripped
+} MeshFormat; // Core Flags B
 
-    typedef enum <byte> {
-        KEYFRAME    = 0x0000, // keyframe based animation
-        NONUNIFORM  = 0x0001, // Non-uniform animation
-        SKINBONE    = 0x0002 // Skinned Animation
-    } MeshAnimType; // BRG Animation Type
+typedef enum < byte > {
+	KEYFRAME = 0x0000, // keyframe based animation
+	NONUNIFORM = 0x0001, // Non-uniform animation
+	SKINBONE = 0x0002 // Skinned Animation
+} MeshAnimType; // BRG Animation Type
 
-    typedef enum <uint> {
-        SFX          = 0x1C000000,
-        REFLECTTEX   = 0x04000000, // use reflective texture
-        MATNONE3     = 0x02000000, // ulfsark death
-        MATNONE4     = 0x01000000, // low poly ulfsark death
-        MATNONE1     = 0x00800000,
-        GLOW         = 0x00200000,
-        PLAYERCOLOR  = 0x00040000,
-        SOLIDCOLOR   = 0x00020000,
-        MATNONE2     = 0x00008300,
-        MATTEXTURE   = 0x00000030
-    } BrgMatFlag <format=hex>;
-string readMeshFlags (local MeshFlags &flags)
+typedef enum < uint > {
+	SFX = 0x1C000000,
+	REFLECTTEX = 0x04000000, // use reflective texture
+	MATNONE3 = 0x02000000, // ulfsark death
+	MATNONE4 = 0x01000000, // low poly ulfsark death
+	ALPHA = 0x00800000,
+	GLOW = 0x00200000,
+	PLAYERCOLOR = 0x00040000,
+	SPECEXP = 0x00020000,
+	BUMPMAP = 0x00008000,
+	MATTEXTURE = 0x00000030
+} BrgMatFlag < format = hex >;
+string readMeshFlags(local MeshFlags &flags)
 {
 	local string s = "";
 	local int commaNeeded = 0;
 	local MeshFlags i = 1;
 
-	SPrintf (s, "%x: ", flags);
-	while (i < ANIMVERTCOLORSNAP) 
+	SPrintf(s, "%x: ", flags);
+	while (i < ANIMVERTCOLORSNAP)
 	{
-        //Printf("'%u'?", i);
+		//Printf("'%u'?", i);
 		if (flags & i)
 		{
-			if (commaNeeded) 
-			{ s += ", "; }
-			s +=  EnumToString(i);
+			if (commaNeeded)
+			{
+				s += ", ";
+			}
+			s += EnumToString(i);
 			commaNeeded = 1;
 		}
 		i = i << 1;
@@ -120,309 +122,333 @@ string readMeshFlags (local MeshFlags &flags)
 }
 int meHasFlag(MeshFlags &flags, MeshFlags flag)
 {
-    return (flags & flag) == flag;
+	return (flags & flag) == flag;
 }
 int maHasFlag(BrgMatFlag &flags, BrgMatFlag flag)
 {
-    return (flags & flag) == flag;
+	return (flags & flag) == flag;
 }
 
 typedef struct (int size) {
-    local int tmp;
-    for (tmp = 0; tmp < size; tmp++)
-        hfloat val;
-} Vector <optimize=true>;
+	local int tmp;
+	for (tmp = 0; tmp < size; tmp++)
+		hfloat val;
+} Vector < optimize = true >;
 typedef struct (int size) {
-    local int tmp;
-    for (tmp = 0; tmp < size; tmp++)
-        int16 val;
-} VectorInt16 <optimize=true>;
+	local int tmp;
+	for (tmp = 0; tmp < size; tmp++)
+		int16 val;
+} VectorInt16 < optimize = true >;
 typedef struct (int size) {
-    local int tmp;
-    for (tmp = 0; tmp < size; tmp++)
-        float val;
-} VectorFloat <optimize=true>;
+	local int tmp;
+	for (tmp = 0; tmp < size; tmp++)
+		float val;
+} VectorFloat < optimize = true >;
+
+typedef struct BrgMeshHeader
+{
+	int16 version; // always 22
+	MeshFormat meshFormat; // Mesh Core Flags B
+	int16 numVertices;
+	int16 numFaces;
+	byte interpolationType;
+	MeshAnimType animationType; // specialProp
+	int16 userDataEntryCount;
+	VectorFloat objectCenter(3);
+	float centerRadius < comment = "Could be longest axis length of boundingBoxMax" >; // unknown03
+	VectorFloat massPos(3) < comment = "Always 0" >; // always 0 for all 3
+	VectorFloat hotspotPos(3);
+	int16 extendedHeaderSize < comment = "Always 40" >; // always 40 (unknown04)
+	MeshFlags properties; // Mesh Core Flags A
+	VectorFloat boundingBoxMin(3);
+	VectorFloat boundingBoxMax(3);
+};
 
 struct {
-    struct HEADER {
-        char Magic[4];
-        int unknown01;
-        int MaterialCount;
-        int unknown02;
-        int MeshCount;
-        int space;
-        byte Revision;
-        byte padding[3]; //unknown03
-    } header;
+	struct HEADER {
+		char Magic[4];
+		int unknown01;
+		int MaterialCount;
+		int unknown02;
+		int MeshCount;
+		int space;
+		byte Revision;
+		byte padding[3]; //unknown03
+	} header;
+    local uint magic;
 
-    if (header.MeshCount > 1 || (header.padding[0] != 100 && header.padding[0] != 52 && header.padding[0] != 119)) {
-        struct {
-            char asetHead[4];
-            int numFrames;
-            float frameStep;
-            float animTime <comment="Time required to complete loop of all frames">;
-            float frequency;
-            float spf;
-            float fps;
-            int space <comment="used to be a LOD flag">;
-        } asetHeader;
-    }
+	while (!FEof())
+	{
+		magic = ReadUInt();
+		if (magic == 1413829441)
+		{
+			struct {
+				char asetHead[4];
+				int numFrames;
+				float frameStep;
+				float animTime < comment = "Time required to complete loop of all frames" > ;
+				float frequency;
+				float spf;
+				float fps;
+				int space < comment = "used to be a LOD flag" > ;
+			} asetHeader;
+		}
+		else if (magic == 1230193997)
+		{
+			local int meshID = 0;
 
-    local int meshID = 0;
+			struct Mesh {
+				char meshHead[4];
+				BrgMeshHeader mHeader;
 
-    struct Mesh {
-        char meshHead[4];
-        int16 version; // always 22
-        MeshFormat meshFormat; // Mesh Core Flags B
-        int16 numVertices;
-        int16 numFaces;
-        byte interpolationType;
-        MeshAnimType animationType; // specialProp
-        int16 userDataEntryCount;
-        VectorFloat objectCenter(3);
-        float centerRadius <comment="Could be longest axis length of boundingBoxMax">; // unknown03
-        VectorFloat massPos(3) <comment="Always 0">; // always 0 for all 3
-        VectorFloat hotspotPos(3);
-        int16 extendedHeaderSize <comment="Always 40">; // always 40 (unknown04)
-        MeshFlags properties; // Mesh Core Flags A
-        VectorFloat boundingBoxMin(3);
-        VectorFloat boundingBoxMax(3);
+				local int i = 0;
 
-        local int i = 0;
+				if (!((mHeader.properties & PARTICLEPOINTS) == PARTICLEPOINTS))
+				{
+					if (mHeader.version == 22)
+					{
+						Vector vertices(3)[mHeader.numVertices];
+						Vector normals(3)[mHeader.numVertices];
+					}
+					else
+					{
+						VectorFloat vertices(3)[mHeader.numVertices];
+						if (mHeader.version >= 13 && mHeader.version <= 17)
+						{
+							int16 normals[mHeader.numVertices];
+						}
+						else
+						{
+							VectorFloat normals(3)[mHeader.numVertices];
+						}
+					}
 
-if (!((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
-{
-        if (version == 22)
-        {
-            Vector vertices(3)[numVertices];
-            Vector normals(3)[numVertices];
-        }
+					if (!((mHeader.properties & SECONDARYMESH) == SECONDARYMESH) || ((mHeader.properties & ANIMTEXCOORDS) == ANIMTEXCOORDS) || ((mHeader.properties & PARTICLESYSTEM) == PARTICLESYSTEM))
+					{
+						if ((mHeader.properties & TEXCOORDSA) == TEXCOORDSA)
+						{
+							if (mHeader.version == 22)
+							{
+								Vector texVert(2)[mHeader.numVertices];
+							}
+							else
+							{
+								VectorFloat texVert(2)[mHeader.numVertices];
+							}
+						}
+					}
+					if (!((mHeader.properties & SECONDARYMESH) == SECONDARYMESH) || ((mHeader.properties & PARTICLESYSTEM) == PARTICLESYSTEM))
+					{
+						if ((mHeader.properties & MATERIAL) == MATERIAL) {
+							int16 faceMat[mHeader.numFaces];
+						}
+
+						VectorInt16 faceVert(3)[mHeader.numFaces];
+
+						if ((mHeader.properties & MATERIAL) == MATERIAL) {
+							int16 vertMat[mHeader.numVertices];
+						}
+					}
+				}
+
+				if (mHeader.userDataEntryCount > 0 && !((mHeader.properties & PARTICLEPOINTS) == PARTICLEPOINTS))
+				{
+					struct AnimationLength
+					{
+						int animNameLength;
+						int animL0;
+						float animL1;
+						char animName[animNameLength];
+					} animationLengths[mHeader.userDataEntryCount];
+				}
+
+				struct {
+					int16 numIndex0 < comment = "Unused" > ; // same as values in attachpoints, could be unused now
+					int16 numMatrix0 < comment = "Unused" > ; // same as values in attachpoints, could be unused
+					int16 nameLength; // ?? unknown091 (still need to figure out)
+					if (mHeader.extendedHeaderSize > 6)
+					{
+						int16 pointMaterial; // ??
+						float pointRadius < comment = "Always 0" > ; // unknown09Unused always 0
+						if (mHeader.extendedHeaderSize > 12)
+						{
+							byte materialCount;
+							byte padding[3] < comment = "Used to be int with matCount" > ; // still not sure but definitely dealing with materials in the mesh
+							local int shadowLength = padding[0] + padding[1];
+							if (mHeader.extendedHeaderSize > 16)
+							{
+								float animTime < comment = "this is what really matters for the animation length of the model" > ;
+								if (mHeader.extendedHeaderSize > 20)
+								{
+									int materialLibraryTimestamp < comment = "Always 191738312, 1032824281 for TT" > ; // always the same value, one for aom, one for tt models, unknown09const
+									if (mHeader.extendedHeaderSize > 24)
+									{
+										int16 checkSpace < comment = "Always 0" > ; // always 0
+										if (mHeader.extendedHeaderSize > 26)
+										{
+											hfloat unknown09e < comment = "Unused" > ; // 0 for almost everything, could be unused now
+											if (mHeader.extendedHeaderSize > 28)
+											{
+												float exportedScaleFactor; // timeMult, some sort of timing multiplier, adjustment?
+												if (mHeader.extendedHeaderSize > 32)
+												{
+													int nonUniformKeyCount; //09c
+													if (mHeader.extendedHeaderSize > 36)
+													{
+														int uniqueMaterialCount; // how many materials are used in a mesh, could be byte, with 3 padding afterwards
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				} extendedHeader;
+
+
+				if (((mHeader.properties & PARTICLEPOINTS) == PARTICLEPOINTS))
+				{
+					float particleData[4 * mHeader.numVertices];
+					struct ParticlePoint {
+						int nameLength;
+						int unk0;
+						int unk1;
+						char name[nameLength];
+					} particlePoint[mHeader.userDataEntryCount];
+				}
+
+				if (mHeader.version == 13)
+				{
+					char name[extendedHeader.nameLength];
+				}
+
+				if ((mHeader.properties & ATTACHPOINTS) == ATTACHPOINTS || extendedHeader.numMatrix0 > 0)
+				{
+					if (mHeader.version == 19 || mHeader.version == 22)
+					{
+						int16 numMatrix < comment = "This is number of bones" > ;
+						int16 numIndex;
+						int16 unknown10 < comment = "Always 1" > ;
+					}
+					else
+					{
+						local int16 numMatrix = extendedHeader.numMatrix0;
+						local int16 numIndex = extendedHeader.numIndex0;
+					}
+
+					if (mHeader.version == 22)
+					{
+						Vector xVector(3)[numMatrix];
+						Vector yVector(3)[numMatrix];
+						Vector zVector(3)[numMatrix];
+						Vector position(3)[numMatrix];
+						Vector boundingBoxMina(3)[numMatrix];
+						Vector boundingBoxMaxa(3)[numMatrix];
+					}
+					else
+					{
+						if (mHeader.version < 19)
+						{
+						}
+						VectorFloat xVector(3)[numMatrix];
+						VectorFloat yVector(3)[numMatrix];
+						VectorFloat zVector(3)[numMatrix];
+						if (mHeader.version == 19)
+						{
+							VectorFloat position(3)[numMatrix];
+						}
+						VectorFloat boundingBoxMina(3)[numMatrix];
+						VectorFloat boundingBoxMaxa(3)[numMatrix];
+					}
+
+					local int32 numPoints = 0;
+					struct AttachNameIndex {
+						int numAttach;
+						int id;
+					} attachNameIndex[numIndex] < optimize = true > ;
+					for (i = 0; i < numIndex; i++) {
+						numPoints += attachNameIndex[i].numAttach;
+					}
+					//unknown12
+
+					byte pointIndex[numPoints]; //unknown13
+				}
+
+				if ((((mHeader.properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (mHeader.properties & COLORCHANNEL) == COLORCHANNEL) && !((mHeader.properties & SECONDARYMESH) == SECONDARYMESH)) || (mHeader.properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
+					struct VertColor {
+						ubyte R;
+						ubyte G;
+						ubyte B;
+						ubyte A;
+					} vertexColor[mHeader.numVertices];
+				}
+
+				if (mHeader.version >= 14 && mHeader.version <= 19)
+				{
+					VectorFloat faceNormals(3)[mHeader.numFaces];
+				}
+
+				if (!((mHeader.properties & SECONDARYMESH) == SECONDARYMESH) && mHeader.extendedHeaderSize > 12)
+				{
+					byte shadow[extendedHeader.shadowLength];
+				}
+
+				// checkSpace is always 0 anyway, this block happens only on first frames, with variable anim set in specialProps
+				if (mHeader.extendedHeaderSize > 32 && extendedHeader.nonUniformKeyCount) {
+					float variableSpeed[extendedHeader.nonUniformKeyCount] < comment = "mesh[x].StartTime = animTime * varSpeed[x]" > ;
+				}
+
+				meshID++;
+			} item[header.MeshCount] < optimize = false > ;
+		}
+		else if (magic == 1280463949)
+		{
+			struct Material 
+            {
+				char mtrlHead[4];
+				int id;
+				BrgMatFlag properties;
+				float unknown01b < comment = "Always 0" > ; // always 0
+				int nameLength;
+				VectorFloat color(3); //unknown02 [36 bytes]
+				VectorFloat ambient(3);
+				VectorFloat specular(3);
+				VectorFloat emissive(3); //unknown03 [12 bytes]
+
+				char diffuseMap[nameLength];
+
+				if ((properties & SPECEXP) == SPECEXP)
+                {
+					float specularLevel;
+				}
+				if (maHasFlag(properties, BUMPMAP))
+				{
+					int bumpMapLength;
+					char bumpMap[bumpMapLength];
+				}
+
+                if (maHasFlag(properties, ALPHA))
+                {
+				    float alpha; //unknown04
+                }
+
+				if ((properties & REFLECTTEX) == REFLECTTEX)
+                {
+					byte numSFX < comment = "Always 0" > ; // always 1
+					struct MatSFX
+                    {
+						byte sfxId < comment = "Always 30, 40 for TT" > ; // always 30/40 for tt
+						int16 sfxNameLength;
+						char sfxName[sfxNameLength];
+					} sfx[numSFX] < optimize = false > ;
+				}
+			} material[header.MaterialCount] < optimize = false > ;
+		}
         else
         {
-            VectorFloat vertices(3)[numVertices];
-            if (version >= 13 && version <= 17)
-            {
-                int16 normals[numVertices];
-            }
-            else
-            {
-                VectorFloat normals(3)[numVertices];
-            }
+            break;
         }
-
-        if (!((properties & SECONDARYMESH) == SECONDARYMESH) || ((properties & ANIMTEXCOORDS) == ANIMTEXCOORDS) || ((properties & PARTICLESYSTEM) == PARTICLESYSTEM)) 
-        {
-            if ((properties & TEXCOORDSA) == TEXCOORDSA)
-            {
-                if (version == 22)
-                {
-                    Vector texVert(2)[numVertices];
-                }
-                else
-                {
-                    VectorFloat texVert(2)[numVertices];
-                }
-            }
-        }
-        if (!((properties & SECONDARYMESH) == SECONDARYMESH) || ((properties & PARTICLESYSTEM) == PARTICLESYSTEM)) 
-        {
-            if ((properties & MATERIAL) == MATERIAL) {
-                int16 faceMat[numFaces];
-            }
-
-            VectorInt16 faceVert(3)[numFaces];
-
-            if ((properties & MATERIAL) == MATERIAL) {
-                int16 vertMat[numVertices];
-            }
-        }
-}
-
-        if (userDataEntryCount > 0 && !((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
-        {
-            struct AnimationLength
-            {
-                int animNameLength;
-                int animL0;
-                float animL1;
-                char animName[animNameLength];
-            } animationLengths[userDataEntryCount];
-        }
-
-        struct {
-            int16 numIndex0 <comment="Unused">; // same as values in attachpoints, could be unused now
-            int16 numMatrix0 <comment="Unused">; // same as values in attachpoints, could be unused
-            int16 nameLength; // ?? unknown091 (still need to figure out)
-            if (extendedHeaderSize > 6)
-            {
-            int16 pointMaterial; // ??
-            float pointRadius <comment="Always 0">; // unknown09Unused always 0
-            if (extendedHeaderSize > 12)
-            {
-            byte materialCount;
-            byte padding[3] <comment="Used to be int with matCount">; // still not sure but definitely dealing with materials in the mesh
-            local int shadowLength = padding[0] + padding[1];
-            if (extendedHeaderSize > 16)
-            {
-                float animTime <comment="this is what really matters for the animation length of the model">;
-                if (extendedHeaderSize > 20)
-                {
-                    int materialLibraryTimestamp <comment="Always 191738312, 1032824281 for TT">; // always the same value, one for aom, one for tt models, unknown09const
-                    if (extendedHeaderSize > 24)
-                    {
-                        int16 checkSpace <comment="Always 0">; // always 0
-                        if (extendedHeaderSize > 26)
-                        {
-                            hfloat unknown09e <comment="Unused">; // 0 for almost everything, could be unused now
-                            if (extendedHeaderSize > 28)
-                            {
-                                float exportedScaleFactor; // timeMult, some sort of timing multiplier, adjustment?
-                                if (extendedHeaderSize > 32)
-                                {
-                                    int nonUniformKeyCount; //09c
-                                    if (extendedHeaderSize > 36)
-                                    {
-                                        int uniqueMaterialCount; // how many materials are used in a mesh, could be byte, with 3 padding afterwards
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            }
-            }
-        } extendedHeader;
-
-
-        if (((properties & PARTICLEPOINTS) == PARTICLEPOINTS))
-        {
-            float particleData[4 * numVertices];
-            struct ParticlePoint {
-                int nameLength;
-                int unk0;
-                int unk1;
-                char name[nameLength];
-            } particlePoint[userDataEntryCount];
-        }
-
-        if (version == 13)
-        {
-            char name[extendedHeader.nameLength];
-        }
-
-        if ((properties & ATTACHPOINTS) == ATTACHPOINTS || extendedHeader.numMatrix0 > 0)
-        {
-            if (version == 19 || version == 22)
-            {
-                int16 numMatrix <comment="This is number of bones">;
-                int16 numIndex;
-                int16 unknown10 <comment="Always 1">;
-            }
-            else
-            {
-                local int16 numMatrix = extendedHeader.numMatrix0;
-                local int16 numIndex = extendedHeader.numIndex0;
-            }
-
-            if (version == 22)
-            {
-                Vector xVector(3)[numMatrix];
-                Vector yVector(3)[numMatrix];
-                Vector zVector(3)[numMatrix];
-                Vector position(3)[numMatrix];
-                Vector boundingBoxMina(3)[numMatrix];
-                Vector boundingBoxMaxa(3)[numMatrix];
-            }
-            else
-            {
-                if (version < 19)
-                {
-                }
-                VectorFloat xVector(3)[numMatrix];
-                VectorFloat yVector(3)[numMatrix];
-                VectorFloat zVector(3)[numMatrix];
-                if (version == 19)
-                {
-                    VectorFloat position(3)[numMatrix];
-                }
-                VectorFloat boundingBoxMina(3)[numMatrix];
-                VectorFloat boundingBoxMaxa(3)[numMatrix];
-            }
-
-            local int32 numPoints = 0;
-            struct AttachNameIndex {
-                int numAttach;
-                int id;
-            } attachNameIndex[numIndex] <optimize=true>;
-            for (i = 0; i < numIndex; i++) {
-                numPoints += attachNameIndex[i].numAttach;
-            }
-            //unknown12
-
-            byte pointIndex[numPoints]; //unknown13
-        }
-
-        if ((((properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (properties & COLORCHANNEL) == COLORCHANNEL) && !((properties & SECONDARYMESH) == SECONDARYMESH)) || (properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
-            struct VertColor {
-                ubyte R;
-                ubyte G;
-                ubyte B;
-                ubyte A;
-            } vertexColor[numVertices];
-        }
-
-        if (version >= 14 && version <= 19)
-        {
-            VectorFloat faceNormals(3)[numFaces];
-        }
-
-        if (!((properties & SECONDARYMESH) == SECONDARYMESH) && extendedHeaderSize > 12)
-        {
-            byte shadow[extendedHeader.shadowLength];
-        }
-
-        // checkSpace is always 0 anyway, this block happens only on first frames, with variable anim set in specialProps
-        if (extendedHeaderSize > 32 && extendedHeader.nonUniformKeyCount) {
-            float variableSpeed[extendedHeader.nonUniformKeyCount] <comment="mesh[x].StartTime = animTime * varSpeed[x]">;
-        }
-
-        meshID++;
-    } item[header.MeshCount] <optimize=false>;
-
-    if ((item[0].properties & MATERIAL) == MATERIAL) {
-        struct Material { // STILL HAVEN'T THOROUGHLY LOOKED AT MATERIALS
-            char mtrlHead[4];
-            int id;
-            BrgMatFlag properties;
-            float unknown01b <comment="Always 0">; // always 0
-            int nameLength;
-            VectorFloat color(3); //unknown02 [36 bytes]
-            VectorFloat ambient(3);
-            VectorFloat specular(3);
-            VectorFloat selfIllumination(3); //unknown03 [12 bytes]
-    
-            char name[nameLength];
-
-            if ((properties & SOLIDCOLOR) == SOLIDCOLOR) {
-                float specularLevel;
-            }
-            if (maHasFlag(properties, MATNONE2))
-            {
-                int nameLength2;
-                char name2[nameLength2];
-            }
-
-            float alpha; //unknown04
-
-            if ((properties & REFLECTTEX) == REFLECTTEX) {
-                byte numSFX <comment="Always 0">; // always 1
-                struct MatSFX {
-                    byte sfxId <comment="Always 30, 40 for TT">; // always 30/40 for tt
-                    int16 sfxNameLength;
-                    char sfxName[sfxNameLength];
-                } sfx[numSFX] <optimize=false>;
-            }
-        } material[header.MaterialCount] <optimize=false>;
-    }
+	}
 } file;

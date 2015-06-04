@@ -5,6 +5,9 @@
     [Flags]
     public enum BrgMatFlag : uint
     {
+        MATNONE1 = 0x80000000,
+        MATNONE2 = 0x40000000,
+        MATNONE3 = 0x20000000,
         ILLUMREFLECTION = 0x10000000, // Don't use the VectorFloat specular?
         MATNONE10 = 0x08000000, // no idea
         REFLECTIONTEXTURE = 0x04000000, // use a reflection texture

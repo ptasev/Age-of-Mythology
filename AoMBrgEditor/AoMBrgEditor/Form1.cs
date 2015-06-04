@@ -44,8 +44,8 @@ namespace AoMBrgEditor
             return;*/
             //@"C:\Games\Steam\SteamApps\common\Age of Mythology\models"
             //@"C:\Users\Petar\Desktop\modelsAlpha"
-            //foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
-            foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
+            foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
+            //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
             //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsAlpha", "*.brg", SearchOption.AllDirectories))
             {
                 try
@@ -60,9 +60,9 @@ namespace AoMBrgEditor
                         foreach (BrgMaterial mat in file.Materials)
                         {
                             //if(mat.sfx.Count > 1)
-                            if (mat.Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
+                            if (mat.Flags.HasFlag(BrgMatFlag.ILLUMREFLECTION))
                             {
-                                //output += Path.GetFileName(s) + " " + mat.sfx[0].Id + " " + mat.Flags.ToString() + Environment.NewLine;
+                                output += Path.GetFileName(s) + " " + mat.Flags.ToString() + Environment.NewLine;
                             }
                         }
                     }

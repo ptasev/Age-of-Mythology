@@ -1,5 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
+    using AoMEngineLibrary.Graphics.Model;
     using MiscUtil.Conversion;
     using MiscUtil.IO;
     using System;
@@ -38,7 +39,7 @@
         }
 
         #region Vector3
-        public void WriteVector3(Vector3<float> v, bool isAom = true, bool isHalf = false)
+        public void WriteVector3D(Vector3D v, bool isAom = true, bool isHalf = false)
         {
             if (isAom)
             {
@@ -87,34 +88,19 @@
             }
         }
         #endregion
-        #region Vector2
-        public void WriteVector2(ref Vector2<float> v, bool isHalf = false)
+
+        public void WriteColor3D(Color3D color)
         {
-            if (!isHalf)
-            {
-                this.Write(v.X);
-                this.Write(v.Y);
-            }
-            else
-            {
-                this.WriteHalf(v.X);
-                this.WriteHalf(v.Y);
-            }
+            this.Write(color.R);
+            this.Write(color.G);
+            this.Write(color.B);
         }
-        #endregion
 
         public void WriteHalf(float half)
         {
             byte[] f = EndianBitConverter.Little.GetBytes(half);
             this.Write(f[2]);
             this.Write(f[3]);
-        }
-        public void WriteVertexColor(ref VertexColor vertexColor)
-        {
-            this.Write(vertexColor.R);
-            this.Write(vertexColor.G);
-            this.Write(vertexColor.B);
-            this.Write(vertexColor.A);
         }
         public void WriteString(string str)
         {

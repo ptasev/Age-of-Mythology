@@ -12,7 +12,6 @@
 
         public BrgAsetHeader()
         {
-
         }
         public BrgAsetHeader(BrgBinaryReader reader)
         {
