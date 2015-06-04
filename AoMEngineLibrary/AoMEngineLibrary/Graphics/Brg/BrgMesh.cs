@@ -4,7 +4,6 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using Wintellect.PowerCollections;
 
     public class BrgMesh : Mesh
     {
