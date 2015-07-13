@@ -8,13 +8,17 @@
 
     public class Face
     {
-        public List<Int16> Indices { get; set; }
         public Int16 MaterialIndex { get; set; }
+        public List<Int16> Indices { get; set; }
+        public List<Int32> NormalIndices { get; set; }
+        public List<Int32> TextureIndices { get; set; }
 
         public Face()
         {
-            this.Indices = new List<Int16>(3);
             this.MaterialIndex = -1;
+            this.Indices = new List<Int16>(3);
+            this.NormalIndices = new List<int>(3);
+            this.TextureIndices = new List<Int32>(3);
         }
     }
 }

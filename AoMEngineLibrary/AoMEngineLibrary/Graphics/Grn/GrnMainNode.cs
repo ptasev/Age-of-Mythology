@@ -40,7 +40,7 @@
                 }
             }
 
-            this.ReadData(reader, 0);
+            //this.ReadData(reader, 0);
         }
         internal override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {

@@ -199,5 +199,40 @@
             //        break;
             //}
         }
+
+        public virtual List<GrnNode> FindNodes(GrnNodeType nodeType)
+        {
+            List<GrnNode> results = new List<GrnNode>();
+
+            if (this.NodeType == nodeType)
+            {
+                results.Add(this);
+            }
+
+            for (int i = 0; i < this.ChildNodes.Count; ++i)
+            {
+                results.AddRange(this.ChildNodes[i].FindNodes(nodeType));
+            }
+
+            return results;
+        }
+        public virtual GrnNode FindNode(GrnNodeType nodeType)
+        {
+            if (this.NodeType == nodeType)
+            {
+                return this;
+            }
+
+            for (int i = 0; i < this.ChildNodes.Count; ++i)
+            {
+                GrnNode result = this.ChildNodes[i].FindNode(nodeType);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
     }
 }

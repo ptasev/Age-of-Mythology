@@ -72,12 +72,17 @@
     <Compile Include="Graphics\Brg\BrgMeshFormat.cs" />
     <Compile Include="Graphics\Brg\BrgMeshHeader.cs" />
     <Compile Include="Graphics\Brg\BrgUserDataEntry.cs" />
+    <Compile Include="Graphics\Grn\GrnAnimation.cs" />
+    <Compile Include="Graphics\Grn\GrnBone.cs" />
+    <Compile Include="Graphics\Grn\GrnBoneBinding.cs" />
+    <Compile Include="Graphics\Grn\GrnBoneTrack.cs" />
+    <Compile Include="Graphics\Grn\GrnMaterial.cs" />
+    <Compile Include="Graphics\Grn\GrnMesh.cs" />
     <Compile Include="Graphics\Model\Color3D.cs" />
     <Compile Include="Graphics\Model\Color4D.cs" />
     <Compile Include="Graphics\Model\Animation.cs" />
     <Compile Include="Graphics\Model\Face.cs" />
     <Compile Include="Graphics\Model\Material.cs" />
-    <Compile Include="Graphics\Model\MeshAnimationChannel.cs" />
     <Compile Include="Graphics\Model\ModelFile.cs" />
     <Compile Include="Graphics\Model\ModelFileReader.cs" />
     <Compile Include="Graphics\Model\VertexWeight.cs" />
@@ -116,6 +121,7 @@
     <Compile Include="Graphics\Vector3.cs" />
     <Compile Include="Graphics\Model\Vector3D.cs" />
     <Compile Include="Graphics\VertexColor.cs" />
+    <Compile Include="GrnMax.cs" />
     <Compile Include="MaxPluginForm.cs">
       <SubType>Form</SubType>
     </Compile>

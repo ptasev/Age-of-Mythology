@@ -8,17 +8,15 @@
 
     public class Animation
     {
-        public string Name { get; set; }
         public float Duration { get; set; }
         public float TimeStep { get; set; }
-        public MeshAnimationChannel MeshChannel { get; set; }
+        public List<float> MeshKeys { get; set; }
 
         public Animation()
         {
-            this.Name = "(unnamed)";
             this.Duration = 1f;
             this.TimeStep = 1f;
-            this.MeshChannel = new MeshAnimationChannel();
+            this.MeshKeys = new List<float>();
         }
     }
 }

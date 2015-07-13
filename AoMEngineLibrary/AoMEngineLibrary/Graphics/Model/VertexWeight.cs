@@ -8,8 +8,13 @@
 
     public class VertexWeight
     {
-        public int BoneIndex { get; set; }
-        public List<int> VertexIndices { get; set; }
+        public List<int> BoneIndices { get; set; }
         public List<float> Weights { get; set; }
+
+        public VertexWeight()
+        {
+            this.BoneIndices = new List<int>();
+            this.Weights = new List<float>();
+        }
     }
 }

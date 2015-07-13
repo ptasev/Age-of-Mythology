@@ -6,23 +6,22 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class ModelFile<TMesh, TMaterial>
+    public class ModelFile<TMesh, TMaterial, TAnimation>
         where TMesh : Mesh
         where TMaterial : Material
+        where TAnimation : Animation
     {
-        public string Name { get; set; }
         public List<TMesh> Meshes { get; set; }
         public List<TMaterial> Materials { get; set; }
 
-        public Animation Animation { get; set; }
+        public TAnimation Animation { get; set; }
 
         public ModelFile()
         {
-            this.Name = "(unnamed)";
             this.Meshes = new List<TMesh>();
             this.Materials = new List<TMaterial>();
 
-            this.Animation = new Animation();
+            this.Animation = (TAnimation)Activator.CreateInstance(typeof(TAnimation));
         }
     }
 }

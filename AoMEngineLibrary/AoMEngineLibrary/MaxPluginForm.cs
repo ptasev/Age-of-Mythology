@@ -113,8 +113,8 @@ namespace AoMEngineLibrary
             this.TopMost = true;
             this.MaximizeBox = false;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            openFileDialog.Filter = "brg files|*.brg";
-            saveFileDialog.Filter = "brg files|*.brg";
+            openFileDialog.Filter = "brg files|*.brg|grn files|*.grn";
+            saveFileDialog.Filter = "brg files|*.brg|grn files|*.grn";
             saveFileDialog.AddExtension = false;
 
             // Update Colors
@@ -389,7 +389,7 @@ namespace AoMEngineLibrary
         }
         private void debug()
         {
-            using (TextWriter writer = File.CreateText(Path.GetFileName(file.FileName) + ".txt"))
+            using (TextWriter writer = File.CreateText(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\lp skult.grn.txt.ms"))//Path.GetFileName(file.FileName) + ".txt"))
             {
                 for (int i = 0; i < Maxscript.Output.Count; i++)
                 {
@@ -707,11 +707,11 @@ namespace AoMEngineLibrary
                     Maxscript.CommentTitle("ANIMATE FRAME " + i);
                     if (i > 0)
                     {
-                        ExportBrgMeshToMax(mainObject, ((BrgMesh)brg.Meshes[0].MeshAnimations[i - 1]), brg.Animation.MeshChannel.MeshTimes[i]);
+                        ExportBrgMeshToMax(mainObject, ((BrgMesh)brg.Meshes[0].MeshAnimations[i - 1]), brg.Animation.MeshKeys[i]);
                     }
                     else
                     {
-                        ExportBrgMeshToMax(mainObject, brg.Meshes[0], brg.Animation.MeshChannel.MeshTimes[0]);
+                        ExportBrgMeshToMax(mainObject, brg.Meshes[0], brg.Animation.MeshKeys[0]);
                     }
                 }
 
@@ -758,7 +758,7 @@ namespace AoMEngineLibrary
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
                     Maxscript.AnimateAtTime(time, "meshOp.setVert {0} {1} {2}", mainObject, i + 1,
-                        Maxscript.NewPoint3Literal<float>(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
+                        Maxscript.Point3Literal<float>(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
                     //Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
                     //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
                     //Maxscript.AnimateAtTime(time, "{0}.Edit_Normals.SetNormal {1} {2}", mainObject, i + 1,
@@ -769,7 +769,7 @@ namespace AoMEngineLibrary
                         mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                     {
                         Maxscript.Animate("{0}.Unwrap_UVW.SetVertexPosition {1}s {2} {3}", mainObject, time, i + 1,
-                            Maxscript.NewPoint3Literal<float>(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
+                            Maxscript.Point3Literal<float>(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
                     }
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
@@ -851,7 +851,7 @@ namespace AoMEngineLibrary
                 for (int i = 0; i < mesh.Vertices.Count; i++)
                 {
                     Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
-                        Maxscript.NewPoint3Literal<float>(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
+                        Maxscript.Point3Literal<float>(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
                     //Maxscript.Command("{0}.Edit_Normals.SetNormal {1} {2}", mainObject, i + 1,
                     //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
                     //Maxscript.Command("{0}.Edit_Normals.SetNormalExplicit {1}", mainObject, i + 1);
@@ -975,7 +975,7 @@ namespace AoMEngineLibrary
             brg.Animation = new Animation();
             for (int i = 1; i <= brg.Header.NumMeshes; ++i)
             {
-                brg.Animation.MeshChannel.MeshTimes.Add(Maxscript.QueryFloat("keys[{0}]", i));
+                brg.Animation.MeshKeys.Add(Maxscript.QueryFloat("keys[{0}]", i));
             }
 
             if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
@@ -1003,13 +1003,13 @@ namespace AoMEngineLibrary
                 {
                     brg.Meshes[0].MeshAnimations.Add(new BrgMesh(brg));
                     brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType, this.ExportedScaleFactor);
-                    ImportBrgMeshFromMax(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshChannel.MeshTimes[i]);
+                    ImportBrgMeshFromMax(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshKeys[i]);
                 }
                 else
                 {
                     brg.Meshes.Add(new BrgMesh(brg));
                     brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType, this.ExportedScaleFactor);
-                    ImportBrgMeshFromMax(mainObject, brg.Meshes[i], brg.Animation.MeshChannel.MeshTimes[i]);
+                    ImportBrgMeshFromMax(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i]);
                 }
             }
 
@@ -1020,7 +1020,7 @@ namespace AoMEngineLibrary
                 brg.Meshes[0].NonUniformKeys = new float[brg.Meshes[0].MeshAnimations.Count + 1];
                 for (int i = 0; i <= brg.Meshes[0].MeshAnimations.Count; i++)
                 {
-                    brg.Meshes[0].NonUniformKeys[i] = brg.Animation.MeshChannel.MeshTimes[i] / brg.Animation.Duration;
+                    brg.Meshes[0].NonUniformKeys[i] = brg.Animation.MeshKeys[i] / brg.Animation.Duration;
                 }
             }
         }
@@ -1076,9 +1076,9 @@ namespace AoMEngineLibrary
 
                     //System.Windows.Forms.MessageBox.Show("1.5");
                     mesh.Normals.Add(new Vector3D(
-                        -Maxscript.QueryFloat("{0}[{1}].x", "averagedNormals", i + 1),
-                        Maxscript.QueryFloat("{0}[{1}].z", "averagedNormals", i + 1),
-                        -Maxscript.QueryFloat("{0}[{1}].y", "averagedNormals", i + 1)));
+                        Maxscript.QueryFloat("{0}[{1}].x", "averagedNormals", i + 1),
+                        -Maxscript.QueryFloat("{0}[{1}].z", "averagedNormals", i + 1),
+                        Maxscript.QueryFloat("{0}[{1}].y", "averagedNormals", i + 1)));
                     //System.Windows.Forms.MessageBox.Show("1.7");
                 }
                 catch (Exception ex)
@@ -1217,14 +1217,14 @@ namespace AoMEngineLibrary
             mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
                 Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
                 Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
-            Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
+            mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
             mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
             int opacityType = Maxscript.QueryInteger("mat.opacityType");
             if (mat.SpecularExponent > 0)
             {
                 mat.Flags |= BrgMatFlag.SpecularExponent;
             }
-            if (Opacity < 1f)
+            if (mat.Opacity < 1f)
             {
                 mat.Flags |= BrgMatFlag.Alpha;
             }
@@ -1268,5 +1268,57 @@ namespace AoMEngineLibrary
             }
         }
         #endregion
+
+        private void grnTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog.FilterIndex = 2;
+            if (!string.IsNullOrEmpty(Settings.OpenFileDialogFileName))
+            {
+                openFileDialog.InitialDirectory = Settings.OpenFileDialogFileName;
+            }
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    //@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\lp skult.grn"
+                    GrnMax.File = new Graphics.Grn.GrnFile();
+                    GrnMax.File.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    GrnMax.Import();
+                    debug();
+                    this.Text = "ABE - " + Path.GetFileName(openFileDialog.FileName);
+                    isExportedToMax = false;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to open file!" + Environment.NewLine + Environment.NewLine + ex.Message, "ABE", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GrnMax.Export();
+
+            try
+            {
+                DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
+                if (dlgR == DialogResult.Yes)
+                {
+                    Maxscript.Command("resetMaxFile #noprompt");
+                }
+                else if (dlgR == DialogResult.Cancel)
+                {
+                    return;
+                }
+            }
+            catch
+            {
+            }
+            Maxscript.Output.Clear();
+            debug();
+
+            GrnMax.Import();
+        }
     }
 }

@@ -5,7 +5,7 @@
     using System;
     using System.Collections.Generic;
 
-    public class BrgFile : ModelFile<BrgMesh, BrgMaterial>
+    public class BrgFile : ModelFile<BrgMesh, BrgMaterial, Animation>
     {
         public string FileName { get; set; }
 
@@ -91,19 +91,19 @@
                 {
                     for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; ++i)
                     {
-                        this.Animation.MeshChannel.MeshTimes.Add(this.Meshes[0].NonUniformKeys[i] * this.Animation.Duration);
+                        this.Animation.MeshKeys.Add(this.Meshes[0].NonUniformKeys[i] * this.Animation.Duration);
                     }
                 }
                 else if (this.Meshes[0].MeshAnimations.Count > 0)
                 {
                     for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; ++i)
                     {
-                        this.Animation.MeshChannel.MeshTimes.Add((float)i / ((float)this.Meshes[0].MeshAnimations.Count) * this.Animation.Duration);
+                        this.Animation.MeshKeys.Add((float)i / ((float)this.Meshes[0].MeshAnimations.Count) * this.Animation.Duration);
                     }
                 }
                 else
                 {
-                    this.Animation.MeshChannel.MeshTimes.Add(0);
+                    this.Animation.MeshKeys.Add(0);
                 }
             }
         }
@@ -168,7 +168,7 @@
         }
         private void updateAsetHeader()
         {
-            AsetHeader.numFrames = this.Animation.MeshChannel.MeshTimes.Count;
+            AsetHeader.numFrames = this.Animation.MeshKeys.Count;
             AsetHeader.frameStep = 1f / (float)AsetHeader.numFrames;
             AsetHeader.animTime = this.Animation.Duration;
             AsetHeader.frequency = 1f / (float)AsetHeader.animTime;

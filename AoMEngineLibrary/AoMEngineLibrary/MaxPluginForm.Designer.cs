@@ -89,9 +89,11 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.materialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extractMTRLFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.flagDetailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.grnTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.flagDetailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.materialPanel.SuspendLayout();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
@@ -125,7 +127,7 @@
             this.materialPanel.Controls.Add(this.materialFlagsGroupBox);
             this.materialPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.materialPanel.Location = new System.Drawing.Point(307, 4);
-            this.materialPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialPanel.Margin = new System.Windows.Forms.Padding(4);
             this.materialPanel.Name = "materialPanel";
             this.materialPanel.Size = new System.Drawing.Size(726, 627);
             this.materialPanel.TabIndex = 1;
@@ -149,9 +151,9 @@
             this.materialGroupBox.Controls.Add(this.diffuseMaxTextBox);
             this.materialGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.materialGroupBox.Location = new System.Drawing.Point(0, 0);
-            this.materialGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.materialGroupBox.Name = "materialGroupBox";
-            this.materialGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.materialGroupBox.Size = new System.Drawing.Size(726, 173);
             this.materialGroupBox.TabIndex = 0;
             this.materialGroupBox.TabStop = false;
@@ -160,7 +162,7 @@
             // updateMatSettingsButton
             // 
             this.updateMatSettingsButton.Location = new System.Drawing.Point(357, 117);
-            this.updateMatSettingsButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.updateMatSettingsButton.Margin = new System.Windows.Forms.Padding(4);
             this.updateMatSettingsButton.Name = "updateMatSettingsButton";
             this.updateMatSettingsButton.Size = new System.Drawing.Size(341, 28);
             this.updateMatSettingsButton.TabIndex = 14;
@@ -171,7 +173,7 @@
             // specularLevelMaxTextBox
             // 
             this.specularLevelMaxTextBox.Location = new System.Drawing.Point(405, 55);
-            this.specularLevelMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.specularLevelMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.specularLevelMaxTextBox.Name = "specularLevelMaxTextBox";
             this.specularLevelMaxTextBox.ReadOnly = true;
             this.specularLevelMaxTextBox.Size = new System.Drawing.Size(117, 22);
@@ -190,7 +192,7 @@
             // opacityMaxTextBox
             // 
             this.opacityMaxTextBox.Location = new System.Drawing.Point(593, 55);
-            this.opacityMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.opacityMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.opacityMaxTextBox.Name = "opacityMaxTextBox";
             this.opacityMaxTextBox.ReadOnly = true;
             this.opacityMaxTextBox.Size = new System.Drawing.Size(104, 22);
@@ -209,7 +211,7 @@
             // unknownMaxTextBox
             // 
             this.unknownMaxTextBox.Location = new System.Drawing.Point(95, 119);
-            this.unknownMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.unknownMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.unknownMaxTextBox.Name = "unknownMaxTextBox";
             this.unknownMaxTextBox.ReadOnly = true;
             this.unknownMaxTextBox.Size = new System.Drawing.Size(253, 22);
@@ -228,7 +230,7 @@
             // reflectionMaxTextBox
             // 
             this.reflectionMaxTextBox.Location = new System.Drawing.Point(95, 87);
-            this.reflectionMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.reflectionMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.reflectionMaxTextBox.Name = "reflectionMaxTextBox";
             this.reflectionMaxTextBox.ReadOnly = true;
             this.reflectionMaxTextBox.Size = new System.Drawing.Size(253, 22);
@@ -247,7 +249,7 @@
             // textureMaxTextBox
             // 
             this.textureMaxTextBox.Location = new System.Drawing.Point(95, 55);
-            this.textureMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textureMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.textureMaxTextBox.Name = "textureMaxTextBox";
             this.textureMaxTextBox.ReadOnly = true;
             this.textureMaxTextBox.Size = new System.Drawing.Size(253, 22);
@@ -256,7 +258,7 @@
             // selfIllumMaxTextBox
             // 
             this.selfIllumMaxTextBox.Location = new System.Drawing.Point(532, 23);
-            this.selfIllumMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.selfIllumMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.selfIllumMaxTextBox.Name = "selfIllumMaxTextBox";
             this.selfIllumMaxTextBox.ReadOnly = true;
             this.selfIllumMaxTextBox.Size = new System.Drawing.Size(165, 22);
@@ -266,7 +268,7 @@
             // specularMaxTextBox
             // 
             this.specularMaxTextBox.Location = new System.Drawing.Point(357, 23);
-            this.specularMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.specularMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.specularMaxTextBox.Name = "specularMaxTextBox";
             this.specularMaxTextBox.ReadOnly = true;
             this.specularMaxTextBox.Size = new System.Drawing.Size(165, 22);
@@ -276,7 +278,7 @@
             // ambientMaxTextBox
             // 
             this.ambientMaxTextBox.Location = new System.Drawing.Point(183, 23);
-            this.ambientMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ambientMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.ambientMaxTextBox.Name = "ambientMaxTextBox";
             this.ambientMaxTextBox.ReadOnly = true;
             this.ambientMaxTextBox.Size = new System.Drawing.Size(165, 22);
@@ -286,7 +288,7 @@
             // diffuseMaxTextBox
             // 
             this.diffuseMaxTextBox.Location = new System.Drawing.Point(8, 23);
-            this.diffuseMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.diffuseMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.diffuseMaxTextBox.Name = "diffuseMaxTextBox";
             this.diffuseMaxTextBox.ReadOnly = true;
             this.diffuseMaxTextBox.Size = new System.Drawing.Size(165, 22);
@@ -298,9 +300,9 @@
             this.materialFlagsGroupBox.Controls.Add(this.materialFlagsCheckedListBox);
             this.materialFlagsGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.materialFlagsGroupBox.Location = new System.Drawing.Point(0, 173);
-            this.materialFlagsGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialFlagsGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.materialFlagsGroupBox.Name = "materialFlagsGroupBox";
-            this.materialFlagsGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialFlagsGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.materialFlagsGroupBox.Size = new System.Drawing.Size(726, 454);
             this.materialFlagsGroupBox.TabIndex = 1;
             this.materialFlagsGroupBox.TabStop = false;
@@ -311,7 +313,7 @@
             this.materialFlagsCheckedListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.materialFlagsCheckedListBox.FormattingEnabled = true;
             this.materialFlagsCheckedListBox.Location = new System.Drawing.Point(4, 19);
-            this.materialFlagsCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialFlagsCheckedListBox.Margin = new System.Windows.Forms.Padding(4);
             this.materialFlagsCheckedListBox.Name = "materialFlagsCheckedListBox";
             this.materialFlagsCheckedListBox.Size = new System.Drawing.Size(718, 431);
             this.materialFlagsCheckedListBox.TabIndex = 0;
@@ -321,7 +323,7 @@
             this.materialSidePanel.Controls.Add(this.materialListBox);
             this.materialSidePanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.materialSidePanel.Location = new System.Drawing.Point(4, 4);
-            this.materialSidePanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialSidePanel.Margin = new System.Windows.Forms.Padding(4);
             this.materialSidePanel.Name = "materialSidePanel";
             this.materialSidePanel.Size = new System.Drawing.Size(303, 627);
             this.materialSidePanel.TabIndex = 0;
@@ -332,7 +334,7 @@
             this.materialListBox.FormattingEnabled = true;
             this.materialListBox.ItemHeight = 16;
             this.materialListBox.Location = new System.Drawing.Point(0, 0);
-            this.materialListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialListBox.Margin = new System.Windows.Forms.Padding(4);
             this.materialListBox.Name = "materialListBox";
             this.materialListBox.Size = new System.Drawing.Size(303, 627);
             this.materialListBox.TabIndex = 0;
@@ -340,7 +342,7 @@
             // timeMultMaxTextBox
             // 
             this.timeMultMaxTextBox.Location = new System.Drawing.Point(101, 176);
-            this.timeMultMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.timeMultMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.timeMultMaxTextBox.Name = "timeMultMaxTextBox";
             this.timeMultMaxTextBox.Size = new System.Drawing.Size(115, 22);
             this.timeMultMaxTextBox.TabIndex = 11;
@@ -374,7 +376,7 @@
             this.attachpointListBox.FormattingEnabled = true;
             this.attachpointListBox.ItemHeight = 16;
             this.attachpointListBox.Location = new System.Drawing.Point(4, 57);
-            this.attachpointListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.attachpointListBox.Margin = new System.Windows.Forms.Padding(4);
             this.attachpointListBox.Name = "attachpointListBox";
             this.attachpointListBox.Size = new System.Drawing.Size(253, 244);
             this.attachpointListBox.TabIndex = 1;
@@ -385,7 +387,7 @@
             this.mainTabControl.Controls.Add(this.materialTabPage);
             this.mainTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTabControl.Location = new System.Drawing.Point(0, 28);
-            this.mainTabControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.mainTabControl.Margin = new System.Windows.Forms.Padding(4);
             this.mainTabControl.Name = "mainTabControl";
             this.mainTabControl.SelectedIndex = 0;
             this.mainTabControl.Size = new System.Drawing.Size(1045, 664);
@@ -396,9 +398,9 @@
             this.meshInfoTabPage.Controls.Add(this.flagsPanel);
             this.meshInfoTabPage.Controls.Add(this.genDataPanel);
             this.meshInfoTabPage.Location = new System.Drawing.Point(4, 25);
-            this.meshInfoTabPage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.meshInfoTabPage.Margin = new System.Windows.Forms.Padding(4);
             this.meshInfoTabPage.Name = "meshInfoTabPage";
-            this.meshInfoTabPage.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.meshInfoTabPage.Padding = new System.Windows.Forms.Padding(4);
             this.meshInfoTabPage.Size = new System.Drawing.Size(1037, 635);
             this.meshInfoTabPage.TabIndex = 0;
             this.meshInfoTabPage.Text = "General Info";
@@ -411,7 +413,7 @@
             this.flagsPanel.Controls.Add(this.genMeshFlagsGroupBox);
             this.flagsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flagsPanel.Location = new System.Drawing.Point(267, 4);
-            this.flagsPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.flagsPanel.Margin = new System.Windows.Forms.Padding(4);
             this.flagsPanel.Name = "flagsPanel";
             this.flagsPanel.Size = new System.Drawing.Size(766, 627);
             this.flagsPanel.TabIndex = 1;
@@ -421,9 +423,9 @@
             this.genMeshFormatGroupBox.Controls.Add(this.genMeshFormatCheckedListBox);
             this.genMeshFormatGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.genMeshFormatGroupBox.Location = new System.Drawing.Point(0, 319);
-            this.genMeshFormatGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshFormatGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.genMeshFormatGroupBox.Name = "genMeshFormatGroupBox";
-            this.genMeshFormatGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshFormatGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.genMeshFormatGroupBox.Size = new System.Drawing.Size(766, 198);
             this.genMeshFormatGroupBox.TabIndex = 1;
             this.genMeshFormatGroupBox.TabStop = false;
@@ -434,7 +436,7 @@
             this.genMeshFormatCheckedListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.genMeshFormatCheckedListBox.FormattingEnabled = true;
             this.genMeshFormatCheckedListBox.Location = new System.Drawing.Point(4, 19);
-            this.genMeshFormatCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshFormatCheckedListBox.Margin = new System.Windows.Forms.Padding(4);
             this.genMeshFormatCheckedListBox.Name = "genMeshFormatCheckedListBox";
             this.genMeshFormatCheckedListBox.Size = new System.Drawing.Size(758, 175);
             this.genMeshFormatCheckedListBox.TabIndex = 1;
@@ -444,9 +446,9 @@
             this.genMeshPropsGroupBox.Controls.Add(this.genMeshPropsCheckedListBox);
             this.genMeshPropsGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.genMeshPropsGroupBox.Location = new System.Drawing.Point(0, 517);
-            this.genMeshPropsGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshPropsGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.genMeshPropsGroupBox.Name = "genMeshPropsGroupBox";
-            this.genMeshPropsGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshPropsGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.genMeshPropsGroupBox.Size = new System.Drawing.Size(766, 110);
             this.genMeshPropsGroupBox.TabIndex = 2;
             this.genMeshPropsGroupBox.TabStop = false;
@@ -457,7 +459,7 @@
             this.genMeshPropsCheckedListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.genMeshPropsCheckedListBox.FormattingEnabled = true;
             this.genMeshPropsCheckedListBox.Location = new System.Drawing.Point(4, 19);
-            this.genMeshPropsCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshPropsCheckedListBox.Margin = new System.Windows.Forms.Padding(4);
             this.genMeshPropsCheckedListBox.Name = "genMeshPropsCheckedListBox";
             this.genMeshPropsCheckedListBox.Size = new System.Drawing.Size(758, 87);
             this.genMeshPropsCheckedListBox.TabIndex = 2;
@@ -467,9 +469,9 @@
             this.genMeshFlagsGroupBox.Controls.Add(this.genMeshFlagsCheckedListBox);
             this.genMeshFlagsGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.genMeshFlagsGroupBox.Location = new System.Drawing.Point(0, 0);
-            this.genMeshFlagsGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshFlagsGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.genMeshFlagsGroupBox.Name = "genMeshFlagsGroupBox";
-            this.genMeshFlagsGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshFlagsGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.genMeshFlagsGroupBox.Size = new System.Drawing.Size(766, 319);
             this.genMeshFlagsGroupBox.TabIndex = 0;
             this.genMeshFlagsGroupBox.TabStop = false;
@@ -480,7 +482,7 @@
             this.genMeshFlagsCheckedListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.genMeshFlagsCheckedListBox.FormattingEnabled = true;
             this.genMeshFlagsCheckedListBox.Location = new System.Drawing.Point(4, 19);
-            this.genMeshFlagsCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genMeshFlagsCheckedListBox.Margin = new System.Windows.Forms.Padding(4);
             this.genMeshFlagsCheckedListBox.Name = "genMeshFlagsCheckedListBox";
             this.genMeshFlagsCheckedListBox.Size = new System.Drawing.Size(758, 296);
             this.genMeshFlagsCheckedListBox.TabIndex = 0;
@@ -491,7 +493,7 @@
             this.genDataPanel.Controls.Add(this.attachpointGroupBox);
             this.genDataPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.genDataPanel.Location = new System.Drawing.Point(4, 4);
-            this.genDataPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.genDataPanel.Margin = new System.Windows.Forms.Padding(4);
             this.genDataPanel.Name = "genDataPanel";
             this.genDataPanel.Size = new System.Drawing.Size(263, 627);
             this.genDataPanel.TabIndex = 2;
@@ -515,9 +517,9 @@
             this.generalDataGroupBox.Controls.Add(this.numMeshMaxTextBox);
             this.generalDataGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.generalDataGroupBox.Location = new System.Drawing.Point(0, 0);
-            this.generalDataGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.generalDataGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.generalDataGroupBox.Name = "generalDataGroupBox";
-            this.generalDataGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.generalDataGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.generalDataGroupBox.Size = new System.Drawing.Size(263, 323);
             this.generalDataGroupBox.TabIndex = 0;
             this.generalDataGroupBox.TabStop = false;
@@ -536,7 +538,7 @@
             // numFacesMaxTextBox
             // 
             this.numFacesMaxTextBox.Location = new System.Drawing.Point(101, 48);
-            this.numFacesMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numFacesMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.numFacesMaxTextBox.Name = "numFacesMaxTextBox";
             this.numFacesMaxTextBox.ReadOnly = true;
             this.numFacesMaxTextBox.Size = new System.Drawing.Size(115, 22);
@@ -555,7 +557,7 @@
             // numVertsMaxTextBox
             // 
             this.numVertsMaxTextBox.Location = new System.Drawing.Point(101, 16);
-            this.numVertsMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numVertsMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.numVertsMaxTextBox.Name = "numVertsMaxTextBox";
             this.numVertsMaxTextBox.ReadOnly = true;
             this.numVertsMaxTextBox.Size = new System.Drawing.Size(115, 22);
@@ -564,7 +566,7 @@
             // updateSettingsButton
             // 
             this.updateSettingsButton.Location = new System.Drawing.Point(4, 283);
-            this.updateSettingsButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.updateSettingsButton.Margin = new System.Windows.Forms.Padding(4);
             this.updateSettingsButton.Name = "updateSettingsButton";
             this.updateSettingsButton.Size = new System.Drawing.Size(255, 28);
             this.updateSettingsButton.TabIndex = 12;
@@ -575,7 +577,7 @@
             // interpolationTypeMaxTextBox
             // 
             this.interpolationTypeMaxTextBox.Location = new System.Drawing.Point(101, 208);
-            this.interpolationTypeMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.interpolationTypeMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.interpolationTypeMaxTextBox.Name = "interpolationTypeMaxTextBox";
             this.interpolationTypeMaxTextBox.Size = new System.Drawing.Size(115, 22);
             this.interpolationTypeMaxTextBox.TabIndex = 7;
@@ -593,7 +595,7 @@
             // animTimeMaxTextBox
             // 
             this.animTimeMaxTextBox.Location = new System.Drawing.Point(101, 144);
-            this.animTimeMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.animTimeMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.animTimeMaxTextBox.Name = "animTimeMaxTextBox";
             this.animTimeMaxTextBox.ReadOnly = true;
             this.animTimeMaxTextBox.Size = new System.Drawing.Size(115, 22);
@@ -612,7 +614,7 @@
             // numMatMaxTextBox
             // 
             this.numMatMaxTextBox.Location = new System.Drawing.Point(101, 112);
-            this.numMatMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numMatMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.numMatMaxTextBox.Name = "numMatMaxTextBox";
             this.numMatMaxTextBox.ReadOnly = true;
             this.numMatMaxTextBox.Size = new System.Drawing.Size(115, 22);
@@ -641,7 +643,7 @@
             // numMeshMaxTextBox
             // 
             this.numMeshMaxTextBox.Location = new System.Drawing.Point(101, 80);
-            this.numMeshMaxTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numMeshMaxTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.numMeshMaxTextBox.Name = "numMeshMaxTextBox";
             this.numMeshMaxTextBox.ReadOnly = true;
             this.numMeshMaxTextBox.Size = new System.Drawing.Size(115, 22);
@@ -653,9 +655,9 @@
             this.attachpointGroupBox.Controls.Add(this.attachpointComboBox);
             this.attachpointGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.attachpointGroupBox.Location = new System.Drawing.Point(0, 323);
-            this.attachpointGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.attachpointGroupBox.Margin = new System.Windows.Forms.Padding(4);
             this.attachpointGroupBox.Name = "attachpointGroupBox";
-            this.attachpointGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.attachpointGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.attachpointGroupBox.Size = new System.Drawing.Size(263, 304);
             this.attachpointGroupBox.TabIndex = 1;
             this.attachpointGroupBox.TabStop = false;
@@ -665,7 +667,7 @@
             // 
             this.attachpointComboBox.FormattingEnabled = true;
             this.attachpointComboBox.Location = new System.Drawing.Point(4, 23);
-            this.attachpointComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.attachpointComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.attachpointComboBox.Name = "attachpointComboBox";
             this.attachpointComboBox.Size = new System.Drawing.Size(253, 24);
             this.attachpointComboBox.TabIndex = 0;
@@ -675,9 +677,9 @@
             this.materialTabPage.Controls.Add(this.materialPanel);
             this.materialTabPage.Controls.Add(this.materialSidePanel);
             this.materialTabPage.Location = new System.Drawing.Point(4, 25);
-            this.materialTabPage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialTabPage.Margin = new System.Windows.Forms.Padding(4);
             this.materialTabPage.Name = "materialTabPage";
-            this.materialTabPage.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.materialTabPage.Padding = new System.Windows.Forms.Padding(4);
             this.materialTabPage.Size = new System.Drawing.Size(1037, 635);
             this.materialTabPage.TabIndex = 1;
             this.materialTabPage.Text = "Materials";
@@ -689,7 +691,9 @@
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.materialToolStripMenuItem,
-            this.flagDetailsToolStripMenuItem});
+            this.flagDetailsToolStripMenuItem,
+            this.grnTestToolStripMenuItem,
+            this.exportToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -755,6 +759,20 @@
             this.flagDetailsToolStripMenuItem.Text = "Flag Details";
             this.flagDetailsToolStripMenuItem.Click += new System.EventHandler(this.flagDetailsToolStripMenuItem_Click);
             // 
+            // grnTestToolStripMenuItem
+            // 
+            this.grnTestToolStripMenuItem.Name = "grnTestToolStripMenuItem";
+            this.grnTestToolStripMenuItem.Size = new System.Drawing.Size(71, 24);
+            this.grnTestToolStripMenuItem.Text = "GrnTest";
+            this.grnTestToolStripMenuItem.Click += new System.EventHandler(this.grnTestToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(64, 24);
+            this.exportToolStripMenuItem.Text = "Export";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
             // MaxPluginForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -762,7 +780,7 @@
             this.ClientSize = new System.Drawing.Size(1045, 692);
             this.Controls.Add(this.mainTabControl);
             this.Controls.Add(this.mainMenuStrip);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MaxPluginForm";
             this.Text = "AoM Brg Editor";
             this.materialPanel.ResumeLayout(false);
@@ -854,5 +872,7 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
         private System.Windows.Forms.ToolStripMenuItem extractMTRLFilesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem flagDetailsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem grnTestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
     }
 }

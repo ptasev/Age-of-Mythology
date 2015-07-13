@@ -24,7 +24,8 @@ namespace AoMBrgEditor
             string output = "";
             HashSet<int> ttt = new HashSet<int>();
             GrnFile grnFile = new GrnFile();
-            grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\lp arkan.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            //grnFile.Meshes[0].CalculateUniqueMap();
             /*DdtFile ddt = new DdtFile(File.Open(@"C:\Users\Petar\Desktop\aom\textures\agamemnon map.ddt", FileMode.Open, FileAccess.Read, FileShare.Read));
             Dds dds = new Dds(ddt);
             dds.Write(File.Open(@"C:\Users\Petar\Desktop\archer x arcus corpse bodya.dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
@@ -48,6 +49,7 @@ namespace AoMBrgEditor
             //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
             //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsAlpha", "*.brg", SearchOption.AllDirectories))
             {
+                continue;
                 try
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));

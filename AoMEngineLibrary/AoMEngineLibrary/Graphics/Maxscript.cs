@@ -1,5 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics
 {
+    using AoMEngineLibrary.Graphics.Model;
     using ManagedServices;
     using System;
     using System.Collections.Generic;
@@ -9,7 +10,7 @@
     {
         private static CultureInfo cult = CultureInfo.InvariantCulture;
         public static bool Execute = true;
-        public static bool OutputCommands = false;
+        public static bool OutputCommands = true;
         public static List<string> Output
         {
             get
@@ -94,6 +95,11 @@
             Command("{0} = dummy name:\"{1}\" rotation:({2} as quat) position:{3} boxsize:{4} scale:{5}", varName, name, rotate, position, boxSize, scale);
             return varName;
         }
+        public static string NewBone(string varName, string name, string position, string rotation)
+        {
+            Command("{0} = bone name:\"{1}\" rotation:{3} position:{2}", varName, name, position, rotation);
+            return varName;
+        }
         public static string SnapshotAsMesh(string varName, string varNode, float time)
         {
             Command("{1} = at time {0}s (snapshotAsMesh {2})", time, varName, varNode);
@@ -115,15 +121,23 @@
             Command("{0} = matrix3 {1} {2} {3} {4}", name, xVector, yVector, zVector, posVector);
             return name;
         }
+        public static string QuatLiteral(Quaternion q)
+        {
+            return MaxscriptSDK.AssembleScript("quat {0} {1} {2} {3}", q.X, q.Y, q.Z, q.W);
+        }
         #region Point3
         public static string NewPoint3<T>(string name, ref Vector3<T> vector)
         {
             Command("{0} = [{1}, {2}, {3}]", name, vector.X, vector.Y, vector.Z);
             return name;
         }
-        public static string NewPoint3Literal<T>(T X, T Y, T Z)
+        public static string Point3Literal<T>(T X, T Y, T Z)
         {
             return MaxscriptSDK.AssembleScript("[{0}, {1}, {2}]", X, Y, Z);
+        }
+        public static string Point3Literal(Vector3D v)
+        {
+            return MaxscriptSDK.AssembleScript("[{0}, {1}, {2}]", v.X, v.Y, v.Z);
         }
         public static string NewPoint3<T>(string name, T X, T Y, T Z)
         {
