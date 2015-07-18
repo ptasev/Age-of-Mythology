@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.Graphics.Grn
+﻿namespace AoMEngineLibrary.Graphics.Grn.Nodes
 {
     using System;
     using System.Collections.Generic;

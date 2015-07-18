@@ -1,13 +1,15 @@
-﻿using AoMEngineLibrary.Graphics.Model;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AoMEngineLibrary.Graphics.Grn
+﻿namespace AoMEngineLibrary.Graphics.Grn
 {
+    using AoMEngineLibrary.Graphics.Grn.Nodes;
+    using AoMEngineLibrary.Graphics.Model;
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Specialized;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
     public class GrnMaterial : Material
     {
         public GrnFile ParentFile { get; set; }
@@ -72,24 +74,33 @@ namespace AoMEngineLibrary.Graphics.Grn
             this.ParentFile = parentFile;
         }
 
-        internal void Read(GrnBinaryReader reader, List<int> textureDataRefExts, GrnNode material, uint directoryOffset)
+        internal void Read(GrnNode material, List<int> textureDataRefExts)
         {
             // -- Each material has diffuseTex (0, textureIndex(+1), 1), and dataExtRef
-            GrnNode matDiffuse = material.FindNode(GrnNodeType.MaterialSimpleDiffuseTexture);
+            GrnMaterialSimpleDiffuseTextureNode matDiffuse = 
+                material.FindNode<GrnMaterialSimpleDiffuseTextureNode>(
+                GrnNodeType.MaterialSimpleDiffuseTexture);
             if (matDiffuse != null)
             {
-                reader.Seek((int)(matDiffuse.Offset + directoryOffset), SeekOrigin.Begin);
-                reader.ReadInt32();
-                this.TextureDataExtensionIndex = textureDataRefExts[reader.ReadInt32() - 1];
-                // skip last one
+                this.TextureDataExtensionIndex = textureDataRefExts[matDiffuse.TextureMapIndex - 1];
             }
 
-            GrnNode dataExtRef = material.FindNode(GrnNodeType.DataExtensionReference);
-            if (dataExtRef != null)
-            {
-                reader.Seek((int)(dataExtRef.Offset + directoryOffset), SeekOrigin.Begin);
-                this.DataExtensionIndex = reader.ReadInt32() - 1;
-            }
+            this.DataExtensionIndex = 
+                material.FindNode<GrnDataExtensionReferenceNode>(
+                GrnNodeType.DataExtensionReference).DataExtensionIndex - 1;
+        }
+        public void Write(GrnNode matSecNode, OrderedDictionary textureMaps)
+        {
+            GrnNode matNode = new GrnNode(matSecNode, GrnNodeType.Material);
+            matSecNode.AppendChild(matNode);
+            GrnMaterialSimpleDiffuseTextureNode matDiffNode =
+                new GrnMaterialSimpleDiffuseTextureNode(matNode);
+            matDiffNode.TextureMapIndex = (int)textureMaps[(object)this.TextureDataExtensionIndex] + 1;
+            matDiffNode.Unknown = matDiffNode.TextureMapIndex;
+            matNode.AppendChild(matDiffNode);
+            GrnDataExtensionReferenceNode refNode = new GrnDataExtensionReferenceNode(matNode);
+            refNode.DataExtensionIndex = this.DataExtensionIndex + 1;
+            matNode.AppendChild(refNode);
         }
     }
 }

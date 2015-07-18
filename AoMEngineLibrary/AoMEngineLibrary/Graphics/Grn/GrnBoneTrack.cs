@@ -1,4 +1,5 @@
-﻿using AoMEngineLibrary.Graphics.Model;
+﻿using AoMEngineLibrary.Graphics.Grn.Nodes;
+using AoMEngineLibrary.Graphics.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,53 +30,28 @@ namespace AoMEngineLibrary.Graphics.Grn
             this.Scales = new List<Matrix3x3>();
         }
 
-        public void Read(GrnBinaryReader reader, List<int> transformChannels, GrnNode animTransTrackKeys, uint directoryOffset)
+        public void Read(List<int> transformChannels, GrnAnimationTransformTrackKeysNode animTransTrackKeys)
         {
-            reader.Seek((int)(animTransTrackKeys.Offset + directoryOffset), SeekOrigin.Begin);
-            this.DataExtensionIndex = transformChannels[reader.ReadInt32() - 1];
-            
-            // read 5 unknowns
-            reader.ReadInt32();
-            reader.ReadInt32();
-            reader.ReadInt32();
-            reader.ReadInt32();
-            reader.ReadInt32();
-
-            int numPositions = reader.ReadInt32();
-            int numRotations = reader.ReadInt32();
-            int numTransforms = reader.ReadInt32();
-
-            // read 4 unknowns
-            reader.ReadInt32();
-            reader.ReadInt32();
-            reader.ReadInt32();
-            reader.ReadInt32();
-
-            for (int i = 0; i < numPositions; ++i)
-            {
-                this.PositionKeys.Add(reader.ReadSingle());
-            }
-            for (int i = 0; i < numRotations; ++i)
-            {
-                this.RotationKeys.Add(reader.ReadSingle());
-            }
-            for (int i = 0; i < numTransforms; ++i)
-            {
-                this.ScaleKeys.Add(reader.ReadSingle());
-            }
-
-            for (int i = 0; i < numPositions; ++i)
-            {
-                this.Positions.Add(reader.ReadVector3D());
-            }
-            for (int i = 0; i < numRotations; ++i)
-            {
-                this.Rotations.Add(reader.ReadQuaternion());
-            }
-            for (int i = 0; i < numTransforms; ++i)
-            {
-                this.Scales.Add(reader.ReadMatrix3x3());
-            }
+            this.DataExtensionIndex = transformChannels[animTransTrackKeys.TransformChannelIndex - 1];
+            this.PositionKeys = animTransTrackKeys.PositionKeys;
+            this.RotationKeys = animTransTrackKeys.RotationKeys;
+            this.ScaleKeys = animTransTrackKeys.ScaleKeys;
+            this.Positions = animTransTrackKeys.Positions;
+            this.Rotations = animTransTrackKeys.Rotations;
+            this.Scales = animTransTrackKeys.Scales;
+        }
+        public void Write(GrnNode animTraTraSecNode, int boneTrackIndex)
+        {
+            GrnAnimationTransformTrackKeysNode attKeysNode = 
+                new GrnAnimationTransformTrackKeysNode(animTraTraSecNode);
+            attKeysNode.TransformChannelIndex = boneTrackIndex + 1;
+            attKeysNode.PositionKeys = this.PositionKeys;
+            attKeysNode.RotationKeys = this.RotationKeys;
+            attKeysNode.ScaleKeys = this.ScaleKeys;
+            attKeysNode.Positions = this.Positions;
+            attKeysNode.Rotations = this.Rotations;
+            attKeysNode.Scales = this.Scales;
+            animTraTraSecNode.AppendChild(attKeysNode);
         }
     }
 }

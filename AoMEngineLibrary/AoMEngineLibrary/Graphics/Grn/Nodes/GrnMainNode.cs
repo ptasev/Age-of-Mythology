@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.Graphics.Grn
+﻿namespace AoMEngineLibrary.Graphics.Grn.Nodes
 {
     using System;
     using System.Collections.Generic;
@@ -42,12 +42,56 @@
 
             //this.ReadData(reader, 0);
         }
-        internal override void ReadData(GrnBinaryReader reader, int directoryOffset)
+        public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
             for (int i = 0; i < this.ChildNodes.Count; i++)
             {
                 this.ChildNodes[i].ReadData(reader, 0);
             }
+        }
+
+        public override void Write(GrnBinaryWriter writer)
+        {
+            this.UpdateNumTotalChildNodes();
+            this.UpdateOffset(0);
+
+            writer.Write((uint)this.NodeType);
+            writer.Write(this.NumTotalChildNodes);
+            writer.Write(new byte[8]);
+            writer.Write(this.FileLength);
+            writer.Write(new byte[12]);
+
+            foreach (GrnNode child in this.ChildNodes)
+            {
+                child.Write(writer);
+            }
+
+            foreach (GrnNode child in this.ChildNodes)
+            {
+                child.WriteData(writer);
+            }
+        }
+
+        public override void UpdateNumTotalChildNodes()
+        {
+            this.NumTotalChildNodes = this.ChildNodes.Count;
+
+            for (int i = 0; i < this.ChildNodes.Count; ++i)
+            {
+                this.ChildNodes[i].UpdateNumTotalChildNodes();
+            }
+        }
+        public override uint UpdateOffset(uint offset)
+        {
+            uint lastOffset = 64 + 32 + 20 * (uint)this.ChildNodes.Count;
+
+            foreach (GrnNode child in this.ChildNodes)
+            {
+                lastOffset = child.UpdateOffset(lastOffset);
+            }
+            this.FileLength = lastOffset - 64;
+
+            return 64;
         }
 
         public override void CreateFolder(string parentDirectory, int fileIndex)

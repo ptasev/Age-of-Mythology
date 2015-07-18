@@ -24,7 +24,9 @@ namespace AoMBrgEditor
             string output = "";
             HashSet<int> ttt = new HashSet<int>();
             GrnFile grnFile = new GrnFile();
-            grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\agamem_idlea.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            grnFile.Write(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC2.grn", FileMode.Create, FileAccess.Write, FileShare.Read));
             //grnFile.Meshes[0].CalculateUniqueMap();
             /*DdtFile ddt = new DdtFile(File.Open(@"C:\Users\Petar\Desktop\aom\textures\agamemnon map.ddt", FileMode.Open, FileAccess.Read, FileShare.Read));
             Dds dds = new Dds(ddt);

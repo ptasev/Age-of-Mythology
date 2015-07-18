@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.Graphics.Grn
+﻿namespace AoMEngineLibrary.Graphics.Grn.Nodes
 {
     using System;
     using System.Collections.Generic;
@@ -42,12 +42,54 @@
 
             reader.Seek(currentPosition, System.IO.SeekOrigin.Begin);
         }
-        internal override void ReadData(GrnBinaryReader reader, int directoryOffset)
+        public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
             for (int i = 0; i < this.ChildNodes.Count; i++)
             {
                 this.ChildNodes[i].ReadData(reader, (int)this.Offset);
             }
+        }
+
+        public override void Write(GrnBinaryWriter writer)
+        {
+            writer.Write((uint)this.NodeType);
+            writer.Write(0);
+            writer.Write(this.Offset);
+            writer.Write(0L);
+        }
+        public override void WriteData(GrnBinaryWriter writer)
+        {
+            writer.Write(this.NumTotalChildNodes);
+            if (this.NodeType == GrnNodeType.NullFrameDirectory)
+            {
+                writer.Write(1240936);
+                writer.Write(1240936);
+                writer.Write(1241292);
+            }
+            else
+            {
+                writer.Write(0);
+                writer.Write(this.ParentNode.FirstChild.Offset);
+                writer.Write(0);
+            }
+
+            foreach (GrnNode child in this.ChildNodes)
+            {
+                child.Write(writer);
+            }
+
+            foreach (GrnNode child in this.ChildNodes)
+            {
+                child.WriteData(writer);
+            }
+        }
+
+        public override uint UpdateOffset(uint offset)
+        {
+            uint lastOffset = base.UpdateOffset(16 + 12 * (uint)this.NumTotalChildNodes);
+            this.Offset = offset;
+
+            return lastOffset + offset;
         }
 
         public override void CreateFolder(string parentDirectory, int fileIndex)

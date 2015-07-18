@@ -1,4 +1,5 @@
-﻿using AoMEngineLibrary.Graphics.Model;
+﻿using AoMEngineLibrary.Graphics.Grn.Nodes;
+using AoMEngineLibrary.Graphics.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,14 +38,21 @@ namespace AoMEngineLibrary.Graphics.Grn
             this.ParentFile = parentFile;
         }
 
-        public void Read(GrnBinaryReader reader, GrnNode boneNode, uint directoryOffset)
+        public void Read(GrnBoneNode boneNode)
         {
-            reader.Seek((int)(boneNode.Offset + directoryOffset), SeekOrigin.Begin);
-            this.ParentIndex = reader.ReadInt32();
-            this.Position = reader.ReadVector3D();
-            this.Rotation = reader.ReadQuaternion();
-            this.Scale = reader.ReadMatrix3x3();
+            this.ParentIndex = boneNode.ParentIndex;
+            this.Position = boneNode.Position;
+            this.Rotation = boneNode.Rotation;
+            this.Scale = boneNode.Scale;
         }
-
+        public void Write(GrnNode boneSecNode)
+        {
+            GrnBoneNode boneNode = new GrnBoneNode(boneSecNode);
+            boneNode.ParentIndex = this.ParentIndex;
+            boneNode.Position = this.Position;
+            boneNode.Rotation = this.Rotation;
+            boneNode.Scale = this.Scale;
+            boneSecNode.AppendChild(boneNode);
+        }
     }
 }

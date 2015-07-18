@@ -1,5 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn
 {
+    using AoMEngineLibrary.Graphics.Grn.Nodes;
     using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.Collections.Generic;
@@ -35,139 +36,113 @@
             this.ParentFile = parentFile;
         }
 
-        public void Read(GrnBinaryReader reader, GrnNode meshNode, uint directoryOffset)
+        public void Read(GrnNode meshNode)
         {
-            GrnNode meshVertices = meshNode.FindNodes(GrnNodeType.MeshVertices)[0];
-            reader.Seek((int)(meshVertices.Offset + directoryOffset), SeekOrigin.Begin);
-            for (int i = 0; i < meshVertices.GetDataLength() / 12; ++i)
-            {
-                this.Vertices.Add(reader.ReadVector3D());
-            }
-
-            GrnNode meshNormals = meshNode.FindNodes(GrnNodeType.MeshNormals)[0];
-            reader.Seek((int)(meshNormals.Offset + directoryOffset), SeekOrigin.Begin);
-            for (int i = 0; i < meshNormals.GetDataLength() / 12; ++i)
-            {
-                this.Normals.Add(reader.ReadVector3D());
-            }
-
-            GrnNode meshTexCoords = meshNode.FindNode(GrnNodeType.MeshField);
-            if (meshTexCoords != null)
-            {
-                reader.Seek((int)(meshTexCoords.Offset + directoryOffset), SeekOrigin.Begin);
-                reader.ReadInt32(); // unknown, maybe link to map object, or whether its UV or UVW
-                for (int i = 0; i < meshTexCoords.GetDataLength() / 12; ++i)
-                {
-                    this.TextureCoordinates.Add(reader.ReadVector3D());
-                }
-            }
-
-            GrnNode meshWeights = meshNode.FindNodes(GrnNodeType.MeshWeights)[0];
-            reader.Seek((int)(meshWeights.Offset + directoryOffset), SeekOrigin.Begin);
-            int weightsCount = reader.ReadInt32();
-            reader.ReadInt32(); // unknown (12 Jormund.grn)
-            reader.ReadInt32(); // unknown (2 Jormund.grn)
-            for (int i = 0; i < weightsCount; ++i)
-            {
-                this.VertexWeights.Add(new VertexWeight());
-                int boneCount = reader.ReadInt32();
-                for (int j = 0; j < boneCount; ++j)
-                {
-                    this.VertexWeights[i].BoneIndices.Add(reader.ReadInt32());
-                    this.VertexWeights[i].Weights.Add(reader.ReadSingle());
-                }
-            }
-
-            Dictionary<int, List<int>> dd = new Dictionary<int, List<int>>();
-            GrnNode meshTriangles = meshNode.FindNodes(GrnNodeType.MeshTriangles)[0];
-            reader.Seek((int)(meshTriangles.Offset + directoryOffset), SeekOrigin.Begin);
-            for (int i = 0; i < meshTriangles.GetDataLength() / 24; ++i)
-            {
-                this.Faces.Add(new Face());
-                this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
-                this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
-                this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
-                this.Faces[i].NormalIndices.Add(reader.ReadInt32());
-                this.Faces[i].NormalIndices.Add(reader.ReadInt32());
-                this.Faces[i].NormalIndices.Add(reader.ReadInt32());
-                if (!dd.ContainsKey(this.Faces[i].Indices[0]))
-                {
-                    dd.Add(this.Faces[i].Indices[0], new List<int>());
-                }
-                if (!dd.ContainsKey(this.Faces[i].Indices[1]))
-                {
-                    dd.Add(this.Faces[i].Indices[1], new List<int>());
-                }
-                if (!dd.ContainsKey(this.Faces[i].Indices[2]))
-                {
-                    dd.Add(this.Faces[i].Indices[2], new List<int>());
-                }
-
-                //dd[this.Faces[i].Indices[0]].Add(one);
-                //dd[this.Faces[i].Indices[1]].Add(two);
-                //dd[this.Faces[i].Indices[2]].Add(three);
-
-                //if (one != this.Faces[i].Indices[0] || two != this.Faces[i].Indices[1] || three != this.Faces[i].Indices[2])
-                //{
-                //    two = 5;
-                //}
-                //if (one >= this.Vertices.Count || two >= this.Vertices.Count || three >= this.Vertices.Count)
-                //{
-                //    two = 5;
-                //}
-                //if (one >= this.Normals.Count || two >= this.Normals.Count || three >= this.Normals.Count)
-                //{
-                //    two = 5;
-                //}
-            }
-
-            Dictionary<int, int> aaa = new Dictionary<int, int>();
-            foreach (KeyValuePair<int, List<int>> dddd in dd)
-            {
-                foreach (int nIndex in dddd.Value)
-                {
-
-                }
-                if (dddd.Value.Count > 1)
-                {
-                    aaa.Add(dddd.Key, dddd.Value.Count - 1);
-                }
-            }
-
-            int tttt = 0;
-            foreach (KeyValuePair<int, int> a in aaa)
-            {
-                tttt += a.Value;
-            }
-
-            GrnNode dataExtRef = meshNode.FindNodes(GrnNodeType.DataExtensionReference)[0];
-            reader.Seek((int)(dataExtRef.Offset + directoryOffset), SeekOrigin.Begin);
-            this.DataExtensionIndex = reader.ReadInt32() - 1;
+            this.Vertices = meshNode.FindNode<GrnMeshVerticesNode>(GrnNodeType.MeshVertices).Vertices;
+            this.Normals = meshNode.FindNode<GrnMeshNormalsNode>(GrnNodeType.MeshNormals).Normals;
+            this.TextureCoordinates = meshNode.FindNode<GrnMeshFieldNode>(GrnNodeType.MeshField).TextureCoordinates;
+            this.VertexWeights = meshNode.FindNode<GrnMeshWeightsNode>(GrnNodeType.MeshWeights).VertexWeights;
+            this.Faces = meshNode.FindNode<GrnMeshTrianglesNode>(GrnNodeType.MeshTriangles).Faces;
+            this.DataExtensionIndex = meshNode.FindNode<GrnDataExtensionReferenceNode>(GrnNodeType.DataExtensionReference).DataExtensionIndex - 1;
         }
-        public void ReadFormMeshBones(GrnBinaryReader reader, List<GrnNode> formMeshBones, uint directoryOffset)
+        public void Write(GrnNode meshSecNode)
+        {
+            GrnNode meshNode = new GrnNode(meshSecNode, GrnNodeType.Mesh);
+            meshSecNode.AppendChild(meshNode);
+            GrnNode meshVertSetSecNode = new GrnNode(meshNode, GrnNodeType.MeshVertexSetSection);
+            meshNode.AppendChild(meshVertSetSecNode);
+            GrnNode meshVertSetNode = new GrnNode(meshVertSetSecNode, GrnNodeType.MeshVertexSet);
+            meshVertSetSecNode.AppendChild(meshVertSetNode);
+
+            GrnMeshVerticesNode mVertNode = new GrnMeshVerticesNode(meshVertSetNode);
+            mVertNode.Vertices = this.Vertices;
+            meshVertSetNode.AppendChild(mVertNode);
+            GrnMeshNormalsNode mNormNode = new GrnMeshNormalsNode(meshVertSetNode);
+            mNormNode.Normals = this.Normals;
+            meshVertSetNode.AppendChild(mNormNode);
+            GrnNode meshFieldSecNode = new GrnNode(meshVertSetNode, GrnNodeType.MeshFieldSection);
+            meshVertSetNode.AppendChild(meshFieldSecNode);
+            GrnMeshFieldNode mFieldNode = new GrnMeshFieldNode(meshFieldSecNode);
+            mFieldNode.TextureCoordinates = this.TextureCoordinates;
+            meshFieldSecNode.AppendChild(mFieldNode);
+
+            GrnMeshWeightsNode mWeightNode = new GrnMeshWeightsNode(meshNode);
+            mWeightNode.VertexWeights = this.VertexWeights;
+            meshNode.AppendChild(mWeightNode);
+            GrnMeshTrianglesNode mTriNode = new GrnMeshTrianglesNode(meshNode);
+            mTriNode.Faces = this.Faces;
+            meshNode.AppendChild(mTriNode);
+            GrnDataExtensionReferenceNode mDERefNode = new GrnDataExtensionReferenceNode(meshNode);
+            mDERefNode.DataExtensionIndex = this.DataExtensionIndex + 1;
+            meshNode.AppendChild(mDERefNode);
+        }
+        public void ReadFormMeshBones(List<GrnFormMeshBoneNode> formMeshBones)
         {
             this.BoneBindings = new List<GrnBoneBinding>(formMeshBones.Count);
             for (int i = 0; i < formMeshBones.Count; ++i)
             {
-                reader.Seek((int)(formMeshBones[i].Offset + directoryOffset), SeekOrigin.Begin);
                 this.BoneBindings.Add(new GrnBoneBinding());
-                this.BoneBindings[i].BoneIndex = reader.ReadInt32();
-                this.BoneBindings[i].Unknown = reader.ReadSingle();
-                this.BoneBindings[i].OBBMin = reader.ReadVector3D();
-                this.BoneBindings[i].OBBMax = reader.ReadVector3D();
+                this.BoneBindings[i].BoneIndex = formMeshBones[i].BoneIndex;
+                this.BoneBindings[i].Unknown = formMeshBones[i].Unknown;
+                this.BoneBindings[i].OBBMin = formMeshBones[i].OBBMin;
+                this.BoneBindings[i].OBBMax = formMeshBones[i].OBBMax;
             }
         }
-        public void ReadRenderPassTriangles(GrnBinaryReader reader, int matIndex, GrnNode renderPassTriangles, uint directoryOffset)
+        public void WriteFormMeshBones(GrnNode fMeshBoneSecNode)
         {
-            reader.Seek((int)(renderPassTriangles.Offset + directoryOffset), SeekOrigin.Begin);
-            int count = reader.ReadInt32();
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < this.BoneBindings.Count; ++i)
             {
-                int faceIndex = reader.ReadInt32();
-                this.Faces[faceIndex].MaterialIndex = (Int16)matIndex;
-                this.Faces[faceIndex].TextureIndices.Add(reader.ReadInt32());
-                this.Faces[faceIndex].TextureIndices.Add(reader.ReadInt32());
-                this.Faces[faceIndex].TextureIndices.Add(reader.ReadInt32());
+                GrnFormMeshBoneNode fMeshBoneNode = new GrnFormMeshBoneNode(fMeshBoneSecNode);
+                fMeshBoneNode.BoneIndex = this.BoneBindings[i].BoneIndex;
+                fMeshBoneNode.Unknown = this.BoneBindings[i].Unknown;
+                fMeshBoneNode.OBBMin = this.BoneBindings[i].OBBMin;
+                fMeshBoneNode.OBBMax = this.BoneBindings[i].OBBMax;
+                fMeshBoneSecNode.AppendChild(fMeshBoneNode);
+            }
+        }
+        public void ReadRenderPassTriangles(int matIndex, GrnRenderPassTrianglesNode renderPassTriangles)
+        {
+            foreach (KeyValuePair<int, List<int>> rendPassTri in renderPassTriangles.TextureIndices)
+            {
+                this.Faces[rendPassTri.Key].TextureIndices = rendPassTri.Value;
+                this.Faces[rendPassTri.Key].MaterialIndex = (Int16)matIndex;
+            }
+        }
+        public void WriteRenderPass(GrnNode rendPassSecNode, int meshIndex)
+        {
+            Dictionary<int, List<int>> matFaceMap = new Dictionary<int, List<int>>();
+            for (int i = 0; i < this.Faces.Count; ++i)
+            {
+                if (!matFaceMap.ContainsKey(this.Faces[i].MaterialIndex))
+                {
+                    matFaceMap.Add(this.Faces[i].MaterialIndex, new List<int>());
+                }
+                matFaceMap[this.Faces[i].MaterialIndex].Add(i);
+            }
+            foreach (KeyValuePair<int, List<int>> matFace in matFaceMap)
+            {
+                GrnRenderPassNode rendPassNode = new GrnRenderPassNode(rendPassSecNode);
+                rendPassNode.FormMeshIndex = meshIndex;
+                rendPassNode.MaterialIndex = matFace.Key + 1;
+                rendPassSecNode.AppendChild(rendPassNode);
+
+                GrnNode rpFieldSecNode = new GrnNode(rendPassNode, GrnNodeType.RenderPassFieldSection);
+                rendPassNode.AppendChild(rpFieldSecNode);
+                GrnNode rpFieldConstNode = new GrnNode(rpFieldSecNode, GrnNodeType.RenderPassFieldConstant);
+                rpFieldConstNode.Data = new byte[] { 0x00, 0x00, 0x80, 0x3F,
+                    0x00, 0x00, 0x80, 0x3F,
+                    0x00, 0x00, 0x80, 0x3F };
+                rpFieldSecNode.AppendChild(rpFieldConstNode);
+                GrnNode rpFieldAssNode = new GrnNode(rpFieldSecNode, GrnNodeType.RenderPassFieldAssignment);
+                rpFieldAssNode.Data = new byte[] { 0x00, 0x00, 0x00, 0x00 };
+                rpFieldSecNode.AppendChild(rpFieldAssNode);
+
+                GrnRenderPassTrianglesNode rpTriNode = new GrnRenderPassTrianglesNode(rendPassNode);
+                foreach (int faceIndex in matFace.Value)
+                {
+                    rpTriNode.TextureIndices.Add(faceIndex, this.Faces[faceIndex].TextureIndices);
+                }
+                rendPassNode.AppendChild(rpTriNode);
             }
         }
 

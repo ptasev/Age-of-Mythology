@@ -1,8 +1,11 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn
 {
+    using AoMEngineLibrary.Graphics.Grn.Nodes;
     using AoMEngineLibrary.Graphics.Model;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -42,137 +45,127 @@
                 mainNode.ReadData(reader, 0);
                 mainNode.CreateFolder(@"C:\Users\Petar\Desktop\Nieuwe map (3)\Output", 0);
 
-                GrnSectionNode dirNode = mainNode.FindNodes(GrnNodeType.StandardFrameDirectory)[0] as GrnSectionNode;
+                GrnSectionNode dirNode = mainNode.FindNode<GrnSectionNode>(GrnNodeType.StandardFrameDirectory);
                 uint directoryOffset = dirNode.Offset;
 
                 // 0StringTable
-                List<string> strings = this.ReadStringTable(reader, dirNode.FindNodes(GrnNodeType.StringTable)[0], directoryOffset);
+                List<string> strings = dirNode.FindNode<GrnStringTableNode>(GrnNodeType.StringTable).Strings;
 
                 // 1DataExtension
-                this.ReadDataExtension(reader, strings, dirNode.FindNodes(GrnNodeType.DataExtension), directoryOffset);
+                this.ReadDataExtension(strings, dirNode.FindNodes<GrnNode>(GrnNodeType.DataExtension));
 
                 // 2VectorChannel
 
                 // 3TransformChannel
-                List<int> transformChannels = this.ReadTransformChannel(reader, dirNode.ChildNodes[3].FindNodes(GrnNodeType.TransformChannel), directoryOffset);
+                List<int> transformChannels = this.ReadTransformChannel(dirNode.ChildNodes[3].FindNodes<GrnNode>(GrnNodeType.TransformChannel));
 
                 // 4Mesh
-                List<GrnNode> meshes = dirNode.ChildNodes[4].FindNodes(GrnNodeType.Mesh);
+                List<GrnNode> meshes = dirNode.ChildNodes[4].FindNodes<GrnNode>(GrnNodeType.Mesh);
                 for (int i = 0; i < meshes.Count; ++i)
                 {
                     this.Meshes.Add(new GrnMesh(this));
-                    this.Meshes[i].Read(reader, meshes[i], directoryOffset);
+                    this.Meshes[i].Read(meshes[i]);
                 }
 
                 // 5Skeleton
-                List<GrnNode> bones = dirNode.ChildNodes[5].FindNodes(GrnNodeType.Bone);
+                List<GrnBoneNode> bones = dirNode.ChildNodes[5].FindNodes<GrnBoneNode>(GrnNodeType.Bone);
                 for (int i = 0; i < bones.Count; ++i)
                 {
                     this.Bones.Add(new GrnBone(this));
-                    this.Bones[i].Read(reader, bones[i], directoryOffset);
+                    this.Bones[i].Read(bones[i]);
                 }
 
                 // 6Texture
-                // -- Each TextureMap has width height, depth, and dataExtRef
+                // -- Each TextureMap has width height, depth?, and dataExtRef
                 List<int> textureDataRefExts = new List<int>();
-                List<GrnNode> textureMap = dirNode.ChildNodes[6].FindNodes(GrnNodeType.DataExtensionReference);
+                List<GrnDataExtensionReferenceNode> textureMap = 
+                    dirNode.ChildNodes[6].FindNodes<GrnDataExtensionReferenceNode>(
+                    GrnNodeType.DataExtensionReference);
                 for (int i = 0; i < textureMap.Count; ++i)
                 {
-                    reader.Seek((int)(textureMap[i].Offset + directoryOffset), SeekOrigin.Begin);
-                    textureDataRefExts.Add(reader.ReadInt32() - 1);
+                    textureDataRefExts.Add(textureMap[i].DataExtensionIndex - 1);
                 }
 
                 // 7Material
-                List<GrnNode> materials = dirNode.ChildNodes[7].FindNodes(GrnNodeType.Material);
+                List<GrnNode> materials = dirNode.ChildNodes[7].FindNodes<GrnNode>(GrnNodeType.Material);
                 for (int i = 0; i < materials.Count; ++i)
                 {
                     this.Materials.Add(new GrnMaterial(this));
-                    this.Materials[i].Read(reader, textureDataRefExts, materials[i], directoryOffset);
+                    this.Materials[i].Read(materials[i], textureDataRefExts);
                 }
 
                 // 8Form
-                this.ReadFormBoneChannel(reader, transformChannels, dirNode.ChildNodes[8].FindNodes(GrnNodeType.FormBoneChannels)[0], directoryOffset);
-                List<GrnNode> formMeshes = dirNode.ChildNodes[8].FindNodes(GrnNodeType.FormMesh);
+                this.ReadFormBoneChannel(transformChannels, 
+                    dirNode.ChildNodes[8].FindNode<GrnFormBoneChannelsNode>(GrnNodeType.FormBoneChannels));
+                List<GrnFormMeshNode> formMeshes = dirNode.ChildNodes[8].
+                    FindNodes<GrnFormMeshNode>(GrnNodeType.FormMesh);
                 List<int> meshLinks = new List<int>(formMeshes.Count);
                 for (int i = 0; i < formMeshes.Count; ++i)
                 {
-                    reader.Seek((int)(formMeshes[i].Offset + directoryOffset), SeekOrigin.Begin);
-                    int meshIndex = reader.ReadInt32() - 1;
-                    meshLinks.Add(meshIndex);
-                    this.Meshes[meshIndex].ReadFormMeshBones(reader, formMeshes[i].FindNodes(GrnNodeType.FormMeshBone), directoryOffset);
+                    meshLinks.Add(formMeshes[i].MeshIndex - 1);
+                    this.Meshes[formMeshes[i].MeshIndex - 1].ReadFormMeshBones(formMeshes[i].
+                        FindNodes<GrnFormMeshBoneNode>(GrnNodeType.FormMeshBone));
                 }
 
                 // 9Model
-                List<GrnNode> renderPass = dirNode.ChildNodes[9].FindNodes(GrnNodeType.RenderPass);
+                List<GrnRenderPassNode> renderPass = 
+                    dirNode.ChildNodes[9].FindNodes<GrnRenderPassNode>(GrnNodeType.RenderPass);
                 for (int i = 0; i < renderPass.Count; ++i)
                 {
-                    reader.Seek((int)(renderPass[i].Offset + directoryOffset), SeekOrigin.Begin);
-                    int meshIndex = meshLinks[reader.ReadInt32()];
-                    int matIndex = reader.ReadInt32() - 1;
-                    this.Meshes[meshIndex].ReadRenderPassTriangles(reader, matIndex, renderPass[i].FindNodes(GrnNodeType.RenderPassTriangles)[0], directoryOffset);
+                    int meshIndex = meshLinks[renderPass[i].FormMeshIndex];
+                    int matIndex = renderPass[i].MaterialIndex - 1;
+                    this.Meshes[meshIndex].ReadRenderPassTriangles(matIndex, 
+                        renderPass[i].FindNode<GrnRenderPassTrianglesNode>(GrnNodeType.RenderPassTriangles));
                 }
 
                 // 10Animation
-                List<GrnNode> animTransTrackKeys = dirNode.ChildNodes[10].FindNodes(GrnNodeType.AnimationTransformTrackKeys);
+                List<GrnAnimationTransformTrackKeysNode> animTransTrackKeys = 
+                    dirNode.ChildNodes[10].FindNodes<GrnAnimationTransformTrackKeysNode>(
+                    GrnNodeType.AnimationTransformTrackKeys);
                 this.Animation.BoneTracks = new List<GrnBoneTrack>(animTransTrackKeys.Count);
                 for (int i = 0; i < animTransTrackKeys.Count; i++)
                 {
                     this.Animation.BoneTracks.Add(new GrnBoneTrack());
-                    this.Animation.BoneTracks[i].Read(reader, transformChannels, animTransTrackKeys[i], directoryOffset);
+                    this.Animation.BoneTracks[i].Read(transformChannels, animTransTrackKeys[i]);
                 }
                 this.CalculateAnimationDuration();
             }
         }
-        private List<string> ReadStringTable(GrnBinaryReader reader, GrnNode stringTable, uint directoryOffset)
-        {
-            using (MemoryStream stream = new MemoryStream())
-            reader.Seek((int)(stringTable.Offset + directoryOffset), SeekOrigin.Begin);
-            Int32 numString = reader.ReadInt32();
-            Int32 stringDataLength = reader.ReadInt32();
-
-            List<string> strings = new List<string>(numString);
-            for (int i = 0; i < numString; i++)
-            {
-                strings.Add(reader.ReadString());
-            }
-
-            //reader.ReadBytes((-stringDataLength) & 3); // padding
-            return strings;
-        }
-        private void ReadDataExtension(GrnBinaryReader reader, List<string> strings, List<GrnNode> dataExtensions, uint directoryOffset)
+        private void ReadDataExtension(List<string> strings, List<GrnNode> dataExtensions)
         {
             for (int i = 0; i < dataExtensions.Count; ++i)
             {
                 this.DataExtensions.Add(new Dictionary<string, string>());
-                List<GrnNode> dataExtensionProperties = dataExtensions[i].FindNodes(GrnNodeType.DataExtensionProperty);
-                foreach (GrnNode dataExtProp in dataExtensionProperties)
+                List<GrnDataExtensionPropertyNode> dataExtensionProperties = 
+                    dataExtensions[i].FindNodes<GrnDataExtensionPropertyNode>(
+                    GrnNodeType.DataExtensionProperty);
+                foreach (GrnDataExtensionPropertyNode dataExtProp in dataExtensionProperties)
                 {
-                    GrnNode dataExtensionPropertyValue = dataExtProp.FindNodes(GrnNodeType.DataExtensionPropertyValue)[0];
-                    reader.Seek((int)(dataExtProp.Offset + directoryOffset), SeekOrigin.Begin);
-                    int key = reader.ReadInt32();
-                    reader.Seek((int)(dataExtensionPropertyValue.Offset + directoryOffset), SeekOrigin.Begin);
-                    reader.ReadInt32(); // skip 4
-                    int value = reader.ReadInt32();
-                    this.DataExtensions[i].Add(strings[key], strings[value]);
+                    GrnDataExtensionPropertyValueNode dataExtensionPropertyValue = 
+                        dataExtProp.FindNode<GrnDataExtensionPropertyValueNode>(
+                        GrnNodeType.DataExtensionPropertyValue);
+                    this.DataExtensions[i].Add(strings[dataExtProp.StringTableIndex], 
+                        strings[dataExtensionPropertyValue.StringTableIndex]);
                 }
             }
         }
-        private List<int> ReadTransformChannel(GrnBinaryReader reader, List<GrnNode> transformChannelNodes, uint directoryOffset)
+        private List<int> ReadTransformChannel(List<GrnNode> transformChannelNodes)
         {
             List<int> transformChannels = new List<int>(transformChannelNodes.Count);
             for (int i = 0; i < transformChannelNodes.Count; ++i)
             {
-                reader.Seek((int)(transformChannelNodes[i].FirstChild.Offset + directoryOffset), SeekOrigin.Begin);
-                transformChannels.Add(reader.ReadInt32() - 1);
+                transformChannels.Add(
+                    ((GrnDataExtensionReferenceNode)transformChannelNodes[i].FirstChild)
+                    .DataExtensionIndex - 1);
             }
             return transformChannels;
         }
-        private void ReadFormBoneChannel(GrnBinaryReader reader, List<int> transformChannels, GrnNode formBoneChannels, uint directoryOffset)
+        private void ReadFormBoneChannel(List<int> transformChannels, GrnFormBoneChannelsNode formBoneChannels)
         {
-            reader.Seek((int)(formBoneChannels.Offset + directoryOffset), SeekOrigin.Begin);
-            for (int i = 0; i < formBoneChannels.GetDataLength() / 4; ++i)
+            for (int i = 0; i < this.Bones.Count; ++i)
             {
-                this.Bones[i].DataExtensionIndex = transformChannels[reader.ReadInt32() - 1];
+                this.Bones[i].DataExtensionIndex = 
+                    transformChannels[formBoneChannels.TransformChannelIndices[i] - 1];
             }
         }
         private void CalculateAnimationDuration()
@@ -227,6 +220,306 @@
                 }
             }
             maxKeys = Convert.ToInt32(this.Animation.TimeStep * this.Animation.Duration);
+        }
+
+        public void Write(Stream stream)
+        {
+            using (GrnBinaryWriter writer = new GrnBinaryWriter(stream))
+            {
+                this.WriteHeader(writer);
+
+                GrnMainNode mainNode = new GrnMainNode();
+                mainNode.NumTotalChildNodes = 3;
+                this.CreateVerFrameDir(mainNode);
+
+                GrnSectionNode staFrameDir = new GrnSectionNode(mainNode, GrnNodeType.StandardFrameDirectory);
+                staFrameDir.Offset = 440;
+                mainNode.AppendChild(staFrameDir);
+
+                // 0StringTable
+                OrderedDictionary stringMap = this.CreateStringMap();
+                GrnStringTableNode strTableNode = new GrnStringTableNode(staFrameDir);
+                strTableNode.Strings = stringMap.Keys.Cast<string>().ToList();
+                staFrameDir.AppendChild(strTableNode);
+
+                // 1DataExtension
+                GrnNode dataExtSecNode = new GrnNode(staFrameDir, GrnNodeType.DataExtensionSection);
+                staFrameDir.AppendChild(dataExtSecNode);
+                this.WriteDataExtensions(dataExtSecNode, stringMap);
+
+                // 2VectorChannel
+                GrnNode vecChanSecNode = new GrnNode(staFrameDir, GrnNodeType.VectorChannelSection);
+                staFrameDir.AppendChild(vecChanSecNode);
+
+                // 3TransformChannel
+                GrnNode traChanSecNode = new GrnNode(staFrameDir, GrnNodeType.TransformChannelSection);
+                staFrameDir.AppendChild(traChanSecNode);
+                foreach (GrnBone bone in this.Bones)
+                {
+                    GrnNode traChanNode = new GrnNode(traChanSecNode, GrnNodeType.TransformChannel);
+                    traChanSecNode.AppendChild(traChanNode);
+
+                    GrnDataExtensionReferenceNode refNode = new GrnDataExtensionReferenceNode(traChanNode);
+                    refNode.DataExtensionIndex = bone.DataExtensionIndex + 1;
+                    traChanNode.AppendChild(refNode);
+                }
+
+                // 4Mesh
+                GrnNode meshSecNode = new GrnNode(staFrameDir, GrnNodeType.MeshSection);
+                staFrameDir.AppendChild(meshSecNode);
+                foreach (GrnMesh mesh in this.Meshes)
+                {
+                    mesh.Write(meshSecNode);
+                }
+
+                // 5Skeleton
+                GrnNode skelSecNode = new GrnNode(staFrameDir, GrnNodeType.SkeletonSection);
+                staFrameDir.AppendChild(skelSecNode);
+                GrnNode skelNode = new GrnNode(skelSecNode, GrnNodeType.Skeleton);
+                skelSecNode.AppendChild(skelNode);
+                GrnNode boneSecNode = new GrnNode(skelNode, GrnNodeType.BoneSection);
+                skelNode.AppendChild(boneSecNode);
+                foreach (GrnBone bone in this.Bones)
+                {
+                    bone.Write(boneSecNode);
+                }
+
+                // 6Texture
+                OrderedDictionary textureMaps = this.CreateTextureMaps();
+                GrnNode texSecNode = new GrnNode(staFrameDir, GrnNodeType.TextureSection);
+                staFrameDir.AppendChild(texSecNode);
+                this.WriteTextureMaps(texSecNode, textureMaps);
+
+                // 7Material
+                GrnNode matSecNode = new GrnNode(staFrameDir, GrnNodeType.MaterialSection);
+                staFrameDir.AppendChild(matSecNode);
+                foreach (GrnMaterial mat in this.Materials)
+                {
+                    mat.Write(matSecNode, textureMaps);
+                }
+
+                // 8Form
+                GrnNode formSecNode = new GrnNode(staFrameDir, GrnNodeType.FormSection);
+                staFrameDir.AppendChild(formSecNode);
+                this.WriteForm(formSecNode);
+
+                // 9Model
+                GrnNode modelSecNode = new GrnNode(staFrameDir, GrnNodeType.ModelSection);
+                staFrameDir.AppendChild(modelSecNode);
+                GrnNode modelNode = new GrnNode(modelSecNode, GrnNodeType.Model);
+                modelNode.Data = new byte[] { 0x01, 0x00, 0x00, 0x00 };
+                modelSecNode.AppendChild(modelNode);
+                GrnNode rendPassSecNode = new GrnNode(modelNode, GrnNodeType.RenderPassSection);
+                modelNode.AppendChild(rendPassSecNode);
+                for (int i = 0; i < this.Meshes.Count; ++i)
+                {
+                    this.Meshes[i].WriteRenderPass(rendPassSecNode, i);
+                }
+
+                // 10Animation
+                GrnNode animSecNode = new GrnNode(staFrameDir, GrnNodeType.AnimationSection);
+                staFrameDir.AppendChild(animSecNode);
+                GrnNode animNode = new GrnNode(animSecNode, GrnNodeType.Animation);
+                animSecNode.AppendChild(animNode);
+                GrnNode animVecTraSecNode = new GrnNode(animNode, GrnNodeType.AnimationVectorTrackSection);
+                animNode.AppendChild(animVecTraSecNode);
+                GrnNode animTraTraSecNode = new GrnNode(animNode, GrnNodeType.AnimationTransformTrackSection);
+                animNode.AppendChild(animTraTraSecNode);
+                for (int i = 0; i < this.Animation.BoneTracks.Count; ++i)
+                {
+                    this.Animation.BoneTracks[i].Write(animTraTraSecNode, i);
+                }
+
+                // 11NullTerminator
+                GrnNode nullTermNode = new GrnNode(staFrameDir, GrnNodeType.NullTerminator);
+                staFrameDir.AppendChild(nullTermNode);
+
+                GrnSectionNode nullFrameDir = new GrnSectionNode(mainNode, GrnNodeType.NullFrameDirectory);
+                mainNode.AppendChild(nullFrameDir);
+                nullTermNode = new GrnNode(nullFrameDir, GrnNodeType.NullTerminator);
+                nullFrameDir.AppendChild(nullTermNode);
+
+                mainNode.Write(writer);
+            }
+        }
+        private void WriteHeader(GrnBinaryWriter writer)
+        {
+            writer.Write(7380350958317416490);
+            writer.Write(8845441965100526989);
+            writer.Write(3613614802009591920);
+            writer.Write(2261131331893869605);
+            writer.Write(2261131331893869605);
+            writer.Write(7053895580311513156);
+            writer.Write(2138146631217928280);
+            writer.Write(4032492294667058554);
+        }
+        private void CreateVerFrameDir(GrnNode mainNode)
+        {
+            GrnSectionNode verFrameDir = new GrnSectionNode(null, GrnNodeType.VersionFrameDirectory);
+            verFrameDir.Offset = 156;
+            verFrameDir.NumTotalChildNodes = 6;
+            mainNode.AppendChild(verFrameDir);
+
+            GrnStringTableNode strNode = new GrnStringTableNode(verFrameDir);
+            strNode.Offset = 88;
+            strNode.Strings.Add(string.Empty);
+            strNode.Strings.Add("RAD 3D Studio MAX 4.x");
+            strNode.Strings.Add("1.2b");
+            strNode.Strings.Add("10-4-2000");
+            strNode.Strings.Add("win32");
+            strNode.Strings.Add("(C) Copyright 1999-2000 RAD Game Tools, Inc.  All Rights Reserved.");
+            verFrameDir.AppendChild(strNode);
+
+            GrnNode verSect = new GrnNode(verFrameDir, GrnNodeType.VersionSection);
+            verSect.Offset = 208;
+            verSect.NumTotalChildNodes = 3;
+            verFrameDir.AppendChild(verSect);
+
+            GrnNode expVer = new GrnNode(verSect, GrnNodeType.ExporterVersion);
+            expVer.Offset = 208;
+            expVer.NumTotalChildNodes = 1;
+            expVer.Data = new byte[] { 0x01, 0x00, 0x00, 0x00, 
+                    0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00 };
+            verSect.AppendChild(expVer);
+
+            GrnNode maxSys = new GrnNode(expVer, GrnNodeType.ModelerAxisSystem);
+            maxSys.Offset = 220;
+            maxSys.Data = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                    0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xBF,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00};
+            expVer.AppendChild(maxSys);
+
+            GrnNode runVer = new GrnNode(verSect, GrnNodeType.RuntimeVersion);
+            runVer.Offset = 268;
+            runVer.Data = new byte[] { 0x02, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
+                    0x03, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00};
+            verSect.AppendChild(runVer);
+
+            GrnNode nullTer = new GrnNode(verFrameDir, GrnNodeType.NullTerminator);
+            nullTer.Offset = 284;
+            verFrameDir.AppendChild(nullTer);
+        }
+        private OrderedDictionary CreateStringMap()
+        {
+            OrderedDictionary stringMap = new OrderedDictionary();
+
+            stringMap.Add(string.Empty, 0);
+            stringMap.Add("__Standard", 1);
+            foreach (Dictionary<string, string> dataExt in this.DataExtensions)
+            {
+                foreach (string s in dataExt.Keys)
+                {
+                    if (!stringMap.Contains(s))
+                    {
+                        stringMap.Add(s, stringMap.Count);
+                    }
+                }
+                foreach (string s in dataExt.Values)
+                {
+                    if (!stringMap.Contains(s))
+                    {
+                        stringMap.Add(s, stringMap.Count);
+                    }
+                }
+            }
+
+            return stringMap;
+        }
+        private void WriteDataExtensions(GrnNode dataExtSecNode, OrderedDictionary stringMap)
+        {
+            foreach (Dictionary<string, string> dataExt in this.DataExtensions)
+            {
+                GrnNode dataExtNode = new GrnNode(dataExtSecNode, GrnNodeType.DataExtension);
+                dataExtNode.Data = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
+                dataExtSecNode.AppendChild(dataExtNode);
+
+                GrnNode datExtPropSecNode = new GrnNode(dataExtNode, GrnNodeType.DataExtensionPropertySection);
+                dataExtNode.AppendChild(datExtPropSecNode);
+
+                foreach (KeyValuePair<string, string> deProp in dataExt)
+                {
+                    GrnDataExtensionPropertyNode dePropNode = new GrnDataExtensionPropertyNode(datExtPropSecNode);
+                    dePropNode.StringTableIndex = (int)stringMap[deProp.Key];
+                    datExtPropSecNode.AppendChild(dePropNode);
+
+                    GrnNode deValSection = new GrnNode(dePropNode, GrnNodeType.DataExtensionValueSection);
+                    dePropNode.AppendChild(deValSection);
+
+                    GrnDataExtensionPropertyValueNode dePValNode = new GrnDataExtensionPropertyValueNode(deValSection);
+                    dePValNode.StringTableIndex = (int)stringMap[deProp.Value];
+                    deValSection.AppendChild(dePValNode);
+                }
+            }
+        }
+        private OrderedDictionary CreateTextureMaps()
+        {
+            OrderedDictionary textureMaps = new OrderedDictionary();
+            foreach (GrnMaterial mat in this.Materials)
+            {
+                if (!textureMaps.Contains(mat.TextureDataExtensionIndex))
+                {
+                    textureMaps.Add(mat.TextureDataExtensionIndex, textureMaps.Count);
+                }
+            }
+            return textureMaps;
+        }
+        private void WriteTextureMaps(GrnNode texSecNode, OrderedDictionary textureMaps)
+        {
+            foreach (DictionaryEntry texMap in textureMaps)
+            {
+                GrnNode texMapNode = new GrnNode(texSecNode, GrnNodeType.TextureMap);
+                texSecNode.AppendChild(texMapNode);
+                GrnNode texImSecNode = new GrnNode(texMapNode, GrnNodeType.TextureImageSection);
+                texMapNode.AppendChild(texImSecNode);
+                GrnNode texMapImNode = new GrnNode(texImSecNode, GrnNodeType.TextureMapImage);
+                texMapImNode.Data = new byte[] { 0x00, 0x00, 0x00, 0x00, 
+                        0x00, 0x00, 0x00, 0x00, 
+                        0x07, 0x00, 0x00, 0x00 };
+                texImSecNode.AppendChild(texMapImNode);
+                GrnDataExtensionReferenceNode refNode = new GrnDataExtensionReferenceNode(texMapNode);
+                refNode.DataExtensionIndex = (int)texMap.Key + 1;
+                texMapNode.AppendChild(refNode);
+            }
+        }
+        private List<int> CreateFormBoneChannels()
+        {
+            List<int> fBC = new List<int>(this.Bones.Count);
+            for (int i = 1; i <= this.Bones.Count; ++i)
+            {
+                fBC.Add(i);
+            }
+            return fBC;
+        }
+        private void WriteForm(GrnNode formSecNode)
+        {
+            GrnNode formNode = new GrnNode(formSecNode, GrnNodeType.Form);
+            formSecNode.AppendChild(formNode);
+
+            GrnNode formSkelSecNode = new GrnNode(formNode, GrnNodeType.FormSkeletonSection);
+            formNode.AppendChild(formSkelSecNode);
+            GrnNode formSkelNode = new GrnNode(formSkelSecNode, GrnNodeType.FormSkeleton);
+            formSkelNode.Data = new byte[] { 0x01, 0x00, 0x00, 0x00 };
+            formSkelSecNode.AppendChild(formSkelNode);
+            GrnFormBoneChannelsNode fBoneChaNode = new GrnFormBoneChannelsNode(formSkelNode);
+            fBoneChaNode.TransformChannelIndices = this.CreateFormBoneChannels();
+            formSkelNode.AppendChild(fBoneChaNode);
+            GrnNode fPoseWeightsNode = new GrnNode(formSkelNode, GrnNodeType.FormPoseWeights);
+            formSkelNode.AppendChild(fPoseWeightsNode);
+
+            GrnNode formMeshSecNode = new GrnNode(formNode, GrnNodeType.FormMeshSection);
+            formNode.AppendChild(formMeshSecNode);
+            for (int i = 0; i < this.Meshes.Count; ++i)
+            {
+                GrnFormMeshNode fMeshNode = new GrnFormMeshNode(formMeshSecNode);
+                fMeshNode.MeshIndex = i + 1;
+                formMeshSecNode.AppendChild(fMeshNode);
+                GrnNode fVertSetWeiNode = new GrnNode(fMeshNode, GrnNodeType.FormVertexSetWeights);
+                fMeshNode.AppendChild(fVertSetWeiNode);
+                GrnNode fMeshBoneSecNode = new GrnNode(fMeshNode, GrnNodeType.FormMeshBoneSection);
+                fMeshNode.AppendChild(fMeshBoneSecNode);
+                this.Meshes[i].WriteFormMeshBones(fMeshBoneSecNode);
+            }
         }
 
         public int AddDataExtension(string objectName)
