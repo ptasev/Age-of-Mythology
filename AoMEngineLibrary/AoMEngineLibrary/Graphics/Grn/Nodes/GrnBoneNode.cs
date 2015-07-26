@@ -47,6 +47,7 @@
             this.Position = reader.ReadVector3D();
             this.Rotation = reader.ReadQuaternion();
             this.Scale = reader.ReadMatrix3x3();
+            if (this.GetReadDataLength() != this.GetWriteDataLength()) throw new Exception("bbb");
         }
 
         public override void WriteData(GrnBinaryWriter writer)

@@ -61,7 +61,7 @@
 
             for (int i = 0; i < this.Faces.Count; ++i)
             {
-                XElement face = new XElement("face");
+                XElement face = new XElement("face", new XAttribute("index", i));
                 root.Add(face);
                 for (int j = 0; j < this.Faces[i].Indices.Count; ++j)
                 {

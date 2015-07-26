@@ -27,10 +27,14 @@
         {
             using (GrnBinaryReader reader = new GrnBinaryReader(stream))
             {
-                reader.ReadBytes(64);
+                Int64 magic = reader.ReadInt64();
+                if (magic != 7380350958317416490)
+                {
+                    throw new Exception("This is not a GRN file!");
+                }
+                reader.ReadBytes(56);
                 GrnNodeType nodeType = (GrnNodeType)reader.ReadInt32(); // should be FileDirectory
                 GrnNode mainNode = GrnNode.ReadByNodeType(reader, null, nodeType);
-                mainNode.ReadData(reader, 0);
                 mainNode.CreateFolder(folderPath, 0);
             }
         }
@@ -39,11 +43,15 @@
         {
             using (GrnBinaryReader reader = new GrnBinaryReader(stream))
             {
-                reader.ReadBytes(64);
+                Int64 magic = reader.ReadInt64();
+                if (magic != 7380350958317416490)
+                {
+                    throw new Exception("This is not a GRN file!");
+                }
+                reader.ReadBytes(56);
                 GrnNodeType nodeType = (GrnNodeType)reader.ReadInt32(); // should be FileDirectory
                 GrnNode mainNode = GrnNode.ReadByNodeType(reader, null, nodeType);
-                mainNode.ReadData(reader, 0);
-                mainNode.CreateFolder(@"C:\Users\Petar\Desktop\Nieuwe map (3)\Output", 0);
+                //mainNode.CreateFolder(@"C:\Users\Petar\Desktop\Nieuwe map (3)\Output", 0);
 
                 GrnSectionNode dirNode = mainNode.FindNode<GrnSectionNode>(GrnNodeType.StandardFrameDirectory);
                 uint directoryOffset = dirNode.Offset;

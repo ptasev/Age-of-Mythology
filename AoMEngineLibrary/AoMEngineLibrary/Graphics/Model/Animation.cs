@@ -14,7 +14,7 @@
 
         public Animation()
         {
-            this.Duration = 1f;
+            this.Duration = 0f;
             this.TimeStep = 1f;
             this.MeshKeys = new List<float>();
         }

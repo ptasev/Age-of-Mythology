@@ -95,6 +95,13 @@
             this.Write(color.G);
             this.Write(color.B);
         }
+        public void WriteColor4D(Color4D color)
+        {
+            this.Write((byte)(color.R * Byte.MaxValue));
+            this.Write((byte)(color.G * Byte.MaxValue));
+            this.Write((byte)(color.B * Byte.MaxValue));
+            this.Write((byte)(color.A * Byte.MaxValue));
+        }
 
         public void WriteHalf(float half)
         {

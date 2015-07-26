@@ -6,10 +6,14 @@
     public class BrgAttachpoint
     {
         public static string[] AttachpointNames = new string[55] { 
-            "TARGETPOINT", "LAUNCHPOINT", "CORPSE", "DECAL", "FIRE", "GATHERPOINT", "RESERVED9", "RESERVED8", "RESERVED7", "RESERVED6", "RESERVED5", "RESERVED4", "RESERVED3", "RESERVED2", "RESERVED1", "RESERVED0", 
-            "SMOKE9", "SMOKE8", "SMOKE7", "SMOKE6", "SMOKE5", "SMOKE4", "SMOKE3", "SMOKE2", "SMOKE1", "SMOKE0", "GARRISONFLAG", "HITPOINTBAR", "RIGHTFOREARM", "LEFTFOREARM", "RIGHTFOOT", "LEFTFOOT", 
-            "RIGHTLEG", "LEFTLEG", "RIGHTTHIGH", "LEFTTHIGH", "PELVIS", "BACKABDOMEN", "FRONTABDOMEN", "BACKCHEST", "FRONTCHEST", "RIGHTSHOULDER", "LEFTSHOULDER", "NECK", "RIGHTEAR", "LEFTEAR", "CHIN", "FACE", 
-            "FOREHEAD", "TOPOFHEAD", "RIGHTHAND", "LEFTHAND", "RESERVED", "SMOKEPOINT", "ATTACHPOINT"
+            "targetpoint", "launchpoint", "corpse", "decal", "fire", "gatherpoint", "reserved9", "reserved8", "reserved7", "reserved6", "reserved5", "reserved4", "reserved3", "reserved2", "reserved1", "reserved0", 
+            "smoke9", "smoke8", "smoke7", "smoke6", "smoke5", "smoke4", "smoke3", "smoke2", "smoke1", "smoke0", "garrisonflag", "hitpointbar", "rightforearm", "leftforearm", "rightfoot", "leftfoot", 
+            "rightleg", "leftleg", "rightthigh", "leftthigh", "pelvis", "backabdomen", "frontabdomen", "backchest", "frontchest", "rightshoulder", "leftshoulder", "neck", "rightear", "leftear", "chin", "face", 
+            "forehead", "topofhead", "righthand", "lefthand", "reserved", "smokepoint", "attachpoint"
+            //"TARGETPOINT", "LAUNCHPOINT", "CORPSE", "DECAL", "FIRE", "GATHERPOINT", "RESERVED9", "RESERVED8", "RESERVED7", "RESERVED6", "RESERVED5", "RESERVED4", "RESERVED3", "RESERVED2", "RESERVED1", "RESERVED0", 
+            //"SMOKE9", "SMOKE8", "SMOKE7", "SMOKE6", "SMOKE5", "SMOKE4", "SMOKE3", "SMOKE2", "SMOKE1", "SMOKE0", "GARRISONFLAG", "HITPOINTBAR", "RIGHTFOREARM", "LEFTFOREARM", "RIGHTFOOT", "LEFTFOOT", 
+            //"RIGHTLEG", "LEFTLEG", "RIGHTTHIGH", "LEFTTHIGH", "PELVIS", "BACKABDOMEN", "FRONTABDOMEN", "BACKCHEST", "FRONTCHEST", "RIGHTSHOULDER", "LEFTSHOULDER", "NECK", "RIGHTEAR", "LEFTEAR", "CHIN", "FACE", 
+            //"FOREHEAD", "TOPOFHEAD", "RIGHTHAND", "LEFTHAND", "RESERVED", "SMOKEPOINT", "ATTACHPOINT"
          };
 
         public int Index;
@@ -32,7 +36,7 @@
                 else
                 {
                     //return string.Empty;
-                    throw new Exception("Invalid Attachpoint Name Id!");
+                    throw new Exception("Invalid Attachpoint Name Id " + NameId + "!");
                 }
             }
         }
@@ -69,16 +73,26 @@
 
         public static int GetIdByName(string name)
         {
+            int ret;
+            if (!BrgAttachpoint.TryGetIdByName(name, out ret))
+            {
+                throw new Exception("Invalid Attachpoint Name " + name + "!");
+            }
+            return ret;
+        }
+        public static bool TryGetIdByName(string name, out int nameId)
+        {
             for (int i = 0; i < AttachpointNames.Length; i++)
             {
-                if (AttachpointNames[i].Equals(name, StringComparison.Ordinal))
+                if (AttachpointNames[i].Equals(name, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return (54 - i);
+                    nameId = (54 - i);
+                    return true;
                 }
             }
 
-            //return -1;
-            throw new Exception("Invalid Attachpoint Name Id!");
+            nameId = -1;
+            return false;
         }
 
         public string GetMaxTransform()
@@ -107,7 +121,8 @@
         }
         public string GetMaxName()
         {
-            return String.Format("atpt{0:D2}.{1}", Index, this.Name);
+            return String.Format("Dummy_{0}", this.Name);
+            //return String.Format("atpt{0:D2}.{1}", Index, this.Name);
         }
     }
 }

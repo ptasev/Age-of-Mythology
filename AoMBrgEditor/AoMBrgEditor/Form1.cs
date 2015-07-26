@@ -24,9 +24,10 @@ namespace AoMBrgEditor
             string output = "";
             HashSet<int> ttt = new HashSet<int>();
             GrnFile grnFile = new GrnFile();
-            grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
+            //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\agamem_idlea.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
-            grnFile.Write(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC2.grn", FileMode.Create, FileAccess.Write, FileShare.Read));
+            //grnFile.Write(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC2.grn", FileMode.Create, FileAccess.Write, FileShare.Read));
             //grnFile.Meshes[0].CalculateUniqueMap();
             /*DdtFile ddt = new DdtFile(File.Open(@"C:\Users\Petar\Desktop\aom\textures\agamemnon map.ddt", FileMode.Open, FileAccess.Read, FileShare.Read));
             Dds dds = new Dds(ddt);
@@ -47,17 +48,21 @@ namespace AoMBrgEditor
             return;*/
             //@"C:\Games\Steam\SteamApps\common\Age of Mythology\models"
             //@"C:\Users\Petar\Desktop\modelsAlpha"
-            foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
-            //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
+            //foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
+            foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
             //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsAlpha", "*.brg", SearchOption.AllDirectories))
             {
                 continue;
                 try
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)))
                     {
-                        //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
+                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
+                    } 
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Format.HasFlag(BrgMeshFormat.ANIMTEXCOORDSNAP)))
+                    {
+                        //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Format.ToString() + Environment.NewLine;
                     }
                     if (file.Materials.Count > 0)
                     {
@@ -66,7 +71,7 @@ namespace AoMBrgEditor
                             //if(mat.sfx.Count > 1)
                             if (mat.Flags.HasFlag(BrgMatFlag.ILLUMREFLECTION))
                             {
-                                output += Path.GetFileName(s) + " " + mat.Flags.ToString() + Environment.NewLine;
+                                //output += Path.GetFileName(s) + " " + mat.Flags.ToString() + Environment.NewLine;
                             }
                         }
                     }

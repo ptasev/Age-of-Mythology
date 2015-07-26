@@ -10,7 +10,7 @@
         public string FileName { get; set; }
 
         public BrgHeader Header { get; set; }
-        public BrgAsetHeader AsetHeader { get; set; }
+        public BrgAsetHeader AsetHeader { get; private set; }
 
         public BrgFile(System.IO.FileStream fileStream)
             : base()
@@ -112,7 +112,6 @@
         {
             this.FileName = string.Empty;
             this.Header = new BrgHeader();
-            this.Header.Unknown03 = 1999922179;
             this.AsetHeader = new BrgAsetHeader();
         }
 
@@ -122,8 +121,6 @@
             {
                 this.FileName = fileStream.Name;
 
-                this.Header.NumMeshes = this.Meshes[0].MeshAnimations.Count + 1;
-                this.Header.NumMaterials = this.Materials.Count;
                 this.Header.Write(writer);
 
                 if (this.Header.NumMeshes > 1)
@@ -176,14 +173,19 @@
             AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
         }
 
-        public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType, float exportedScaleFactor)
+        public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType)
         {
+            if (this.Meshes.Count == 0)
+            {
+                return;
+            }
+
             for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; i++)
             {
-                UpdateMeshSettings(i, flags, format, animType, interpolationType, exportedScaleFactor);
+                UpdateMeshSettings(i, flags, format, animType, interpolationType);
             }
         }
-        public void UpdateMeshSettings(int meshIndex, BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType, float exportedScaleFactor)
+        public void UpdateMeshSettings(int meshIndex, BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType)
         {
             if (meshIndex > 0)
             {
@@ -191,7 +193,6 @@
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.Format = format;
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType = animType;
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.InterpolationType = interpolationType;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).ExtendedHeader.ExportedScaleFactor = exportedScaleFactor;
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.Flags |= BrgMeshFlag.SECONDARYMESH;
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType &= ~BrgMeshAnimType.NONUNIFORM;
             }
@@ -201,7 +202,15 @@
                 this.Meshes[meshIndex].Header.Format = format;
                 this.Meshes[meshIndex].Header.AnimationType = animType;
                 this.Meshes[meshIndex].Header.InterpolationType = interpolationType;
-                this.Meshes[meshIndex].ExtendedHeader.ExportedScaleFactor = exportedScaleFactor;
+
+                if (this.Meshes[meshIndex].Header.AnimationType == BrgMeshAnimType.NONUNIFORM)
+                {
+                    this.Meshes[meshIndex].NonUniformKeys = new float[this.Header.NumMeshes];
+                    for (int i = 0; i < this.Header.NumMeshes; i++)
+                    {
+                        this.Meshes[meshIndex].NonUniformKeys[i] = this.Animation.MeshKeys[i] / this.Animation.Duration;
+                    }
+                }
             }
         }
     }

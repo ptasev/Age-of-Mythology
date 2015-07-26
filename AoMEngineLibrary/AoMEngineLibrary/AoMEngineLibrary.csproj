@@ -56,6 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AMP\BrgMax.cs" />
     <Compile Include="Graphics\Brg\BrgAsetHeader.cs" />
     <Compile Include="Graphics\Brg\BrgAttachpoint.cs" />
     <Compile Include="Graphics\Brg\BrgBinaryReader.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Graphics\Brg\BrgMeshFormat.cs" />
     <Compile Include="Graphics\Brg\BrgMeshHeader.cs" />
     <Compile Include="Graphics\Brg\BrgUserDataEntry.cs" />
+    <Compile Include="Graphics\Brg\MtrlFile.cs" />
     <Compile Include="Graphics\Grn\GrnAnimation.cs" />
     <Compile Include="Graphics\Grn\GrnBinaryWriter.cs" />
     <Compile Include="Graphics\Grn\GrnBone.cs" />
@@ -139,11 +141,12 @@
     <Compile Include="Graphics\Vector3.cs" />
     <Compile Include="Graphics\Model\Vector3D.cs" />
     <Compile Include="Graphics\VertexColor.cs" />
-    <Compile Include="GrnMax.cs" />
-    <Compile Include="MaxPluginForm.cs">
+    <Compile Include="AMP\GrnMax.cs" />
+    <Compile Include="AMP\IModelMaxUi.cs" />
+    <Compile Include="AMP\MaxPluginForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MaxPluginForm.Designer.cs">
+    <Compile Include="AMP\MaxPluginForm.Designer.cs">
       <DependentUpon>MaxPluginForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -154,7 +157,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MaxPluginForm.resx">
+    <EmbeddedResource Include="AMP\MaxPluginForm.resx">
       <DependentUpon>MaxPluginForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

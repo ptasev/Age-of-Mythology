@@ -452,7 +452,7 @@
         {
             private BrgAttachpoint[] attachpoint;
             public readonly static int Capacity = 100;
-            public int Count;
+            public int Count { get; set; }
 
             internal BrgAttachpointCollection()
             {
