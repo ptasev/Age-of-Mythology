@@ -58,10 +58,17 @@
             this.genMeshFormatGroupBox = new System.Windows.Forms.GroupBox();
             this.genMeshFormatCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.genMeshAnimTypeGroupBox = new System.Windows.Forms.GroupBox();
+            this.skinBoneRadioButton = new System.Windows.Forms.RadioButton();
+            this.nonuniRadioButton = new System.Windows.Forms.RadioButton();
+            this.keyframeRadioButton = new System.Windows.Forms.RadioButton();
             this.genMeshFlagsGroupBox = new System.Windows.Forms.GroupBox();
             this.genMeshFlagsCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.genDataPanel = new System.Windows.Forms.Panel();
             this.generalDataGroupBox = new System.Windows.Forms.GroupBox();
+            this.brgImportGroupBox = new System.Windows.Forms.GroupBox();
+            this.brgImportCenterModelCheckBox = new System.Windows.Forms.CheckBox();
+            this.brgImportAttachScaleCheckBox = new System.Windows.Forms.CheckBox();
+            this.interpTypeGroupBox = new System.Windows.Forms.GroupBox();
             this.interpolationTypeCheckBox = new System.Windows.Forms.CheckBox();
             this.attachpointGroupBox = new System.Windows.Forms.GroupBox();
             this.attachpointComboBox = new System.Windows.Forms.ComboBox();
@@ -108,13 +115,7 @@
             this.matsValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.keyframeRadioButton = new System.Windows.Forms.RadioButton();
-            this.nonuniRadioButton = new System.Windows.Forms.RadioButton();
-            this.skinBoneRadioButton = new System.Windows.Forms.RadioButton();
-            this.interpTypeGroupBox = new System.Windows.Forms.GroupBox();
-            this.brgImportGroupBox = new System.Windows.Forms.GroupBox();
-            this.brgImportAttachScaleCheckBox = new System.Windows.Forms.CheckBox();
-            this.brgImportCenterModelCheckBox = new System.Windows.Forms.CheckBox();
+            this.brgFlagsBottomPanel = new System.Windows.Forms.Panel();
             this.materialPanel.SuspendLayout();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
@@ -128,6 +129,8 @@
             this.genMeshFlagsGroupBox.SuspendLayout();
             this.genDataPanel.SuspendLayout();
             this.generalDataGroupBox.SuspendLayout();
+            this.brgImportGroupBox.SuspendLayout();
+            this.interpTypeGroupBox.SuspendLayout();
             this.attachpointGroupBox.SuspendLayout();
             this.materialTabPage.SuspendLayout();
             this.grnSettingsTabPage.SuspendLayout();
@@ -139,8 +142,7 @@
             this.grnObjectsGroupBox.SuspendLayout();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
-            this.interpTypeGroupBox.SuspendLayout();
-            this.brgImportGroupBox.SuspendLayout();
+            this.brgFlagsBottomPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // specularLevelLabel
@@ -390,7 +392,7 @@
             this.attachpointListBox.Location = new System.Drawing.Point(4, 24);
             this.attachpointListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.attachpointListBox.Name = "attachpointListBox";
-            this.attachpointListBox.Size = new System.Drawing.Size(288, 522);
+            this.attachpointListBox.Size = new System.Drawing.Size(288, 591);
             this.attachpointListBox.TabIndex = 1;
             this.attachpointListBox.MouseEnter += new System.EventHandler(this.attachpointListBox_MouseEnter);
             // 
@@ -424,8 +426,8 @@
             // flagsPanel
             // 
             this.flagsPanel.Controls.Add(this.genMeshFormatGroupBox);
-            this.flagsPanel.Controls.Add(this.genMeshAnimTypeGroupBox);
             this.flagsPanel.Controls.Add(this.genMeshFlagsGroupBox);
+            this.flagsPanel.Controls.Add(this.brgFlagsBottomPanel);
             this.flagsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flagsPanel.Location = new System.Drawing.Point(300, 5);
             this.flagsPanel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -441,7 +443,7 @@
             this.genMeshFormatGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.genMeshFormatGroupBox.Name = "genMeshFormatGroupBox";
             this.genMeshFormatGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.genMeshFormatGroupBox.Size = new System.Drawing.Size(864, 252);
+            this.genMeshFormatGroupBox.Size = new System.Drawing.Size(864, 260);
             this.genMeshFormatGroupBox.TabIndex = 1;
             this.genMeshFormatGroupBox.TabStop = false;
             this.genMeshFormatGroupBox.Text = "Mesh Format";
@@ -453,7 +455,7 @@
             this.genMeshFormatCheckedListBox.Location = new System.Drawing.Point(4, 24);
             this.genMeshFormatCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.genMeshFormatCheckedListBox.Name = "genMeshFormatCheckedListBox";
-            this.genMeshFormatCheckedListBox.Size = new System.Drawing.Size(856, 223);
+            this.genMeshFormatCheckedListBox.Size = new System.Drawing.Size(856, 231);
             this.genMeshFormatCheckedListBox.TabIndex = 1;
             // 
             // genMeshAnimTypeGroupBox
@@ -461,15 +463,48 @@
             this.genMeshAnimTypeGroupBox.Controls.Add(this.skinBoneRadioButton);
             this.genMeshAnimTypeGroupBox.Controls.Add(this.nonuniRadioButton);
             this.genMeshAnimTypeGroupBox.Controls.Add(this.keyframeRadioButton);
-            this.genMeshAnimTypeGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.genMeshAnimTypeGroupBox.Location = new System.Drawing.Point(0, 651);
+            this.genMeshAnimTypeGroupBox.Dock = System.Windows.Forms.DockStyle.Right;
+            this.genMeshAnimTypeGroupBox.Location = new System.Drawing.Point(197, 0);
             this.genMeshAnimTypeGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.genMeshAnimTypeGroupBox.Name = "genMeshAnimTypeGroupBox";
             this.genMeshAnimTypeGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.genMeshAnimTypeGroupBox.Size = new System.Drawing.Size(864, 108);
+            this.genMeshAnimTypeGroupBox.Size = new System.Drawing.Size(667, 100);
             this.genMeshAnimTypeGroupBox.TabIndex = 2;
             this.genMeshAnimTypeGroupBox.TabStop = false;
             this.genMeshAnimTypeGroupBox.Text = "Mesh Animation Type";
+            // 
+            // skinBoneRadioButton
+            // 
+            this.skinBoneRadioButton.AutoSize = true;
+            this.skinBoneRadioButton.Location = new System.Drawing.Point(239, 50);
+            this.skinBoneRadioButton.Name = "skinBoneRadioButton";
+            this.skinBoneRadioButton.Size = new System.Drawing.Size(103, 24);
+            this.skinBoneRadioButton.TabIndex = 2;
+            this.skinBoneRadioButton.TabStop = true;
+            this.skinBoneRadioButton.Text = "SkinBone";
+            this.skinBoneRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // nonuniRadioButton
+            // 
+            this.nonuniRadioButton.AutoSize = true;
+            this.nonuniRadioButton.Location = new System.Drawing.Point(114, 50);
+            this.nonuniRadioButton.Name = "nonuniRadioButton";
+            this.nonuniRadioButton.Size = new System.Drawing.Size(119, 24);
+            this.nonuniRadioButton.TabIndex = 1;
+            this.nonuniRadioButton.TabStop = true;
+            this.nonuniRadioButton.Text = "NonUniform";
+            this.nonuniRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // keyframeRadioButton
+            // 
+            this.keyframeRadioButton.AutoSize = true;
+            this.keyframeRadioButton.Location = new System.Drawing.Point(7, 50);
+            this.keyframeRadioButton.Name = "keyframeRadioButton";
+            this.keyframeRadioButton.Size = new System.Drawing.Size(101, 24);
+            this.keyframeRadioButton.TabIndex = 0;
+            this.keyframeRadioButton.TabStop = true;
+            this.keyframeRadioButton.Text = "Keyframe";
+            this.keyframeRadioButton.UseVisualStyleBackColor = true;
             // 
             // genMeshFlagsGroupBox
             // 
@@ -508,16 +543,57 @@
             // generalDataGroupBox
             // 
             this.generalDataGroupBox.Controls.Add(this.brgImportGroupBox);
-            this.generalDataGroupBox.Controls.Add(this.interpTypeGroupBox);
             this.generalDataGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.generalDataGroupBox.Location = new System.Drawing.Point(0, 0);
             this.generalDataGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.generalDataGroupBox.Name = "generalDataGroupBox";
             this.generalDataGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.generalDataGroupBox.Size = new System.Drawing.Size(296, 208);
+            this.generalDataGroupBox.Size = new System.Drawing.Size(296, 139);
             this.generalDataGroupBox.TabIndex = 0;
             this.generalDataGroupBox.TabStop = false;
             this.generalDataGroupBox.Text = "Settings";
+            // 
+            // brgImportGroupBox
+            // 
+            this.brgImportGroupBox.Controls.Add(this.brgImportCenterModelCheckBox);
+            this.brgImportGroupBox.Controls.Add(this.brgImportAttachScaleCheckBox);
+            this.brgImportGroupBox.Location = new System.Drawing.Point(7, 27);
+            this.brgImportGroupBox.Name = "brgImportGroupBox";
+            this.brgImportGroupBox.Size = new System.Drawing.Size(281, 86);
+            this.brgImportGroupBox.TabIndex = 19;
+            this.brgImportGroupBox.TabStop = false;
+            this.brgImportGroupBox.Text = "Import";
+            // 
+            // brgImportCenterModelCheckBox
+            // 
+            this.brgImportCenterModelCheckBox.AutoSize = true;
+            this.brgImportCenterModelCheckBox.Location = new System.Drawing.Point(6, 55);
+            this.brgImportCenterModelCheckBox.Name = "brgImportCenterModelCheckBox";
+            this.brgImportCenterModelCheckBox.Size = new System.Drawing.Size(148, 24);
+            this.brgImportCenterModelCheckBox.TabIndex = 1;
+            this.brgImportCenterModelCheckBox.Text = "Model at Center";
+            this.brgImportCenterModelCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // brgImportAttachScaleCheckBox
+            // 
+            this.brgImportAttachScaleCheckBox.AutoSize = true;
+            this.brgImportAttachScaleCheckBox.Location = new System.Drawing.Point(6, 25);
+            this.brgImportAttachScaleCheckBox.Name = "brgImportAttachScaleCheckBox";
+            this.brgImportAttachScaleCheckBox.Size = new System.Drawing.Size(221, 24);
+            this.brgImportAttachScaleCheckBox.TabIndex = 0;
+            this.brgImportAttachScaleCheckBox.Text = "Uniform Attachpoint Scale";
+            this.brgImportAttachScaleCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // interpTypeGroupBox
+            // 
+            this.interpTypeGroupBox.Controls.Add(this.interpolationTypeCheckBox);
+            this.interpTypeGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.interpTypeGroupBox.Location = new System.Drawing.Point(0, 0);
+            this.interpTypeGroupBox.Name = "interpTypeGroupBox";
+            this.interpTypeGroupBox.Size = new System.Drawing.Size(197, 100);
+            this.interpTypeGroupBox.TabIndex = 18;
+            this.interpTypeGroupBox.TabStop = false;
+            this.interpTypeGroupBox.Text = "Interpolation Type";
             // 
             // interpolationTypeCheckBox
             // 
@@ -534,11 +610,11 @@
             this.attachpointGroupBox.Controls.Add(this.attachpointListBox);
             this.attachpointGroupBox.Controls.Add(this.attachpointComboBox);
             this.attachpointGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.attachpointGroupBox.Location = new System.Drawing.Point(0, 208);
+            this.attachpointGroupBox.Location = new System.Drawing.Point(0, 139);
             this.attachpointGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.attachpointGroupBox.Name = "attachpointGroupBox";
             this.attachpointGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.attachpointGroupBox.Size = new System.Drawing.Size(296, 551);
+            this.attachpointGroupBox.Size = new System.Drawing.Size(296, 620);
             this.attachpointGroupBox.TabIndex = 1;
             this.attachpointGroupBox.TabStop = false;
             this.attachpointGroupBox.Text = "Attachpoints";
@@ -914,79 +990,15 @@
             this.animLengthValueToolStripStatusLabel.Size = new System.Drawing.Size(22, 25);
             this.animLengthValueToolStripStatusLabel.Text = "0";
             // 
-            // keyframeRadioButton
+            // brgFlagsBottomPanel
             // 
-            this.keyframeRadioButton.AutoSize = true;
-            this.keyframeRadioButton.Location = new System.Drawing.Point(7, 50);
-            this.keyframeRadioButton.Name = "keyframeRadioButton";
-            this.keyframeRadioButton.Size = new System.Drawing.Size(101, 24);
-            this.keyframeRadioButton.TabIndex = 0;
-            this.keyframeRadioButton.TabStop = true;
-            this.keyframeRadioButton.Text = "Keyframe";
-            this.keyframeRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // nonuniRadioButton
-            // 
-            this.nonuniRadioButton.AutoSize = true;
-            this.nonuniRadioButton.Location = new System.Drawing.Point(114, 50);
-            this.nonuniRadioButton.Name = "nonuniRadioButton";
-            this.nonuniRadioButton.Size = new System.Drawing.Size(119, 24);
-            this.nonuniRadioButton.TabIndex = 1;
-            this.nonuniRadioButton.TabStop = true;
-            this.nonuniRadioButton.Text = "NonUniform";
-            this.nonuniRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // skinBoneRadioButton
-            // 
-            this.skinBoneRadioButton.AutoSize = true;
-            this.skinBoneRadioButton.Location = new System.Drawing.Point(239, 50);
-            this.skinBoneRadioButton.Name = "skinBoneRadioButton";
-            this.skinBoneRadioButton.Size = new System.Drawing.Size(103, 24);
-            this.skinBoneRadioButton.TabIndex = 2;
-            this.skinBoneRadioButton.TabStop = true;
-            this.skinBoneRadioButton.Text = "SkinBone";
-            this.skinBoneRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // interpTypeGroupBox
-            // 
-            this.interpTypeGroupBox.Controls.Add(this.interpolationTypeCheckBox);
-            this.interpTypeGroupBox.Location = new System.Drawing.Point(7, 119);
-            this.interpTypeGroupBox.Name = "interpTypeGroupBox";
-            this.interpTypeGroupBox.Size = new System.Drawing.Size(281, 59);
-            this.interpTypeGroupBox.TabIndex = 18;
-            this.interpTypeGroupBox.TabStop = false;
-            this.interpTypeGroupBox.Text = "Interpolation Type";
-            // 
-            // brgImportGroupBox
-            // 
-            this.brgImportGroupBox.Controls.Add(this.brgImportCenterModelCheckBox);
-            this.brgImportGroupBox.Controls.Add(this.brgImportAttachScaleCheckBox);
-            this.brgImportGroupBox.Location = new System.Drawing.Point(7, 27);
-            this.brgImportGroupBox.Name = "brgImportGroupBox";
-            this.brgImportGroupBox.Size = new System.Drawing.Size(281, 86);
-            this.brgImportGroupBox.TabIndex = 19;
-            this.brgImportGroupBox.TabStop = false;
-            this.brgImportGroupBox.Text = "Import";
-            // 
-            // brgImportAttachScaleCheckBox
-            // 
-            this.brgImportAttachScaleCheckBox.AutoSize = true;
-            this.brgImportAttachScaleCheckBox.Location = new System.Drawing.Point(6, 25);
-            this.brgImportAttachScaleCheckBox.Name = "brgImportAttachScaleCheckBox";
-            this.brgImportAttachScaleCheckBox.Size = new System.Drawing.Size(221, 24);
-            this.brgImportAttachScaleCheckBox.TabIndex = 0;
-            this.brgImportAttachScaleCheckBox.Text = "Uniform Attachpoint Scale";
-            this.brgImportAttachScaleCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // brgImportCenterModelCheckBox
-            // 
-            this.brgImportCenterModelCheckBox.AutoSize = true;
-            this.brgImportCenterModelCheckBox.Location = new System.Drawing.Point(6, 55);
-            this.brgImportCenterModelCheckBox.Name = "brgImportCenterModelCheckBox";
-            this.brgImportCenterModelCheckBox.Size = new System.Drawing.Size(148, 24);
-            this.brgImportCenterModelCheckBox.TabIndex = 1;
-            this.brgImportCenterModelCheckBox.Text = "Model at Center";
-            this.brgImportCenterModelCheckBox.UseVisualStyleBackColor = true;
+            this.brgFlagsBottomPanel.Controls.Add(this.interpTypeGroupBox);
+            this.brgFlagsBottomPanel.Controls.Add(this.genMeshAnimTypeGroupBox);
+            this.brgFlagsBottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.brgFlagsBottomPanel.Location = new System.Drawing.Point(0, 659);
+            this.brgFlagsBottomPanel.Name = "brgFlagsBottomPanel";
+            this.brgFlagsBottomPanel.Size = new System.Drawing.Size(864, 100);
+            this.brgFlagsBottomPanel.TabIndex = 3;
             // 
             // MaxPluginForm
             // 
@@ -1014,6 +1026,10 @@
             this.genMeshFlagsGroupBox.ResumeLayout(false);
             this.genDataPanel.ResumeLayout(false);
             this.generalDataGroupBox.ResumeLayout(false);
+            this.brgImportGroupBox.ResumeLayout(false);
+            this.brgImportGroupBox.PerformLayout();
+            this.interpTypeGroupBox.ResumeLayout(false);
+            this.interpTypeGroupBox.PerformLayout();
             this.attachpointGroupBox.ResumeLayout(false);
             this.materialTabPage.ResumeLayout(false);
             this.grnSettingsTabPage.ResumeLayout(false);
@@ -1028,10 +1044,7 @@
             this.mainMenuStrip.PerformLayout();
             this.mainStatusStrip.ResumeLayout(false);
             this.mainStatusStrip.PerformLayout();
-            this.interpTypeGroupBox.ResumeLayout(false);
-            this.interpTypeGroupBox.PerformLayout();
-            this.brgImportGroupBox.ResumeLayout(false);
-            this.brgImportGroupBox.PerformLayout();
+            this.brgFlagsBottomPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1126,5 +1139,6 @@
         public System.Windows.Forms.CheckBox brgImportCenterModelCheckBox;
         public System.Windows.Forms.CheckBox brgImportAttachScaleCheckBox;
         private System.Windows.Forms.GroupBox interpTypeGroupBox;
+        private System.Windows.Forms.Panel brgFlagsBottomPanel;
     }
 }

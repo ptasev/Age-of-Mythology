@@ -70,7 +70,7 @@ namespace AoMEngineLibrary
         public MaxPluginForm()
         {
             InitializeComponent();
-            //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
+            this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
             this.MaximizeBox = false;
@@ -120,7 +120,8 @@ namespace AoMEngineLibrary
             attachpointListBox.MouseDoubleClick += attachpointListBox_MouseDoubleClick;
             attachpointListBox.BackColor = uiUp.GetEditControlColor();
             attachpointListBox.ForeColor = uiUp.GetTextColor();
-            string[] atpts = BrgAttachpoint.AttachpointNames;
+            string[] atpts = new string[55];
+            Array.Copy(BrgAttachpoint.AttachpointNames, atpts, 55);
             Array.Sort(atpts);
             attachpointListBox.DataSource = atpts;
 
@@ -298,6 +299,7 @@ namespace AoMEngineLibrary
         [System.Diagnostics.Conditional("DEBUG")]
         private void debug()
         {
+            return;
             using (TextWriter writer = File.CreateText(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\lp skult.grn.txt.ms"))//Path.GetFileName(file.FileName) + ".txt"))
             {
                 for (int i = 0; i < Maxscript.Output.Count; i++)
@@ -352,7 +354,7 @@ namespace AoMEngineLibrary
             model.SaveUi();
             model.Import();
             model.LoadUi();
-            //debug();
+            debug();
             Maxscript.Output.Clear();
             try
             {

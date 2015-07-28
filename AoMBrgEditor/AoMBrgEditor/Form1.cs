@@ -48,8 +48,8 @@ namespace AoMBrgEditor
             return;*/
             //@"C:\Games\Steam\SteamApps\common\Age of Mythology\models"
             //@"C:\Users\Petar\Desktop\modelsAlpha"
-            //foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
-            foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
+            foreach (string s in Directory.GetFiles(@"C:\Games\Steam\SteamApps\common\Age of Mythology\models", "*.brg", SearchOption.AllDirectories))
+            //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsBeta", "*.brg", SearchOption.AllDirectories))
             //foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\modelsAlpha", "*.brg", SearchOption.AllDirectories))
             {
                 continue;
@@ -58,11 +58,15 @@ namespace AoMBrgEditor
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
                     if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)))
                     {
-                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
+                        //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
                     } 
                     if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Format.HasFlag(BrgMeshFormat.ANIMTEXCOORDSNAP)))
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Format.ToString() + Environment.NewLine;
+                    }
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM)))
+                    {
+                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.AnimationType.ToString() + Environment.NewLine;
                     }
                     if (file.Materials.Count > 0)
                     {

@@ -273,41 +273,76 @@
                 // typically bones and bonetracks match up
                 // but won't if an anim file is imported on top of a regular model file
                 int boneArrayIndex = this.boneMap[this.File.Bones[i].Name] + 1;
-                this.Plugin.richTextBox1.AppendText(i + " " + this.File.GetDataExtensionObjectName(bone.DataExtensionIndex) + " " + Maxscript.QueryString("boneArray[{0}].name", boneArrayIndex) + Environment.NewLine);
+                this.Plugin.richTextBox1.AppendText(i + " " + this.File.GetDataExtensionObjectName(bone.DataExtensionIndex) + " " + bone.Scales[0] + Environment.NewLine);
 
-                Maxscript.Command("{0}[{1}][3][1].controller = Bezier_Position()", boneArray, boneArrayIndex);
-                for (int j = 0; j < bone.PositionKeys.Count; ++j)
+                Vector3D pos = new Vector3D();
+                Quaternion rot = new Quaternion();
+                Matrix3x3 scale = Matrix3x3.Identity;
+                HashSet<float> uKeys = new HashSet<float>();
+                uKeys.UnionWith(bone.RotationKeys);
+                uKeys.UnionWith(bone.ScaleKeys);
+                uKeys.UnionWith(bone.PositionKeys);
+                List<float> keys = uKeys.ToList();
+                keys.Sort();
+
+                for (int j = 0; j < keys.Count; ++j)
                 {
-                    //Maxscript.Command("addNewKey {0}[{1}][3][1].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-                    //Maxscript.Command("{0}[{1}][3][1].controller.keys[{2}].value = {3}",
-                    //    boneArray, boneArrayIndex, j + 1, Maxscript.Point3Literal(bone.Positions[j]));
-                    Maxscript.Command("addNewKey {0}[{1}][3][1][1].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-                    Maxscript.Command("addNewKey {0}[{1}][3][1][2].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-                    Maxscript.Command("addNewKey {0}[{1}][3][1][3].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
+                    int index = bone.PositionKeys.IndexOf(keys[j]);
+                    if (index >= 0)
+                    {
+                        pos = bone.Positions[index];
+                    }
+                    index = bone.RotationKeys.IndexOf(keys[j]);
+                    if (index >= 0)
+                    {
+                        rot = bone.Rotations[index];
+                    }
+                    index = bone.ScaleKeys.IndexOf(keys[j]);
+                    if (index >= 0)
+                    {
+                        scale = bone.Scales[index];
+                    }
 
-                    Maxscript.Command("{0}[{1}][3][1][1].controller.keys[{2}].value = {3}",
-                        boneArray, boneArrayIndex, j + 1, bone.Positions[j].X);
-                    Maxscript.Command("{0}[{1}][3][1][2].controller.keys[{2}].value = {3}",
-                        boneArray, boneArrayIndex, j + 1, bone.Positions[j].Y);
-                    Maxscript.Command("{0}[{1}][3][1][3].controller.keys[{2}].value = {3}",
-                        boneArray, boneArrayIndex, j + 1, bone.Positions[j].Z);
+                    //Maxscript.Command("addNewKey {0}[{1}][3].controller {2}s", boneArray, boneArrayIndex, keys[j]);
+                    Maxscript.AnimateAtTime(keys[j], "{0}[{1}][3].controller.value = {2}",
+                        boneArray, boneArrayIndex, this.GetBoneLocalTransform("bAnimMatrix", pos, rot, scale));
+                    //Maxscript.Command("{0}[{1}][3].controller.keys[{2}].value = {3}",
+                    //    boneArray, boneArrayIndex, j + 1, this.GetBoneLocalTransform("bAnimMatrix", pos, rot, scale));
                 }
 
-                Maxscript.Command("{0}[{1}][3][2].controller = Bezier_Rotation()", boneArray, boneArrayIndex);
-                for (int j = 0; j < bone.RotationKeys.Count; ++j)
-                {
-                    Maxscript.Command("addNewKey {0}[{1}][3][2].controller {2}s", boneArray, boneArrayIndex, bone.RotationKeys[j]);
-                    Maxscript.Command("{0}[{1}][3][2].controller.keys[{2}].value = {3}", 
-                        boneArray, boneArrayIndex, j + 1, Maxscript.QuatLiteral(bone.Rotations[j]));
-                }
+                //Maxscript.Command("{0}[{1}][3][1].controller = Bezier_Position()", boneArray, boneArrayIndex);
+                //for (int j = 0; j < bone.PositionKeys.Count; ++j)
+                //{
+                //    //Maxscript.Command("addNewKey {0}[{1}][3][1].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
+                //    //Maxscript.Command("{0}[{1}][3][1].controller.keys[{2}].value = {3}",
+                //    //    boneArray, boneArrayIndex, j + 1, Maxscript.Point3Literal(bone.Positions[j]));
+                //    Maxscript.Command("addNewKey {0}[{1}][3][1][1].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
+                //    Maxscript.Command("addNewKey {0}[{1}][3][1][2].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
+                //    Maxscript.Command("addNewKey {0}[{1}][3][1][3].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
 
-                Maxscript.Command("{0}[{1}][3][3].controller = Bezier_Scale()", boneArray, boneArrayIndex);
-                for (int j = 0; j < bone.ScaleKeys.Count; ++j)
-                {
-                    Maxscript.Command("addNewKey {0}[{1}][3][3].controller {2}s", boneArray, boneArrayIndex, bone.ScaleKeys[j]);
-                    Maxscript.Command("{0}[{1}][3][3].controller.keys[{2}].value = {3}", boneArray, boneArrayIndex, j + 1,
-                        Maxscript.Point3Literal(bone.Scales[j].A1, bone.Scales[j].B2, bone.Scales[j].C3));
-                }
+                //    Maxscript.Command("{0}[{1}][3][1][1].controller.keys[{2}].value = {3}",
+                //        boneArray, boneArrayIndex, j + 1, bone.Positions[j].X);
+                //    Maxscript.Command("{0}[{1}][3][1][2].controller.keys[{2}].value = {3}",
+                //        boneArray, boneArrayIndex, j + 1, bone.Positions[j].Y);
+                //    Maxscript.Command("{0}[{1}][3][1][3].controller.keys[{2}].value = {3}",
+                //        boneArray, boneArrayIndex, j + 1, bone.Positions[j].Z);
+                //}
+
+                //Maxscript.Command("{0}[{1}][3][2].controller = Bezier_Rotation()", boneArray, boneArrayIndex);
+                //for (int j = 0; j < bone.RotationKeys.Count; ++j)
+                //{
+                //    Maxscript.Command("addNewKey {0}[{1}][3][2].controller {2}s", boneArray, boneArrayIndex, bone.RotationKeys[j]);
+                //    Maxscript.Command("{0}[{1}][3][2].controller.keys[{2}].value = {3}", 
+                //        boneArray, boneArrayIndex, j + 1, Maxscript.QuatLiteral(bone.Rotations[j]));
+                //}
+
+                //Maxscript.Command("{0}[{1}][3][3].controller = Bezier_Scale()", boneArray, boneArrayIndex);
+                //for (int j = 0; j < bone.ScaleKeys.Count; ++j)
+                //{
+                //    Maxscript.Command("addNewKey {0}[{1}][3][3].controller {2}s", boneArray, boneArrayIndex, bone.ScaleKeys[j]);
+                //    Maxscript.Command("{0}[{1}][3][3].controller.keys[{2}].value = {3}", boneArray, boneArrayIndex, j + 1,
+                //        Maxscript.Point3Literal(bone.Scales[j].A1, bone.Scales[j].B2, bone.Scales[j].C3));
+                //}
             }
         }
         private string ImportMaterial(GrnMaterial mat)
@@ -719,44 +754,103 @@
                 GrnBoneTrack bone = new GrnBoneTrack();
                 bone.DataExtensionIndex = this.File.Bones[i].DataExtensionIndex;
 
-                int numPosKeys = Maxscript.QueryInteger("grnBones[{0}][3][1].controller.keys.count", i);
-                Maxscript.Command("sort grnBones[{0}][3][1].controller.keys", i);
-                for (int j = 0; j < numPosKeys; ++j)
+                Maxscript.Command("keys = #()");
+                Maxscript.Command("join keys (for t in grnBones[{0}][3][1].controller.keys collect (t.time.ticks / 4800.0))", i);
+                Maxscript.Command("join keys (for t in grnBones[{0}][3][1][1].controller.keys collect (t.time.ticks / 4800.0))", i);
+                Maxscript.Command("join keys (for t in grnBones[{0}][3][1][2].controller.keys collect (t.time.ticks / 4800.0))", i);
+                Maxscript.Command("join keys (for t in grnBones[{0}][3][1][3].controller.keys collect (t.time.ticks / 4800.0))", i);
+                Maxscript.Command("join keys (for t in grnBones[{0}][3][2].controller.keys collect (t.time.ticks / 4800.0))", i);
+                Maxscript.Command("join keys (for t in grnBones[{0}][3][3].controller.keys collect (t.time.ticks / 4800.0))", i);
+                Maxscript.Command("keys = makeUniqueArray keys");
+                Maxscript.Command("sort keys");
+
+                int numKeys = Maxscript.QueryInteger("keys.count");
+                float time = Maxscript.QueryFloat("keys[1]");
+                Vector3D pos = new Vector3D();
+                Quaternion rot = new Quaternion();
+                Matrix3x3 scale = Matrix3x3.Identity;
+
+                if (numKeys > 0)
                 {
-                    try
+                    Maxscript.SetVarAtTime(time, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
+                    bone.PositionKeys.Add(time);
+                    bone.Positions.Add(pos);
+                    bone.RotationKeys.Add(time);
+                    bone.Rotations.Add(rot);
+                    bone.ScaleKeys.Add(time);
+                    bone.Scales.Add(scale);
+                }
+
+                Vector3D posCurrent = new Vector3D();
+                Quaternion rotCurrent = new Quaternion();
+                Matrix3x3 scaleCurrent = Matrix3x3.Identity;
+                for (int j = 1; j < numKeys; ++j)
+                {
+                    time = Maxscript.QueryFloat("keys[{0}]", j + 1);
+                    Maxscript.SetVarAtTime(time, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
+
+                    if (pos != posCurrent)
                     {
-                        bone.PositionKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][1].controller.keys[{1}].time as float / 4800", i, j + 1));
-                        bone.Positions.Add(new Vector3D(
-                            Maxscript.QueryFloat("grnBones[{0}][3][1][1].controller.keys[{1}].value", i, j + 1),
-                            Maxscript.QueryFloat("grnBones[{0}][3][1][2].controller.keys[{1}].value", i, j + 1),
-                            Maxscript.QueryFloat("grnBones[{0}][3][1][3].controller.keys[{1}].value", i, j + 1)));
+                        bone.PositionKeys.Add(time);
+                        bone.Positions.Add(posCurrent);
+                        pos = posCurrent;
                     }
-                    catch (Exception ex) { throw new Exception("Pos Controller Bone " + i + " key " + (j + 1), ex); }
+
+                    if (rot != rotCurrent)
+                    {
+                        bone.RotationKeys.Add(time);
+                        bone.Rotations.Add(rotCurrent);
+                        rot = rotCurrent;
+                    }
+
+                    if (scale != scaleCurrent)
+                    {
+                        bone.ScaleKeys.Add(time);
+                        bone.Scales.Add(scaleCurrent);
+                        scale = scaleCurrent;
+                    }
                 }
 
-                int numRotKeys = Maxscript.QueryInteger("grnBones[{0}][3][2].controller.keys.count", i);
-                for (int j = 0; j < numRotKeys; ++j)
-                {
-                    bone.RotationKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][2].controller.keys[{1}].time as float / 4800", i, j + 1));
-                    Maxscript.Command("rotQuat = grnBones[{0}][3][2].controller.keys[{1}].value as quat", i, j + 1);
-                    bone.Rotations.Add(new Quaternion(
-                        Maxscript.QueryFloat("rotQuat.w"),
-                        Maxscript.QueryFloat("rotQuat.x"),
-                        Maxscript.QueryFloat("rotQuat.y"),
-                        Maxscript.QueryFloat("rotQuat.z")));
-                }
+                //int numPosKeys = Maxscript.QueryInteger("grnBones[{0}][3][1].controller.keys.count", i);
+                //Maxscript.Command("sort grnBones[{0}][3][1].controller.keys", i);
+                //for (int j = 0; j < numPosKeys; ++j)
+                //{
+                //    try
+                //    {
+                //        bone.PositionKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][1].controller.keys[{1}].time as float / 4800", i, j + 1));
+                //        bone.Positions.Add(new Vector3D(
+                //            Maxscript.QueryFloat("grnBones[{0}][3][1][1].controller.keys[{1}].value", i, j + 1),
+                //            Maxscript.QueryFloat("grnBones[{0}][3][1][2].controller.keys[{1}].value", i, j + 1),
+                //            Maxscript.QueryFloat("grnBones[{0}][3][1][3].controller.keys[{1}].value", i, j + 1)));
+                //    }
+                //    catch (Exception ex) { throw new Exception("Pos Controller Bone " + i + " key " + (j + 1), ex); }
+                //}
 
-                int numScaleKeys = Maxscript.QueryInteger("grnBones[{0}][3][3].controller.keys.count", i);
-                for (int j = 0; j < numScaleKeys; ++j)
-                {
-                    bone.ScaleKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][3].controller.keys[{1}].time as float / 4800", i, j + 1));
-                    Maxscript.Command("bTrackScale = grnBones[{0}][3][3].controller.keys[{1}].value", i, j + 1);
-                    Matrix3x3 scaleMatrix = new Matrix3x3();
-                    scaleMatrix.A1 = Maxscript.QueryFloat("bTrackScale.x");
-                    scaleMatrix.B2 = Maxscript.QueryFloat("bTrackScale.y");
-                    scaleMatrix.C3 = Maxscript.QueryFloat("bTrackScale.z");
-                    bone.Scales.Add(scaleMatrix);
-                }
+                //int numRotKeys = Maxscript.QueryInteger("grnBones[{0}][3][2].controller.keys.count", i);
+                //for (int j = 0; j < numRotKeys; ++j)
+                //{
+                //    bone.RotationKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][2].controller.keys[{1}].time as float / 4800", i, j + 1));
+                //    Maxscript.Command("rotQuat = grnBones[{0}][3][2].controller.keys[{1}].value as quat", i, j + 1);
+                //    bone.Rotations.Add(new Quaternion(
+                //        Maxscript.QueryFloat("rotQuat.w"),
+                //        Maxscript.QueryFloat("rotQuat.x"),
+                //        Maxscript.QueryFloat("rotQuat.y"),
+                //        Maxscript.QueryFloat("rotQuat.z")));
+                //}
+
+                //int numScaleKeys = Maxscript.QueryInteger("grnBones[{0}][3][3].controller.keys.count", i);
+                //for (int j = 0; j < numScaleKeys; ++j)
+                //{
+                //    bone.ScaleKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][3].controller.keys[{1}].time as float / 4800", i, j + 1));
+                //    Maxscript.Command("bTrackScale = grnBones[{0}][3][3].controller.keys[{1}].value", i, j + 1);
+                //    Matrix3x3 scaleMatrix = new Matrix3x3();
+                //    scaleMatrix.A1 = Maxscript.QueryFloat("bTrackScale.x");
+                //    scaleMatrix.B2 = Maxscript.QueryFloat("bTrackScale.y");
+                //    scaleMatrix.C3 = Maxscript.QueryFloat("bTrackScale.z");
+                //    bone.Scales.Add(scaleMatrix);
+                //}
 
                 //this.Plugin.richTextBox1.AppendText(i + " " + Maxscript.QueryString("grnBones[{0}].name", i) + Environment.NewLine);
                 //this.Plugin.richTextBox1.AppendText(bone.Rotations[0].ToString() + Environment.NewLine);
@@ -875,6 +969,45 @@
             //    Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
 
             return nameM3;
+        }
+        private string GetBoneLocalTransform(string nameM3, Vector3D pos, Quaternion rot, Matrix3x3 scale)
+        {
+            Maxscript.Command("{0} = matrix3 1", nameM3);
+            Maxscript.Command("{0} = transmatrix {1}", nameM3, Maxscript.Point3Literal(pos));
+            Maxscript.Command("{0} = (inverse(quat {1} {2} {3} {4}) as matrix3) * {0}", nameM3, rot.X, rot.Y, rot.Z, rot.W);
+            Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] [0,0,0]) * {0}", nameM3,
+                scale.A1, scale.A2, scale.A3,
+                scale.B1, scale.B2, scale.B3,
+                scale.C1, scale.C2, scale.C3);
+
+            return nameM3;
+        }
+        private void GetTransformPRS(string nameM3, out Vector3D pos, out Quaternion rot, out Matrix3x3 scale)
+        {
+            Maxscript.Command("bRot = inverse({0}.rotation)", nameM3);
+            Maxscript.Command("boneScTransMat = {0} * inverse({0}.rotation as matrix3)", nameM3);
+            Maxscript.Command("{0} = inverse({0}.rotation as matrix3) * {0}", nameM3);
+            Maxscript.Command("bPos = {0}.position", nameM3);
+
+            pos = new Vector3D(
+                    Maxscript.QueryFloat("bPos.x"),
+                    Maxscript.QueryFloat("bPos.y"),
+                    Maxscript.QueryFloat("bPos.z"));
+            rot = new Quaternion(
+                Maxscript.QueryFloat("bRot.w"),
+                Maxscript.QueryFloat("bRot.x"),
+                Maxscript.QueryFloat("bRot.y"),
+                Maxscript.QueryFloat("bRot.z"));
+            scale = new Matrix3x3();
+            scale.A1 = Maxscript.QueryFloat("boneScTransMat.row1.x");
+            scale.A2 = Maxscript.QueryFloat("boneScTransMat.row1.y");
+            scale.A3 = Maxscript.QueryFloat("boneScTransMat.row1.z");
+            scale.B1 = Maxscript.QueryFloat("boneScTransMat.row2.x");
+            scale.B2 = Maxscript.QueryFloat("boneScTransMat.row2.y");
+            scale.B3 = Maxscript.QueryFloat("boneScTransMat.row2.z");
+            scale.C1 = Maxscript.QueryFloat("boneScTransMat.row3.x");
+            scale.C2 = Maxscript.QueryFloat("boneScTransMat.row3.y");
+            scale.C3 = Maxscript.QueryFloat("boneScTransMat.row3.z");
         }
         private string GetBoneWorldTransform(GrnFile file, int boneIndex, string nameM3)
         {

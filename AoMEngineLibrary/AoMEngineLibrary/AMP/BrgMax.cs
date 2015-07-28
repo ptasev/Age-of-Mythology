@@ -356,14 +356,6 @@
             {
                 brg.Animation.MeshKeys.Add(Maxscript.QueryFloat("keys[{0}]", i));
             }
-
-            if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
-            {
-                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
-            }
-            else { hadEditNormMod = true; }
-            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
-
             if (brg.Header.NumMeshes == 1)
             {
                 brg.Animation.Duration = 0;
@@ -373,6 +365,13 @@
                 brg.Animation.Duration = Maxscript.QueryFloat("(animationRange.end.ticks - animationRange.start.ticks) / 4800.0");
             }
             brg.Animation.TimeStep = brg.Animation.Duration / (float)brg.Header.NumMeshes;
+
+            if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
+            {
+                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+            }
+            else { hadEditNormMod = true; }
+            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
 
             brg.Header.NumMaterials = Maxscript.QueryInteger("{0}.material.materialList.count", mainObject);
             //System.Windows.Forms.MessageBox.Show(Header.numMeshes + " " + Header.numMaterials);

@@ -12,6 +12,13 @@
         public BrgHeader Header { get; set; }
         public BrgAsetHeader AsetHeader { get; private set; }
 
+        public BrgFile()
+            : base()
+        {
+            this.FileName = string.Empty;
+            this.Header = new BrgHeader();
+            this.AsetHeader = new BrgAsetHeader();
+        }
         public BrgFile(System.IO.FileStream fileStream)
             : base()
         {
@@ -106,13 +113,6 @@
                     this.Animation.MeshKeys.Add(0);
                 }
             }
-        }
-        public BrgFile()
-            : base()
-        {
-            this.FileName = string.Empty;
-            this.Header = new BrgHeader();
-            this.AsetHeader = new BrgAsetHeader();
         }
 
         public void Write(System.IO.FileStream fileStream)

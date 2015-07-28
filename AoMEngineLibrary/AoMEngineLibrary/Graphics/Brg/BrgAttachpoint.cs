@@ -80,18 +80,18 @@
             }
             return ret;
         }
-        public static bool TryGetIdByName(string name, out int nameId)
+        public static bool TryGetIdByName(string name, out int nId)
         {
             for (int i = 0; i < AttachpointNames.Length; i++)
             {
                 if (AttachpointNames[i].Equals(name, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    nameId = (54 - i);
+                    nId = 54 - i;
                     return true;
                 }
             }
 
-            nameId = -1;
+            nId = -1;
             return false;
         }
 
