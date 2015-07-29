@@ -16,7 +16,7 @@
         public BrgUserDataEntry[] UserDataEntries { get; set; }
         private float[] particleData;
 
-        public BrgAttachpointCollection Attachpoints { get; set; }
+        public List<BrgAttachpoint> Attachpoints { get; set; }
         public float[] NonUniformKeys { get; set; }
 
         public BrgMesh(BrgBinaryReader reader, BrgFile file)
@@ -182,7 +182,7 @@
                     }
                 }
 
-                this.Attachpoints = new BrgAttachpointCollection();
+                this.Attachpoints = new List<BrgAttachpoint>();
                 for (int i = 0; i < nameId.Count; i++)
                 {
                     this.Attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
@@ -193,7 +193,7 @@
             }
             else
             {
-                this.Attachpoints = new BrgAttachpointCollection();
+                this.Attachpoints = new List<BrgAttachpoint>();
             }
 
             if (((this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
@@ -251,7 +251,7 @@
             this.UserDataEntries = new BrgUserDataEntry[0];
             this.particleData = new float[0];
 
-            this.Attachpoints = new BrgAttachpointCollection();
+            this.Attachpoints = new List<BrgAttachpoint>();
             this.NonUniformKeys = new float[0];
         }
 
@@ -445,76 +445,6 @@
                 {
                     writer.Write(this.NonUniformKeys[i]);
                 }
-            }
-        }
-
-        public class BrgAttachpointCollection : IEnumerable
-        {
-            private BrgAttachpoint[] attachpoint;
-            public readonly static int Capacity = 100;
-            public int Count { get; set; }
-
-            internal BrgAttachpointCollection()
-            {
-                attachpoint = new BrgAttachpoint[Capacity];
-            }
-
-            public void Add()
-            {
-                Add(Count, new BrgAttachpoint());
-            }
-            public int Add(int index)
-            {
-                return Add(index, new BrgAttachpoint());
-            }
-            public void Add(BrgAttachpoint att)
-            {
-                Add(Count, att);
-            }
-            public int Add(int index, BrgAttachpoint att)
-            {
-                if (Count > 100)
-                {
-                    throw new Exception("Reached max attachpoint capacity!");
-                }
-                att.Index = index;
-                if (attachpoint[att.Index] != null)
-                {
-                    att.Index = 0;
-                    while (attachpoint[att.Index] != null)
-                    {
-                        att.Index++;
-                    }
-                }
-                attachpoint[att.Index] = att;
-                Count++;
-                return att.Index;
-            }
-            public void Remove(int index)
-            {
-                attachpoint[index] = null;
-                Count--;
-            }
-            public BrgAttachpoint this[int index]
-            {
-                get
-                {
-                    return attachpoint[index];
-                }
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-            public IEnumerator GetEnumerator()
-            {
-                foreach (BrgAttachpoint att in attachpoint)
-                {
-                    if (att != null)
-                        yield return att;
-                }
-                //return attachpoint.GetEnumerator();
             }
         }
     }

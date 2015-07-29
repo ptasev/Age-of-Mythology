@@ -248,11 +248,18 @@
             }
 
             Maxscript.CommentTitle("Load Attachpoints");
-            foreach (BrgAttachpoint att in mesh.Attachpoints)
+            string attachDummyArray = "attachDummyArray";
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
             {
+                Maxscript.NewArray(attachDummyArray);
+            }
+            for (int i = 0; i < mesh.Attachpoints.Count; ++i)
+            {
+                BrgAttachpoint att = mesh.Attachpoints[i];
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
-                    Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
+                    //Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
+                    Maxscript.Command("attachpoint = {0}[{1}]", attachDummyArray, i + 1);
                     Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
                     Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
                     if (this.uniformAttachpointScale)
@@ -266,14 +273,16 @@
                 }
                 else
                 {
+                    string attachDummy;
                     if (this.uniformAttachpointScale)
                     {
-                        string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), "[0.25,0.25,0.25]", "[1,1,1]");
+                        attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), "[0.25,0.25,0.25]", "[1,1,1]");
                     }
                     else
                     {
-                        string attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
+                        attachDummy = Maxscript.NewDummy("attachDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
                     }
+                    Maxscript.Command("append {0} {1}", attachDummyArray, attachDummy);
                 }
             }
         }
@@ -560,18 +569,19 @@
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
             if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                mesh.Attachpoints = new BrgMesh.BrgAttachpointCollection();
+                mesh.Attachpoints = new List<BrgAttachpoint>();
                 for (int i = 0; i < numAttachpoints; i++)
                 {
                     string aName = Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1);
                     int nameId;
                     if (!BrgAttachpoint.TryGetIdByName(aName.Substring(6), out nameId)) continue;
+                    BrgAttachpoint att = new BrgAttachpoint();
                     //System.Windows.Forms.MessageBox.Show(aName);
                     //int index = Convert.ToInt32((Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1)).Substring(4, 2));
-                    int index = mesh.Attachpoints.Add(i);//mesh.Attachpoints.Add(index);
                     //System.Windows.Forms.MessageBox.Show("5.1");
-                    mesh.Attachpoints[index].NameId = nameId;
-                    Maxscript.Command("{0}[{1}].name = \"{2}\"", attachDummy, i + 1, mesh.Attachpoints[index].GetMaxName());
+                    //System.Windows.Forms.MessageBox.Show(mesh.Attachpoints.Count + " " + i);
+                    att.NameId = nameId;
+                    Maxscript.Command("{0}[{1}].name = \"{2}\"", attachDummy, i + 1, att.GetMaxName());
                     //System.Windows.Forms.MessageBox.Show("5.2");
                     Maxscript.SetVarAtTime(time, "{0}Transform", "{0}[{1}].rotation as matrix3", attachDummy, i + 1);
                     Maxscript.SetVarAtTime(time, "{0}Position", "{0}[{1}].position", attachDummy, i + 1);
@@ -581,29 +591,31 @@
                     bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
-                    mesh.Attachpoints[index].XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
-                    mesh.Attachpoints[index].XVector.Y = Maxscript.QueryFloat("{0}Transform[3].z", attachDummy);
-                    mesh.Attachpoints[index].XVector.Z = -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy);
+                    att.XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
+                    att.XVector.Y = Maxscript.QueryFloat("{0}Transform[3].z", attachDummy);
+                    att.XVector.Z = -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy);
 
-                    mesh.Attachpoints[index].YVector.X = -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy);
-                    mesh.Attachpoints[index].YVector.Y = Maxscript.QueryFloat("{0}Transform[3].y", attachDummy);
-                    mesh.Attachpoints[index].YVector.Z = -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy);
+                    att.YVector.X = -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy);
+                    att.YVector.Y = Maxscript.QueryFloat("{0}Transform[3].y", attachDummy);
+                    att.YVector.Z = -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy);
 
-                    mesh.Attachpoints[index].ZVector.X = -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy);
-                    mesh.Attachpoints[index].ZVector.Y = Maxscript.QueryFloat("{0}Transform[3].x", attachDummy);
-                    mesh.Attachpoints[index].ZVector.Z = -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy);
+                    att.ZVector.X = -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy);
+                    att.ZVector.Y = Maxscript.QueryFloat("{0}Transform[3].x", attachDummy);
+                    att.ZVector.Z = -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy);
 
-                    mesh.Attachpoints[index].Position.X = -Maxscript.QueryFloat("{0}Position.x", attachDummy);
-                    mesh.Attachpoints[index].Position.Z = -Maxscript.QueryFloat("{0}Position.y", attachDummy);
-                    mesh.Attachpoints[index].Position.Y = Maxscript.QueryFloat("{0}Position.z", attachDummy);
+                    att.Position.X = -Maxscript.QueryFloat("{0}Position.x", attachDummy);
+                    att.Position.Z = -Maxscript.QueryFloat("{0}Position.y", attachDummy);
+                    att.Position.Y = Maxscript.QueryFloat("{0}Position.z", attachDummy);
                     //System.Windows.Forms.MessageBox.Show("5.5");
 
-                    mesh.Attachpoints[index].BoundingBoxMin.X = -bBox.X;
-                    mesh.Attachpoints[index].BoundingBoxMin.Z = -bBox.Y;
-                    mesh.Attachpoints[index].BoundingBoxMin.Y = -bBox.Z;
-                    mesh.Attachpoints[index].BoundingBoxMax.X = bBox.X;
-                    mesh.Attachpoints[index].BoundingBoxMax.Z = bBox.Y;
-                    mesh.Attachpoints[index].BoundingBoxMax.Y = bBox.Z;
+                    att.BoundingBoxMin.X = -bBox.X;
+                    att.BoundingBoxMin.Z = -bBox.Y;
+                    att.BoundingBoxMin.Y = -bBox.Z;
+                    att.BoundingBoxMax.X = bBox.X;
+                    att.BoundingBoxMax.Z = bBox.Y;
+                    att.BoundingBoxMax.Y = bBox.Z;
+
+                    mesh.Attachpoints.Add(att);
                 }
                 //System.Windows.Forms.MessageBox.Show("# Atpts: " + Attachpoint.Count);
             }
