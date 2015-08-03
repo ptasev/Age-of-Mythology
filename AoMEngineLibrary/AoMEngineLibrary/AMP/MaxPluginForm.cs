@@ -70,7 +70,7 @@ namespace AoMEngineLibrary
         public MaxPluginForm()
         {
             InitializeComponent();
-            this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
+            //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
             this.MaximizeBox = false;

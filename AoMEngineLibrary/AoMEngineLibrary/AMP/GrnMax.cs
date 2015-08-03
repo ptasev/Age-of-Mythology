@@ -535,12 +535,13 @@
 
             for (int i = 1; i <= numBones; ++i)
             {
-                if (!this.ExportSetting.HasFlag(GrnExportSetting.Model) &&
-                    this.ExportSetting.HasFlag(GrnExportSetting.Animation) &&
-                    Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
-                {
-                    continue;
-                }
+                //if (!this.ExportSetting.HasFlag(GrnExportSetting.Model) &&
+                //    this.ExportSetting.HasFlag(GrnExportSetting.Animation) &&
+                //    Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
+                //{
+                //    MaxPluginForm.DebugBox("d " + i);
+                //    continue;
+                //}
 
                 try
                 {
@@ -548,60 +549,21 @@
                     bone.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("grnBones[{0}].name", i));
                     bone.ParentIndex = Maxscript.QueryInteger("grnBoneParents[{0}]", i);
 
-                    Maxscript.Command("copiedBone = copy grnBones[{0}]", i);
                     Maxscript.Command("boneTransMat = grnBones[{0}].transform", i);
                     if (bone.ParentIndex > 0)
                     {
                         Maxscript.Command("boneTransMat = boneTransMat * inverse(grnBones[{0}].parent.transform)", i);
-                        //Maxscript.Command("copiedBone.transform *= (inverse copiedBone.parent.transform)");
                     }
-                    Maxscript.Command("bScale = boneTransMat.scale");
-                    //Maxscript.Command("boneTransMat = inverse(scalematrix bScale) * boneTransMat", i);
-                    Maxscript.Command("bRot = inverse(boneTransMat.rotation)");
-                    Maxscript.Command("boneScTransMat = boneTransMat * inverse(boneTransMat.rotation as matrix3) --boneTransMat");
-                    Maxscript.Command("boneTransMat = inverse(boneTransMat.rotation as matrix3) * boneTransMat", i);
-                    Maxscript.Command("bPos = boneTransMat.position");
-                    Maxscript.Command("bScale = boneTransMat.scale");
 
-                    bone.Position = new Vector3D(
-                            Maxscript.QueryFloat("bPos.x"),
-                            Maxscript.QueryFloat("bPos.y"),
-                            Maxscript.QueryFloat("bPos.z"));
-                    bone.Rotation = new Quaternion(
-                        Maxscript.QueryFloat("bRot.w"),
-                        Maxscript.QueryFloat("bRot.x"),
-                        Maxscript.QueryFloat("bRot.y"),
-                        Maxscript.QueryFloat("bRot.z"));
-                    Matrix3x3 scale = new Matrix3x3();
-                    scale.A1 = Maxscript.QueryFloat("boneScTransMat.row1.x");
-                    scale.A2 = Maxscript.QueryFloat("boneScTransMat.row1.y");
-                    scale.A3 = Maxscript.QueryFloat("boneScTransMat.row1.z");
-                    scale.B1 = Maxscript.QueryFloat("boneScTransMat.row2.x");
-                    scale.B2 = Maxscript.QueryFloat("boneScTransMat.row2.y");
-                    scale.B3 = Maxscript.QueryFloat("boneScTransMat.row2.z");
-                    scale.C1 = Maxscript.QueryFloat("boneScTransMat.row3.x");
-                    scale.C2 = Maxscript.QueryFloat("boneScTransMat.row3.y");
-                    scale.C3 = Maxscript.QueryFloat("boneScTransMat.row3.z");
-
-                    //bone.Position = new Vector3D(
-                    //        Maxscript.QueryFloat("(coordsys parent copiedBone.position).x"),
-                    //        Maxscript.QueryFloat("(coordsys parent copiedBone.position).y"),
-                    //        Maxscript.QueryFloat("(coordsys parent copiedBone.position).z"));
-                    //bone.Rotation = new Quaternion(
-                    //    Maxscript.QueryFloat("(coordsys parent copiedBone.rotation).w"),
-                    //    Maxscript.QueryFloat("(coordsys parent copiedBone.rotation).x"),
-                    //    Maxscript.QueryFloat("(coordsys parent copiedBone.rotation).y"),
-                    //    Maxscript.QueryFloat("(coordsys parent copiedBone.rotation).z"));
-                    //Matrix3x3 scale = new Matrix3x3();
-                    //scale.A1 = Maxscript.QueryFloat("(coordsys parent copiedBone.scale).x");
-                    //scale.B2 = Maxscript.QueryFloat("(coordsys parent copiedBone.scale).y");
-                    //scale.C3 = Maxscript.QueryFloat("(coordsys parent copiedBone.scale).z");
-
-                    Maxscript.Command("delete copiedBone");
+                    Vector3D pos;
+                    Quaternion rot;
+                    Matrix3x3 scale;
+                    this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
+                    bone.Position = pos;
+                    bone.Rotation = rot;
                     bone.Scale = scale;
+
                     this.File.Bones.Add(bone);
-                    //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + Environment.NewLine);
-                    //this.Plugin.richTextBox1.AppendText(bone.Rotation.ToString() + Environment.NewLine);
                     this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
                 }
                 catch (Exception ex)
@@ -743,28 +705,45 @@
             HashSet<float> rootTrackKeys = new HashSet<float>();
             rootBoneTrack.DataExtensionIndex = this.File.Bones[0].DataExtensionIndex;
             this.File.Animation.BoneTracks.Add(rootBoneTrack);
+            Maxscript.Command("grnBoneAnimKeys = #()");
 
             for (int i = 1; i <= numBones; ++i)
             {
-                if (Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
-                {
-                    continue;
-                }
+                //if (Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
+                //{
+                //    continue;
+                //}
 
                 GrnBoneTrack bone = new GrnBoneTrack();
                 bone.DataExtensionIndex = this.File.Bones[i].DataExtensionIndex;
 
-                Maxscript.Command("keys = #()");
-                Maxscript.Command("join keys (for t in grnBones[{0}][3][1].controller.keys collect (t.time.ticks / 4800.0))", i);
-                Maxscript.Command("join keys (for t in grnBones[{0}][3][1][1].controller.keys collect (t.time.ticks / 4800.0))", i);
-                Maxscript.Command("join keys (for t in grnBones[{0}][3][1][2].controller.keys collect (t.time.ticks / 4800.0))", i);
-                Maxscript.Command("join keys (for t in grnBones[{0}][3][1][3].controller.keys collect (t.time.ticks / 4800.0))", i);
-                Maxscript.Command("join keys (for t in grnBones[{0}][3][2].controller.keys collect (t.time.ticks / 4800.0))", i);
-                Maxscript.Command("join keys (for t in grnBones[{0}][3][3].controller.keys collect (t.time.ticks / 4800.0))", i);
-                Maxscript.Command("keys = makeUniqueArray keys");
-                Maxscript.Command("sort keys");
+                Maxscript.Command("GetBoneAnimKeys grnBones[{0}]", i);
+                Maxscript.Command("append grnBoneAnimKeys keys");
+                if (this.File.Bones[i].ParentIndex > 0 &&
+                    (Maxscript.QueryBoolean("classof grnBones[{0}] == Biped_Object", i) ||
+                    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == BipSlave_Control", i) ||
+                    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == Vertical_Horizontal_Turn", i)))
+                {
+                    Maxscript.Command("join keys grnBoneAnimKeys[grnBoneParents[{0}]]", i);
+                    Maxscript.Command("keys = makeUniqueArray keys");
+                    Maxscript.Command("sort keys");
+                    Maxscript.Command("grnBoneAnimKeys[{0}] = keys", i);
+
+                    //Maxscript.Command("posParentNode = biped.getPosParentNode grnBones[{0}]", i);
+                    //Maxscript.Command("rotParentNode = biped.getRotParentNode grnBones[{0}]", i);
+                    //if (Maxscript.QueryBoolean("grnBones[{0}].parent != posParentNode", i) ||
+                    //    Maxscript.QueryBoolean("grnBones[{0}].parent != rotParentNode", i))
+                    //{
+                    //    //Maxscript.Command("origKeys = deepcopy keys");
+                    //    //Maxscript.Command("GetBoneAnimKeys grnBones[grnBoneParents[{0}]]", i);
+                    //    //Maxscript.Command("join keys origKeys");
+                    //    //Maxscript.Command("keys = makeUniqueArray keys");
+                    //    //Maxscript.Command("sort keys");
+                    //}
+                }
 
                 int numKeys = Maxscript.QueryInteger("keys.count");
+                float startTime = Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
                 float time = Maxscript.QueryFloat("keys[1]");
                 Vector3D pos = new Vector3D();
                 Quaternion rot = new Quaternion();
@@ -772,8 +751,54 @@
 
                 if (numKeys > 0)
                 {
-                    Maxscript.SetVarAtTime(time, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    if (Maxscript.QueryBoolean("classof grnBones[{0}] == Dummy", i))
+                    {
+                        Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    }
+                    else if (this.File.Bones[i].ParentIndex > 0)
+                    {
+                        Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
+                        Maxscript.SetVarAtTime(time + startTime, "bonePTransMat", "grnBones[{0}].parent.transform", i);
+                        Maxscript.Command("boneTransMat = boneTransMat * inverse(bonePTransMat)");
+                    }
+                    else
+                    {
+                        Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
+                    }
                     this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
+                    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    //if (this.File.Bones[i].ParentIndex > 0 && 
+                    //    (Maxscript.QueryBoolean("classof grnBones[{0}] == Biped_Object", i) ||
+                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == BipSlave_Control", i) ||
+                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == Vertical_Horizontal_Turn", i)))
+                    //{
+                    //    //Vector3D posPNode = new Vector3D();
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(grnBones[{0}].parent[3].controller.value)", i);
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatPos", "boneTransMat * inverse(posParentNode[3].controller.value)");
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(grnBones[{0}].parent[3].controller.value)", i);
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(rotParentNode[3].controller.value) * inverse(posParentNode[3].controller.value)");
+                    //    //if (Maxscript.QueryBoolean("grnBones[{0}].parent != posParentNode", i))
+                    //    //{
+                    //    //    Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMatRot * inverse(transmatrix grnBones[{0}].parent[3].controller.value.translation)", i);
+                    //    //}
+                    //    //if (Maxscript.QueryBoolean("grnBones[{0}].parent != rotParentNode", i))
+                    //    //{
+                    //    //    Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMatRot * inverse(grnBones[{0}].parent[3].controller.value.rotation as matrix3)", i);
+                    //    //}
+                    //    //this.GetTransformPRS("boneTransMatPos", out posPNode, out rot, out scale);
+                    //    Maxscript.SetVarAtTime(time + startTime, "bonePTransMat", "grnBones[{0}].parent[3].controller.value", i);
+                    //    Maxscript.Command("boneTransMat = boneTransMat * inverse(bonePTransMat)");
+                    //    this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
+                    //    //pos = posPNode;
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "boneTransMat * inverse(grnBones[{0}].parent.transform)", i);
+                    //    ////Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value * inverse(grnBones[{0}].parent[3].controller.value)", i);
+                    //    //this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
+                    //}
+                    //else
+                    //{
+                    //    this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
+                    //}
+
                     bone.PositionKeys.Add(time);
                     bone.Positions.Add(pos);
                     bone.RotationKeys.Add(time);
@@ -788,24 +813,63 @@
                 for (int j = 1; j < numKeys; ++j)
                 {
                     time = Maxscript.QueryFloat("keys[{0}]", j + 1);
-                    Maxscript.SetVarAtTime(time, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    if (Maxscript.QueryBoolean("classof grnBones[{0}] == Dummy", i))
+                    {
+                        Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    }
+                    else if (this.File.Bones[i].ParentIndex > 0)
+                    {
+                        Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
+                        Maxscript.SetVarAtTime(time + startTime, "bonePTransMat", "grnBones[{0}].parent.transform", i);
+                        Maxscript.Command("boneTransMat = boneTransMat * inverse(bonePTransMat)");
+                    }
+                    else
+                    {
+                        Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
+                    }
                     this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
+                    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value", i);
+                    //if (this.File.Bones[i].ParentIndex > 0 &&
+                    //    (Maxscript.QueryBoolean("classof grnBones[{0}] == Biped_Object", i) ||
+                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == BipSlave_Control", i) ||
+                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == Vertical_Horizontal_Turn", i)))
+                    //{
+                    //    //Vector3D posPNode = new Vector3D();
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatPos", "boneTransMat * inverse(posParentNode[3].controller.value)");
+                    //    //this.GetTransformPRS("boneTransMatPos", out posPNode, out rotCurrent, out scaleCurrent);
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(rotParentNode[3].controller.value)");
+                    //    //this.GetTransformPRS("boneTransMatRot", out posCurrent, out rotCurrent, out scaleCurrent);
+                    //    //posCurrent = posPNode;
+                    //    //sliderTime = frameNum
+                    //    //forceCompleteRedraw()
+                    //    //Maxscript.Command("sliderTime = {0}s", time + startTime);
+                    //    //Maxscript.Command("forceCompleteRedraw()");
+                    //    Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
+                    //    Maxscript.SetVarAtTime(time + startTime, "bonePTransMat", "grnBones[{0}].parent.transform", i);
+                    //    Maxscript.Command("boneTransMat = boneTransMat * inverse(bonePTransMat)", i);
+                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value * inverse(grnBones[{0}].parent[3].controller.value)", i);
+                    //    this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
+                    //}
+                    //else
+                    //{
+                    //    this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
+                    //}
 
-                    if (pos != posCurrent)
+                    if (pos != posCurrent || j + 1 == numKeys)
                     {
                         bone.PositionKeys.Add(time);
                         bone.Positions.Add(posCurrent);
                         pos = posCurrent;
                     }
 
-                    if (rot != rotCurrent)
+                    if (rot != rotCurrent || j + 1 == numKeys)
                     {
                         bone.RotationKeys.Add(time);
                         bone.Rotations.Add(rotCurrent);
                         rot = rotCurrent;
                     }
 
-                    if (scale != scaleCurrent)
+                    if (!this.AreEqual(scale, scaleCurrent) || j + 1 == numKeys) //if (scale != scaleCurrent)
                     {
                         bone.ScaleKeys.Add(time);
                         bone.Scales.Add(scaleCurrent);
@@ -1025,15 +1089,19 @@
 
             return nameM3;
         }
-        private bool OnlyHasRootNode()
+        private bool AreEqual(Matrix3x3 m1, Matrix3x3 m2)
         {
-            if (this.File.Bones.Count == 1 &&
-                this.File.Bones[0].Name == "__Root")
-            {
-                return true;
-            }
+            float epsilon = 10e-6f;
 
-            return false;
+            return (Math.Abs(m1.A1 - m2.A1) < epsilon) &&
+                (Math.Abs(m1.A2 - m2.A2) < epsilon) &&
+                (Math.Abs(m1.A3 - m2.A3) < epsilon) &&
+                (Math.Abs(m1.B1 - m2.B1) < epsilon) &&
+                (Math.Abs(m1.B2 - m2.B2) < epsilon) &&
+                (Math.Abs(m1.B3 - m2.B3) < epsilon) &&
+                (Math.Abs(m1.C1 - m2.C1) < epsilon) &&
+                (Math.Abs(m1.C2 - m2.C2) < epsilon) &&
+                (Math.Abs(m1.C3 - m2.C3) < epsilon);
         }
         #endregion
 
@@ -1055,6 +1123,7 @@
                 this.Plugin.facesValueToolStripStatusLabel.Text = "0";
             }
             this.Plugin.meshesValueToolStripStatusLabel.Text = this.File.Meshes.Count.ToString();
+            this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
             this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Animation.Duration.ToString();
 
             this.Plugin.grnExportModelCheckBox.Checked = this.ExportSetting.HasFlag(GrnExportSetting.Model);

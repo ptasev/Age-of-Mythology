@@ -24,6 +24,10 @@ namespace AoMBrgEditor
             string output = "";
             HashSet<int> ttt = new HashSet<int>();
             GrnFile grnFile = new GrnFile();
+            //@"C:\Users\Petar\Desktop\Nieuwe map (3)\Output"
+            //bool areEq = this.AreEqual(AoMEngineLibrary.Graphics.Model.Matrix3x3.Identity, new AoMEngineLibrary.Graphics.Model.Matrix3x3(0.9999996f, 0f, 0f, 0f, 0.9999996f, 0f, 0f, 0f, 0.9999996f));
+            grnFile.DumpData(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read), @"C:\Users\Petar\Desktop\Nieuwe map (3)\Output");
+            //grnFile.Read(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\agamem_idlea.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
@@ -66,7 +70,7 @@ namespace AoMBrgEditor
                     }
                     if (file.Meshes.Count > 0 && (file.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM)))
                     {
-                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.AnimationType.ToString() + Environment.NewLine;
+                        //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.AnimationType.ToString() + Environment.NewLine;
                     }
                     if (file.Materials.Count > 0)
                     {
@@ -75,8 +79,22 @@ namespace AoMBrgEditor
                             //if(mat.sfx.Count > 1)
                             if (mat.Flags.HasFlag(BrgMatFlag.ILLUMREFLECTION))
                             {
+                                output += Path.GetFileName(s) + "," + mat.DiffuseMap + "," + mat.BumpMap + "," + mat.sfx[0].Name;
                                 //output += Path.GetFileName(s) + " " + mat.Flags.ToString() + Environment.NewLine;
                             }
+                            else
+                            {
+                                output += Path.GetFileName(s) + "," + mat.DiffuseMap + "," + mat.BumpMap + "," + string.Empty;
+                            }
+                            foreach (BrgMatFlag eval in Enum.GetValues(typeof(BrgMatFlag)).Cast<BrgMatFlag>())
+                            {
+                                output += ",";
+                                if (mat.Flags.HasFlag(eval))
+                                {
+                                    output += eval.ToString();
+                                }
+                            }
+                            output += Environment.NewLine;
                         }
                     }
                     //file.Write(File.Open(@"C:\Users\Petar\Desktop\modelsAlphaConv\" + Path.GetFileName(s), FileMode.Create, FileAccess.Write, FileShare.Read));
@@ -289,6 +307,21 @@ namespace AoMBrgEditor
             {
                 //file.WriteBr3(File.Open(dlg2.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
             }
+        }
+
+        private bool AreEqual(AoMEngineLibrary.Graphics.Model.Matrix3x3 m1, AoMEngineLibrary.Graphics.Model.Matrix3x3 m2)
+        {
+            float epsilon = 10e-6f;
+
+            return (Math.Abs(m1.A1 - m2.A1) < epsilon) &&
+                (Math.Abs(m1.A2 - m2.A2) < epsilon) &&
+                (Math.Abs(m1.A3 - m2.A3) < epsilon) &&
+                (Math.Abs(m1.B1 - m2.B1) < epsilon) &&
+                (Math.Abs(m1.B2 - m2.B2) < epsilon) &&
+                (Math.Abs(m1.B3 - m2.B3) < epsilon) &&
+                (Math.Abs(m1.C1 - m2.C1) < epsilon) &&
+                (Math.Abs(m1.C2 - m2.C2) < epsilon) &&
+                (Math.Abs(m1.C3 - m2.C3) < epsilon);
         }
     }
 }
