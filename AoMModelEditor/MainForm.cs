@@ -1,26 +1,23 @@
 ﻿#define DEBUGBOX // allows the use of messageboxes in debug mode
 
-namespace AoMEngineLibrary.AMP
+namespace AoMModelEditor
 {
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
-    using ManagedServices;
-    using MaxCustomControls;
     using MiscUtil;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
-    using System.Threading;
     using System.Windows.Forms;
     using System.Xml;
 
-    public partial class MaxPluginForm : MaxForm
+    public partial class MainForm : Form
     {
-        public static string PluginTitle = "AMP 7.0";
+        public static string PluginTitle = "AME 1.0";
         public static class Settings
         {
-            private static string fileName = Application.StartupPath + "\\AoMEngineLibraryPluginSettings.xml";
+            private static string fileName = Application.StartupPath + "\\AoMModelEditorSettings.xml";
             public static string OpenFileDialogFileName;
             public static string SaveFileDialogFileName;
             public static string MtrlFolderDialogDirectory;
@@ -63,125 +60,52 @@ namespace AoMEngineLibrary.AMP
             }
         }
 
-        public static CuiUpdater uiUp;
-        IModelMaxUi model;
-        BrgMax brg;
-        GrnMax grn;
+        IModelUi model;
+        BrgUi brg;
+        GrnUi grn;
 
-        public MaxPluginForm()
+        public MainForm()
         {
             InitializeComponent();
-            //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
-            this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(0, 0);
-            this.MaximizeBox = false;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            openFileDialog.Filter = "brg files|*.brg|grn files|*.grn";
-            saveFileDialog.Filter = "brg files|*.brg|grn files|*.grn";
-            saveFileDialog.AddExtension = false;
 
-            // Update Colors
-            uiUp = CuiUpdater.GetInstance();
-            mainMenuStrip.Renderer = new ToolStripMaxPluginRenderer();
-            mainStatusStrip.SizingGrip = false;
-            mainStatusStrip.BackColor = uiUp.GetControlColor();
-            mainStatusStrip.ForeColor = uiUp.GetTextColor();
+            //BrgFile f = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\cavalry g prodromos_attacka.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
+            //BrgFile f2 = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\cavalry g prodromos_attacka.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
+            //f2.Materials[0].id = 12212;
+            //int eq = f.Materials.IndexOf(f2.Materials[0]);
 
-            for (int i = 0; i < mainTabControl.TabPages.Count; i++)
+            foreach (string s in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\models", "*.brg", SearchOption.AllDirectories))
             {
-                mainTabControl.TabPages[i].BackColor = uiUp.GetControlColor();
-                mainTabControl.TabPages[i].ForeColor = uiUp.GetTextColor();
+                BrgFile file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
+                for (int i = 0; i < file.Materials.Count; i++)
+                {
+                    MtrlFile mtrl = new MtrlFile(file.Materials[i]);
+                    mtrl.Write(File.Open(Path.Combine(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\materials", Path.GetFileNameWithoutExtension(s) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
+                }
             }
 
-            // General Tab
-            generalDataGroupBox.ForeColor = uiUp.GetTextColor();
-            brgImportGroupBox.ForeColor = uiUp.GetTextColor();
-            interpTypeGroupBox.ForeColor = uiUp.GetTextColor();
-            attachpointGroupBox.ForeColor = uiUp.GetTextColor();
-            genMeshFlagsGroupBox.ForeColor = uiUp.GetTextColor();
-            genMeshFormatGroupBox.ForeColor = uiUp.GetTextColor();
-            genMeshAnimTypeGroupBox.ForeColor = uiUp.GetTextColor();
+            //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
 
-            genMeshFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
-            genMeshFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
-            genMeshFlagsCheckedListBox.BorderStyle = BorderStyle.None;
+            // General Tab
             genMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
-            genMeshFormatCheckedListBox.BackColor = uiUp.GetEditControlColor();
-            genMeshFormatCheckedListBox.ForeColor = uiUp.GetTextColor();
-            genMeshFormatCheckedListBox.BorderStyle = BorderStyle.None;
             genMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
 
             // Attachpoints
-            attachpointComboBox.SelectedIndexChanged += attachpointComboBox_SelectedIndexChanged;
-            //attachpointComboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            //attachpointComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
-            attachpointComboBox.FlatStyle = FlatStyle.Flat;
-            attachpointComboBox.BackColor = uiUp.GetEditControlColor();
-            attachpointComboBox.ForeColor = uiUp.GetTextColor();
-            attachpointListBox.MouseDoubleClick += attachpointListBox_MouseDoubleClick;
-            attachpointListBox.BackColor = uiUp.GetEditControlColor();
-            attachpointListBox.ForeColor = uiUp.GetTextColor();
-            string[] atpts = new string[55];
-            Array.Copy(BrgAttachpoint.AttachpointNames, atpts, 55);
-            Array.Sort(atpts);
-            attachpointListBox.DataSource = atpts;
+            this.attachpointListBox.ValueMember = "Index";
+            this.attachpointListBox.DisplayMember = "MaxName";
 
             // Materials
-            extractMatButton.FlatStyle = FlatStyle.Flat;
-            extractMatButton.BackColor = uiUp.GetEditControlColor();
-            extractMatButton.ForeColor = uiUp.GetTextColor();
-            materialGroupBox.BackColor = uiUp.GetControlColor();
-            materialGroupBox.ForeColor = uiUp.GetTextColor();
-            diffuseMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            diffuseMaxTextBox.ForeColor = uiUp.GetTextColor();
-            ambientMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            ambientMaxTextBox.ForeColor = uiUp.GetTextColor();
-            specularMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            specularMaxTextBox.ForeColor = uiUp.GetTextColor();
-            selfIllumMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            selfIllumMaxTextBox.ForeColor = uiUp.GetTextColor();
-            textureMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            textureMaxTextBox.ForeColor = uiUp.GetTextColor();
-            reflectionMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            reflectionMaxTextBox.ForeColor = uiUp.GetTextColor();
-            bumpMapMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            bumpMapMaxTextBox.ForeColor = uiUp.GetTextColor();
-            opacityMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            opacityMaxTextBox.ForeColor = uiUp.GetTextColor();
-            specularLevelMaxTextBox.BackColor = uiUp.GetEditControlColor();
-            specularLevelMaxTextBox.ForeColor = uiUp.GetTextColor();
-            materialSideGroupBox.BackColor = uiUp.GetControlColor();
-            materialSideGroupBox.ForeColor = uiUp.GetTextColor();
-            materialFlagsGroupBox.BackColor = uiUp.GetControlColor();
-            materialFlagsGroupBox.ForeColor = uiUp.GetTextColor();
             materialListBox.SelectedIndexChanged += materialListBox_SelectedIndexChanged;
-            materialListBox.BackColor = uiUp.GetEditControlColor();
-            materialListBox.ForeColor = uiUp.GetTextColor();
-            materialFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
-            materialFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
-            materialFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
 
             // Grn Settings
-            grnSettingsGroupBox.ForeColor = uiUp.GetTextColor();
-            grnExportGroupBox.ForeColor = uiUp.GetTextColor();
-            grnObjectsGroupBox.ForeColor = uiUp.GetTextColor();
-            grnPropsGroupBox.ForeColor = uiUp.GetTextColor();
-
             grnObjectsListBox.SelectedIndexChanged += grnObjectsListBox_SelectedIndexChanged;
-            grnObjectsListBox.BackColor = uiUp.GetEditControlColor();
-            grnObjectsListBox.ForeColor = uiUp.GetTextColor();
-            grnObjectsListBox.BorderStyle = BorderStyle.None;
-            grnPropsListBox.BackColor = uiUp.GetEditControlColor();
-            grnPropsListBox.ForeColor = uiUp.GetTextColor();
-            grnPropsListBox.BorderStyle = BorderStyle.None;
 
             //plugin = new MaxPlugin();
             //this.Controls.Add(plugin);
             //plugin.Dock = DockStyle.Fill;
             Settings.Read();
-            brg = new BrgMax(this);
-            grn = new GrnMax(this);
+            brg = new BrgUi(this);
+            grn = new GrnUi(this);
             brg.LoadUi();
             grn.LoadUi();
             model = brg;
@@ -203,64 +127,6 @@ namespace AoMEngineLibrary.AMP
             return Color.FromArgb(d, d, d);
         }
 
-        private class ToolStripMaxPluginRenderer : MaxToolStripSystemRenderer//ToolStripProfessionalRenderer
-        {
-            protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
-            {
-                e.ToolStrip.BackColor = uiUp.GetControlColor();
-                //base.OnRenderImageMargin(e);
-            }
-
-            protected override void OnRenderToolStripPanelBackground(ToolStripPanelRenderEventArgs e)
-            {
-                e.ToolStripPanel.BackColor = uiUp.GetControlColor();
-                //base.OnRenderToolStripPanelBackground(e);
-            }
-            protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
-            {
-                e.ToolStrip.BackColor = uiUp.GetControlColor();
-                e.ToolStrip.ForeColor = uiUp.GetTextColor();
-                //base.OnRenderToolStripBackground(e);
-                //Rectangle rc = new Rectangle(Point.Empty, e.ToolStrip.Size);
-                //e.Graphics.FillRectangle(new SolidBrush(uiUp.GetControlColor()), rc);
-                //e.Graphics.DrawRectangle(Pens.Blue, 1, 0, rc.Width - 4, rc.Height - 1);
-            }
-            protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
-            {
-                if (e.ToolStrip.GetType() == typeof(MenuStrip))
-                {
-                    // skip render border of main
-                }
-                else
-                {
-                    // do render border
-                    //base.OnRenderToolStripBorder(e);
-                    Rectangle rc = new Rectangle(Point.Empty, e.ToolStrip.Size);
-                    //e.Graphics.FillRectangle(new SolidBrush(uiUp.GetEditControlColor()), rc);
-                    e.Graphics.DrawRectangle(Pens.Black, 0, 0, rc.Width - 1, rc.Height - 1);
-                }
-            }
-
-            protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
-            {
-                if (!e.Item.Selected)
-                {
-                    //for (int i = 0; i < e.Item.)
-                    //base.OnRenderMenuItemBackground(e);
-                    //Rectangle rc = new Rectangle(Point.Empty, e.Item.Size);
-                    //e.Graphics.FillRectangle(new SolidBrush(uiUp.GetControlColor()), rc);
-                    //e.Graphics.DrawRectangle(Pens.Black, 1, 0, rc.Width - 4, rc.Height - 1);
-                }
-                else
-                {
-                    // Highlight selected item
-                    Rectangle rc = new Rectangle(Point.Empty, e.Item.Size);
-                    e.Graphics.FillRectangle(new SolidBrush(uiUp.GetEditControlColor()), 3, 1, rc.Width - 6, rc.Height - 3);
-                    e.Graphics.DrawRectangle(Pens.Black, 3, 1, rc.Width - 6, rc.Height - 3);
-                }
-                //base.OnRenderMenuItemBackground(e);
-            }
-        }
         #endregion
 
         #region MainMenu
@@ -292,7 +158,7 @@ namespace AoMEngineLibrary.AMP
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to open file!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed to open file!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -333,7 +199,7 @@ namespace AoMEngineLibrary.AMP
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to save file!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed to save file!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -352,12 +218,6 @@ namespace AoMEngineLibrary.AMP
             }
 
             model.SaveUi();
-            //ProgDialog = new ProgressDialog();
-            //Thread importThread = new Thread(model.Import);
-            //importThread.IsBackground = true;
-            //importThread.Start();
-            //ProgDialog.ShowDialog();
-            //importThread.Join();
             model.Import();
             model.LoadUi();
             debug();
@@ -367,7 +227,7 @@ namespace AoMEngineLibrary.AMP
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -381,7 +241,7 @@ namespace AoMEngineLibrary.AMP
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -410,45 +270,6 @@ namespace AoMEngineLibrary.AMP
         private void attachpointListBox_MouseEnter(object sender, EventArgs e)
         {
             attachpointListBox.Focus();
-        }
-        void attachpointListBox_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            int index = attachpointListBox.IndexFromPoint(e.Location);
-            if (index != System.Windows.Forms.ListBox.NoMatches)
-            {
-                BrgAttachpoint att = new BrgAttachpoint();
-                att.NameId = BrgAttachpoint.GetIdByName((string)attachpointListBox.Items[index]);
-                Maxscript.NewDummy("newDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
-
-                //if (brg.File.Meshes.Count == 0)
-                //{
-                //    brg.File.Meshes.Add(new BrgMesh(brg.File));
-                //}
-                //brg.File.Meshes[0].Attachpoints.Add(att);
-                //brg.LoadUiAttachpoint();
-                //attachpointComboBox.SelectedIndex = attachpointComboBox.Items.Count - 1;
-            }
-        }
-        void attachpointComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (attachpointComboBox.SelectedItem != null && brg.File.Meshes.Count > 0)
-            {
-                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName());
-                if (Maxscript.QueryBoolean("selectDummy != undefined"))
-                {
-                    Maxscript.Command("select selectDummy");
-                }
-                //else
-                //{
-                //    DialogResult dlgR = MessageBox.Show("Could not find \"" + ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName() + "\"! Would you like to delete it?", "ABE",
-                //        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
-                //    if (dlgR == DialogResult.Yes)
-                //    {
-                //        brg.File.Meshes[0].Attachpoints.Remove(((BrgAttachpoint)attachpointComboBox.SelectedItem).Index);
-                //        brg.LoadUiAttachpoint();
-                //    }
-                //}
-            }
         }
 
         private void materialFlagsCheckedListBox_MouseEnter(object sender, EventArgs e)

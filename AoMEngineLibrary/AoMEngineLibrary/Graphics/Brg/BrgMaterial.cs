@@ -8,7 +8,7 @@
     using System.IO;
     using System.Text;
 
-    public class BrgMaterial : Material
+    public class BrgMaterial : Material, IEquatable<BrgMaterial>
     {
         public BrgFile ParentFile;
         public string EditorName
@@ -119,6 +119,42 @@
                     writer.WriteString(this.sfx[i].Name, 2);
                 }
             }
+        }
+
+        public bool Equals(BrgMaterial m)
+        {
+            // If parameter is null return false:
+            if ((object)m == null)
+            {
+                return false;
+            }
+
+            //ret = ret && this.ParentFile == m.ParentFile;
+            //ret = ret && this.id == m.id;
+            bool ret = this.Flags == m.Flags &&
+                this.unknown01b == m.unknown01b &&
+                this.DiffuseColor == m.DiffuseColor &&
+                this.AmbientColor == m.AmbientColor &&
+                this.SpecularColor == m.SpecularColor &&
+                this.EmissiveColor == m.EmissiveColor &&
+                this.DiffuseMap == m.DiffuseMap &&
+                this.BumpMap == m.BumpMap &&
+                this.SpecularExponent == m.SpecularExponent &&
+                this.Opacity == m.Opacity &&
+                this.sfx.Count == m.sfx.Count;
+
+            if (ret)
+            {
+                for (int i = 0; i < this.sfx.Count; ++i)
+                {
+                    ret = ret && 
+                        this.sfx[i].Id == m.sfx[i].Id &&
+                        this.sfx[i].Name == m.sfx[i].Name;
+                }
+            }
+
+            // Return true if the fields match:
+            return ret;
         }
     }
 }

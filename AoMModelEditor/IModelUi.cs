@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.AMP
+﻿namespace AoMModelEditor
 {
     using System;
     using System.Collections.Generic;
@@ -7,9 +7,9 @@
     using System.Threading.Tasks;
     using AoMEngineLibrary.Graphics.Model;
 
-    public interface IModelMaxUi
+    public interface IModelUi
     {
-        MaxPluginForm Plugin { get; set; }
+        MainForm Plugin { get; set; }
         string FileName { get; set; }
         int FilterIndex { get; }
 

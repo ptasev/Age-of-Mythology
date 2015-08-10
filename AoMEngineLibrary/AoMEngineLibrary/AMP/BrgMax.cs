@@ -1,5 +1,6 @@
-﻿namespace AoMEngineLibrary
+﻿namespace AoMEngineLibrary.AMP
 {
+    using AoMEngineLibrary.Extensions;
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
     using AoMEngineLibrary.Graphics.Model;
@@ -90,7 +91,6 @@
                 Maxscript.Command("max select none");
                 Maxscript.Command("max zoomext sel all");
                 Maxscript.Command("max zoomext sel all");
-                Maxscript.Command("select {0}", mainObject);
 
                 if (this.File.Materials.Count > 0)
                 {
@@ -289,7 +289,7 @@
         private string ImportBrgMaterial(BrgMaterial mat)
         {
             Maxscript.Command("mat = StandardMaterial()");
-            Maxscript.Command("mat.name = \"{0}\"", mat.DiffuseMap);
+            this.ImportMaterialNameFromFlags(mat);
             Maxscript.Command("mat.adLock = false");
             Maxscript.Command("mat.useSelfIllumColor = true");
             Maxscript.Command("mat.diffuse = color {0} {1} {2}", mat.DiffuseColor.R * 255f, mat.DiffuseColor.G * 255f, mat.DiffuseColor.B * 255f);
@@ -298,7 +298,7 @@
             Maxscript.Command("mat.selfIllumColor = color {0} {1} {2}", mat.EmissiveColor.R * 255f, mat.EmissiveColor.G * 255f, mat.EmissiveColor.B * 255f);
             Maxscript.Command("mat.opacity = {0}", mat.Opacity * 100f);
             Maxscript.Command("mat.specularLevel = {0}", mat.SpecularExponent);
-            //MaxHelper.Command("print \"{0}\"", name);
+            
             if (mat.Flags.HasFlag(BrgMatFlag.SubtractiveBlend))
             {
                 Maxscript.Command("mat.opacityType = 1");
@@ -306,6 +306,16 @@
             else if (mat.Flags.HasFlag(BrgMatFlag.AdditiveBlend))
             {
                 Maxscript.Command("mat.opacityType = 2");
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.TwoSided))
+            {
+                Maxscript.Command("mat.twoSided = true");
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.FaceMap))
+            {
+                Maxscript.Command("mat.faceMap = true");
             }
 
             if (mat.Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
@@ -339,17 +349,28 @@
 
             return "mat";
         }
+        private void ImportMaterialNameFromFlags(BrgMaterial mat)
+        {
+            //Maxscript.Command("mat.name = \"{0}\"", mat.DiffuseMap);
+            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMap);
+
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1))
+            {
+                name += " colorxform1";
+            }
+
+            Maxscript.Command("mat.name = \"{0}\"", name);
+        }
 
         public void Export()
         {
             BrgFile brg = this.File;
-            bool hadEditNormMod = false;
-            string mainObject = "mainObject";
-            Maxscript.Command("{0} = selection[1]", mainObject);
-            bool objectSelected = Maxscript.QueryBoolean("classOf {0} == Editable_mesh", mainObject);
-            if (!objectSelected)
+
+            Maxscript.Command("ExportBrgData()");
+            int meshCount = Maxscript.QueryInteger("brgMeshes.count");
+            if (meshCount == 0)
             {
-                throw new Exception("No object selected!");
+                throw new Exception("No Editable_Mesh objects detected!");
             }
 
             // Call GetKeys function from max
@@ -375,49 +396,147 @@
             }
             brg.Animation.TimeStep = brg.Animation.Duration / (float)brg.Header.NumMeshes;
 
-            if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
-            {
-                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
-            }
-            else { hadEditNormMod = true; }
-            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
-
-            brg.Header.NumMaterials = Maxscript.QueryInteger("{0}.material.materialList.count", mainObject);
-            //System.Windows.Forms.MessageBox.Show(Header.numMeshes + " " + Header.numMaterials);
-            if (brg.Header.NumMaterials > 0)
-            {
-                brg.Materials = new List<BrgMaterial>(brg.Header.NumMaterials);
-                for (int i = 0; i < brg.Header.NumMaterials; i++)
-                {
-                    brg.Materials.Add(new BrgMaterial(brg));
-                    this.ExportBrgMaterial(mainObject, i);
-                }
-            }
-
+            string mainObject = "mainObject";
+            bool hadEditNormMod = false;
+            brg.Materials = new List<BrgMaterial>();
             brg.Meshes = new List<BrgMesh>(brg.Header.NumMeshes);
-            for (int i = 0; i < brg.Header.NumMeshes; i++)
+            for (int m = 0; m < meshCount; ++m)
             {
-                if (i > 0)
+                Maxscript.Command("{0} = brgMeshes[{1}]", mainObject, m + 1);
+
+                // Materials
+                Dictionary<int, int> matIdMapping = new Dictionary<int, int>();
+                if (Maxscript.QueryBoolean("classof {0}.material == Multimaterial", mainObject))
                 {
-                    brg.Meshes[0].MeshAnimations.Add(new BrgMesh(brg));
-                    brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType);
-                    ExportBrgMesh(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshKeys[i]);
+                    brg.Header.NumMaterials = Maxscript.QueryInteger("{0}.material.materialList.count", mainObject);
+                    for (int i = 0; i < brg.Header.NumMaterials; i++)
+                    {
+                        BrgMaterial mat = new BrgMaterial(brg);
+                        mat.id = brg.Materials.Count + 1;
+                        Maxscript.Command("mat = {0}.material.materialList[{1}]", mainObject, i + 1);
+                        this.ExportBrgMaterial(mainObject, mat);
+
+                        int matListIndex = brg.Materials.IndexOf(mat);
+                        if (matListIndex >= 0)
+                        {
+                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), brg.Materials[matListIndex].id);
+                        }
+                        else
+                        {
+                            brg.Materials.Add(mat);
+                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), mat.id);
+                        }
+                    }
+                }
+                else if (Maxscript.QueryBoolean("classof {0}.material == Standardmaterial", mainObject))
+                {
+                    BrgMaterial mat = new BrgMaterial(brg);
+                    mat.id = brg.Materials.Count + 1;
+                    Maxscript.Command("mat = {0}.material", mainObject);
+                    this.ExportBrgMaterial(mainObject, mat);
+
+                    int matListIndex = brg.Materials.IndexOf(mat);
+                    if (matListIndex >= 0)
+                    {
+                        matIdMapping.Add(1, brg.Materials[matListIndex].id);
+                    }
+                    else
+                    {
+                        brg.Materials.Add(mat);
+                        matIdMapping.Add(1, mat.id);
+                    }
                 }
                 else
                 {
-                    brg.Meshes.Add(new BrgMesh(brg));
-                    brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType);
-                    ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i]);
+                    throw new Exception("Not all meshes have a material applied!");
+                }
+
+                // Add Edit_Normals Mod
+                hadEditNormMod = false;
+                if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
+                {
+                    Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+                }
+                else { hadEditNormMod = true; }
+                Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
+
+                // Mesh Animations
+                for (int i = 0; i < brg.Header.NumMeshes; i++)
+                {
+                    if (i > 0)
+                    {
+                        if (m == 0)
+                        {
+                            brg.Meshes[0].MeshAnimations.Add(new BrgMesh(brg));
+                        }
+                        brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType);
+                        this.ExportBrgMesh(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshKeys[i], matIdMapping);
+                    }
+                    else
+                    {
+                        if (m == 0)
+                        {
+                            brg.Meshes.Add(new BrgMesh(brg));
+                        }
+                        brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType);
+                        this.ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i], matIdMapping);
+                    }
+                }
+
+                // Delete normals mod if it wasn't there in the first place
+                if (!hadEditNormMod)
+                {
+                    Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
                 }
             }
+            brg.Header.NumMaterials = brg.Materials.Count;
 
-            // Delete normals mod if it wasn't there in the first place
-            if (!hadEditNormMod)
+            // Export Attachpoints, and Update some Mesh data
+            HashSet<int> usedFaceMaterials = new HashSet<int>();
+            for (int i = 0; i < brg.Header.NumMeshes; i++)
             {
-                Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
+                BrgMesh mesh;
+                if (i > 0)
+                {
+                    mesh = (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1];
+                }
+                else
+                {
+                    mesh = brg.Meshes[i];
+                }
+
+                this.ExportAttachpoints(mesh, brg.Animation.MeshKeys[i]);
+                HashSet<int> diffFaceMats = new HashSet<int>();
+                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                {
+                    for (int j = 0; j < mesh.Faces.Count; ++j)
+                    {
+                        if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                        {
+                            diffFaceMats.Add(mesh.Faces[j].MaterialIndex);
+                        }
+                    }
+
+                    if (diffFaceMats.Count > 0)
+                    {
+                        mesh.ExtendedHeader.NumMaterials = (byte)(diffFaceMats.Count - 1);
+                        mesh.ExtendedHeader.NumUniqueMaterials = diffFaceMats.Count;
+                    }
+                }
+                usedFaceMaterials.UnionWith(diffFaceMats);
+                mesh.ExtendedHeader.AnimationLength = this.File.Animation.Duration;
             }
+            List<BrgMaterial> usedMats = new List<BrgMaterial>(brg.Materials.Count);
+            for (int i = 0; i < brg.Materials.Count; ++i)
+            {
+                if (usedFaceMaterials.Contains(brg.Materials[i].id))
+                {
+                    usedMats.Add(brg.Materials[i]);
+                }
+            }
+            brg.Materials = usedMats;
         }
-        private void ExportBrgMesh(string mainObject, BrgMesh mesh, float time)
+        private void ExportBrgMesh(string mainObject, BrgMesh mesh, float time, Dictionary<int, int> matIdMapping)
         {
             time += Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
 
@@ -449,15 +568,12 @@
             mesh.Header.MaximumExtent = new Vector3D(bBox.X, bBox.Z, bBox.Y);
 
             string mainMesh = "mainMesh";
-            string attachDummy = Maxscript.NewArray("attachDummy");
-            Maxscript.SetVarAtTime(time, attachDummy, "for helpObj in ($helpers/Dummy_*) where classof helpObj == Dummy collect helpObj");//"$helpers/Dummy_* as array");
-            //Maxscript.SetVarAtTime(time, attachDummy, "$helpers/atpt??* as array");
-            int numAttachpoints = Maxscript.QueryInteger("{0}.count", attachDummy);
 
             // Figure out the proper data to import
             Maxscript.Command("GetExportData {0}", time);
             int numVertices = Maxscript.QueryInteger("{0}.numverts", mainMesh);
             int numFaces = Maxscript.QueryInteger("{0}.numfaces", mainMesh);
+            int currNumVertices = mesh.Vertices.Count;
 
             //System.Windows.Forms.MessageBox.Show("1 " + numVertices);
             for (int i = 0; i < numVertices; i++)
@@ -478,7 +594,7 @@
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Import Verts/Normals " + i.ToString(), ex);
+                    throw new Exception("Error at Export Verts/Normals " + i, ex);
                 }
             }
 
@@ -504,67 +620,62 @@
             {
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    List<Vector3D> texVerticesList = new List<Vector3D>(numVertices);
                     for (int i = 0; i < numVertices; i++)
                     {
                         if (vertexMask[i] > 0)
                         {
                             Maxscript.Command("tVert = getTVert {0} {1}", mainMesh, vertexMask[i]);// i + 1);
-                            texVerticesList.Add(new Vector3D(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
+                            mesh.TextureCoordinates.Add(new Vector3D(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
                         }
                     }
-                    mesh.TextureCoordinates = texVerticesList;
                 }
             }
 
             //System.Windows.Forms.MessageBox.Show("3");
-            HashSet<int> diffFaceMats = new HashSet<int>();
             if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
             {
-                mesh.Faces = new List<Face>(numFaces);
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                {
+                    mesh.VertexMaterials.AddRange(new Int16[numVertices]);
+                }
                 for (int i = 0; i < numFaces; ++i)
                 {
-                    mesh.Faces.Add(new Face());
-                }
+                    Face f = new Face();
+                    mesh.Faces.Add(f);
 
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                {
-                    for (int i = 0; i < numFaces; i++)
+                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        mesh.Faces[i].MaterialIndex = (Int16)Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1);
-                        diffFaceMats.Add(mesh.Faces[i].MaterialIndex);
+                        f.MaterialIndex = (Int16)matIdMapping[Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1)];
+                        if (f.MaterialIndex == 2)
+                        {
+                            //MaxPluginForm.DebugBox("yo " + i);
+                        }
                     }
-                }
 
-                //System.Windows.Forms.MessageBox.Show("3.1");
-                for (int i = 0; i < mesh.Faces.Count; i++)
-                {
+                    //System.Windows.Forms.MessageBox.Show("3.1");
                     Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
-                    mesh.Faces[i].Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
-                    mesh.Faces[i].Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1));
-                    mesh.Faces[i].Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1));
-                }
+                    f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1 + currNumVertices));
+                    f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1 + currNumVertices));
+                    f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices));
 
-                //System.Windows.Forms.MessageBox.Show("3.2");
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                {
-                    mesh.VertexMaterials = new Int16[mesh.Vertices.Count];
-                    for (int i = 0; i < mesh.Faces.Count; i++)
+                    //System.Windows.Forms.MessageBox.Show("3.2");
+                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        mesh.VertexMaterials[mesh.Faces[i].Indices[0]] = mesh.Faces[i].MaterialIndex;
-                        mesh.VertexMaterials[mesh.Faces[i].Indices[1]] = mesh.Faces[i].MaterialIndex;
-                        mesh.VertexMaterials[mesh.Faces[i].Indices[2]] = mesh.Faces[i].MaterialIndex;
+                        mesh.VertexMaterials[f.Indices[0]] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.Indices[1]] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.Indices[2]] = f.MaterialIndex;
                     }
                 }
             }
-
+        }
+        private void ExportAttachpoints(BrgMesh mesh, float time)
+        {
+            time += Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
             //System.Windows.Forms.MessageBox.Show("4");
-            if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && diffFaceMats.Count > 0)
-            {
-                mesh.ExtendedHeader.NumMaterials = (byte)(diffFaceMats.Count - 1);
-                mesh.ExtendedHeader.NumUniqueMaterials = diffFaceMats.Count;
-            }
-            mesh.ExtendedHeader.AnimationLength = this.File.Animation.Duration;
+            string attachDummy = Maxscript.NewArray("attachDummy");
+            Maxscript.SetVarAtTime(time, attachDummy, "for helpObj in ($helpers/Dummy_*) where classof helpObj == Dummy collect helpObj");//"$helpers/Dummy_* as array");
+            //Maxscript.SetVarAtTime(time, attachDummy, "$helpers/atpt??* as array");
+            int numAttachpoints = Maxscript.QueryInteger("{0}.count", attachDummy);
 
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
             if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
@@ -588,7 +699,7 @@
                     Maxscript.SetVarAtTime(time, "{0}Scale", "{0}[{1}].scale * {0}[{1}].boxsize", attachDummy, i + 1);
                     //System.Windows.Forms.MessageBox.Show("5.3");
                     Vector3<float> scale = new Vector3<float>(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
-                    bBox = scale / 2;
+                    Vector3<float> bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
                     att.XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
@@ -620,12 +731,10 @@
                 //System.Windows.Forms.MessageBox.Show("# Atpts: " + Attachpoint.Count);
             }
         }
-        private void ExportBrgMaterial(string mainObject, int materialIndex)
+        private void ExportBrgMaterial(string mainObject, BrgMaterial mat)
         {
-            BrgFile brg = this.File;
-            BrgMaterial mat = brg.Materials[materialIndex];
-            mat.id = Maxscript.QueryInteger("{0}.material.materialIDList[{1}]", mainObject, materialIndex + 1);
-            Maxscript.Command("mat = {0}.material[{1}]", mainObject, mat.id);
+            //mat.id = Maxscript.QueryInteger("{0}.material.materialIDList[{1}]", mainObject, materialIndex + 1);
+            //Maxscript.Command("mat = {0}.material[{1}]", mainObject, mat.id);
 
             mat.DiffuseColor = new Color3D(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
                 Maxscript.QueryFloat("mat.diffuse.g") / 255f,
@@ -639,17 +748,20 @@
             mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
                 Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
                 Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
-            mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
+
             mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
-            int opacityType = Maxscript.QueryInteger("mat.opacityType");
             if (mat.SpecularExponent > 0)
             {
                 mat.Flags |= BrgMatFlag.SpecularExponent;
             }
+
+            mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
             if (mat.Opacity < 1f)
             {
                 mat.Flags |= BrgMatFlag.Alpha;
             }
+
+            int opacityType = Maxscript.QueryInteger("mat.opacityType");
             if (opacityType == 1)
             {
                 mat.Flags |= BrgMatFlag.SubtractiveBlend;
@@ -657,6 +769,16 @@
             else if (opacityType == 2)
             {
                 mat.Flags |= BrgMatFlag.AdditiveBlend;
+            }
+
+            if (Maxscript.QueryBoolean("mat.twoSided"))
+            {
+                mat.Flags |= BrgMatFlag.TwoSided;
+            }
+
+            if (Maxscript.QueryBoolean("mat.faceMap"))
+            {
+                mat.Flags |= BrgMatFlag.FaceMap;
             }
 
             if (Maxscript.QueryBoolean("(classof mat.reflectionMap) == BitmapTexture"))
@@ -691,6 +813,30 @@
             {
                 mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1 | BrgMatFlag.PixelXForm1;
                 mat.DiffuseMap = Maxscript.QueryString("getFilenameFile(mat.diffusemap.mapList[1].filename)");
+            }
+
+            this.ExportMaterialFlagsFromName(mat);
+        }
+        private void ExportMaterialFlagsFromName(BrgMaterial mat)
+        {
+            string flags = Maxscript.QueryString("mat.name").ToLower();
+            StringComparison cmp = StringComparison.InvariantCultureIgnoreCase;
+
+            if (flags.Contains("colorxform1", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PlayerXFormColor1;
+            }
+
+            if (flags.Contains("2-sided", cmp) ||
+                flags.Contains("2 sided", cmp) ||
+                flags.Contains("2sided", cmp))
+            {
+                mat.Flags |= BrgMatFlag.TwoSided;
+            }
+
+            if (flags.Contains("pixelxform1", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PixelXForm1;
             }
         }
         #endregion

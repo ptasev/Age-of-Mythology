@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMAnimConverter", "..\AoMA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMBrgEditor", "..\AoMBrgEditor\AoMBrgEditor\AoMBrgEditor.csproj", "{3B38591C-D355-4124-BBE7-C6098E01B2C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelPlugin", "..\AoMModelPlugin\AoMModelPlugin\AoMModelPlugin.csproj", "{31CC84D2-44DE-439F-ADCD-4584E2C62676}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelEditor", "..\AoMModelEditor\AoMModelEditor.csproj", "{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,16 +63,16 @@ Global
 		{3B38591C-D355-4124-BBE7-C6098E01B2C8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3B38591C-D355-4124-BBE7-C6098E01B2C8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3B38591C-D355-4124-BBE7-C6098E01B2C8}.Release|x64.ActiveCfg = Release|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{31CC84D2-44DE-439F-ADCD-4584E2C62676}.Release|x64.ActiveCfg = Release|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

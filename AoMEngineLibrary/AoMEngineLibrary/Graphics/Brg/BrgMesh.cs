@@ -10,7 +10,7 @@
         public BrgFile ParentFile { get; set; }
         public BrgMeshHeader Header { get; set; }
 
-        public Int16[] VertexMaterials { get; set; }
+        public List<Int16> VertexMaterials { get; set; }
 
         public BrgMeshExtendedHeader ExtendedHeader { get; set; }
         public BrgUserDataEntry[] UserDataEntries { get; set; }
@@ -25,7 +25,7 @@
             this.ParentFile = file;
             this.Header = new BrgMeshHeader(reader);
 
-            this.VertexMaterials = new Int16[0];
+            this.VertexMaterials = new List<Int16>();
             if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
                 this.Vertices = new List<Vector3D>(this.Header.NumVertices);
@@ -84,10 +84,10 @@
 
                     if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        this.VertexMaterials = new Int16[this.Header.NumVertices];
+                        this.VertexMaterials = new List<Int16>(this.Header.NumVertices);
                         for (int i = 0; i < this.Header.NumVertices; i++)
                         {
-                            this.VertexMaterials[i] = reader.ReadInt16();
+                            this.VertexMaterials.Add(reader.ReadInt16());
                         }
                     }
                 }
@@ -242,7 +242,7 @@
             this.Header.Version = 22;
             this.Header.ExtendedHeaderSize = 40;
 
-            this.VertexMaterials = new Int16[0];
+            this.VertexMaterials = new List<Int16>();
 
             this.ExtendedHeader = new BrgMeshExtendedHeader();
             this.ExtendedHeader.MaterialLibraryTimestamp = 191738312;
@@ -315,7 +315,7 @@
 
                     if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        for (int i = 0; i < this.VertexMaterials.Length; i++)
+                        for (int i = 0; i < this.VertexMaterials.Count; i++)
                         {
                             writer.Write(this.VertexMaterials[i]);
                         }

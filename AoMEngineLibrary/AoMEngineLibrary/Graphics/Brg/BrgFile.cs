@@ -57,9 +57,10 @@
                     else if (magic == "MTRL")
                     {
                         BrgMaterial mat = new BrgMaterial(reader, this);
+                        Materials.Add(mat);
                         if (!ContainsMaterialID(mat.id))
                         {
-                            Materials.Add(mat);
+                            //Materials.Add(mat);
                         }
                         else
                         {

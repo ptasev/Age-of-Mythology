@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AoMModelPlugin")]
+[assembly: AssemblyTitle("AoM Model Editor")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("AoMModelPlugin")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("Petar Tasev")]
+[assembly: AssemblyProduct("AoM Model Editor")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("1d174cdc-eac1-4580-91d7-df30e4b7b757")]
+[assembly: Guid("5f590516-90a8-4bb7-9c10-5a550997077f")]
 
 // Version information for an assembly consists of the following four values:
 //

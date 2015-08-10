@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary
+﻿namespace AoMEngineLibrary.AMP
 {
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Grn;
@@ -8,6 +8,7 @@
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Forms;
 
@@ -57,7 +58,7 @@
         #region Import/Export
         public void Import()
         {
-            this.Plugin.richTextBox1.AppendText(this.boneMap.Count.ToString() + Environment.NewLine + Environment.NewLine);
+            //this.Plugin.richTextBox1.AppendText(this.boneMap.Count.ToString() + Environment.NewLine + Environment.NewLine);
             string mainObject = "mainObject";
             string boneArray = "boneArray";
 
@@ -67,26 +68,38 @@
                 this.matGroupInit = true;
             }
 
+            //this.Plugin.ProgDialog.SetProgressText("Importing skeleton...");
             this.ImportSkeleton(boneArray);
+            //this.Plugin.ProgDialog.SetProgressValue(35);
 
+            //this.Plugin.ProgDialog.SetProgressText("Importing meshes...");
             for (int i = 0; i < this.File.Meshes.Count; i++)
             {
                 this.ImportMesh(this.File.Meshes[i], mainObject, boneArray);
                 Maxscript.Command("select {0}", mainObject);
                 Maxscript.Command("{0}.material = matGroup", mainObject);
             }
+            //this.Plugin.ProgDialog.SetProgressValue(70);
 
+            //this.Plugin.ProgDialog.SetProgressText("Importing animation...");
             if (this.File.Animation.Duration > 0)
             {
                 this.ImportAnimation(boneArray);
             }
+            //this.Plugin.ProgDialog.SetProgressValue(85);
 
+            //this.Plugin.ProgDialog.SetProgressText("Importing materials...");
             for (int i = 0; i < this.File.Materials.Count; i++)
             {
                 Maxscript.Command("matGroup[{0}] = {1}", i + 1, ImportMaterial(this.File.Materials[i]));
             }
+            //this.Plugin.ProgDialog.SetProgressValue(100);
 
             Maxscript.Command("max zoomext sel all");
+            //if (this.Plugin.ProgDialog.InvokeRequired)
+            //{
+            //    this.Plugin.ProgDialog.BeginInvoke(new Action(() => this.Plugin.ProgDialog.Close()));
+            //}
         }
         private void ImportSkeleton(string boneArray)
         {
@@ -131,7 +144,7 @@
                     Maxscript.Command("{0}[{1}].transform *= {0}[{1}].parent.transform", boneArray, this.boneMap[bone.Name] + 1);
                 }
                 //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.ParentIndex + " " + Environment.NewLine);
-                this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
+                //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
             }
 
             //List<GrnBone> bones = this.File.Bones.OrderBy(b => b.ParentIndex).ToList();
@@ -175,7 +188,7 @@
 
             foreach (var face in mesh.Faces)
             {
-                Maxscript.Append(faceMats, face.MaterialIndex.ToString());
+                Maxscript.Append(faceMats, face.MaterialIndex + 1);
                 Maxscript.Append(faceArray, Maxscript.NewPoint3<Int32>("fV", 
                     face.Indices[0] + 1, face.Indices[1] + 1, face.Indices[2] + 1));
                 Maxscript.Append(tFaceArray, Maxscript.NewPoint3<Int32>("tFV", 
@@ -273,7 +286,7 @@
                 // typically bones and bonetracks match up
                 // but won't if an anim file is imported on top of a regular model file
                 int boneArrayIndex = this.boneMap[this.File.Bones[i].Name] + 1;
-                this.Plugin.richTextBox1.AppendText(i + " " + this.File.GetDataExtensionObjectName(bone.DataExtensionIndex) + " " + bone.Scales[0] + Environment.NewLine);
+                //this.Plugin.richTextBox1.AppendText(i + " " + this.File.GetDataExtensionObjectName(bone.DataExtensionIndex) + " " + bone.Scales[0] + Environment.NewLine);
 
                 Vector3D pos = new Vector3D();
                 Quaternion rot = new Quaternion();
@@ -564,7 +577,7 @@
                     bone.Scale = scale;
 
                     this.File.Bones.Add(bone);
-                    this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
+                    //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
                 }
                 catch (Exception ex)
                 {
@@ -638,7 +651,7 @@
             for (int i = 0; i < numFaces; ++i)
             {
                 Face f = new Face();
-                f.MaterialIndex = (Int16)Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1);
+                f.MaterialIndex = (Int16)(Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1) - 1);
                 Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1));

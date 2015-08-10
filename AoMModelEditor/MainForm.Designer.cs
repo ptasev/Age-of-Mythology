@@ -1,6 +1,6 @@
-﻿namespace AoMEngineLibrary.AMP
+﻿namespace AoMModelEditor
 {
-    partial class MaxPluginForm
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,23 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.specularLevelLabel = new System.Windows.Forms.Label();
             this.materialPanel = new System.Windows.Forms.Panel();
             this.materialGroupBox = new System.Windows.Forms.GroupBox();
             this.extractMatButton = new System.Windows.Forms.Button();
-            this.specularLevelMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.specularLevelMaxTextBox = new System.Windows.Forms.TextBox();
             this.opacityLabel = new System.Windows.Forms.Label();
-            this.opacityMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.opacityMaxTextBox = new System.Windows.Forms.TextBox();
             this.unkLabel = new System.Windows.Forms.Label();
-            this.bumpMapMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.bumpMapMaxTextBox = new System.Windows.Forms.TextBox();
             this.reflectionLabel = new System.Windows.Forms.Label();
-            this.reflectionMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.reflectionMaxTextBox = new System.Windows.Forms.TextBox();
             this.textureLabel = new System.Windows.Forms.Label();
-            this.textureMaxTextBox = new MaxCustomControls.MaxTextBox();
-            this.selfIllumMaxTextBox = new MaxCustomControls.MaxTextBox();
-            this.specularMaxTextBox = new MaxCustomControls.MaxTextBox();
-            this.ambientMaxTextBox = new MaxCustomControls.MaxTextBox();
-            this.diffuseMaxTextBox = new MaxCustomControls.MaxTextBox();
+            this.textureMaxTextBox = new System.Windows.Forms.TextBox();
+            this.selfIllumMaxTextBox = new System.Windows.Forms.TextBox();
+            this.specularMaxTextBox = new System.Windows.Forms.TextBox();
+            this.ambientMaxTextBox = new System.Windows.Forms.TextBox();
+            this.diffuseMaxTextBox = new System.Windows.Forms.TextBox();
             this.materialFlagsGroupBox = new System.Windows.Forms.GroupBox();
             this.materialFlagsCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.materialSidePanel = new System.Windows.Forms.Panel();
@@ -72,7 +73,6 @@
             this.brgImportCenterModelCheckBox = new System.Windows.Forms.CheckBox();
             this.brgImportAttachScaleCheckBox = new System.Windows.Forms.CheckBox();
             this.attachpointGroupBox = new System.Windows.Forms.GroupBox();
-            this.attachpointComboBox = new System.Windows.Forms.ComboBox();
             this.materialTabPage = new System.Windows.Forms.TabPage();
             this.grnSettingsTabPage = new System.Windows.Forms.TabPage();
             this.grnSettingsMainPanel = new System.Windows.Forms.Panel();
@@ -157,13 +157,13 @@
             // 
             // materialPanel
             // 
-            this.materialPanel.Controls.Add(this.materialGroupBox);
             this.materialPanel.Controls.Add(this.materialFlagsGroupBox);
+            this.materialPanel.Controls.Add(this.materialGroupBox);
             this.materialPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.materialPanel.Location = new System.Drawing.Point(267, 4);
             this.materialPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialPanel.Name = "materialPanel";
-            this.materialPanel.Size = new System.Drawing.Size(766, 605);
+            this.materialPanel.Size = new System.Drawing.Size(766, 602);
             this.materialPanel.TabIndex = 1;
             // 
             // materialGroupBox
@@ -183,25 +183,24 @@
             this.materialGroupBox.Controls.Add(this.specularMaxTextBox);
             this.materialGroupBox.Controls.Add(this.ambientMaxTextBox);
             this.materialGroupBox.Controls.Add(this.diffuseMaxTextBox);
-            this.materialGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.materialGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.materialGroupBox.Location = new System.Drawing.Point(0, 0);
             this.materialGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialGroupBox.Name = "materialGroupBox";
             this.materialGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.materialGroupBox.Size = new System.Drawing.Size(766, 167);
+            this.materialGroupBox.Size = new System.Drawing.Size(766, 169);
             this.materialGroupBox.TabIndex = 0;
             this.materialGroupBox.TabStop = false;
             this.materialGroupBox.Text = "Information";
             // 
             // extractMatButton
             // 
-            this.extractMatButton.Location = new System.Drawing.Point(393, 109);
+            this.extractMatButton.Location = new System.Drawing.Point(393, 110);
             this.extractMatButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.extractMatButton.Name = "extractMatButton";
             this.extractMatButton.Size = new System.Drawing.Size(339, 33);
             this.extractMatButton.TabIndex = 14;
             this.extractMatButton.Text = "Extract All Materials for EE";
-            this.extractMatButton.UseVisualStyleBackColor = true;
             this.extractMatButton.Click += new System.EventHandler(this.extractMatButton_Click);
             // 
             // specularLevelMaxTextBox
@@ -332,12 +331,12 @@
             // materialFlagsGroupBox
             // 
             this.materialFlagsGroupBox.Controls.Add(this.materialFlagsCheckedListBox);
-            this.materialFlagsGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.materialFlagsGroupBox.Location = new System.Drawing.Point(0, 167);
+            this.materialFlagsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.materialFlagsGroupBox.Location = new System.Drawing.Point(0, 169);
             this.materialFlagsGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialFlagsGroupBox.Name = "materialFlagsGroupBox";
             this.materialFlagsGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.materialFlagsGroupBox.Size = new System.Drawing.Size(766, 438);
+            this.materialFlagsGroupBox.Size = new System.Drawing.Size(766, 433);
             this.materialFlagsGroupBox.TabIndex = 1;
             this.materialFlagsGroupBox.TabStop = false;
             this.materialFlagsGroupBox.Text = "Flags";
@@ -349,7 +348,7 @@
             this.materialFlagsCheckedListBox.Location = new System.Drawing.Point(4, 19);
             this.materialFlagsCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialFlagsCheckedListBox.Name = "materialFlagsCheckedListBox";
-            this.materialFlagsCheckedListBox.Size = new System.Drawing.Size(758, 415);
+            this.materialFlagsCheckedListBox.Size = new System.Drawing.Size(758, 410);
             this.materialFlagsCheckedListBox.TabIndex = 0;
             this.materialFlagsCheckedListBox.MouseEnter += new System.EventHandler(this.materialFlagsCheckedListBox_MouseEnter);
             // 
@@ -360,7 +359,7 @@
             this.materialSidePanel.Location = new System.Drawing.Point(4, 4);
             this.materialSidePanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialSidePanel.Name = "materialSidePanel";
-            this.materialSidePanel.Size = new System.Drawing.Size(263, 605);
+            this.materialSidePanel.Size = new System.Drawing.Size(263, 602);
             this.materialSidePanel.TabIndex = 0;
             // 
             // materialSideGroupBox
@@ -371,7 +370,7 @@
             this.materialSideGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.materialSideGroupBox.Name = "materialSideGroupBox";
             this.materialSideGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.materialSideGroupBox.Size = new System.Drawing.Size(263, 605);
+            this.materialSideGroupBox.Size = new System.Drawing.Size(263, 602);
             this.materialSideGroupBox.TabIndex = 1;
             this.materialSideGroupBox.TabStop = false;
             this.materialSideGroupBox.Text = "Materials";
@@ -384,8 +383,13 @@
             this.materialListBox.Location = new System.Drawing.Point(3, 17);
             this.materialListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialListBox.Name = "materialListBox";
-            this.materialListBox.Size = new System.Drawing.Size(257, 586);
+            this.materialListBox.Size = new System.Drawing.Size(257, 583);
             this.materialListBox.TabIndex = 0;
+            // 
+            // saveFileDialog
+            // 
+            this.saveFileDialog.AddExtension = false;
+            this.saveFileDialog.Filter = "\"brg files|*.brg|grn files|*.grn\"";
             // 
             // attachpointListBox
             // 
@@ -395,7 +399,7 @@
             this.attachpointListBox.Location = new System.Drawing.Point(4, 19);
             this.attachpointListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.attachpointListBox.Name = "attachpointListBox";
-            this.attachpointListBox.Size = new System.Drawing.Size(255, 473);
+            this.attachpointListBox.Size = new System.Drawing.Size(255, 468);
             this.attachpointListBox.TabIndex = 1;
             this.attachpointListBox.MouseEnter += new System.EventHandler(this.attachpointListBox_MouseEnter);
             // 
@@ -454,7 +458,6 @@
             // genMeshFormatCheckedListBox
             // 
             this.genMeshFormatCheckedListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.genMeshFormatCheckedListBox.FormattingEnabled = true;
             this.genMeshFormatCheckedListBox.Location = new System.Drawing.Point(4, 19);
             this.genMeshFormatCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.genMeshFormatCheckedListBox.Name = "genMeshFormatCheckedListBox";
@@ -477,7 +480,6 @@
             // genMeshFlagsCheckedListBox
             // 
             this.genMeshFlagsCheckedListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.genMeshFlagsCheckedListBox.FormattingEnabled = true;
             this.genMeshFlagsCheckedListBox.Location = new System.Drawing.Point(4, 19);
             this.genMeshFlagsCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.genMeshFlagsCheckedListBox.Name = "genMeshFlagsCheckedListBox";
@@ -517,7 +519,6 @@
             this.interpolationTypeCheckBox.Size = new System.Drawing.Size(149, 21);
             this.interpolationTypeCheckBox.TabIndex = 17;
             this.interpolationTypeCheckBox.Text = "Conform to Terrain";
-            this.interpolationTypeCheckBox.UseVisualStyleBackColor = true;
             // 
             // genMeshAnimTypeGroupBox
             // 
@@ -544,7 +545,6 @@
             this.skinBoneRadioButton.TabIndex = 2;
             this.skinBoneRadioButton.TabStop = true;
             this.skinBoneRadioButton.Text = "SkinBone";
-            this.skinBoneRadioButton.UseVisualStyleBackColor = true;
             // 
             // nonuniRadioButton
             // 
@@ -556,7 +556,6 @@
             this.nonuniRadioButton.TabIndex = 1;
             this.nonuniRadioButton.TabStop = true;
             this.nonuniRadioButton.Text = "NonUniform";
-            this.nonuniRadioButton.UseVisualStyleBackColor = true;
             // 
             // keyframeRadioButton
             // 
@@ -568,12 +567,11 @@
             this.keyframeRadioButton.TabIndex = 0;
             this.keyframeRadioButton.TabStop = true;
             this.keyframeRadioButton.Text = "Keyframe";
-            this.keyframeRadioButton.UseVisualStyleBackColor = true;
             // 
             // genDataPanel
             // 
-            this.genDataPanel.Controls.Add(this.generalDataGroupBox);
             this.genDataPanel.Controls.Add(this.attachpointGroupBox);
+            this.genDataPanel.Controls.Add(this.generalDataGroupBox);
             this.genDataPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.genDataPanel.Location = new System.Drawing.Point(4, 4);
             this.genDataPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -584,12 +582,12 @@
             // generalDataGroupBox
             // 
             this.generalDataGroupBox.Controls.Add(this.brgImportGroupBox);
-            this.generalDataGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.generalDataGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.generalDataGroupBox.Location = new System.Drawing.Point(0, 0);
             this.generalDataGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.generalDataGroupBox.Name = "generalDataGroupBox";
             this.generalDataGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.generalDataGroupBox.Size = new System.Drawing.Size(263, 106);
+            this.generalDataGroupBox.Size = new System.Drawing.Size(263, 111);
             this.generalDataGroupBox.TabIndex = 0;
             this.generalDataGroupBox.TabStop = false;
             this.generalDataGroupBox.Text = "Settings";
@@ -598,11 +596,11 @@
             // 
             this.brgImportGroupBox.Controls.Add(this.brgImportCenterModelCheckBox);
             this.brgImportGroupBox.Controls.Add(this.brgImportAttachScaleCheckBox);
-            this.brgImportGroupBox.Location = new System.Drawing.Point(6, 22);
+            this.brgImportGroupBox.Location = new System.Drawing.Point(4, 21);
             this.brgImportGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.brgImportGroupBox.Name = "brgImportGroupBox";
             this.brgImportGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.brgImportGroupBox.Size = new System.Drawing.Size(250, 69);
+            this.brgImportGroupBox.Size = new System.Drawing.Size(255, 69);
             this.brgImportGroupBox.TabIndex = 19;
             this.brgImportGroupBox.TabStop = false;
             this.brgImportGroupBox.Text = "Import";
@@ -616,7 +614,6 @@
             this.brgImportCenterModelCheckBox.Size = new System.Drawing.Size(130, 21);
             this.brgImportCenterModelCheckBox.TabIndex = 1;
             this.brgImportCenterModelCheckBox.Text = "Model at Center";
-            this.brgImportCenterModelCheckBox.UseVisualStyleBackColor = true;
             // 
             // brgImportAttachScaleCheckBox
             // 
@@ -627,30 +624,19 @@
             this.brgImportAttachScaleCheckBox.Size = new System.Drawing.Size(193, 21);
             this.brgImportAttachScaleCheckBox.TabIndex = 0;
             this.brgImportAttachScaleCheckBox.Text = "Uniform Attachpoint Scale";
-            this.brgImportAttachScaleCheckBox.UseVisualStyleBackColor = true;
             // 
             // attachpointGroupBox
             // 
             this.attachpointGroupBox.Controls.Add(this.attachpointListBox);
-            this.attachpointGroupBox.Controls.Add(this.attachpointComboBox);
-            this.attachpointGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.attachpointGroupBox.Location = new System.Drawing.Point(0, 106);
+            this.attachpointGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.attachpointGroupBox.Location = new System.Drawing.Point(0, 111);
             this.attachpointGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.attachpointGroupBox.Name = "attachpointGroupBox";
             this.attachpointGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.attachpointGroupBox.Size = new System.Drawing.Size(263, 496);
+            this.attachpointGroupBox.Size = new System.Drawing.Size(263, 491);
             this.attachpointGroupBox.TabIndex = 1;
             this.attachpointGroupBox.TabStop = false;
             this.attachpointGroupBox.Text = "Attachpoints";
-            // 
-            // attachpointComboBox
-            // 
-            this.attachpointComboBox.FormattingEnabled = true;
-            this.attachpointComboBox.Location = new System.Drawing.Point(4, 23);
-            this.attachpointComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.attachpointComboBox.Name = "attachpointComboBox";
-            this.attachpointComboBox.Size = new System.Drawing.Size(253, 24);
-            this.attachpointComboBox.TabIndex = 0;
             // 
             // materialTabPage
             // 
@@ -660,7 +646,7 @@
             this.materialTabPage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.materialTabPage.Name = "materialTabPage";
             this.materialTabPage.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.materialTabPage.Size = new System.Drawing.Size(1037, 613);
+            this.materialTabPage.Size = new System.Drawing.Size(1037, 610);
             this.materialTabPage.TabIndex = 1;
             this.materialTabPage.Text = "Brg Materials";
             this.materialTabPage.UseVisualStyleBackColor = true;
@@ -725,8 +711,8 @@
             // 
             // grnSettingsSidePanel
             // 
-            this.grnSettingsSidePanel.Controls.Add(this.grnSettingsGroupBox);
             this.grnSettingsSidePanel.Controls.Add(this.grnObjectsGroupBox);
+            this.grnSettingsSidePanel.Controls.Add(this.grnSettingsGroupBox);
             this.grnSettingsSidePanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.grnSettingsSidePanel.Location = new System.Drawing.Point(3, 2);
             this.grnSettingsSidePanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -737,12 +723,12 @@
             // grnSettingsGroupBox
             // 
             this.grnSettingsGroupBox.Controls.Add(this.grnExportGroupBox);
-            this.grnSettingsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnSettingsGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.grnSettingsGroupBox.Location = new System.Drawing.Point(0, 0);
             this.grnSettingsGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnSettingsGroupBox.Name = "grnSettingsGroupBox";
             this.grnSettingsGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnSettingsGroupBox.Size = new System.Drawing.Size(263, 68);
+            this.grnSettingsGroupBox.Size = new System.Drawing.Size(263, 85);
             this.grnSettingsGroupBox.TabIndex = 0;
             this.grnSettingsGroupBox.TabStop = false;
             this.grnSettingsGroupBox.Text = "Settings";
@@ -751,7 +737,7 @@
             // 
             this.grnExportGroupBox.Controls.Add(this.grnExportAnimCheckBox);
             this.grnExportGroupBox.Controls.Add(this.grnExportModelCheckBox);
-            this.grnExportGroupBox.Location = new System.Drawing.Point(5, 20);
+            this.grnExportGroupBox.Location = new System.Drawing.Point(5, 19);
             this.grnExportGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnExportGroupBox.Name = "grnExportGroupBox";
             this.grnExportGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -785,12 +771,12 @@
             // grnObjectsGroupBox
             // 
             this.grnObjectsGroupBox.Controls.Add(this.grnObjectsListBox);
-            this.grnObjectsGroupBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.grnObjectsGroupBox.Location = new System.Drawing.Point(0, 68);
+            this.grnObjectsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnObjectsGroupBox.Location = new System.Drawing.Point(0, 85);
             this.grnObjectsGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnObjectsGroupBox.Name = "grnObjectsGroupBox";
             this.grnObjectsGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnObjectsGroupBox.Size = new System.Drawing.Size(263, 538);
+            this.grnObjectsGroupBox.Size = new System.Drawing.Size(263, 521);
             this.grnObjectsGroupBox.TabIndex = 1;
             this.grnObjectsGroupBox.TabStop = false;
             this.grnObjectsGroupBox.Text = "Objects";
@@ -803,7 +789,7 @@
             this.grnObjectsListBox.Location = new System.Drawing.Point(3, 17);
             this.grnObjectsListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnObjectsListBox.Name = "grnObjectsListBox";
-            this.grnObjectsListBox.Size = new System.Drawing.Size(257, 519);
+            this.grnObjectsListBox.Size = new System.Drawing.Size(257, 502);
             this.grnObjectsListBox.TabIndex = 0;
             // 
             // mainMenuStrip
@@ -833,7 +819,7 @@
             // 
             // newToolStripMenuItem
             // 
-            this.newToolStripMenuItem.Image = global::AoMEngineLibrary.Properties.Resources.picture_empty;
+            this.newToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripMenuItem.Image")));
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
             this.newToolStripMenuItem.Text = "New";
@@ -841,7 +827,7 @@
             // 
             // openToolStripMenuItem
             // 
-            this.openToolStripMenuItem.Image = global::AoMEngineLibrary.Properties.Resources.folder_picture;
+            this.openToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripMenuItem.Image")));
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
             this.openToolStripMenuItem.Text = "Open";
@@ -849,7 +835,7 @@
             // 
             // saveToolStripMenuItem
             // 
-            this.saveToolStripMenuItem.Image = global::AoMEngineLibrary.Properties.Resources.picture_save;
+            this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
             this.saveToolStripMenuItem.Text = "Save";
@@ -861,8 +847,8 @@
             this.importToolStripMenuItem,
             this.exportToolStripMenuItem});
             this.maxToolStripMenuItem.Name = "maxToolStripMenuItem";
-            this.maxToolStripMenuItem.Size = new System.Drawing.Size(49, 24);
-            this.maxToolStripMenuItem.Text = "Max";
+            this.maxToolStripMenuItem.Size = new System.Drawing.Size(72, 24);
+            this.maxToolStripMenuItem.Text = "Collada";
             // 
             // importToolStripMenuItem
             // 
@@ -949,6 +935,10 @@
             this.saveGrnTestToolStripMenuItem.Text = "Save Grn Test";
             this.saveGrnTestToolStripMenuItem.Click += new System.EventHandler(this.saveGrnTestToolStripMenuItem_Click);
             // 
+            // openFileDialog
+            // 
+            this.openFileDialog.Filter = "\"brg files|*.brg|grn files|*.grn\"";
+            // 
             // mainStatusStrip
             // 
             this.mainStatusStrip.Dock = System.Windows.Forms.DockStyle.Top;
@@ -968,6 +958,7 @@
             this.mainStatusStrip.Name = "mainStatusStrip";
             this.mainStatusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 12, 0);
             this.mainStatusStrip.Size = new System.Drawing.Size(1045, 25);
+            this.mainStatusStrip.SizingGrip = false;
             this.mainStatusStrip.TabIndex = 4;
             this.mainStatusStrip.Text = "mainStatusStrip";
             // 
@@ -1031,7 +1022,7 @@
             this.animLengthValueToolStripStatusLabel.Size = new System.Drawing.Size(17, 20);
             this.animLengthValueToolStripStatusLabel.Text = "0";
             // 
-            // MaxPluginForm
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -1040,8 +1031,8 @@
             this.Controls.Add(this.mainStatusStrip);
             this.Controls.Add(this.mainMenuStrip);
             this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.Name = "MaxPluginForm";
-            this.Text = "AoM Model Plugin";
+            this.Name = "MainForm";
+            this.Text = "AoM Model Editor";
             this.materialPanel.ResumeLayout(false);
             this.materialGroupBox.ResumeLayout(false);
             this.materialGroupBox.PerformLayout();
@@ -1093,7 +1084,6 @@
         private System.Windows.Forms.GroupBox materialFlagsGroupBox;
         private System.Windows.Forms.Panel materialSidePanel;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
-        private System.Windows.Forms.ListBox attachpointListBox;
         private System.Windows.Forms.TabControl mainTabControl;
         private System.Windows.Forms.TabPage meshInfoTabPage;
         private System.Windows.Forms.Panel flagsPanel;
@@ -1113,7 +1103,6 @@
         private System.Windows.Forms.ToolStripMenuItem grnTestToolStripMenuItem;
         public System.Windows.Forms.CheckedListBox genMeshFlagsCheckedListBox;
         public System.Windows.Forms.CheckedListBox genMeshFormatCheckedListBox;
-        public System.Windows.Forms.ComboBox attachpointComboBox;
         public System.Windows.Forms.ListBox materialListBox;
         private System.Windows.Forms.Button extractMatButton;
         private System.Windows.Forms.ToolStripMenuItem maxToolStripMenuItem;
@@ -1143,6 +1132,7 @@
         private System.Windows.Forms.Panel grnSettingsMainPanel;
         private System.Windows.Forms.GroupBox grnSettingsGroupBox;
         private System.Windows.Forms.GroupBox grnExportGroupBox;
+        public System.Windows.Forms.RichTextBox richTextBox1;
         public System.Windows.Forms.CheckBox grnExportAnimCheckBox;
         public System.Windows.Forms.CheckBox grnExportModelCheckBox;
         private System.Windows.Forms.GroupBox materialSideGroupBox;
@@ -1152,15 +1142,15 @@
         public System.Windows.Forms.ListBox grnObjectsListBox;
         public System.Windows.Forms.CheckedListBox materialFlagsCheckedListBox;
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
-        public MaxCustomControls.MaxTextBox specularLevelMaxTextBox;
-        public MaxCustomControls.MaxTextBox opacityMaxTextBox;
-        public MaxCustomControls.MaxTextBox bumpMapMaxTextBox;
-        public MaxCustomControls.MaxTextBox reflectionMaxTextBox;
-        public MaxCustomControls.MaxTextBox textureMaxTextBox;
-        public MaxCustomControls.MaxTextBox selfIllumMaxTextBox;
-        public MaxCustomControls.MaxTextBox specularMaxTextBox;
-        public MaxCustomControls.MaxTextBox ambientMaxTextBox;
-        public MaxCustomControls.MaxTextBox diffuseMaxTextBox;
+        public System.Windows.Forms.TextBox specularLevelMaxTextBox;
+        public System.Windows.Forms.TextBox opacityMaxTextBox;
+        public System.Windows.Forms.TextBox bumpMapMaxTextBox;
+        public System.Windows.Forms.TextBox reflectionMaxTextBox;
+        public System.Windows.Forms.TextBox textureMaxTextBox;
+        public System.Windows.Forms.TextBox selfIllumMaxTextBox;
+        public System.Windows.Forms.TextBox specularMaxTextBox;
+        public System.Windows.Forms.TextBox ambientMaxTextBox;
+        public System.Windows.Forms.TextBox diffuseMaxTextBox;
         public System.Windows.Forms.RadioButton skinBoneRadioButton;
         public System.Windows.Forms.RadioButton nonuniRadioButton;
         public System.Windows.Forms.RadioButton keyframeRadioButton;
@@ -1170,6 +1160,6 @@
         public System.Windows.Forms.CheckBox brgImportAttachScaleCheckBox;
         private System.Windows.Forms.GroupBox interpTypeGroupBox;
         private System.Windows.Forms.Panel brgFlagsBottomPanel;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        internal System.Windows.Forms.ListBox attachpointListBox;
     }
 }

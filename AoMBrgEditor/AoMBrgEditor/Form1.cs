@@ -60,9 +60,9 @@ namespace AoMBrgEditor
                 try
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)))
                     {
-                        //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
+                        output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
                     } 
                     if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Format.HasFlag(BrgMeshFormat.ANIMTEXCOORDSNAP)))
                     {
@@ -72,31 +72,31 @@ namespace AoMBrgEditor
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.AnimationType.ToString() + Environment.NewLine;
                     }
-                    if (file.Materials.Count > 0)
-                    {
-                        foreach (BrgMaterial mat in file.Materials)
-                        {
-                            //if(mat.sfx.Count > 1)
-                            if (mat.Flags.HasFlag(BrgMatFlag.ILLUMREFLECTION))
-                            {
-                                output += Path.GetFileName(s) + "," + mat.DiffuseMap + "," + mat.BumpMap + "," + mat.sfx[0].Name;
-                                //output += Path.GetFileName(s) + " " + mat.Flags.ToString() + Environment.NewLine;
-                            }
-                            else
-                            {
-                                output += Path.GetFileName(s) + "," + mat.DiffuseMap + "," + mat.BumpMap + "," + string.Empty;
-                            }
-                            foreach (BrgMatFlag eval in Enum.GetValues(typeof(BrgMatFlag)).Cast<BrgMatFlag>())
-                            {
-                                output += ",";
-                                if (mat.Flags.HasFlag(eval))
-                                {
-                                    output += eval.ToString();
-                                }
-                            }
-                            output += Environment.NewLine;
-                        }
-                    }
+                    //if (file.Materials.Count > 0)
+                    //{
+                    //    foreach (BrgMaterial mat in file.Materials)
+                    //    {
+                    //        //if(mat.sfx.Count > 1)
+                    //        if (mat.Flags.HasFlag(BrgMatFlag.ILLUMREFLECTION))
+                    //        {
+                    //            output += Path.GetFileName(s) + "," + mat.DiffuseMap + "," + mat.BumpMap + "," + mat.sfx[0].Name;
+                    //            //output += Path.GetFileName(s) + " " + mat.Flags.ToString() + Environment.NewLine;
+                    //        }
+                    //        else
+                    //        {
+                    //            output += Path.GetFileName(s) + "," + mat.DiffuseMap + "," + mat.BumpMap + "," + string.Empty;
+                    //        }
+                    //        foreach (BrgMatFlag eval in Enum.GetValues(typeof(BrgMatFlag)).Cast<BrgMatFlag>())
+                    //        {
+                    //            output += ",";
+                    //            if (mat.Flags.HasFlag(eval))
+                    //            {
+                    //                output += eval.ToString();
+                    //            }
+                    //        }
+                    //        output += Environment.NewLine;
+                    //    }
+                    //}
                     //file.Write(File.Open(@"C:\Users\Petar\Desktop\modelsAlphaConv\" + Path.GetFileName(s), FileMode.Create, FileAccess.Write, FileShare.Read));
                 }
                 catch (Exception ex)

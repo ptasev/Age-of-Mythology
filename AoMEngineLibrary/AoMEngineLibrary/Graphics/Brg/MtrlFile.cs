@@ -1,13 +1,13 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
-using MiscUtil.Conversion;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+    using MiscUtil.Conversion;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
 
     public class MtrlFile
     {
@@ -65,7 +65,7 @@ using System.Threading.Tasks;
 
             this.id = -1;
 
-            this.selfIlluminating = 1;
+            this.selfIlluminating = 0;
             this.clampU = 0;
             this.clampV = 0;
             this.lightSpecular = 1;
@@ -90,6 +90,16 @@ using System.Threading.Tasks;
             this.emissive = mat.EmissiveColor;
             this.specularLevel = mat.SpecularExponent;
             this.alpha = mat.Opacity;
+
+            if (!mat.Flags.HasFlag(BrgMatFlag.WrapUTx1))
+            {
+                this.clampU = 1;
+            }
+
+            if (!mat.Flags.HasFlag(BrgMatFlag.WrapVTx1))
+            {
+                this.clampV = 1;
+            }
 
             if (mat.Flags.HasFlag(BrgMatFlag.AdditiveBlend))
             {
