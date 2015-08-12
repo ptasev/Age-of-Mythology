@@ -11,13 +11,13 @@ LittleEndian();
 typedef enum <byte> { NormalMap = 0, NoAlphaTest = 1, NoLowDetail = 2, DisplacementMap = 4, CubeMap = 8 } DdtProperties;
 typedef enum <byte> 
 { 
-    Raw32 = 1,
-    Raw24 = 2,
-    BT8 = 3,
-    Dxt1 = 4,
-    Dxt1Alpha = 5,
-    Dxt3 = 6,
-    AlphaData = 7,
+    LEG_Raw32 = 1,
+    LEG_Raw24 = 2,
+    LEG_BT8 = 3,
+    LEG_Dxt1 = 4,
+    LEG_Dxt1Alpha = 5,
+    LEG_Dxt3Swizzled = 6,
+    LEG_AlphaData = 7,
     BC1 = 4,
     BC2 = 8,
     BC3 = 9,
@@ -37,7 +37,7 @@ struct
     int Width;
     int Height;
     
-    if (Format == BT8) 
+    if (Format == LEG_BT8) 
     {
         struct
         {

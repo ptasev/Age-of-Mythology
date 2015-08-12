@@ -4,6 +4,9 @@ namespace AoMModelEditor
 {
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
+    using AoMEngineLibrary.Graphics.Grn;
+    using AoMEngineLibrary.Graphics.Model;
+    using BrightIdeasSoftware;
     using MiscUtil;
     using System;
     using System.Collections.Generic;
@@ -73,42 +76,110 @@ namespace AoMModelEditor
             //f2.Materials[0].id = 12212;
             //int eq = f.Materials.IndexOf(f2.Materials[0]);
 
-            foreach (string s in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\models", "*.brg", SearchOption.AllDirectories))
+            //foreach (string s in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\models", "*.brg", SearchOption.AllDirectories))
+            //{
+            //    BrgFile file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
+            //    for (int i = 0; i < file.Materials.Count; i++)
+            //    {
+            //        MtrlFile mtrl = new MtrlFile(file.Materials[i]);
+            //        mtrl.Write(File.Open(Path.Combine(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\materials", Path.GetFileNameWithoutExtension(s) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
+            //    }
+            //}
+
+            // Brg Objects Viewer
+            this.brgObjectListView.FormatCell += objectListView1_FormatCell;
+            this.brgObjectListView.CellEditStarting += objectListView1_CellEditStarting;
+            this.brgObjectListView.CellEditFinishing += objectListView1_CellEditFinishing;
+            this.brgObjectListView.MouseEnter += ObjectListView_MouseEnter;
+            this.brgObjectListView.CellEditActivation = ObjectListView.CellEditActivateMode.DoubleClick;
+            this.brgObjectListView.ShowGroups = false;
+            this.brgObjectListView.OwnerDraw = true;
+            this.brgObjectListView.UseCellFormatEvents = true;
+
+            // Brg Tree View
+            this.brgObjectsTreeListView.MouseEnter += TreeListView_MouseEnter;
+            brgObjectsTreeListView.FullRowSelect = true;
+            brgObjectsTreeListView.HideSelection = false;
+            brgObjectsTreeListView.CanExpandGetter = delegate(object rowObject)
             {
-                BrgFile file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                for (int i = 0; i < file.Materials.Count; i++)
+                if (rowObject is BrgMesh)
                 {
-                    MtrlFile mtrl = new MtrlFile(file.Materials[i]);
-                    mtrl.Write(File.Open(Path.Combine(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\materials", Path.GetFileNameWithoutExtension(s) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
+                    return ((BrgMesh)rowObject).MeshAnimations.Count > 0;
                 }
-            }
 
-            //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
+                return false;
+            };
+            brgObjectsTreeListView.ChildrenGetter = delegate(object rowObject)
+            {
+                if (rowObject is BrgMesh)
+                {
+                    return ((BrgMesh)rowObject).MeshAnimations;
+                }
 
-            // General Tab
-            genMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
-            genMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
+                return null;
+            };
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.FillsFreeSpace = true;
+            brgObjectsTreeListView.Columns.Add(nameCol);
 
-            // Attachpoints
-            this.attachpointListBox.ValueMember = "Index";
-            this.attachpointListBox.DisplayMember = "MaxName";
+            // Grn Objects Viewer
+            //this.grnObjectListView.FormatCell += objectListView1_FormatCell;
+            //this.grnObjectListView.CellEditStarting += objectListView1_CellEditStarting;
+            //this.grnObjectListView.CellEditFinishing += objectListView1_CellEditFinishing;
+            this.grnObjectListView.MouseEnter += ObjectListView_MouseEnter;
+            this.grnObjectListView.CellEditActivation = ObjectListView.CellEditActivateMode.DoubleClick;
+            this.grnObjectListView.ShowGroups = false;
+            //this.grnObjectListView.OwnerDraw = true;
+            //this.grnObjectListView.UseCellFormatEvents = true;
 
-            // Materials
-            materialListBox.SelectedIndexChanged += materialListBox_SelectedIndexChanged;
-            materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
+            // Grn Tree View
+            this.grnObjectsTreeListView.SelectedIndexChanged += grnObjectsTreeListView_SelectedIndexChanged;
+            this.grnObjectsTreeListView.MouseEnter += TreeListView_MouseEnter;
+            grnObjectsTreeListView.FullRowSelect = true;
+            grnObjectsTreeListView.HideSelection = false;
+            grnObjectsTreeListView.CanExpandGetter = delegate(object rowObject)
+            {
+                if (rowObject is GrnBone)
+                {
+                    int rowIndex = grn.File.Bones.IndexOf((GrnBone)rowObject);
+                    return grn.File.Bones.Exists(x => x.ParentIndex == rowIndex);
+                }
 
-            // Grn Settings
-            grnObjectsListBox.SelectedIndexChanged += grnObjectsListBox_SelectedIndexChanged;
+                return false;
+            };
+            grnObjectsTreeListView.ChildrenGetter = delegate(object rowObject)
+            {
+                if (rowObject is GrnBone)
+                {
+                    int rowIndex = grn.File.Bones.IndexOf((GrnBone)rowObject);
+                    List<GrnBone> bones = grn.File.Bones.FindAll(x => x.ParentIndex == rowIndex);
+                    bones.Remove((GrnBone)rowObject);
+                    return bones;
+                }
 
-            //plugin = new MaxPlugin();
-            //this.Controls.Add(plugin);
-            //plugin.Dock = DockStyle.Fill;
+                return null;
+            };
+            nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 300;
+            grnObjectsTreeListView.Columns.Add(nameCol);
+
+            // Model Settings
             Settings.Read();
             brg = new BrgUi(this);
             grn = new GrnUi(this);
             brg.LoadUi();
             grn.LoadUi();
             model = brg;
+        }
+
+        private void ObjectListView_MouseEnter(object sender, EventArgs e)
+        {
+            ((ObjectListView)sender).Focus();
+        }
+
+        private void TreeListView_MouseEnter(object sender, EventArgs e)
+        {
+            ((TreeListView)sender).Focus();
         }
 
         #region UiColors
@@ -267,22 +338,6 @@ namespace AoMModelEditor
         #endregion
 
         #region Brg
-        private void attachpointListBox_MouseEnter(object sender, EventArgs e)
-        {
-            attachpointListBox.Focus();
-        }
-
-        private void materialFlagsCheckedListBox_MouseEnter(object sender, EventArgs e)
-        {
-            materialFlagsCheckedListBox.Focus();
-        }
-        void materialListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (materialListBox.SelectedIndex >= 0)
-            {
-                brg.LoadUiMaterialData();
-            }
-        }
         private void extractMatButton_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(Settings.MtrlFolderDialogDirectory))
@@ -415,23 +470,20 @@ namespace AoMModelEditor
 
         void grnObjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (grnObjectsListBox.SelectedIndex >= 0)
-            {
-                grnPropsListBox.Items.Clear();
-                foreach (KeyValuePair<string, string> prop in grn.File.DataExtensions[grnObjectsListBox.SelectedIndex])
-                {
-                    grnPropsListBox.Items.Add(prop.Key + " -- " + prop.Value);
-                }
-            }
+            //if (grnObjectsListBox.SelectedIndex >= 0)
+            //{
+            //    grnPropsListBox.Items.Clear();
+            //    foreach (KeyValuePair<string, string> prop in grn.File.DataExtensions[grnObjectsListBox.SelectedIndex])
+            //    {
+            //        grnPropsListBox.Items.Add(prop.Key + " -- " + prop.Value);
+            //    }
+            //}
         }
         #endregion
 
         private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            model.SaveUi();
-
-            if (mainTabControl.SelectedIndex == 0 ||
-                mainTabControl.SelectedIndex == 1)
+            if (mainTabControl.SelectedIndex == 0)
             {
                 this.model = this.brg;
                 //MessageBox.Show("brg");
@@ -441,8 +493,6 @@ namespace AoMModelEditor
                 this.model = this.grn;
                 //MessageBox.Show("grn");
             }
-
-            model.LoadUi();
         }
 
         [System.Diagnostics.Conditional("DEBUG")] // Don't allow calls to this func in release mode
@@ -451,6 +501,159 @@ namespace AoMModelEditor
 #if DEBUGBOX
             MessageBox.Show(message);
 #endif
+        }
+
+        private void objectListView1_CellEditStarting(object sender, CellEditEventArgs e)
+        {
+            if (e.Value is BrgMatFlag)
+            {
+                CheckedListBox clb = new CheckedListBox();
+                Rectangle rect = new Rectangle(e.CellBounds.Left, e.CellBounds.Bottom, e.CellBounds.Width, 300);
+                clb.Bounds = rect;
+
+                foreach (object value in Enum.GetValues(typeof(BrgMatFlag)))
+                {
+                    clb.Items.Add(value);
+                }
+
+                this.SetCheckedListBoxSelectedEnums<BrgMatFlag>(clb, (uint)e.Value);
+                e.Control = clb;
+            }
+            else if (e.Value is BrgMeshFlag)
+            {
+                CheckedListBox clb = new CheckedListBox();
+                Rectangle rect = new Rectangle(e.CellBounds.Left, e.CellBounds.Bottom, e.CellBounds.Width, 300);
+                clb.Bounds = rect;
+
+                foreach (object value in Enum.GetValues(typeof(BrgMeshFlag)))
+                {
+                    clb.Items.Add(value);
+                }
+
+                this.SetCheckedListBoxSelectedEnums<BrgMeshFlag>(clb, (UInt16)e.Value);
+                e.Control = clb;
+            }
+            else if (e.Value is BrgMeshFormat)
+            {
+                CheckedListBox clb = new CheckedListBox();
+                Rectangle rect = new Rectangle(e.CellBounds.Left, e.CellBounds.Bottom, e.CellBounds.Width, 300);
+                clb.Bounds = rect;
+
+                foreach (object value in Enum.GetValues(typeof(BrgMeshFormat)))
+                {
+                    clb.Items.Add(value);
+                }
+
+                this.SetCheckedListBoxSelectedEnums<BrgMeshFormat>(clb, (UInt16)e.Value);
+                e.Control = clb;
+            }
+            else if (e.Value is Color3D)
+            {
+                ThemeColorPicker tcp = new ThemeColorPicker();
+                tcp.Location = new Point(e.CellBounds.Left, e.CellBounds.Bottom);
+
+                Color3D col = (Color3D)e.Value;
+                tcp.Color = Color.FromArgb(Convert.ToByte(col.R * Byte.MaxValue),
+                    Convert.ToByte(col.G * Byte.MaxValue),
+                    Convert.ToByte(col.B * Byte.MaxValue));
+                e.Control = tcp;
+            }
+        }
+
+        private void objectListView1_CellEditFinishing(object sender, CellEditEventArgs e)
+        {
+            if (e.Cancel)
+                return;
+
+            if (e.Value is BrgMatFlag)
+            {
+                e.NewValue = this.GetCheckedListBoxSelectedEnums<BrgMatFlag>((CheckedListBox)e.Control);
+                //((BrgMaterial)e.RowObject).Flags = (BrgMatFlag)e.NewValue;
+
+                // Any updating will have been down in the SelectedIndexChanged event handler
+                // Here we simply make the list redraw the involved ListViewItem
+                //((ObjectListView)sender).RefreshItem(e.ListViewItem);
+
+                // We have updated the model object, so we cancel the auto update
+                //e.Cancel = true;
+            }
+            else if (e.Value is BrgMeshFlag)
+            {
+                e.NewValue = this.GetCheckedListBoxSelectedEnums<BrgMeshFlag>((CheckedListBox)e.Control);
+                //brg.File.UpdateMeshSettings((BrgMeshFlag)e.NewValue, brg.File.Meshes[0].Header.Format,
+                //    brg.File.Meshes[0].Header.AnimationType, brg.File.Meshes[0].Header.InterpolationType);
+                //((ObjectListView)sender).RefreshItem(e.ListViewItem);
+                //e.Cancel = true;
+            }
+            else if (e.Value is BrgMeshFormat)
+            {
+                e.NewValue = this.GetCheckedListBoxSelectedEnums<BrgMeshFormat>((CheckedListBox)e.Control);
+                //e.Cancel = true;
+            }
+            else if (e.Value is Color3D)
+            {
+                Color c = ((ThemeColorPicker)e.Control).Color;
+                e.NewValue = new Color3D((float)c.R / byte.MaxValue, (float)c.G / byte.MaxValue, (float)c.B / byte.MaxValue);
+            }
+        }
+
+        private void objectListView1_FormatCell(object sender, FormatCellEventArgs e)
+        {
+            if (e.CellValue is Color3D)
+            {
+                Color3D col = (Color3D)e.CellValue;
+                e.SubItem.BackColor = Color.FromArgb(Convert.ToByte(col.R * Byte.MaxValue),
+                    Convert.ToByte(col.G * Byte.MaxValue),
+                    Convert.ToByte(col.B * Byte.MaxValue));
+                //e.SubItem.ForeColor = this.ContrastColor(e.SubItem.BackColor);
+                e.SubItem.Text = string.Empty;
+            }
+        }
+
+        private void brgObjectsTreeListView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (this.brgObjectsTreeListView.SelectedObject == null)
+            {
+                return;
+            }
+
+            if (this.brgObjectsTreeListView.SelectedObject is BrgAttachpoint)
+            {
+                brg.LoadAttachpointUI();
+            }
+            else if (this.brgObjectsTreeListView.SelectedObject is BrgMesh)
+            {
+                brg.LoadMeshUI();
+            }
+            else if (this.brgObjectsTreeListView.SelectedObject is BrgMaterial)
+            {
+                brg.LoadMaterialUI();
+            }
+
+            this.brgObjectListView.SetObjects(new object[] { this.brgObjectsTreeListView.SelectedObject });
+        }
+
+        private void grnObjectsTreeListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.grnObjectsTreeListView.SelectedObject == null)
+            {
+                return;
+            }
+
+            if (this.grnObjectsTreeListView.SelectedObject is GrnBone)
+            {
+                grn.LoadBoneUI();
+            }
+            else if (this.grnObjectsTreeListView.SelectedObject is GrnMesh)
+            {
+                grn.LoadMeshUI();
+            }
+            else if (this.grnObjectsTreeListView.SelectedObject is GrnMaterial)
+            {
+                grn.LoadMaterialUI();
+            }
+
+            this.grnObjectListView.SetObjects(new object[] { this.grnObjectsTreeListView.SelectedObject });
         }
     }
 }

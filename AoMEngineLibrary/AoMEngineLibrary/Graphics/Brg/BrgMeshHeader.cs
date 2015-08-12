@@ -9,7 +9,7 @@
         public BrgMeshFormat Format { get; set; }
         public Int16 NumVertices { get; set; }
         public Int16 NumFaces { get; set; }
-        public byte InterpolationType { get; set; }
+        public BrgMeshInterpolationType InterpolationType { get; set; }
         public BrgMeshAnimType AnimationType { get; set; }
         public Int16 UserDataEntryCount { get; set; }
         public Vector3D CenterPosition { get; set; }
@@ -31,7 +31,7 @@
             this.Format = (BrgMeshFormat)reader.ReadInt16();
             this.NumVertices = reader.ReadInt16();
             this.NumFaces = reader.ReadInt16();
-            this.InterpolationType = reader.ReadByte();
+            this.InterpolationType = (BrgMeshInterpolationType)reader.ReadByte();
             this.AnimationType = (BrgMeshAnimType)reader.ReadByte();
             this.UserDataEntryCount = reader.ReadInt16();
             this.CenterPosition = reader.ReadVector3D(true, false);
@@ -50,7 +50,7 @@
             writer.Write((UInt16)this.Format);
             writer.Write(this.NumVertices);
             writer.Write(this.NumFaces);
-            writer.Write(this.InterpolationType);
+            writer.Write((Byte)this.InterpolationType);
             writer.Write((Byte)this.AnimationType);
             writer.Write(this.UserDataEntryCount);
             writer.WriteVector3D(this.CenterPosition, true);

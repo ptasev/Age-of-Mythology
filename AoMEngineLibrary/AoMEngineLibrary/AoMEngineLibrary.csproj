@@ -70,6 +70,7 @@
     <Compile Include="Graphics\Brg\BrgBinaryWriter.cs" />
     <Compile Include="Graphics\Brg\BrgFile.cs" />
     <Compile Include="Graphics\Brg\BrgHeader.cs" />
+    <Compile Include="Graphics\Brg\BrgMeshInterpolationType.cs" />
     <Compile Include="Graphics\Brg\BrgMaterial.cs" />
     <Compile Include="Graphics\Brg\BrgMatFlag.cs" />
     <Compile Include="Graphics\Brg\BrgMatSFX.cs" />

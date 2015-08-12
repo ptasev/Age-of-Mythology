@@ -68,7 +68,7 @@ namespace AoMBrgEditor
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Format.ToString() + Environment.NewLine;
                     }
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform)))
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.AnimationType.ToString() + Environment.NewLine;
                     }
@@ -235,7 +235,7 @@ namespace AoMBrgEditor
                             //if (file.Material[j].flags.HasFlag(BrgMatFlag.MATNONE8))
                             {
                                 print = true;
-                                output += "id = " + file.Materials[j].id;
+                                output += "id = " + file.Materials[j].Id;
                                 output += "\tflags = " + file.Materials[j].Flags;
                                 output += "\tflags78 = " + ((int)file.Materials[j].Flags & 0x000000FF);
                                 output += "\tu01b = " + file.Materials[j].unknown01b;

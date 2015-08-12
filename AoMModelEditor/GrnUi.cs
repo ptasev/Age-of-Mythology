@@ -3,6 +3,7 @@
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Grn;
     using AoMEngineLibrary.Graphics.Model;
+    using BrightIdeasSoftware;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -65,18 +66,23 @@
         {
             this.Plugin.Text = MainForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
 
-            this.LoadDataExtensions();
+            this.Plugin.grnObjectsTreeListView.ClearObjects();
+            if (this.File.Bones.Count > 0)
+            {
+                this.Plugin.grnObjectsTreeListView.AddObject(this.File.Bones[0]);
+            }
+            this.Plugin.grnObjectsTreeListView.AddObjects(this.File.Meshes);
+            this.Plugin.grnObjectsTreeListView.AddObjects(this.File.Materials);
 
-            if (this.File.Meshes.Count > 0)
+            int totalVerts = 0;
+            int totalFaces = 0;
+            for (int i = 0; i < this.File.Meshes.Count; ++i)
             {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
-                this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
+                totalVerts += this.File.Meshes[i].Vertices.Count;
+                totalFaces += this.File.Meshes[i].Faces.Count;
             }
-            else
-            {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = "0";
-                this.Plugin.facesValueToolStripStatusLabel.Text = "0";
-            }
+            this.Plugin.vertsValueToolStripStatusLabel.Text = totalVerts.ToString();
+            this.Plugin.facesValueToolStripStatusLabel.Text = totalFaces.ToString();
             this.Plugin.meshesValueToolStripStatusLabel.Text = this.File.Meshes.Count.ToString();
             this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
             this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Animation.Duration.ToString();
@@ -84,13 +90,40 @@
             this.Plugin.grnExportModelCheckBox.Checked = this.ExportSetting.HasFlag(GrnExportSetting.Model);
             this.Plugin.grnExportAnimCheckBox.Checked = this.ExportSetting.HasFlag(GrnExportSetting.Animation);
         }
-        private void LoadDataExtensions()
+        public void LoadBoneUI()
         {
-            this.Plugin.grnObjectsListBox.Items.Clear();
-            for (int i = 0; i < this.File.DataExtensions.Count; ++i)
-            {
-                this.Plugin.grnObjectsListBox.Items.Add(this.File.GetDataExtensionObjectName(i));
-            }
+            this.Plugin.grnObjectListView.Columns.Clear();
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 100;
+            nameCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(nameCol);
+
+            OLVColumn posCol = new OLVColumn("Positon", "Position");
+            posCol.Width = 250;
+            posCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(posCol);
+        }
+        public void LoadMeshUI()
+        {
+            this.Plugin.grnObjectListView.Columns.Clear();
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 100;
+            nameCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(nameCol);
+
+            OLVColumn vertCountCol = new OLVColumn("Vertex Count", "Vertices.Count");
+            vertCountCol.Width = 75;
+            vertCountCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(vertCountCol);
+
+            OLVColumn faceCountCol = new OLVColumn("Face Count", "Faces.Count");
+            faceCountCol.Width = 70;
+            faceCountCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(faceCountCol);
+        }
+        public void LoadMaterialUI()
+        {
+
         }
 
         public void SaveUi()

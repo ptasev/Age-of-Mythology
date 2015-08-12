@@ -3,8 +3,10 @@
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
     using AoMEngineLibrary.Graphics.Model;
+    using BrightIdeasSoftware;
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -17,19 +19,12 @@
         public string FileName { get; set; }
         public int FilterIndex { get { return 1; } }
 
-        public Byte InterpolationType { get; set; }
-        public BrgMeshFlag Flags { get; set; }
-        public BrgMeshFormat Format { get; set; }
-        public BrgMeshAnimType AnimationType { get; set; }
-
-        private BrgMaterial lastMatSelected;
         private bool uniformAttachpointScale;
         private bool modelAtCenter;
 
         public BrgUi(MainForm plugin)
         {
             this.Clear();
-            this.File = new BrgFile();
             this.FileName = "Untitled";
             this.Plugin = plugin;
         }
@@ -48,11 +43,12 @@
         public void Clear()
         {
             this.File = new BrgFile();
+            this.File.Meshes.Add(new BrgMesh(this.File));
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
-            this.InterpolationType = 0;
-            this.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
-            this.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
-            this.AnimationType = BrgMeshAnimType.KEYFRAME;
+            this.File.Meshes[0].Header.InterpolationType = 0;
+            this.File.Meshes[0].Header.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
+            this.File.Meshes[0].Header.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
+            this.File.Meshes[0].Header.AnimationType = BrgMeshAnimType.KeyFrame;
         }
         #endregion
 
@@ -70,176 +66,135 @@
         public void LoadUi()
         {
             this.Plugin.Text = MainForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
-            // Materials
-            this.LoadUiMaterial();
+
+            this.Plugin.brgObjectsTreeListView.ClearObjects();
+            this.Plugin.brgObjectsTreeListView.AddObject(this.File.Meshes[0]);
+            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Meshes[0].Attachpoints);
+            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Materials);
+            this.Plugin.brgObjectsTreeListView.SelectObject(this.File.Meshes[0], true);
 
             // General Info
-            this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
             this.Plugin.brgImportAttachScaleCheckBox.Checked = this.uniformAttachpointScale;
             this.Plugin.brgImportCenterModelCheckBox.Checked = this.modelAtCenter;
-            //MessageBox.Show("1");
 
-            if (this.File.Meshes.Count > 0)
-            {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
-                this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
-                this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes[0].MeshAnimations.Count + 1).ToString();
-                //MessageBox.Show("2.1");
-                this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Meshes[0].ExtendedHeader.AnimationLength.ToString();
-                //MessageBox.Show("2.2");
-                this.Plugin.interpolationTypeCheckBox.Checked = Convert.ToBoolean(this.File.Meshes[0].Header.InterpolationType);
-                //MessageBox.Show("2.3");
-
-                // Attachpoints
-                LoadUiAttachpoint();
-
-                for (int i = 0; i < this.Plugin.genMeshFlagsCheckedListBox.Items.Count; i++)
-                {
-                    if (this.File.Meshes[0].Header.Flags.HasFlag((BrgMeshFlag)this.Plugin.genMeshFlagsCheckedListBox.Items[i]))
-                    {
-                        this.Plugin.genMeshFlagsCheckedListBox.SetItemChecked(i, true);
-                    }
-                    else
-                    {
-                        this.Plugin.genMeshFlagsCheckedListBox.SetItemChecked(i, false);
-                    }
-                }
-                for (int i = 0; i < this.Plugin.genMeshFormatCheckedListBox.Items.Count; i++)
-                {
-                    if (this.File.Meshes[0].Header.Format.HasFlag((BrgMeshFormat)this.Plugin.genMeshFormatCheckedListBox.Items[i]))
-                    {
-                        this.Plugin.genMeshFormatCheckedListBox.SetItemChecked(i, true);
-                    }
-                    else
-                    {
-                        this.Plugin.genMeshFormatCheckedListBox.SetItemChecked(i, false);
-                    }
-                }
-                if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.KEYFRAME)
-                {
-                    this.Plugin.keyframeRadioButton.Checked = true;
-                }
-                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.NONUNIFORM)
-                {
-                    this.Plugin.nonuniRadioButton.Checked = true;
-                }
-                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.SKINBONE)
-                {
-                    this.Plugin.skinBoneRadioButton.Checked = true;
-                }
-            }
-            else
-            {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = "0";
-                this.Plugin.facesValueToolStripStatusLabel.Text = "0";
-                this.Plugin.meshesValueToolStripStatusLabel.Text = "0";
-                this.Plugin.animLengthValueToolStripStatusLabel.Text = "0.0";
-                this.Plugin.interpolationTypeCheckBox.Checked = Convert.ToBoolean(this.InterpolationType);
-                this.Plugin.SetCheckedListBoxSelectedEnums<BrgMeshFlag>(this.Plugin.genMeshFlagsCheckedListBox, (uint)this.Flags);
-                this.Plugin.SetCheckedListBoxSelectedEnums<BrgMeshFormat>(this.Plugin.genMeshFormatCheckedListBox, (uint)this.Format);
-
-                if (this.AnimationType == BrgMeshAnimType.KEYFRAME)
-                {
-                    this.Plugin.keyframeRadioButton.Checked = true;
-                }
-                else if (this.AnimationType == BrgMeshAnimType.NONUNIFORM)
-                {
-                    this.Plugin.nonuniRadioButton.Checked = true;
-                }
-                else if (this.AnimationType == BrgMeshAnimType.SKINBONE)
-                {
-                    this.Plugin.skinBoneRadioButton.Checked = true;
-                }
-            }
+            this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
+            this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
+            this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes[0].MeshAnimations.Count + 1).ToString();
+            this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
+            this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Meshes[0].ExtendedHeader.AnimationLength.ToString();
         }
-        public void LoadUiMaterial()
+        public void LoadMeshUI()
         {
-            this.Plugin.materialListBox.DataSource = null;
-            this.Plugin.materialListBox.DataSource = this.File.Materials;
-            this.Plugin.materialListBox.DisplayMember = "EditorName";
+            this.Plugin.brgObjectListView.Columns.Clear();
+            OLVColumn flagsCol = new OLVColumn("Flags", "Header.Flags");
+            flagsCol.Width = 200;
+            flagsCol.AspectPutter = delegate(object rowObject, object newValue)
+            {
+                this.File.UpdateMeshSettings((BrgMeshFlag)newValue, this.File.Meshes[0].Header.Format,
+                    this.File.Meshes[0].Header.AnimationType, this.File.Meshes[0].Header.InterpolationType);
+            };
+            this.Plugin.brgObjectListView.Columns.Add(flagsCol);
 
-        }
-        public void LoadUiMaterialData()
-        {
-            if (this.lastMatSelected != null)
+            OLVColumn formatCol = new OLVColumn("Format", "Header.Format");
+            formatCol.Width = 200;
+            formatCol.AspectPutter = delegate(object rowObject, object newValue)
             {
-                this.lastMatSelected.Flags = this.Plugin.
-                    GetCheckedListBoxSelectedEnums<BrgMatFlag>(this.Plugin.materialFlagsCheckedListBox);
-            }
-            BrgMaterial mat = this.File.Materials[this.Plugin.materialListBox.SelectedIndex];
-            this.lastMatSelected = mat;
-            // Update Info
-            this.Plugin.diffuseMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.DiffuseColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.DiffuseColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.DiffuseColor.B * Byte.MaxValue));
-            this.Plugin.diffuseMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.diffuseMaxTextBox.BackColor);
-            this.Plugin.ambientMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.AmbientColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.AmbientColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.AmbientColor.B * Byte.MaxValue));
-            this.Plugin.ambientMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.ambientMaxTextBox.BackColor);
-            this.Plugin.specularMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.SpecularColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.SpecularColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.SpecularColor.B * Byte.MaxValue));
-            this.Plugin.specularMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.specularMaxTextBox.BackColor);
-            this.Plugin.selfIllumMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.EmissiveColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.EmissiveColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.EmissiveColor.B * Byte.MaxValue));
-            this.Plugin.selfIllumMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.selfIllumMaxTextBox.BackColor);
-            this.Plugin.specularLevelMaxTextBox.Text = mat.SpecularExponent.ToString();
-            this.Plugin.opacityMaxTextBox.Text = mat.Opacity.ToString();
-            this.Plugin.textureMaxTextBox.Text = mat.DiffuseMap;
-            if (mat.sfx.Count > 0)
-            {
-                this.Plugin.reflectionMaxTextBox.Text = mat.sfx[0].Name;
-            }
-            else { this.Plugin.reflectionMaxTextBox.Text = string.Empty; }
-            this.Plugin.bumpMapMaxTextBox.Text = mat.BumpMap;
+                this.File.UpdateMeshSettings(this.File.Meshes[0].Header.Flags, (BrgMeshFormat)newValue,
+                    this.File.Meshes[0].Header.AnimationType, this.File.Meshes[0].Header.InterpolationType);
+            };
+            this.Plugin.brgObjectListView.Columns.Add(formatCol);
 
-            // Update Flags box
-            for (int i = 0; i < this.Plugin.materialFlagsCheckedListBox.Items.Count; i++)
+            OLVColumn animTypeCol = new OLVColumn("Animation Type", "Header.AnimationType");
+            animTypeCol.Width = 100;
+            animTypeCol.AspectPutter = delegate(object rowObject, object newValue)
             {
-                if (mat.Flags.HasFlag((BrgMatFlag)this.Plugin.materialFlagsCheckedListBox.Items[i]))
-                {
-                    this.Plugin.materialFlagsCheckedListBox.SetItemChecked(i, true);
-                }
-                else
-                {
-                    this.Plugin.materialFlagsCheckedListBox.SetItemChecked(i, false);
-                }
-            }
+                this.File.UpdateMeshSettings(this.File.Meshes[0].Header.Flags, this.File.Meshes[0].Header.Format,
+                    (BrgMeshAnimType)newValue, this.File.Meshes[0].Header.InterpolationType);
+            };
+            this.Plugin.brgObjectListView.Columns.Add(animTypeCol);
+
+            OLVColumn interpTypeCol = new OLVColumn("Interpolation Type", "Header.InterpolationType");
+            interpTypeCol.Width = 100;
+            interpTypeCol.AspectPutter = delegate(object rowObject, object newValue)
+            {
+                this.File.UpdateMeshSettings(this.File.Meshes[0].Header.Flags, this.File.Meshes[0].Header.Format,
+                    this.File.Meshes[0].Header.AnimationType, (BrgMeshInterpolationType)newValue);
+            };
+            this.Plugin.brgObjectListView.Columns.Add(interpTypeCol);
         }
-        public void LoadUiAttachpoint()
+        public void LoadMaterialUI()
         {
-            this.Plugin.attachpointListBox.DataSource = this.File.Meshes[0].Attachpoints;
+            this.Plugin.brgObjectListView.Columns.Clear();
+            OLVColumn idCol = new OLVColumn("ID", "Id");
+            idCol.Width = 35;
+            idCol.IsEditable = false;
+            this.Plugin.brgObjectListView.Columns.Add(idCol);
+
+            OLVColumn flagsCol = new OLVColumn("Flags", "Flags");
+            flagsCol.Width = 200;
+            this.Plugin.brgObjectListView.Columns.Add(flagsCol);
+
+            OLVColumn diffColorCol = new OLVColumn("Diffuse Color", "DiffuseColor");
+            this.Plugin.brgObjectListView.Columns.Add(diffColorCol);
+            OLVColumn ambColorCol = new OLVColumn("Ambient Color", "AmbientColor");
+            this.Plugin.brgObjectListView.Columns.Add(ambColorCol);
+            OLVColumn specColorCol = new OLVColumn("Specular Color", "SpecularColor");
+            this.Plugin.brgObjectListView.Columns.Add(specColorCol);
+            OLVColumn emisColorCol = new OLVColumn("Emissive Color", "EmissiveColor");
+            this.Plugin.brgObjectListView.Columns.Add(emisColorCol);
+
+            OLVColumn specLevelCol = new OLVColumn("Specular Level", "SpecularExponent");
+            this.Plugin.brgObjectListView.Columns.Add(specLevelCol);
+
+            OLVColumn opacityCol = new OLVColumn("Opacity", "Opacity");
+            this.Plugin.brgObjectListView.Columns.Add(opacityCol);
+
+            OLVColumn diffMapCol = new OLVColumn("Diffuse Map", "DiffuseMap");
+            this.Plugin.brgObjectListView.Columns.Add(diffMapCol);
+
+            OLVColumn bumpMapCol = new OLVColumn("Bump Map", "BumpMap");
+            this.Plugin.brgObjectListView.Columns.Add(bumpMapCol);
+
+            OLVColumn reflMapCol = new OLVColumn("Reflection Map", string.Empty);
+            reflMapCol.AspectGetter = delegate(object rowObject)
+            {
+                BrgMaterial mat = (BrgMaterial)rowObject;
+                if (mat.sfx.Count > 0)
+                {
+                    return mat.sfx[0].Name;
+                }
+                else { return string.Empty; }
+            };
+            reflMapCol.AspectPutter = delegate(object rowObject, object newValue)
+            {
+                BrgMaterial mat = (BrgMaterial)rowObject;
+                BrgMatSFX sfxMap = new BrgMatSFX();
+                sfxMap.Id = 30;
+                sfxMap.Name = (string)newValue;
+
+                if (mat.sfx.Count > 0) { mat.sfx[0] = sfxMap; }
+                else { mat.sfx.Add(sfxMap); }
+            };
+            this.Plugin.brgObjectListView.Columns.Add(reflMapCol);
+        }
+        public void LoadAttachpointUI()
+        {
+            this.Plugin.brgObjectListView.Columns.Clear();
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 100;
+            nameCol.IsEditable = false;
+            this.Plugin.brgObjectListView.Columns.Add(nameCol);
+
+            OLVColumn posCol = new OLVColumn("Positon", "Position");
+            posCol.Width = 250;
+            posCol.IsEditable = false;
+            this.Plugin.brgObjectListView.Columns.Add(posCol);
         }
 
         public void SaveUi()
         {
             this.uniformAttachpointScale = this.Plugin.brgImportAttachScaleCheckBox.Checked;
             this.modelAtCenter = this.Plugin.brgImportCenterModelCheckBox.Checked;
-            this.InterpolationType = Convert.ToByte(this.Plugin.interpolationTypeCheckBox.Checked);
-            this.Flags = this.Plugin.
-                GetCheckedListBoxSelectedEnums<BrgMeshFlag>(this.Plugin.genMeshFlagsCheckedListBox);
-            this.Format = this.Plugin.
-                GetCheckedListBoxSelectedEnums<BrgMeshFormat>(this.Plugin.genMeshFormatCheckedListBox);
-            if (this.Plugin.keyframeRadioButton.Checked)
-            {
-                this.AnimationType = BrgMeshAnimType.KEYFRAME;
-            }
-            else if (this.Plugin.nonuniRadioButton.Checked)
-            {
-                this.AnimationType = BrgMeshAnimType.NONUNIFORM;
-            }
-            else if (this.Plugin.skinBoneRadioButton.Checked)
-            {
-                this.AnimationType = BrgMeshAnimType.SKINBONE;
-            }
-            this.File.UpdateMeshSettings(this.Flags, this.Format, this.AnimationType, this.InterpolationType);
-            if (this.lastMatSelected != null)
-            {
-                this.lastMatSelected.Flags = this.Plugin.
-                    GetCheckedListBoxSelectedEnums<BrgMatFlag>(this.Plugin.materialFlagsCheckedListBox);
-            }
         }
         #endregion
     }

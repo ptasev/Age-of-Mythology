@@ -180,8 +180,6 @@
         {
             this.Animation.Duration = 0;
             this.Animation.TimeStep = 1f/30f;
-            int maxKeys = 0;
-            float minStep = 1;
             for (int i = 0; i < this.Animation.BoneTracks.Count; ++i)
             {
                 //this.Animation.Duration = Math.Max(this.Animation.Duration, this.Animation.BoneTracks[i].PositionKeys.Last());
@@ -197,25 +195,7 @@
                 {
                     this.Animation.Duration = this.Animation.BoneTracks[i].ScaleKeys.Last();
                 }
-
-                maxKeys = Math.Max(maxKeys, this.Animation.BoneTracks[i].PositionKeys.Count);
-                maxKeys = Math.Max(maxKeys, this.Animation.BoneTracks[i].RotationKeys.Count);
-                maxKeys = Math.Max(maxKeys, this.Animation.BoneTracks[i].ScaleKeys.Count);
-
-                for (int j = 1; j < this.Animation.BoneTracks[i].PositionKeys.Count; ++j)
-                {
-                    minStep = Math.Min(minStep, this.Animation.BoneTracks[i].PositionKeys[j] - this.Animation.BoneTracks[i].PositionKeys[j - 1]);
-                }
-                for (int j = 1; j < this.Animation.BoneTracks[i].RotationKeys.Count; ++j)
-                {
-                    minStep = Math.Min(minStep, this.Animation.BoneTracks[i].RotationKeys[j] - this.Animation.BoneTracks[i].RotationKeys[j - 1]);
-                }
-                for (int j = 1; j < this.Animation.BoneTracks[i].ScaleKeys.Count; ++j)
-                {
-                    minStep = Math.Min(minStep, this.Animation.BoneTracks[i].ScaleKeys[j] - this.Animation.BoneTracks[i].ScaleKeys[j - 1]);
-                }
             }
-            maxKeys = Convert.ToInt32(this.Animation.TimeStep * this.Animation.Duration);
         }
 
         public void Write(Stream stream)

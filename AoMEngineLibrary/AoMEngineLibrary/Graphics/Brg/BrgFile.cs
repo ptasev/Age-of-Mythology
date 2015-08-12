@@ -58,7 +58,7 @@
                     {
                         BrgMaterial mat = new BrgMaterial(reader, this);
                         Materials.Add(mat);
-                        if (!ContainsMaterialID(mat.id))
+                        if (!ContainsMaterialID(mat.Id))
                         {
                             //Materials.Add(mat);
                         }
@@ -95,7 +95,7 @@
 
                 this.Animation.Duration = this.Meshes[0].ExtendedHeader.AnimationLength;
                 this.Animation.TimeStep = this.Meshes[0].ExtendedHeader.AnimationLength / (float)(this.Meshes[0].MeshAnimations.Count + 1);
-                if (this.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
+                if (this.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
                 {
                     for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; ++i)
                     {
@@ -156,7 +156,7 @@
         {
             for (int i = 0; i < Materials.Count; i++)
             {
-                if (Materials[i].id == id)
+                if (Materials[i].Id == id)
                 {
                     return true;
                 }
@@ -174,7 +174,7 @@
             AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
         }
 
-        public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType)
+        public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, BrgMeshInterpolationType interpolationType)
         {
             if (this.Meshes.Count == 0)
             {
@@ -186,7 +186,7 @@
                 UpdateMeshSettings(i, flags, format, animType, interpolationType);
             }
         }
-        public void UpdateMeshSettings(int meshIndex, BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, byte interpolationType)
+        public void UpdateMeshSettings(int meshIndex, BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, BrgMeshInterpolationType interpolationType)
         {
             if (meshIndex > 0)
             {
@@ -195,7 +195,7 @@
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType = animType;
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.InterpolationType = interpolationType;
                 ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.Flags |= BrgMeshFlag.SECONDARYMESH;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType &= ~BrgMeshAnimType.NONUNIFORM;
+                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType &= ~BrgMeshAnimType.NonUniform;
             }
             else
             {
@@ -204,7 +204,7 @@
                 this.Meshes[meshIndex].Header.AnimationType = animType;
                 this.Meshes[meshIndex].Header.InterpolationType = interpolationType;
 
-                if (this.Meshes[meshIndex].Header.AnimationType == BrgMeshAnimType.NONUNIFORM)
+                if (this.Meshes[meshIndex].Header.AnimationType == BrgMeshAnimType.NonUniform)
                 {
                     this.Meshes[meshIndex].NonUniformKeys = new float[this.Header.NumMeshes];
                     for (int i = 0; i < this.Header.NumMeshes; i++)

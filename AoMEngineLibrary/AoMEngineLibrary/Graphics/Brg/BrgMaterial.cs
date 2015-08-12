@@ -15,11 +15,11 @@
         {
             get
             {
-                return "Mat ID: " + id;
+                return "Mat ID: " + Id;
             }
         }
 
-        public int id;
+        public int Id { get; set; }
         public BrgMatFlag Flags { get; set; }
         public int unknown01b;
         public string DiffuseMap { get; set; }
@@ -31,7 +31,7 @@
         {
             ParentFile = file;
 
-            id = reader.ReadInt32();
+            Id = reader.ReadInt32();
             Flags = (BrgMatFlag)reader.ReadInt32();
             unknown01b = reader.ReadInt32();
             int nameLength = reader.ReadInt32();
@@ -72,7 +72,7 @@
             : base()
         {
             this.ParentFile = file;
-            this.id = 0;
+            this.Id = 0;
             this.Flags = 0;
             this.unknown01b = 0;
 
@@ -84,7 +84,7 @@
 
         public void Write(BrgBinaryWriter writer)
         {
-            writer.Write(this.id);
+            writer.Write(this.Id);
             writer.Write((int)this.Flags);
 
             writer.Write(this.unknown01b);

@@ -18,7 +18,7 @@
         public string FileName { get; set; }
         public int FilterIndex { get { return 1; } }
 
-        public Byte InterpolationType { get; set; }
+        public BrgMeshInterpolationType InterpolationType { get; set; }
         public BrgMeshFlag Flags { get; set; }
         public BrgMeshFormat Format { get; set; }
         public BrgMeshAnimType AnimationType { get; set; }
@@ -53,7 +53,7 @@
             this.InterpolationType = 0;
             this.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
             this.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
-            this.AnimationType = BrgMeshAnimType.KEYFRAME;
+            this.AnimationType = BrgMeshAnimType.KeyFrame;
         }
         #endregion
 
@@ -99,7 +99,7 @@
                     for (int i = 0; i < this.File.Materials.Count; i++)
                     {
                         Maxscript.Command("matGroup[{0}] = {1}", i + 1, ImportBrgMaterial(brg.Materials[i]));
-                        Maxscript.Command("matGroup.materialIDList[{0}] = {1}", i + 1, this.File.Materials[i].id);
+                        Maxscript.Command("matGroup.materialIDList[{0}] = {1}", i + 1, this.File.Materials[i].Id);
                     }
                     Maxscript.Command("{0}.material = matGroup", mainObject);
                 }
@@ -412,38 +412,38 @@
                     for (int i = 0; i < brg.Header.NumMaterials; i++)
                     {
                         BrgMaterial mat = new BrgMaterial(brg);
-                        mat.id = brg.Materials.Count + 1;
+                        mat.Id = brg.Materials.Count + 1;
                         Maxscript.Command("mat = {0}.material.materialList[{1}]", mainObject, i + 1);
                         this.ExportBrgMaterial(mainObject, mat);
 
                         int matListIndex = brg.Materials.IndexOf(mat);
                         if (matListIndex >= 0)
                         {
-                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), brg.Materials[matListIndex].id);
+                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), brg.Materials[matListIndex].Id);
                         }
                         else
                         {
                             brg.Materials.Add(mat);
-                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), mat.id);
+                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), mat.Id);
                         }
                     }
                 }
                 else if (Maxscript.QueryBoolean("classof {0}.material == Standardmaterial", mainObject))
                 {
                     BrgMaterial mat = new BrgMaterial(brg);
-                    mat.id = brg.Materials.Count + 1;
+                    mat.Id = brg.Materials.Count + 1;
                     Maxscript.Command("mat = {0}.material", mainObject);
                     this.ExportBrgMaterial(mainObject, mat);
 
                     int matListIndex = brg.Materials.IndexOf(mat);
                     if (matListIndex >= 0)
                     {
-                        matIdMapping.Add(1, brg.Materials[matListIndex].id);
+                        matIdMapping.Add(1, brg.Materials[matListIndex].Id);
                     }
                     else
                     {
                         brg.Materials.Add(mat);
-                        matIdMapping.Add(1, mat.id);
+                        matIdMapping.Add(1, mat.Id);
                     }
                 }
                 else
@@ -529,7 +529,7 @@
             List<BrgMaterial> usedMats = new List<BrgMaterial>(brg.Materials.Count);
             for (int i = 0; i < brg.Materials.Count; ++i)
             {
-                if (usedFaceMaterials.Contains(brg.Materials[i].id))
+                if (usedFaceMaterials.Contains(brg.Materials[i].Id))
                 {
                     usedMats.Add(brg.Materials[i]);
                 }
@@ -890,15 +890,15 @@
                         this.Plugin.genMeshFormatCheckedListBox.SetItemChecked(i, false);
                     }
                 }
-                if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.KEYFRAME)
+                if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.KeyFrame)
                 {
                     this.Plugin.keyframeRadioButton.Checked = true;
                 }
-                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.NONUNIFORM)
+                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.NonUniform)
                 {
                     this.Plugin.nonuniRadioButton.Checked = true;
                 }
-                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.SKINBONE)
+                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.SkinBone)
                 {
                     this.Plugin.skinBoneRadioButton.Checked = true;
                 }
@@ -913,15 +913,15 @@
                 this.Plugin.SetCheckedListBoxSelectedEnums<BrgMeshFlag>(this.Plugin.genMeshFlagsCheckedListBox, (uint)this.Flags);
                 this.Plugin.SetCheckedListBoxSelectedEnums<BrgMeshFormat>(this.Plugin.genMeshFormatCheckedListBox, (uint)this.Format);
 
-                if (this.AnimationType == BrgMeshAnimType.KEYFRAME)
+                if (this.AnimationType == BrgMeshAnimType.KeyFrame)
                 {
                     this.Plugin.keyframeRadioButton.Checked = true;
                 }
-                else if (this.AnimationType == BrgMeshAnimType.NONUNIFORM)
+                else if (this.AnimationType == BrgMeshAnimType.NonUniform)
                 {
                     this.Plugin.nonuniRadioButton.Checked = true;
                 }
-                else if (this.AnimationType == BrgMeshAnimType.SKINBONE)
+                else if (this.AnimationType == BrgMeshAnimType.SkinBone)
                 {
                     this.Plugin.skinBoneRadioButton.Checked = true;
                 }
@@ -1000,22 +1000,22 @@
         {
             this.uniformAttachpointScale = this.Plugin.brgImportAttachScaleCheckBox.Checked;
             this.modelAtCenter = this.Plugin.brgImportCenterModelCheckBox.Checked;
-            this.InterpolationType = Convert.ToByte(this.Plugin.interpolationTypeCheckBox.Checked);
+            this.InterpolationType = (BrgMeshInterpolationType)Convert.ToByte(this.Plugin.interpolationTypeCheckBox.Checked);
             this.Flags = this.Plugin.
                 GetCheckedListBoxSelectedEnums<BrgMeshFlag>(this.Plugin.genMeshFlagsCheckedListBox);
             this.Format = this.Plugin.
                 GetCheckedListBoxSelectedEnums<BrgMeshFormat>(this.Plugin.genMeshFormatCheckedListBox);
             if (this.Plugin.keyframeRadioButton.Checked)
             {
-                this.AnimationType = BrgMeshAnimType.KEYFRAME;
+                this.AnimationType = BrgMeshAnimType.KeyFrame;
             }
             else if (this.Plugin.nonuniRadioButton.Checked)
             {
-                this.AnimationType = BrgMeshAnimType.NONUNIFORM;
+                this.AnimationType = BrgMeshAnimType.NonUniform;
             }
             else if (this.Plugin.skinBoneRadioButton.Checked)
             {
-                this.AnimationType = BrgMeshAnimType.SKINBONE;
+                this.AnimationType = BrgMeshAnimType.SkinBone;
             }
             this.File.UpdateMeshSettings(this.Flags, this.Format, this.AnimationType, this.InterpolationType);
             if (this.lastMatSelected != null)

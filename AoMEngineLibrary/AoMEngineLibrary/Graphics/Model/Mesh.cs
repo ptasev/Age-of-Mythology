@@ -8,6 +8,7 @@
 
     public class Mesh
     {
+        public virtual string Name { get; set; }
         public List<Vector3D> Vertices { get; set; }
         public List<Vector3D> Normals { get; set; }
         public List<Face> Faces { get; set; }
@@ -19,6 +20,7 @@
 
         public Mesh()
         {
+            this.Name = "Mesh";
             this.Vertices = new List<Vector3D>();
             this.Normals = new List<Vector3D>();
             this.Faces = new List<Face>();

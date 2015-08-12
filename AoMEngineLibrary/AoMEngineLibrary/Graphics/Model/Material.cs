@@ -8,6 +8,7 @@
 
     public class Material
     {
+        public virtual string Name { get; set; }
         public Color3D DiffuseColor
         {
             get
@@ -64,6 +65,7 @@
 
         public Material()
         {
+            this.Name = "Material";
             this.diffuseColor = new Color3D(1f);
             this.ambientColor = new Color3D(1f);
             this.specularColor = new Color3D(0f);

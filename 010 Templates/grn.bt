@@ -4,7 +4,7 @@
 // File:    grn.bt
 // Author:  Petar Tasev
 // Revision:1.0
-// Purpose: Highlight prt files from AoM game.
+// Purpose: Highlight grn files from AoM game.
 //--------------------------------------
 LittleEndian();
 

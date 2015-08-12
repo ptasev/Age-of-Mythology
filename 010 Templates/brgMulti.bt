@@ -412,8 +412,8 @@ struct {
 				BrgMatFlag properties;
 				float unknown01b < comment = "Always 0" > ; // always 0
 				int nameLength;
-				VectorFloat color(3); //unknown02 [36 bytes]
-				VectorFloat ambient(3);
+				VectorFloat ambient(3); //unknown02 [36 bytes]
+				VectorFloat diffuse(3);
 				VectorFloat specular(3);
 				VectorFloat emissive(3); //unknown03 [12 bytes]
 

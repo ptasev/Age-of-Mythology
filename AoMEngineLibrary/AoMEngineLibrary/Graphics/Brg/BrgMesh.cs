@@ -210,7 +210,7 @@
 
             // Only seen on first mesh
             this.NonUniformKeys = new float[0];
-            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
+            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
                 this.NonUniformKeys = new float[this.ExtendedHeader.NumNonUniformKeys];
                 for (int i = 0; i < this.ExtendedHeader.NumNonUniformKeys; i++)
@@ -439,7 +439,7 @@
                 }
             }
 
-            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NONUNIFORM))
+            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
                 for (int i = 0; i < this.NonUniformKeys.Length; i++)
                 {
