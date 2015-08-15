@@ -16,11 +16,14 @@
         public List<Dictionary<string, string>> DataExtensions { get; set; }
         public List<GrnBone> Bones { get; set; }
 
+        public List<GrnTexture> Textures { get; set; }
+
         public GrnFile()
             : base()
         {
             this.DataExtensions = new List<Dictionary<string, string>>();
             this.Bones = new List<GrnBone>();
+            this.Textures = new List<GrnTexture>();
         }
 
         public void DumpData(System.IO.Stream stream, string folderPath)
@@ -84,14 +87,11 @@
                 }
 
                 // 6Texture
-                // -- Each TextureMap has width height, depth?, and dataExtRef
-                List<int> textureDataRefExts = new List<int>();
-                List<GrnDataExtensionReferenceNode> textureMap = 
-                    dirNode.ChildNodes[6].FindNodes<GrnDataExtensionReferenceNode>(
-                    GrnNodeType.DataExtensionReference);
-                for (int i = 0; i < textureMap.Count; ++i)
+                List<GrnNode> textureMaps = dirNode.ChildNodes[6].FindNodes<GrnNode>(GrnNodeType.TextureMap);
+                for (int i = 0; i < textureMaps.Count; ++i)
                 {
-                    textureDataRefExts.Add(textureMap[i].DataExtensionIndex - 1);
+                    this.Textures.Add(new GrnTexture(this));
+                    this.Textures[i].Read(textureMaps[i]);
                 }
 
                 // 7Material
@@ -99,7 +99,7 @@
                 for (int i = 0; i < materials.Count; ++i)
                 {
                     this.Materials.Add(new GrnMaterial(this));
-                    this.Materials[i].Read(materials[i], textureDataRefExts);
+                    this.Materials[i].Read(materials[i]);
                 }
 
                 // 8Form
@@ -261,17 +261,19 @@
                 }
 
                 // 6Texture
-                OrderedDictionary textureMaps = this.CreateTextureMaps();
                 GrnNode texSecNode = new GrnNode(staFrameDir, GrnNodeType.TextureSection);
                 staFrameDir.AppendChild(texSecNode);
-                this.WriteTextureMaps(texSecNode, textureMaps);
+                foreach (GrnTexture tex in this.Textures)
+                {
+                    tex.Write(texSecNode);
+                }
 
                 // 7Material
                 GrnNode matSecNode = new GrnNode(staFrameDir, GrnNodeType.MaterialSection);
                 staFrameDir.AppendChild(matSecNode);
                 foreach (GrnMaterial mat in this.Materials)
                 {
-                    mat.Write(matSecNode, textureMaps);
+                    mat.Write(matSecNode);
                 }
 
                 // 8Form
@@ -384,18 +386,16 @@
             stringMap.Add("__Standard", 1);
             foreach (Dictionary<string, string> dataExt in this.DataExtensions)
             {
-                foreach (string s in dataExt.Keys)
+                foreach (KeyValuePair<string, string> dataExtProp in dataExt)
                 {
-                    if (!stringMap.Contains(s))
+                    if (!stringMap.Contains(dataExtProp.Key))
                     {
-                        stringMap.Add(s, stringMap.Count);
+                        stringMap.Add(dataExtProp.Key, stringMap.Count);
                     }
-                }
-                foreach (string s in dataExt.Values)
-                {
-                    if (!stringMap.Contains(s))
+
+                    if (!stringMap.Contains(dataExtProp.Value))
                     {
-                        stringMap.Add(s, stringMap.Count);
+                        stringMap.Add(dataExtProp.Value, stringMap.Count);
                     }
                 }
             }
@@ -426,36 +426,6 @@
                     dePValNode.StringTableIndex = (int)stringMap[deProp.Value];
                     deValSection.AppendChild(dePValNode);
                 }
-            }
-        }
-        private OrderedDictionary CreateTextureMaps()
-        {
-            OrderedDictionary textureMaps = new OrderedDictionary();
-            foreach (GrnMaterial mat in this.Materials)
-            {
-                if (!textureMaps.Contains(mat.TextureDataExtensionIndex))
-                {
-                    textureMaps.Add(mat.TextureDataExtensionIndex, textureMaps.Count);
-                }
-            }
-            return textureMaps;
-        }
-        private void WriteTextureMaps(GrnNode texSecNode, OrderedDictionary textureMaps)
-        {
-            foreach (DictionaryEntry texMap in textureMaps)
-            {
-                GrnNode texMapNode = new GrnNode(texSecNode, GrnNodeType.TextureMap);
-                texSecNode.AppendChild(texMapNode);
-                GrnNode texImSecNode = new GrnNode(texMapNode, GrnNodeType.TextureImageSection);
-                texMapNode.AppendChild(texImSecNode);
-                GrnNode texMapImNode = new GrnNode(texImSecNode, GrnNodeType.TextureMapImage);
-                texMapImNode.Data = new byte[] { 0x00, 0x00, 0x00, 0x00, 
-                        0x00, 0x00, 0x00, 0x00, 
-                        0x07, 0x00, 0x00, 0x00 };
-                texImSecNode.AppendChild(texMapImNode);
-                GrnDataExtensionReferenceNode refNode = new GrnDataExtensionReferenceNode(texMapNode);
-                refNode.DataExtensionIndex = (int)texMap.Key + 1;
-                texMapNode.AppendChild(refNode);
             }
         }
         private List<int> CreateFormBoneChannels()

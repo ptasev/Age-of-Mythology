@@ -144,6 +144,10 @@ namespace AoMModelEditor
                     int rowIndex = grn.File.Bones.IndexOf((GrnBone)rowObject);
                     return grn.File.Bones.Exists(x => x.ParentIndex == rowIndex);
                 }
+                else if (rowObject is GrnMaterial)
+                {
+                    return ((GrnMaterial)rowObject).DiffuseTexture != null;
+                }
 
                 return false;
             };
@@ -155,6 +159,10 @@ namespace AoMModelEditor
                     List<GrnBone> bones = grn.File.Bones.FindAll(x => x.ParentIndex == rowIndex);
                     bones.Remove((GrnBone)rowObject);
                     return bones;
+                }
+                else if (rowObject is GrnMaterial)
+                {
+                    return new object[] { ((GrnMaterial)rowObject).DiffuseTexture };
                 }
 
                 return null;
@@ -651,6 +659,10 @@ namespace AoMModelEditor
             else if (this.grnObjectsTreeListView.SelectedObject is GrnMaterial)
             {
                 grn.LoadMaterialUI();
+            }
+            else if (this.grnObjectsTreeListView.SelectedObject is GrnTexture)
+            {
+                grn.LoadTextureUI();
             }
 
             this.grnObjectListView.SetObjects(new object[] { this.grnObjectsTreeListView.SelectedObject });

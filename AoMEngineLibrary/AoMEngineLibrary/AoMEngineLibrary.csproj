@@ -89,6 +89,7 @@
     <Compile Include="Graphics\Grn\GrnBoneTrack.cs" />
     <Compile Include="Graphics\Grn\GrnMaterial.cs" />
     <Compile Include="Graphics\Grn\GrnMesh.cs" />
+    <Compile Include="Graphics\Grn\GrnTexture.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnAnimationTransformTrackKeysNode.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnBoneNode.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnDataExtensionPropertyNode.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Graphics\Grn\Nodes\GrnRenderPassNode.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnRenderPassTrianglesNode.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnStringTableNode.cs" />
+    <Compile Include="Graphics\Grn\Nodes\GrnTextureMapImageNode.cs" />
     <Compile Include="Graphics\Model\Color3D.cs" />
     <Compile Include="Graphics\Model\Color4D.cs" />
     <Compile Include="Graphics\Model\Animation.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="Graphics\Model\Material.cs" />
     <Compile Include="Graphics\Model\ModelFile.cs" />
     <Compile Include="Graphics\Model\ModelFileReader.cs" />
+    <Compile Include="Graphics\Model\Texture.cs" />
     <Compile Include="Graphics\Model\VertexWeight.cs" />
     <Compile Include="Graphics\Grn\GrnBinaryReader.cs" />
     <Compile Include="Graphics\Grn\GrnFile.cs" />

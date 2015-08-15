@@ -14,7 +14,7 @@
     {
         public GrnFile ParentFile { get; set; }
         public Int32 DataExtensionIndex { get; set; }
-        public Int32 TextureDataExtensionIndex { get; set; }
+        public Int32 DiffuseTextureIndex { get; set; }
 
         public string Name
         {
@@ -31,34 +31,11 @@
                 return "(unnamed)";
             }
         }
-        public string DiffuseMap
+        public GrnTexture DiffuseTexture
         {
             get
             {
-                foreach (KeyValuePair<string, string> dataExt in this.ParentFile.DataExtensions[this.TextureDataExtensionIndex])
-                {
-                    if (dataExt.Key == "__ObjectName")
-                    {
-                        return dataExt.Value;
-                    }
-                }
-
-                return "(unnamed)";
-            }
-        }
-        public string DiffuseMapFileName
-        {
-            get
-            {
-                foreach (KeyValuePair<string, string> dataExt in this.ParentFile.DataExtensions[this.TextureDataExtensionIndex])
-                {
-                    if (dataExt.Key == "__FileName")
-                    {
-                        return dataExt.Value;
-                    }
-                }
-
-                return "(unnamed)";
+                return this.ParentFile.Textures[this.DiffuseTextureIndex];
             }
         }
 
@@ -66,7 +43,7 @@
             : base()
         {
             this.DataExtensionIndex = 0;
-            this.TextureDataExtensionIndex = 0;
+            this.DiffuseTextureIndex = 0;
         }
         public GrnMaterial(GrnFile parentFile)
             : this()
@@ -74,7 +51,7 @@
             this.ParentFile = parentFile;
         }
 
-        internal void Read(GrnNode material, List<int> textureDataRefExts)
+        internal void Read(GrnNode material)
         {
             // -- Each material has diffuseTex (0, textureIndex(+1), 1), and dataExtRef
             GrnMaterialSimpleDiffuseTextureNode matDiffuse = 
@@ -82,21 +59,20 @@
                 GrnNodeType.MaterialSimpleDiffuseTexture);
             if (matDiffuse != null)
             {
-                this.TextureDataExtensionIndex = textureDataRefExts[matDiffuse.TextureMapIndex - 1];
+                this.DiffuseTextureIndex = matDiffuse.TextureMapIndex - 1;
             }
 
             this.DataExtensionIndex = 
                 material.FindNode<GrnDataExtensionReferenceNode>(
                 GrnNodeType.DataExtensionReference).DataExtensionIndex - 1;
         }
-        public void Write(GrnNode matSecNode, OrderedDictionary textureMaps)
+        public void Write(GrnNode matSecNode)
         {
             GrnNode matNode = new GrnNode(matSecNode, GrnNodeType.Material);
             matSecNode.AppendChild(matNode);
             GrnMaterialSimpleDiffuseTextureNode matDiffNode =
                 new GrnMaterialSimpleDiffuseTextureNode(matNode);
-            matDiffNode.TextureMapIndex = (int)textureMaps[(object)this.TextureDataExtensionIndex] + 1;
-            matDiffNode.Unknown = matDiffNode.TextureMapIndex;
+            matDiffNode.TextureMapIndex = this.DiffuseTextureIndex + 1;
             matNode.AppendChild(matDiffNode);
             GrnDataExtensionReferenceNode refNode = new GrnDataExtensionReferenceNode(matNode);
             refNode.DataExtensionIndex = this.DataExtensionIndex + 1;

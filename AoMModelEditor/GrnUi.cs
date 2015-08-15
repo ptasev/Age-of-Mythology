@@ -123,7 +123,49 @@
         }
         public void LoadMaterialUI()
         {
+            this.Plugin.grnObjectListView.Columns.Clear();
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 100;
+            nameCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(nameCol);
 
+            //OLVColumn idCol = new OLVColumn("ID", "DataExtensionIndex");
+            //idCol.Width = 100;
+            //idCol.IsEditable = false;
+            //this.Plugin.grnObjectListView.Columns.Add(idCol);
+
+            OLVColumn diffuseMapNameCol = new OLVColumn("Diffuse Texture", "DiffuseTexture.Name");
+            diffuseMapNameCol.Width = 100;
+            diffuseMapNameCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(diffuseMapNameCol);
+        }
+        public void LoadTextureUI()
+        {
+            this.Plugin.grnObjectListView.Columns.Clear();
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 100;
+            nameCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(nameCol);
+
+            //OLVColumn idCol = new OLVColumn("ID", "DataExtensionIndex");
+            //idCol.Width = 100;
+            //idCol.IsEditable = false;
+            //this.Plugin.grnObjectListView.Columns.Add(idCol);
+
+            OLVColumn widthCol = new OLVColumn("Width", "Width");
+            widthCol.Width = 45;
+            widthCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(widthCol);
+
+            OLVColumn heightCol = new OLVColumn("Height", "Height");
+            heightCol.Width = 45;
+            heightCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(heightCol);
+
+            OLVColumn fileNameCol = new OLVColumn("FileName", "FileName");
+            fileNameCol.Width = 100;
+            fileNameCol.IsEditable = false;
+            this.Plugin.grnObjectListView.Columns.Add(fileNameCol);
         }
 
         public void SaveUi()

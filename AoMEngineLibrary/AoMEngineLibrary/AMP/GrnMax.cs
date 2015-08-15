@@ -372,35 +372,9 @@
             Maxscript.Command("mat.specularLevel = {0}", mat.SpecularExponent);
 
             Maxscript.Command("tex = BitmapTexture()");
-            Maxscript.Command("tex.name = \"{0}\"", mat.DiffuseMap);
-            if (mat.Name == "pixelxform1")
-            {
-                Maxscript.Command("pcCompTex = CompositeTextureMap()");
-
-                Maxscript.Command("pcTex = BitmapTexture()");
-                Maxscript.Command("pcTex.name = \"{0}\"", mat.DiffuseMap);
-                Maxscript.Command("pcTex.filename = \"{0}\"", Path.GetFileName(mat.DiffuseMapFileName));
-
-                Maxscript.Command("pcTex2 = BitmapTexture()");
-                Maxscript.Command("pcTex2.name = \"{0}\"", mat.DiffuseMap);
-                Maxscript.Command("pcTex2.filename = \"{0}\"", Path.GetFileName(mat.DiffuseMapFileName));
-                Maxscript.Command("pcTex2.monoOutput = 1");
-
-                Maxscript.Command("pcCheck = Checker()");
-                Maxscript.Command("pcCheck.Color1 = color 0 0 255");
-                Maxscript.Command("pcCheck.Color2 = color 0 0 255");
-
-                Maxscript.Command("pcCompTex.mapList[1] = pcTex");
-                Maxscript.Command("pcCompTex.mapList[2] = pcCheck");
-                Maxscript.Command("pcCompTex.mask[2] = pcTex2");
-
-                Maxscript.Command("mat.diffusemap = pcCompTex");
-            }
-            else
-            {
-                Maxscript.Command("tex.filename = \"{0}\"", Path.GetFileName(mat.DiffuseMapFileName));
-                Maxscript.Command("mat.diffusemap = tex");
-            }
+            Maxscript.Command("tex.name = \"{0}\"", mat.DiffuseTexture.Name);
+            Maxscript.Command("tex.filename = \"{0}\"", Path.GetFileName(mat.DiffuseTexture.FileName));
+            Maxscript.Command("mat.diffusemap = tex");
 
             return "mat";
         }
@@ -975,13 +949,38 @@
 
             if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
             {
-                mat.TextureDataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.name"));
-                this.File.SetDataExtensionFileName(mat.TextureDataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.filename")));
+                GrnTexture tex = new GrnTexture(this.File);
+                tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.name"));
+                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.filename")));
+
+                int texIndex = this.File.Textures.IndexOf(tex);
+                if (texIndex >= 0)
+                {
+                    mat.DiffuseTextureIndex = texIndex;
+                }
+                else
+                {
+                    mat.DiffuseTextureIndex = this.File.Textures.Count;
+                    this.File.Textures.Add(tex);
+                }
             }
             else if (Maxscript.QueryBoolean("(classof mat.diffusemap) == CompositeTextureMap") && Maxscript.QueryBoolean("(classof mat.diffusemap.mapList[1]) == BitmapTexture"))
             {
-                mat.TextureDataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].name"));
-                this.File.SetDataExtensionFileName(mat.TextureDataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")));
+                GrnTexture tex = new GrnTexture(this.File);
+                tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].name"));
+                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")));
+
+                int texIndex = this.File.Textures.IndexOf(tex);
+                if (texIndex >= 0)
+                {
+                    mat.DiffuseTextureIndex = texIndex;
+                    this.File.DataExtensions.RemoveAt(tex.DataExtensionIndex);
+                }
+                else
+                {
+                    mat.DiffuseTextureIndex = this.File.Textures.Count;
+                    this.File.Textures.Add(tex);
+                }
             }
         }
 

@@ -17,6 +17,7 @@ namespace AoMEngineLibrary.AMP
 
     public partial class MaxPluginForm : MaxForm
     {
+        // 7.0 -- Improved material export, Grn support, Multiple Mesh Export Support
         public static string PluginTitle = "AMP 7.0";
         public static class Settings
         {

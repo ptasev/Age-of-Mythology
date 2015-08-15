@@ -163,6 +163,10 @@
             {
                 node = new GrnAnimationTransformTrackKeysNode(parentNode);
             }
+            else if (nodeType == GrnNodeType.TextureMapImage)
+            {
+                node = new GrnTextureMapImageNode(parentNode);
+            }
             else
             {
                 node = new GrnNode(parentNode, nodeType);
