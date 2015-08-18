@@ -255,12 +255,6 @@
 
         public int GetReadDataLength()
         {
-            int temp;
-            if (this.NodeType == GrnNodeType.DataExtensionPropertyValue)
-            {
-                temp = 5;
-            }
-
             if (this.ChildNodes.Count > 0)
             {
                 return (int)(this.ChildNodes[0].Offset - this.Offset);

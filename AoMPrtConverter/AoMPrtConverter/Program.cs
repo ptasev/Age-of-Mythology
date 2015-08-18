@@ -14,35 +14,43 @@
         {
             try
             {
-                if (args.Length == 0 || !File.Exists(args[0]))
+                Console.WriteLine("--- APC 2.0 ---");
+                if (args.Length == 0)
                 {
                     Console.WriteLine("No input arguments were found!");
                     Console.WriteLine("Drag and drop a prt or xml file on the EXE to convert.");
-                    return;
                 }
 
-                if (Path.GetExtension(args[0]) == ".prt")
+                foreach (string f in args)
                 {
-                    PrtFile file = new PrtFile(File.Open(args[0], FileMode.Open, FileAccess.Read, FileShare.Read));
-                    file.SerializeAsXml(File.Open(args[0] + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
-                    Console.WriteLine("Success! Xml created.");
+                    try
+                    {
+                        Console.WriteLine("Processing " + Path.GetFileName(f) + "...");
+
+                        if (Path.GetExtension(f) == ".prt")
+                        {
+                            PrtFile file = new PrtFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                            file.SerializeAsXml(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                            Console.WriteLine("Success! Xml created.");
+                        }
+                        else if (Path.GetExtension(f) == ".xml")
+                        {
+                            PrtFile file = PrtFile.DeserializeAsXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                            file.Write(File.Open(f + ".prt", FileMode.Create, FileAccess.Write, FileShare.Read));
+                            Console.WriteLine("Success! Prt created.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid file extension!");
+                            Console.WriteLine("Drag and drop a prt or xml file on the EXE to convert.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to convert the file!");
+                        Console.WriteLine(ex.ToString());
+                    }
                 }
-                else if (Path.GetExtension(args[0]) == ".xml")
-                {
-                    PrtFile file = PrtFile.DeserializeAsXml(File.Open(args[0], FileMode.Open, FileAccess.Read, FileShare.Read));
-                    file.Write(File.Open(args[0] + ".prt", FileMode.Create, FileAccess.Write, FileShare.Read));
-                    Console.WriteLine("Success! Prt created.");
-                }
-                else
-                {
-                    Console.WriteLine("Invalid file extension!");
-                    Console.WriteLine("Drag and drop a prt or xml file on the EXE to convert.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed to convert the file!");
-                Console.WriteLine(ex.ToString());
             }
             finally
             {

@@ -6,6 +6,7 @@
     using System.Xml.Serialization;
     using XmlCommentSerialization;
 
+    [XmlRootAttribute("ParticleFile", IsNullable = false)]
     public class PrtFile
     {
         [XmlAttribute]

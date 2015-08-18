@@ -19,7 +19,7 @@
         public float CycleTime { get; set; }
         public float CycleTimeVar { get; set; }
 
-        [XmlArrayItem("ScaleStage")]
+        [XmlArrayItem("Stage")]
         public List<PrtScaleStage> ScaleStages
         {
             get;

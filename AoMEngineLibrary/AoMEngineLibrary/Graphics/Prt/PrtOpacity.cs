@@ -13,7 +13,7 @@
         public float CycleTime { get; set; }
         public float CycleTimeVar { get; set; }
 
-        [XmlArrayItem("OpacityStage")]
+        [XmlArrayItem("Stage")]
         public List<PrtOpacityStage> OpacityStages
         {
             get;

@@ -27,7 +27,7 @@
             get;
             set;
         }
-        [XmlArrayItem("FileName")]
+        [XmlArrayItem("File")]
         public List<string> AppearanceFiles
         {
             get;

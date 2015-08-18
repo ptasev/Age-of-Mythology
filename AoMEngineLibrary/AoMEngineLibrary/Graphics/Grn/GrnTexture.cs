@@ -13,7 +13,7 @@
         public Int32 DataExtensionIndex { get; set; }
 
         public GrnFile ParentFile { get; set; }
-        public string Name
+        public override string Name
         {
             get
             {

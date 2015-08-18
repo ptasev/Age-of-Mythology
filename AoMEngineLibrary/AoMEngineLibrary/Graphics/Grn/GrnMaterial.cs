@@ -16,7 +16,7 @@
         public Int32 DataExtensionIndex { get; set; }
         public Int32 DiffuseTextureIndex { get; set; }
 
-        public string Name
+        public override string Name
         {
             get
             {

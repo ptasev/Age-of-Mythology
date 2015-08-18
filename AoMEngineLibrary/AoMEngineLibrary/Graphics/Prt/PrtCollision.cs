@@ -13,7 +13,7 @@
         public float TerrainHeight { get; set; }
         public float TerrainHeightVar { get; set; }
 
-        [XmlArrayItem("CollisionType")]
+        [XmlArrayItem("Type")]
         public List<PrtCollisionType> CollisionTypes
         {
             get;

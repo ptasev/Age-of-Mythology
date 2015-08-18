@@ -15,13 +15,13 @@
         public float WorldLightingInfluence { get; set; }
         public Texel Color { get; set; }
 
-        [XmlArrayItem("PaletteColor")]
+        [XmlArrayItem("Color")]
         public List<Texel> PaletteColors
         {
             get;
             set;
         }
-        [XmlArrayItem("ColorStage")]
+        [XmlArrayItem("Stage")]
         public List<PrtColorStage> ColorStages
         {
             get;
