@@ -24,6 +24,7 @@ namespace AoMEngineLibrary.Graphics.Model
     using System;
     using System.Globalization;
     using System.Runtime.InteropServices;
+    using System.Xml.Serialization;
 
     /// <summary>
     /// Represents a Red-Green-Blue-Alpha (RGBA) color.
@@ -37,21 +38,25 @@ namespace AoMEngineLibrary.Graphics.Model
         /// <summary>
         /// Red component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float R;
 
         /// <summary>
         /// Green component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float G;
 
         /// <summary>
         /// Blue component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float B;
 
         /// <summary>
         /// Alpha component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float A;
 
         /// <summary>
@@ -377,6 +382,16 @@ namespace AoMEngineLibrary.Graphics.Model
         public static bool operator !=(Color4D a, Color4D b)
         {
             return (a.R != b.R) || (a.G != b.G) || (a.B != b.B) || (a.A != b.A);
+        }
+
+        /// <summary>
+        /// Implicitly converts a Color4D to a texel.
+        /// </summary>
+        /// <param name="color">Color4D to convert</param>
+        /// <returns>Converted texel</returns>
+        public static implicit operator Texel(Color4D color)
+        {
+            return new Texel((byte)(color.B * 255), (byte)(color.G * 255), (byte)(color.R * 255), (byte)(color.A * 255));
         }
 
         /// <summary>

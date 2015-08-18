@@ -13,14 +13,14 @@
         {
         }
 
-        public VertexColor ReadVertexColor()
+        public Texel ReadTexel()
         {
-            VertexColor color = new VertexColor();
-            color.R = this.ReadByte();
-            color.G = this.ReadByte();
-            color.B = this.ReadByte();
-            color.A = this.ReadByte();
-            return color;
+            Texel t = new Texel();
+            t.B = this.ReadByte();
+            t.G = this.ReadByte();
+            t.R = this.ReadByte();
+            t.A = this.ReadByte();
+            return t;
         }
 
         public new string ReadString()

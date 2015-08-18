@@ -24,6 +24,7 @@ namespace AoMEngineLibrary.Graphics.Model
     using System;
     using System.Globalization;
     using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 
     /// <summary>
     /// Represents a RGB color.
@@ -36,16 +37,19 @@ namespace AoMEngineLibrary.Graphics.Model
         /// <summary>
         /// Red component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float R;
 
         /// <summary>
         /// Green component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float G;
 
         /// <summary>
         /// Blue component.
         /// </summary>
+        [XmlAttributeAttribute]
         public float B;
 
         /// <summary>

@@ -83,7 +83,7 @@
 
                 for (int i = 0; i < this.Color.NumPaletteColors; i++)
                 {
-                    this.Color.PaletteColors.Add(reader.ReadVertexColor());
+                    this.Color.PaletteColors.Add(reader.ReadTexel());
                 }
 
                 for (int i = 0; i < this.Appearance.NumFiles; i++)
@@ -163,7 +163,7 @@
 
                 for (int i = 0; i < this.Color.NumPaletteColors; i++)
                 {
-                    writer.WriteVertexColor(this.Color.PaletteColors[i]);
+                    writer.WriteTexel(this.Color.PaletteColors[i]);
                 }
 
                 for (int i = 0; i < this.Appearance.NumFiles; i++)

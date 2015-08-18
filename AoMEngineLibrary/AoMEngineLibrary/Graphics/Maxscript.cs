@@ -126,11 +126,6 @@
             return MaxscriptSDK.AssembleScript("quat {0} {1} {2} {3}", q.X, q.Y, q.Z, q.W);
         }
         #region Point3
-        public static string NewPoint3<T>(string name, ref Vector3<T> vector)
-        {
-            Command("{0} = [{1}, {2}, {3}]", name, vector.X, vector.Y, vector.Z);
-            return name;
-        }
         public static string Point3Literal<T>(T X, T Y, T Z)
         {
             return MaxscriptSDK.AssembleScript("[{0}, {1}, {2}]", X, Y, Z);

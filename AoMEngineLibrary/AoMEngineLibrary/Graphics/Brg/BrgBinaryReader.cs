@@ -122,16 +122,14 @@
 
             return color;
         }
-        public Color4D ReadVertexColor()
+        public Texel ReadTexel()
         {
-            Color4D color = new Color4D();
-
-            color.R = this.ReadByte() / (float)Byte.MaxValue;
-            color.G = this.ReadByte() / (float)Byte.MaxValue;
-            color.B = this.ReadByte() / (float)Byte.MaxValue;
-            color.A = this.ReadByte() / (float)Byte.MaxValue;
-
-            return color;
+            Texel t = new Texel();
+            t.B = this.ReadByte();
+            t.G = this.ReadByte();
+            t.R = this.ReadByte();
+            t.A = this.ReadByte();
+            return t;
         }
 
         public float ReadHalf()

@@ -204,7 +204,7 @@
                 this.Colors = new List<Color4D>(this.Header.NumVertices);
                 for (int i = 0; i < this.Header.NumVertices; i++)
                 {
-                    this.Colors.Add(reader.ReadVertexColor());
+                    this.Colors.Add(reader.ReadTexel());
                 }
             }
 
@@ -432,10 +432,7 @@
             {
                 for (int i = 0; i < this.Colors.Count; i++)
                 {
-                    writer.Write((Byte)(this.Colors[i].R * Byte.MaxValue));
-                    writer.Write((Byte)(this.Colors[i].G * Byte.MaxValue));
-                    writer.Write((Byte)(this.Colors[i].B * Byte.MaxValue));
-                    writer.Write((Byte)(this.Colors[i].A * Byte.MaxValue));
+                    writer.WriteTexel(this.Colors[i]);
                 }
             }
 

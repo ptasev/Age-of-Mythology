@@ -13,10 +13,10 @@
         public float CycleTime { get; set; }
         public float CycleTimeVar { get; set; }
         public float WorldLightingInfluence { get; set; }
-        public VertexColor Color { get; set; }
+        public Texel Color { get; set; }
 
         [XmlArrayItem("PaletteColor")]
-        public List<VertexColor> PaletteColors
+        public List<Texel> PaletteColors
         {
             get;
             set;
@@ -30,7 +30,7 @@
 
         private PrtColor()
         {
-            PaletteColors = new List<VertexColor>();
+            PaletteColors = new List<Texel>();
             ColorStages = new List<PrtColorStage>();
         }
         public PrtColor(PrtBinaryReader reader)
@@ -44,9 +44,9 @@
             this.CycleTime = reader.ReadSingle();
             this.CycleTimeVar = reader.ReadSingle();
             this.WorldLightingInfluence = reader.ReadSingle();
-            this.Color = reader.ReadVertexColor();
+            this.Color = reader.ReadTexel();
 
-            this.PaletteColors = new List<VertexColor>(this.NumPaletteColors);
+            this.PaletteColors = new List<Texel>(this.NumPaletteColors);
             this.ColorStages = new List<PrtColorStage>(this.NumStages);
         }
 
@@ -63,7 +63,7 @@
             writer.Write(this.CycleTime);
             writer.Write(this.CycleTimeVar);
             writer.Write(this.WorldLightingInfluence);
-            writer.WriteVertexColor(this.Color);
+            writer.WriteTexel(this.Color);
         }
     }
 }

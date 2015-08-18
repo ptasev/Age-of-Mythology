@@ -5,7 +5,7 @@
     public class PrtColorStage
     {
         public bool UsePalette { get; set; }
-        public VertexColor Color { get; set; }
+        public Texel Color { get; set; }
         public float Hold { get; set; }
         public float Fade { get; set; }
 
@@ -18,7 +18,7 @@
             this.UsePalette = reader.ReadBoolean();
             reader.ReadBytes(3);
 
-            this.Color = reader.ReadVertexColor();
+            this.Color = reader.ReadTexel();
             this.Hold = reader.ReadSingle();
             this.Fade = reader.ReadSingle();
         }
@@ -28,7 +28,7 @@
             writer.Write(this.UsePalette);
             writer.Write(new byte[3]);
 
-            writer.WriteVertexColor(this.Color);
+            writer.WriteTexel(this.Color);
             writer.Write(this.Hold);
             writer.Write(this.Fade);
         }

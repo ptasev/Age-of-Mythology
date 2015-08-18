@@ -571,9 +571,9 @@
 
             Maxscript.SetVarAtTime(time, "{0}BBMax", "{0}.max", mainObject);
             Maxscript.SetVarAtTime(time, "{0}BBMin", "{0}.min", mainObject);
-            Vector3<float> bBoxMax = new Vector3<float>(Maxscript.QueryFloat("{0}BBMax.X", mainObject), Maxscript.QueryFloat("{0}BBMax.Y", mainObject), Maxscript.QueryFloat("{0}BBMax.Z", mainObject));
-            Vector3<float> bBoxMin = new Vector3<float>(Maxscript.QueryFloat("{0}BBMin.X", mainObject), Maxscript.QueryFloat("{0}BBMin.Y", mainObject), Maxscript.QueryFloat("{0}BBMin.Z", mainObject));
-            Vector3<float> bBox = (bBoxMax - bBoxMin) / 2;
+            Vector3D bBoxMax = new Vector3D(Maxscript.QueryFloat("{0}BBMax.X", mainObject), Maxscript.QueryFloat("{0}BBMax.Y", mainObject), Maxscript.QueryFloat("{0}BBMax.Z", mainObject));
+            Vector3D bBoxMin = new Vector3D(Maxscript.QueryFloat("{0}BBMin.X", mainObject), Maxscript.QueryFloat("{0}BBMin.Y", mainObject), Maxscript.QueryFloat("{0}BBMin.Z", mainObject));
+            Vector3D bBox = (bBoxMax - bBoxMin) / 2;
             mesh.Header.MinimumExtent = new Vector3D(-bBox.X, -bBox.Z, -bBox.Y);
             mesh.Header.MaximumExtent = new Vector3D(bBox.X, bBox.Z, bBox.Y);
 
@@ -708,8 +708,8 @@
                     Maxscript.SetVarAtTime(time, "{0}Position", "{0}[{1}].position", attachDummy, i + 1);
                     Maxscript.SetVarAtTime(time, "{0}Scale", "{0}[{1}].scale * {0}[{1}].boxsize", attachDummy, i + 1);
                     //System.Windows.Forms.MessageBox.Show("5.3");
-                    Vector3<float> scale = new Vector3<float>(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
-                    Vector3<float> bBox = scale / 2;
+                    Vector3D scale = new Vector3D(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
+                    Vector3D bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
                     att.XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);

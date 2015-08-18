@@ -11,12 +11,12 @@
         {
         }
 
-        public void WriteVertexColor(VertexColor vertexColor)
+        public void WriteTexel(Texel t)
         {
-            this.Write(vertexColor.R);
-            this.Write(vertexColor.G);
-            this.Write(vertexColor.B);
-            this.Write(vertexColor.A);
+            this.Write(t.B);
+            this.Write(t.G);
+            this.Write(t.R);
+            this.Write(t.A);
         }
 
         public new void Write(string str)

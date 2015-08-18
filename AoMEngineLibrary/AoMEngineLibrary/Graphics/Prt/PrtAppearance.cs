@@ -14,8 +14,8 @@
         public Int32 FrameHeight { get; set; }
         [XmlComment]
         public PrtMaterialType MaterialType { get; set; }
-        public VertexColor Emissive { get; set; }
-        public VertexColor Specular { get; set; }
+        public Texel Emissive { get; set; }
+        public Texel Specular { get; set; }
         public float SpecularExponent { get; set; }
         public float FramesPerSecond { get; set; }
         public float AnimationRate { get; set; }
@@ -49,8 +49,8 @@
             this.FrameWidth = reader.ReadInt32();
             this.FrameHeight = reader.ReadInt32();
             this.MaterialType = (PrtMaterialType)reader.ReadInt32();
-            this.Emissive = reader.ReadVertexColor();
-            this.Specular = reader.ReadVertexColor();
+            this.Emissive = reader.ReadTexel();
+            this.Specular = reader.ReadTexel();
             this.SpecularExponent = reader.ReadSingle();
             this.FramesPerSecond = reader.ReadSingle();
             this.AnimationRate = reader.ReadSingle();
@@ -71,8 +71,8 @@
             writer.Write(this.FrameWidth);
             writer.Write(this.FrameHeight);
             writer.Write((Int32)this.MaterialType);
-            writer.WriteVertexColor(this.Emissive);
-            writer.WriteVertexColor(this.Specular);
+            writer.WriteTexel(this.Emissive);
+            writer.WriteTexel(this.Specular);
             writer.Write(this.SpecularExponent);
             writer.Write(this.FramesPerSecond);
             writer.Write(this.AnimationRate);

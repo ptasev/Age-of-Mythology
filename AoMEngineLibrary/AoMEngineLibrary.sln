@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMBrgEditor", "..\AoMBrgEd
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelEditor", "..\AoMModelEditor\AoMModelEditor.csproj", "{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMMtrlConverter", "..\AoMMtrlConverter\AoMMtrlConverter.csproj", "{FC55F9E0-3E40-4E45-804B-2B477F78A33A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,16 @@ Global
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|x64.ActiveCfg = Release|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FC55F9E0-3E40-4E45-804B-2B477F78A33A}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

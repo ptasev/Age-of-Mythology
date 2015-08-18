@@ -72,21 +72,6 @@
                 }
             }
         }
-        public void WriteVector3(ref Vector3<Int16> v, bool isAom = true)
-        {
-            if (isAom)
-            {
-                this.Write(v.X);
-                this.Write(v.Y);
-                this.Write(v.Z);
-            }
-            else
-            {
-                this.Write((Int16)(-v.X));
-                this.Write((Int16)(-v.Z));
-                this.Write(v.Y);
-            }
-        }
         #endregion
 
         public void WriteColor3D(Color3D color)
@@ -97,10 +82,17 @@
         }
         public void WriteColor4D(Color4D color)
         {
-            this.Write((byte)(color.R * Byte.MaxValue));
-            this.Write((byte)(color.G * Byte.MaxValue));
-            this.Write((byte)(color.B * Byte.MaxValue));
-            this.Write((byte)(color.A * Byte.MaxValue));
+            this.Write(color.R);
+            this.Write(color.G);
+            this.Write(color.B);
+            this.Write(color.A);
+        }
+        public void WriteTexel(Texel t)
+        {
+            this.Write(t.B);
+            this.Write(t.G);
+            this.Write(t.R);
+            this.Write(t.A);
         }
 
         public void WriteHalf(float half)
