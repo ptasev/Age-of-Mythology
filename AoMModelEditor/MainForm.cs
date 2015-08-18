@@ -70,6 +70,7 @@ namespace AoMModelEditor
         public MainForm()
         {
             InitializeComponent();
+            this.Icon = Properties.Resources.Cyclops;
 
             //BrgFile f = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\cavalry g prodromos_attacka.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
             //BrgFile f2 = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\cavalry g prodromos_attacka.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
@@ -400,92 +401,57 @@ namespace AoMModelEditor
 
             return enumVal;
         }
+
+        private void brgObjectsTreeListView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (this.brgObjectsTreeListView.SelectedObject == null)
+            {
+                return;
+            }
+
+            if (this.brgObjectsTreeListView.SelectedObject is BrgAttachpoint)
+            {
+                brg.LoadAttachpointUI();
+            }
+            else if (this.brgObjectsTreeListView.SelectedObject is BrgMesh)
+            {
+                brg.LoadMeshUI();
+            }
+            else if (this.brgObjectsTreeListView.SelectedObject is BrgMaterial)
+            {
+                brg.LoadMaterialUI();
+            }
+
+            this.brgObjectListView.SetObjects(new object[] { this.brgObjectsTreeListView.SelectedObject });
+        }
         #endregion
 
         #region Grn
-        private void openGrnTestToolStripMenuItem_Click(object sender, EventArgs e)
+        private void grnObjectsTreeListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            openFileDialog.FilterIndex = 2;
-            if (!string.IsNullOrEmpty(Settings.OpenFileDialogFileName))
+            if (this.grnObjectsTreeListView.SelectedObject == null)
             {
-                openFileDialog.InitialDirectory = Settings.OpenFileDialogFileName;
+                return;
             }
 
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            if (this.grnObjectsTreeListView.SelectedObject is GrnBone)
             {
-                try
-                {
-                    //@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\lp skult.grn"
-                    grn.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    grn.Import();
-                    debug();
-                    this.Text = "ABE - " + Path.GetFileName(openFileDialog.FileName);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Failed to open file!" + Environment.NewLine + Environment.NewLine + ex.Message, "ABE", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                grn.LoadBoneUI();
             }
-        }
-
-        private void exportGrnTestToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            grn.Export();
-
-            try
+            else if (this.grnObjectsTreeListView.SelectedObject is GrnMesh)
             {
-                DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
-                if (dlgR == DialogResult.Yes)
-                {
-                    Maxscript.Command("resetMaxFile #noprompt");
-                }
-                else if (dlgR == DialogResult.Cancel)
-                {
-                    return;
-                }
+                grn.LoadMeshUI();
             }
-            catch
+            else if (this.grnObjectsTreeListView.SelectedObject is GrnMaterial)
             {
+                grn.LoadMaterialUI();
             }
-            Maxscript.Output.Clear();
-            debug();
-
-            grn.Import();
-        }
-
-        private void saveGrnTestToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(grn.FileName))
+            else if (this.grnObjectsTreeListView.SelectedObject is GrnTexture)
             {
-                saveFileDialog.InitialDirectory = Path.GetDirectoryName(grn.FileName);
+                grn.LoadTextureUI();
             }
-            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(grn.FileName);
 
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    grn.SaveUi();
-                    grn.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
-                    grn.LoadUi();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Failed to save file!" + Environment.NewLine + Environment.NewLine + ex.Message, "ABE", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        void grnObjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //if (grnObjectsListBox.SelectedIndex >= 0)
-            //{
-            //    grnPropsListBox.Items.Clear();
-            //    foreach (KeyValuePair<string, string> prop in grn.File.DataExtensions[grnObjectsListBox.SelectedIndex])
-            //    {
-            //        grnPropsListBox.Items.Add(prop.Key + " -- " + prop.Value);
-            //    }
-            //}
+            this.grnObjectListView.SetObjects(new object[] { this.grnObjectsTreeListView.SelectedObject });
         }
         #endregion
 
@@ -616,56 +582,6 @@ namespace AoMModelEditor
                 //e.SubItem.ForeColor = this.ContrastColor(e.SubItem.BackColor);
                 e.SubItem.Text = string.Empty;
             }
-        }
-
-        private void brgObjectsTreeListView_SelectionChanged(object sender, EventArgs e)
-        {
-            if (this.brgObjectsTreeListView.SelectedObject == null)
-            {
-                return;
-            }
-
-            if (this.brgObjectsTreeListView.SelectedObject is BrgAttachpoint)
-            {
-                brg.LoadAttachpointUI();
-            }
-            else if (this.brgObjectsTreeListView.SelectedObject is BrgMesh)
-            {
-                brg.LoadMeshUI();
-            }
-            else if (this.brgObjectsTreeListView.SelectedObject is BrgMaterial)
-            {
-                brg.LoadMaterialUI();
-            }
-
-            this.brgObjectListView.SetObjects(new object[] { this.brgObjectsTreeListView.SelectedObject });
-        }
-
-        private void grnObjectsTreeListView_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (this.grnObjectsTreeListView.SelectedObject == null)
-            {
-                return;
-            }
-
-            if (this.grnObjectsTreeListView.SelectedObject is GrnBone)
-            {
-                grn.LoadBoneUI();
-            }
-            else if (this.grnObjectsTreeListView.SelectedObject is GrnMesh)
-            {
-                grn.LoadMeshUI();
-            }
-            else if (this.grnObjectsTreeListView.SelectedObject is GrnMaterial)
-            {
-                grn.LoadMaterialUI();
-            }
-            else if (this.grnObjectsTreeListView.SelectedObject is GrnTexture)
-            {
-                grn.LoadTextureUI();
-            }
-
-            this.grnObjectListView.SetObjects(new object[] { this.grnObjectsTreeListView.SelectedObject });
         }
     }
 }

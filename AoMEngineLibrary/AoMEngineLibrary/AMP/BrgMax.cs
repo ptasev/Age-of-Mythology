@@ -359,6 +359,16 @@
                 name += " colorxform1";
             }
 
+            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
+            {
+                name += " pixelxform1";
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.TwoSided))
+            {
+                name += " 2-sided";
+            }
+
             Maxscript.Command("mat.name = \"{0}\"", name);
         }
 

@@ -35,6 +35,7 @@
             this.meshInfoTabPage = new System.Windows.Forms.TabPage();
             this.flagsPanel = new System.Windows.Forms.Panel();
             this.brgObjectDetailsGroupBox = new System.Windows.Forms.GroupBox();
+            this.brgObjectListView = new BrightIdeasSoftware.ObjectListView();
             this.genDataPanel = new System.Windows.Forms.Panel();
             this.brgObjectsGroupBox = new System.Windows.Forms.GroupBox();
             this.brgObjectsTreeListView = new BrightIdeasSoftware.TreeListView();
@@ -45,10 +46,10 @@
             this.grnSettingsTabPage = new System.Windows.Forms.TabPage();
             this.grnSettingsMainPanel = new System.Windows.Forms.Panel();
             this.grnPropsGroupBox = new System.Windows.Forms.GroupBox();
-            this.grnPropsListBox = new System.Windows.Forms.ListBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.grnObjectListView = new BrightIdeasSoftware.ObjectListView();
             this.grnSettingsSidePanel = new System.Windows.Forms.Panel();
             this.grnObjectsGroupBox = new System.Windows.Forms.GroupBox();
+            this.grnObjectsTreeListView = new BrightIdeasSoftware.TreeListView();
             this.grnSettingsGroupBox = new System.Windows.Forms.GroupBox();
             this.grnExportGroupBox = new System.Windows.Forms.GroupBox();
             this.grnExportAnimCheckBox = new System.Windows.Forms.CheckBox();
@@ -66,10 +67,6 @@
             this.beginnersGuideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.brgSettingsInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sourceCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.grnTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openGrnTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportGrnTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveGrnTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.mainStatusStrip = new System.Windows.Forms.StatusStrip();
@@ -83,13 +80,11 @@
             this.matsValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.brgObjectListView = new BrightIdeasSoftware.ObjectListView();
-            this.grnObjectsTreeListView = new BrightIdeasSoftware.TreeListView();
-            this.grnObjectListView = new BrightIdeasSoftware.ObjectListView();
             this.mainTabControl.SuspendLayout();
             this.meshInfoTabPage.SuspendLayout();
             this.flagsPanel.SuspendLayout();
             this.brgObjectDetailsGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.brgObjectListView)).BeginInit();
             this.genDataPanel.SuspendLayout();
             this.brgObjectsGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.brgObjectsTreeListView)).BeginInit();
@@ -98,15 +93,14 @@
             this.grnSettingsTabPage.SuspendLayout();
             this.grnSettingsMainPanel.SuspendLayout();
             this.grnPropsGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grnObjectListView)).BeginInit();
             this.grnSettingsSidePanel.SuspendLayout();
             this.grnObjectsGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grnObjectsTreeListView)).BeginInit();
             this.grnSettingsGroupBox.SuspendLayout();
             this.grnExportGroupBox.SuspendLayout();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.brgObjectListView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.grnObjectsTreeListView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.grnObjectListView)).BeginInit();
             this.SuspendLayout();
             // 
             // saveFileDialog
@@ -162,6 +156,16 @@
             this.brgObjectDetailsGroupBox.TabIndex = 0;
             this.brgObjectDetailsGroupBox.TabStop = false;
             this.brgObjectDetailsGroupBox.Text = "Object Details";
+            // 
+            // brgObjectListView
+            // 
+            this.brgObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgObjectListView.Location = new System.Drawing.Point(4, 19);
+            this.brgObjectListView.Name = "brgObjectListView";
+            this.brgObjectListView.Size = new System.Drawing.Size(758, 579);
+            this.brgObjectListView.TabIndex = 1;
+            this.brgObjectListView.UseCompatibleStateImageBehavior = false;
+            this.brgObjectListView.View = System.Windows.Forms.View.Details;
             // 
             // genDataPanel
             // 
@@ -262,9 +266,7 @@
             // 
             // grnSettingsMainPanel
             // 
-            this.grnSettingsMainPanel.Controls.Add(this.grnPropsListBox);
             this.grnSettingsMainPanel.Controls.Add(this.grnPropsGroupBox);
-            this.grnSettingsMainPanel.Controls.Add(this.richTextBox1);
             this.grnSettingsMainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grnSettingsMainPanel.Location = new System.Drawing.Point(266, 2);
             this.grnSettingsMainPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -280,30 +282,20 @@
             this.grnPropsGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnPropsGroupBox.Name = "grnPropsGroupBox";
             this.grnPropsGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnPropsGroupBox.Size = new System.Drawing.Size(768, 308);
+            this.grnPropsGroupBox.Size = new System.Drawing.Size(768, 606);
             this.grnPropsGroupBox.TabIndex = 1;
             this.grnPropsGroupBox.TabStop = false;
             this.grnPropsGroupBox.Text = "Object Details";
             // 
-            // grnPropsListBox
+            // grnObjectListView
             // 
-            this.grnPropsListBox.FormattingEnabled = true;
-            this.grnPropsListBox.ItemHeight = 16;
-            this.grnPropsListBox.Location = new System.Drawing.Point(256, 330);
-            this.grnPropsListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnPropsListBox.Name = "grnPropsListBox";
-            this.grnPropsListBox.Size = new System.Drawing.Size(462, 244);
-            this.grnPropsListBox.TabIndex = 0;
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 308);
-            this.richTextBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(768, 298);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "";
+            this.grnObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnObjectListView.Location = new System.Drawing.Point(3, 17);
+            this.grnObjectListView.Name = "grnObjectListView";
+            this.grnObjectListView.Size = new System.Drawing.Size(762, 587);
+            this.grnObjectListView.TabIndex = 0;
+            this.grnObjectListView.UseCompatibleStateImageBehavior = false;
+            this.grnObjectListView.View = System.Windows.Forms.View.Details;
             // 
             // grnSettingsSidePanel
             // 
@@ -328,6 +320,19 @@
             this.grnObjectsGroupBox.TabIndex = 1;
             this.grnObjectsGroupBox.TabStop = false;
             this.grnObjectsGroupBox.Text = "Objects";
+            // 
+            // grnObjectsTreeListView
+            // 
+            this.grnObjectsTreeListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnObjectsTreeListView.Location = new System.Drawing.Point(3, 17);
+            this.grnObjectsTreeListView.Name = "grnObjectsTreeListView";
+            this.grnObjectsTreeListView.OwnerDraw = true;
+            this.grnObjectsTreeListView.ShowGroups = false;
+            this.grnObjectsTreeListView.Size = new System.Drawing.Size(257, 502);
+            this.grnObjectsTreeListView.TabIndex = 0;
+            this.grnObjectsTreeListView.UseCompatibleStateImageBehavior = false;
+            this.grnObjectsTreeListView.View = System.Windows.Forms.View.Details;
+            this.grnObjectsTreeListView.VirtualMode = true;
             // 
             // grnSettingsGroupBox
             // 
@@ -383,8 +388,7 @@
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.maxToolStripMenuItem,
-            this.helpToolStripMenuItem,
-            this.grnTestToolStripMenuItem});
+            this.helpToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -406,7 +410,7 @@
             // 
             this.newToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripMenuItem.Image")));
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(179, 26);
             this.newToolStripMenuItem.Text = "New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
@@ -487,38 +491,6 @@
             this.sourceCodeToolStripMenuItem.Size = new System.Drawing.Size(189, 24);
             this.sourceCodeToolStripMenuItem.Text = "Source Code";
             this.sourceCodeToolStripMenuItem.Click += new System.EventHandler(this.sourceCodeToolStripMenuItem_Click);
-            // 
-            // grnTestToolStripMenuItem
-            // 
-            this.grnTestToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openGrnTestToolStripMenuItem,
-            this.exportGrnTestToolStripMenuItem,
-            this.saveGrnTestToolStripMenuItem});
-            this.grnTestToolStripMenuItem.Name = "grnTestToolStripMenuItem";
-            this.grnTestToolStripMenuItem.Size = new System.Drawing.Size(71, 24);
-            this.grnTestToolStripMenuItem.Text = "GrnTest";
-            this.grnTestToolStripMenuItem.Visible = false;
-            // 
-            // openGrnTestToolStripMenuItem
-            // 
-            this.openGrnTestToolStripMenuItem.Name = "openGrnTestToolStripMenuItem";
-            this.openGrnTestToolStripMenuItem.Size = new System.Drawing.Size(179, 24);
-            this.openGrnTestToolStripMenuItem.Text = "Open Grn Test";
-            this.openGrnTestToolStripMenuItem.Click += new System.EventHandler(this.openGrnTestToolStripMenuItem_Click);
-            // 
-            // exportGrnTestToolStripMenuItem
-            // 
-            this.exportGrnTestToolStripMenuItem.Name = "exportGrnTestToolStripMenuItem";
-            this.exportGrnTestToolStripMenuItem.Size = new System.Drawing.Size(179, 24);
-            this.exportGrnTestToolStripMenuItem.Text = "Export Grn Test";
-            this.exportGrnTestToolStripMenuItem.Click += new System.EventHandler(this.exportGrnTestToolStripMenuItem_Click);
-            // 
-            // saveGrnTestToolStripMenuItem
-            // 
-            this.saveGrnTestToolStripMenuItem.Name = "saveGrnTestToolStripMenuItem";
-            this.saveGrnTestToolStripMenuItem.Size = new System.Drawing.Size(179, 24);
-            this.saveGrnTestToolStripMenuItem.Text = "Save Grn Test";
-            this.saveGrnTestToolStripMenuItem.Click += new System.EventHandler(this.saveGrnTestToolStripMenuItem_Click);
             // 
             // openFileDialog
             // 
@@ -607,39 +579,6 @@
             this.animLengthValueToolStripStatusLabel.Size = new System.Drawing.Size(17, 20);
             this.animLengthValueToolStripStatusLabel.Text = "0";
             // 
-            // brgObjectListView
-            // 
-            this.brgObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.brgObjectListView.Location = new System.Drawing.Point(4, 19);
-            this.brgObjectListView.Name = "brgObjectListView";
-            this.brgObjectListView.Size = new System.Drawing.Size(758, 579);
-            this.brgObjectListView.TabIndex = 1;
-            this.brgObjectListView.UseCompatibleStateImageBehavior = false;
-            this.brgObjectListView.View = System.Windows.Forms.View.Details;
-            // 
-            // grnObjectsTreeListView
-            // 
-            this.grnObjectsTreeListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnObjectsTreeListView.Location = new System.Drawing.Point(3, 17);
-            this.grnObjectsTreeListView.Name = "grnObjectsTreeListView";
-            this.grnObjectsTreeListView.OwnerDraw = true;
-            this.grnObjectsTreeListView.ShowGroups = false;
-            this.grnObjectsTreeListView.Size = new System.Drawing.Size(257, 502);
-            this.grnObjectsTreeListView.TabIndex = 0;
-            this.grnObjectsTreeListView.UseCompatibleStateImageBehavior = false;
-            this.grnObjectsTreeListView.View = System.Windows.Forms.View.Details;
-            this.grnObjectsTreeListView.VirtualMode = true;
-            // 
-            // grnObjectListView
-            // 
-            this.grnObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnObjectListView.Location = new System.Drawing.Point(3, 17);
-            this.grnObjectListView.Name = "grnObjectListView";
-            this.grnObjectListView.Size = new System.Drawing.Size(762, 289);
-            this.grnObjectListView.TabIndex = 0;
-            this.grnObjectListView.UseCompatibleStateImageBehavior = false;
-            this.grnObjectListView.View = System.Windows.Forms.View.Details;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -655,6 +594,7 @@
             this.meshInfoTabPage.ResumeLayout(false);
             this.flagsPanel.ResumeLayout(false);
             this.brgObjectDetailsGroupBox.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.brgObjectListView)).EndInit();
             this.genDataPanel.ResumeLayout(false);
             this.brgObjectsGroupBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.brgObjectsTreeListView)).EndInit();
@@ -664,8 +604,10 @@
             this.grnSettingsTabPage.ResumeLayout(false);
             this.grnSettingsMainPanel.ResumeLayout(false);
             this.grnPropsGroupBox.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.grnObjectListView)).EndInit();
             this.grnSettingsSidePanel.ResumeLayout(false);
             this.grnObjectsGroupBox.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.grnObjectsTreeListView)).EndInit();
             this.grnSettingsGroupBox.ResumeLayout(false);
             this.grnExportGroupBox.ResumeLayout(false);
             this.grnExportGroupBox.PerformLayout();
@@ -673,9 +615,6 @@
             this.mainMenuStrip.PerformLayout();
             this.mainStatusStrip.ResumeLayout(false);
             this.mainStatusStrip.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.brgObjectListView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.grnObjectsTreeListView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.grnObjectListView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -698,18 +637,14 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
-        private System.Windows.Forms.ToolStripMenuItem grnTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem maxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exportGrnTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem beginnersGuideToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem brgSettingsInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sourceCodeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openGrnTestToolStripMenuItem;
         private System.Windows.Forms.TabPage grnSettingsTabPage;
-        private System.Windows.Forms.ToolStripMenuItem saveGrnTestToolStripMenuItem;
         private System.Windows.Forms.StatusStrip mainStatusStrip;
         private System.Windows.Forms.ToolStripStatusLabel vertsToolStripStatusLabel;
         public System.Windows.Forms.ToolStripStatusLabel vertsValueToolStripStatusLabel;
@@ -725,11 +660,9 @@
         private System.Windows.Forms.Panel grnSettingsMainPanel;
         private System.Windows.Forms.GroupBox grnSettingsGroupBox;
         private System.Windows.Forms.GroupBox grnExportGroupBox;
-        public System.Windows.Forms.RichTextBox richTextBox1;
         public System.Windows.Forms.CheckBox grnExportAnimCheckBox;
         public System.Windows.Forms.CheckBox grnExportModelCheckBox;
         private System.Windows.Forms.GroupBox grnPropsGroupBox;
-        private System.Windows.Forms.ListBox grnPropsListBox;
         private System.Windows.Forms.GroupBox grnObjectsGroupBox;
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
         private System.Windows.Forms.GroupBox brgImportGroupBox;

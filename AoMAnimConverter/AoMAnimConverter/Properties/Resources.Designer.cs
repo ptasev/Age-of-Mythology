@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AoMModelEditor.Properties {
+namespace AoMAnimConverter.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AoMModelEditor.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AoMModelEditor.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AoMAnimConverter.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace AoMModelEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon Cyclops {
+        internal static System.Drawing.Icon Anubite {
             get {
-                object obj = ResourceManager.GetObject("Cyclops", resourceCulture);
+                object obj = ResourceManager.GetObject("Anubite", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
