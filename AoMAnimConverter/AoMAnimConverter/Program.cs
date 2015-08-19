@@ -1,4 +1,4 @@
-﻿using AoMTextEditor;
+﻿using AoMEngineLibrary.Anim;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,37 +14,47 @@ namespace AoMAnimConverter
         {
             try
             {
-                if (args.Length == 1)
+                Console.WriteLine("--- AAC 1.0 ---");
+                if (args.Length == 0)
                 {
-                    if (!File.Exists(args[0]))
-                    {
-                        throw new Exception("The file does not exist!");
-                    }
-
-                    if (Path.GetExtension(args[0]) == ".xml")
-                    {
-                        AnimFile.ConvertToAnim(File.Open(args[0], FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(args[0] + ".txt", FileMode.Create, FileAccess.Write, FileShare.Read));
-                    }
-                    else
-                    {
-                        AnimFile.ConvertToXml(File.Open(args[0], FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(args[0] + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
-                    }
-
-                    Console.WriteLine("Conversion Successful!");
+                    Console.WriteLine("No input arguments were found!");
+                    Console.WriteLine("Drag and drop an anim or xml file on the EXE to convert.");
                 }
-                else
+
+                foreach (string f in args)
                 {
-                    Console.WriteLine("Please drag and drop an XML or TXT file onto the application executable!");
+                    try
+                    {
+                        Console.WriteLine("Processing " + Path.GetFileName(f) + "...");
+
+                        if (Path.GetExtension(f) == ".txt")
+                        {
+                            AnimFile.ConvertToXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                            Console.WriteLine("Success! Xml created.");
+                        }
+                        else if (Path.GetExtension(f) == ".xml")
+                        {
+                            AnimFile.ConvertToAnim(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(f + ".txt", FileMode.Create, FileAccess.Write, FileShare.Read));
+                            Console.WriteLine("Success! Anim created.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid file extension!");
+                            Console.WriteLine("Drag and drop an anim or xml file on the EXE to convert.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to convert the file!");
+                        Console.WriteLine(ex.ToString());
+                    }
                 }
             }
-            catch (Exception ex)
+            finally
             {
-                Console.WriteLine("An error occured:");
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey(true);
             }
-
-            Console.Write("Press any key to exit...");
-            Console.ReadKey();
         }
     }
 }

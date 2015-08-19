@@ -63,6 +63,7 @@
     <Compile Include="AMP\ProgressDialog.Designer.cs">
       <DependentUpon>ProgressDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Anim\AnimFile.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Graphics\Brg\BrgAsetHeader.cs" />
     <Compile Include="Graphics\Brg\BrgAttachpoint.cs" />

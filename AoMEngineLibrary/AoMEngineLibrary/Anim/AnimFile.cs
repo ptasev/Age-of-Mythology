@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 
-namespace AoMTextEditor
+namespace AoMEngineLibrary.Anim
 {
     public class AnimFile
     {
@@ -97,7 +98,15 @@ namespace AoMTextEditor
                     }
                 }
 
-                XDoc.Save(xmlFile);
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = AnimFile.IndentString,
+                };
+                using (XmlWriter writer = XmlWriter.Create(xmlFile, settings))
+                {
+                    XDoc.Save(writer);
+                }
             }
         }
 
