@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AoMEngineLibrary.Graphics.Grn
 {
-    public class GrnBoneTrack
+    public class GrnBoneTrack : IGrnObject
     {
         public Int32 DataExtensionIndex { get; set; }
         public List<float> PositionKeys { get; set; }

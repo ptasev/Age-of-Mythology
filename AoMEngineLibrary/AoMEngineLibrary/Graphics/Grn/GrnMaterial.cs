@@ -10,7 +10,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GrnMaterial : Material
+    public class GrnMaterial : Material, IGrnObject
     {
         public GrnFile ParentFile { get; set; }
         public Int32 DataExtensionIndex { get; set; }

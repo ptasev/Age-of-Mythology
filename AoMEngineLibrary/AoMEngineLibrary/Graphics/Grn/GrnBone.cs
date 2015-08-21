@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AoMEngineLibrary.Graphics.Grn
 {
-    public class GrnBone
+    public class GrnBone : IGrnObject
     {
         public GrnFile ParentFile { get; set; }
         public string Name

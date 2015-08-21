@@ -1122,32 +1122,29 @@
         {
             this.Plugin.Text = MaxPluginForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
 
-            this.LoadDataExtensions();
+            this.Plugin.grnObjectsTreeListView.ClearObjects();
+            if (this.File.Bones.Count > 0)
+            {
+                this.Plugin.grnObjectsTreeListView.AddObject(this.File.Bones[0]);
+            }
+            this.Plugin.grnObjectsTreeListView.AddObjects(this.File.Meshes);
+            this.Plugin.grnObjectsTreeListView.AddObjects(this.File.Materials);
 
-            if (this.File.Meshes.Count > 0)
+            int totalVerts = 0;
+            int totalFaces = 0;
+            for (int i = 0; i < this.File.Meshes.Count; ++i)
             {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
-                this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
+                totalVerts += this.File.Meshes[i].Vertices.Count;
+                totalFaces += this.File.Meshes[i].Faces.Count;
             }
-            else
-            {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = "0";
-                this.Plugin.facesValueToolStripStatusLabel.Text = "0";
-            }
+            this.Plugin.vertsValueToolStripStatusLabel.Text = totalVerts.ToString();
+            this.Plugin.facesValueToolStripStatusLabel.Text = totalFaces.ToString();
             this.Plugin.meshesValueToolStripStatusLabel.Text = this.File.Meshes.Count.ToString();
             this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
             this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Animation.Duration.ToString();
 
             this.Plugin.grnExportModelCheckBox.Checked = this.ExportSetting.HasFlag(GrnExportSetting.Model);
             this.Plugin.grnExportAnimCheckBox.Checked = this.ExportSetting.HasFlag(GrnExportSetting.Animation);
-        }
-        private void LoadDataExtensions()
-        {
-            this.Plugin.grnObjectsListBox.Items.Clear();
-            for (int i = 0; i < this.File.DataExtensions.Count; ++i)
-            {
-                this.Plugin.grnObjectsListBox.Items.Add(this.File.GetDataExtensionObjectName(i));
-            }
         }
 
         public void SaveUI()

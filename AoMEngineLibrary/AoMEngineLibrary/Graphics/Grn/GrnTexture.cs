@@ -8,7 +8,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GrnTexture : Texture, IEquatable<GrnTexture>
+    public class GrnTexture : Texture, IGrnObject, IEquatable<GrnTexture>
     {
         public Int32 DataExtensionIndex { get; set; }
 

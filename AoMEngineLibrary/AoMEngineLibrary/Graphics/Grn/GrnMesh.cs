@@ -9,7 +9,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GrnMesh : Mesh
+    public class GrnMesh : Mesh, IGrnObject
     {
         public GrnFile ParentFile { get; set; }
         public Int32 DataExtensionIndex { get; set; }

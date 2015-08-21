@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            BrightIdeasSoftware.HeaderStateStyle headerStateStyle1 = new BrightIdeasSoftware.HeaderStateStyle();
-            BrightIdeasSoftware.HeaderStateStyle headerStateStyle2 = new BrightIdeasSoftware.HeaderStateStyle();
-            BrightIdeasSoftware.HeaderStateStyle headerStateStyle3 = new BrightIdeasSoftware.HeaderStateStyle();
+            BrightIdeasSoftware.HeaderStateStyle headerStateStyle4 = new BrightIdeasSoftware.HeaderStateStyle();
+            BrightIdeasSoftware.HeaderStateStyle headerStateStyle5 = new BrightIdeasSoftware.HeaderStateStyle();
+            BrightIdeasSoftware.HeaderStateStyle headerStateStyle6 = new BrightIdeasSoftware.HeaderStateStyle();
             this.specularLevelLabel = new System.Windows.Forms.Label();
             this.materialGroupBox = new System.Windows.Forms.GroupBox();
             this.extractMatButton = new System.Windows.Forms.Button();
@@ -55,9 +55,9 @@
             this.mainTabControl = new System.Windows.Forms.TabControl();
             this.meshInfoTabPage = new System.Windows.Forms.TabPage();
             this.brgDataSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.brgSideTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.brgObjectsGroupBox = new System.Windows.Forms.GroupBox();
             this.brgObjectsTreeListView = new BrightIdeasSoftware.TreeListView();
-            this.headerFormatStyle1 = new BrightIdeasSoftware.HeaderFormatStyle();
             this.brgFlagsTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.brgMeshFormatGroupBox = new System.Windows.Forms.GroupBox();
             this.brgMeshFormatCheckedListBox = new System.Windows.Forms.CheckedListBox();
@@ -75,23 +75,21 @@
             this.brgMaterialTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.brgAttachpointTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.grnSettingsTabPage = new System.Windows.Forms.TabPage();
-            this.grnSettingsMainPanel = new System.Windows.Forms.Panel();
             this.grnPropsGroupBox = new System.Windows.Forms.GroupBox();
             this.grnPropsListBox = new System.Windows.Forms.ListBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.grnSettingsSidePanel = new System.Windows.Forms.Panel();
             this.grnObjectsGroupBox = new System.Windows.Forms.GroupBox();
-            this.grnObjectsListBox = new System.Windows.Forms.ListBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.utilitiesSplitContainer = new System.Windows.Forms.SplitContainer();
             this.attachpointGroupBox = new System.Windows.Forms.GroupBox();
-            this.settingsTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.utilMainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.grnExportGroupBox = new System.Windows.Forms.GroupBox();
             this.grnExportAnimCheckBox = new System.Windows.Forms.CheckBox();
             this.grnExportModelCheckBox = new System.Windows.Forms.CheckBox();
             this.brgImportGroupBox = new System.Windows.Forms.GroupBox();
             this.brgImportCenterModelCheckBox = new System.Windows.Forms.CheckBox();
             this.brgImportAttachScaleCheckBox = new System.Windows.Forms.CheckBox();
+            this.headerFormatStyle1 = new BrightIdeasSoftware.HeaderFormatStyle();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,7 +120,11 @@
             this.matsValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.brgSideTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.grnDataSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.grnSideTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.grnMainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.grnObjectsTreeListView = new BrightIdeasSoftware.TreeListView();
+            this.utilSideTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
             this.mainTabControl.SuspendLayout();
@@ -131,6 +133,7 @@
             this.brgDataSplitContainer.Panel1.SuspendLayout();
             this.brgDataSplitContainer.Panel2.SuspendLayout();
             this.brgDataSplitContainer.SuspendLayout();
+            this.brgSideTableLayoutPanel.SuspendLayout();
             this.brgObjectsGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.brgObjectsTreeListView)).BeginInit();
             this.brgFlagsTableLayoutPanel.SuspendLayout();
@@ -143,9 +146,7 @@
             this.brgMeshInterpTypeFlowLayoutPanel.SuspendLayout();
             this.brgMaterialTableLayoutPanel.SuspendLayout();
             this.grnSettingsTabPage.SuspendLayout();
-            this.grnSettingsMainPanel.SuspendLayout();
             this.grnPropsGroupBox.SuspendLayout();
-            this.grnSettingsSidePanel.SuspendLayout();
             this.grnObjectsGroupBox.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.utilitiesSplitContainer)).BeginInit();
@@ -153,12 +154,19 @@
             this.utilitiesSplitContainer.Panel2.SuspendLayout();
             this.utilitiesSplitContainer.SuspendLayout();
             this.attachpointGroupBox.SuspendLayout();
-            this.settingsTableLayoutPanel.SuspendLayout();
+            this.utilMainTableLayoutPanel.SuspendLayout();
             this.grnExportGroupBox.SuspendLayout();
             this.brgImportGroupBox.SuspendLayout();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
-            this.brgSideTableLayoutPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grnDataSplitContainer)).BeginInit();
+            this.grnDataSplitContainer.Panel1.SuspendLayout();
+            this.grnDataSplitContainer.Panel2.SuspendLayout();
+            this.grnDataSplitContainer.SuspendLayout();
+            this.grnSideTableLayoutPanel.SuspendLayout();
+            this.grnMainTableLayoutPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grnObjectsTreeListView)).BeginInit();
+            this.utilSideTableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // specularLevelLabel
@@ -366,7 +374,7 @@
             this.attachpointListBox.Location = new System.Drawing.Point(3, 17);
             this.attachpointListBox.Margin = new System.Windows.Forms.Padding(4);
             this.attachpointListBox.Name = "attachpointListBox";
-            this.attachpointListBox.Size = new System.Drawing.Size(257, 585);
+            this.attachpointListBox.Size = new System.Drawing.Size(251, 581);
             this.attachpointListBox.TabIndex = 1;
             this.attachpointListBox.MouseEnter += new System.EventHandler(this.attachpointListBox_MouseEnter);
             // 
@@ -414,6 +422,19 @@
             this.brgDataSplitContainer.SplitterDistance = 263;
             this.brgDataSplitContainer.TabIndex = 0;
             // 
+            // brgSideTableLayoutPanel
+            // 
+            this.brgSideTableLayoutPanel.ColumnCount = 1;
+            this.brgSideTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgSideTableLayoutPanel.Controls.Add(this.brgObjectsGroupBox, 0, 0);
+            this.brgSideTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgSideTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.brgSideTableLayoutPanel.Name = "brgSideTableLayoutPanel";
+            this.brgSideTableLayoutPanel.RowCount = 1;
+            this.brgSideTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgSideTableLayoutPanel.Size = new System.Drawing.Size(263, 604);
+            this.brgSideTableLayoutPanel.TabIndex = 1;
+            // 
             // brgObjectsGroupBox
             // 
             this.brgObjectsGroupBox.Controls.Add(this.brgObjectsTreeListView);
@@ -440,21 +461,6 @@
             this.brgObjectsTreeListView.View = System.Windows.Forms.View.Details;
             this.brgObjectsTreeListView.VirtualMode = true;
             this.brgObjectsTreeListView.SelectionChanged += new System.EventHandler(this.brgObjectsTreeListView_SelectionChanged);
-            // 
-            // headerFormatStyle1
-            // 
-            headerStateStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            headerStateStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            headerStateStyle1.ForeColor = System.Drawing.Color.White;
-            headerStateStyle1.FrameWidth = 1F;
-            this.headerFormatStyle1.Hot = headerStateStyle1;
-            headerStateStyle2.BackColor = System.Drawing.Color.Gray;
-            headerStateStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            headerStateStyle2.ForeColor = System.Drawing.Color.White;
-            headerStateStyle2.FrameWidth = 1F;
-            this.headerFormatStyle1.Normal = headerStateStyle2;
-            headerStateStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.headerFormatStyle1.Pressed = headerStateStyle3;
             // 
             // brgFlagsTableLayoutPanel
             // 
@@ -657,8 +663,7 @@
             // 
             // grnSettingsTabPage
             // 
-            this.grnSettingsTabPage.Controls.Add(this.grnSettingsMainPanel);
-            this.grnSettingsTabPage.Controls.Add(this.grnSettingsSidePanel);
+            this.grnSettingsTabPage.Controls.Add(this.grnDataSplitContainer);
             this.grnSettingsTabPage.Location = new System.Drawing.Point(4, 25);
             this.grnSettingsTabPage.Name = "grnSettingsTabPage";
             this.grnSettingsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -667,26 +672,15 @@
             this.grnSettingsTabPage.Text = "Grn Data";
             this.grnSettingsTabPage.UseVisualStyleBackColor = true;
             // 
-            // grnSettingsMainPanel
-            // 
-            this.grnSettingsMainPanel.Controls.Add(this.grnPropsGroupBox);
-            this.grnSettingsMainPanel.Controls.Add(this.richTextBox1);
-            this.grnSettingsMainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnSettingsMainPanel.Location = new System.Drawing.Point(266, 3);
-            this.grnSettingsMainPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnSettingsMainPanel.Name = "grnSettingsMainPanel";
-            this.grnSettingsMainPanel.Size = new System.Drawing.Size(768, 604);
-            this.grnSettingsMainPanel.TabIndex = 2;
-            // 
             // grnPropsGroupBox
             // 
             this.grnPropsGroupBox.Controls.Add(this.grnPropsListBox);
             this.grnPropsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnPropsGroupBox.Location = new System.Drawing.Point(0, 0);
+            this.grnPropsGroupBox.Location = new System.Drawing.Point(3, 2);
             this.grnPropsGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnPropsGroupBox.Name = "grnPropsGroupBox";
             this.grnPropsGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnPropsGroupBox.Size = new System.Drawing.Size(768, 306);
+            this.grnPropsGroupBox.Size = new System.Drawing.Size(758, 418);
             this.grnPropsGroupBox.TabIndex = 1;
             this.grnPropsGroupBox.TabStop = false;
             this.grnPropsGroupBox.Text = "Object Properties";
@@ -699,52 +693,31 @@
             this.grnPropsListBox.Location = new System.Drawing.Point(3, 17);
             this.grnPropsListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnPropsListBox.Name = "grnPropsListBox";
-            this.grnPropsListBox.Size = new System.Drawing.Size(762, 287);
+            this.grnPropsListBox.Size = new System.Drawing.Size(752, 399);
             this.grnPropsListBox.TabIndex = 0;
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 306);
+            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox1.Location = new System.Drawing.Point(3, 424);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(768, 298);
+            this.richTextBox1.Size = new System.Drawing.Size(758, 178);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
-            // grnSettingsSidePanel
-            // 
-            this.grnSettingsSidePanel.Controls.Add(this.grnObjectsGroupBox);
-            this.grnSettingsSidePanel.Dock = System.Windows.Forms.DockStyle.Left;
-            this.grnSettingsSidePanel.Location = new System.Drawing.Point(3, 3);
-            this.grnSettingsSidePanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnSettingsSidePanel.Name = "grnSettingsSidePanel";
-            this.grnSettingsSidePanel.Size = new System.Drawing.Size(263, 604);
-            this.grnSettingsSidePanel.TabIndex = 1;
-            // 
             // grnObjectsGroupBox
             // 
-            this.grnObjectsGroupBox.Controls.Add(this.grnObjectsListBox);
+            this.grnObjectsGroupBox.Controls.Add(this.grnObjectsTreeListView);
             this.grnObjectsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnObjectsGroupBox.Location = new System.Drawing.Point(0, 0);
+            this.grnObjectsGroupBox.Location = new System.Drawing.Point(3, 2);
             this.grnObjectsGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grnObjectsGroupBox.Name = "grnObjectsGroupBox";
             this.grnObjectsGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnObjectsGroupBox.Size = new System.Drawing.Size(263, 604);
+            this.grnObjectsGroupBox.Size = new System.Drawing.Size(257, 600);
             this.grnObjectsGroupBox.TabIndex = 1;
             this.grnObjectsGroupBox.TabStop = false;
             this.grnObjectsGroupBox.Text = "Objects";
-            // 
-            // grnObjectsListBox
-            // 
-            this.grnObjectsListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnObjectsListBox.FormattingEnabled = true;
-            this.grnObjectsListBox.ItemHeight = 16;
-            this.grnObjectsListBox.Location = new System.Drawing.Point(3, 17);
-            this.grnObjectsListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grnObjectsListBox.Name = "grnObjectsListBox";
-            this.grnObjectsListBox.Size = new System.Drawing.Size(257, 585);
-            this.grnObjectsListBox.TabIndex = 0;
             // 
             // tabPage1
             // 
@@ -765,11 +738,11 @@
             // 
             // utilitiesSplitContainer.Panel1
             // 
-            this.utilitiesSplitContainer.Panel1.Controls.Add(this.attachpointGroupBox);
+            this.utilitiesSplitContainer.Panel1.Controls.Add(this.utilSideTableLayoutPanel);
             // 
             // utilitiesSplitContainer.Panel2
             // 
-            this.utilitiesSplitContainer.Panel2.Controls.Add(this.settingsTableLayoutPanel);
+            this.utilitiesSplitContainer.Panel2.Controls.Add(this.utilMainTableLayoutPanel);
             this.utilitiesSplitContainer.Size = new System.Drawing.Size(1031, 604);
             this.utilitiesSplitContainer.SplitterDistance = 263;
             this.utilitiesSplitContainer.TabIndex = 0;
@@ -778,29 +751,29 @@
             // 
             this.attachpointGroupBox.Controls.Add(this.attachpointListBox);
             this.attachpointGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.attachpointGroupBox.Location = new System.Drawing.Point(0, 0);
+            this.attachpointGroupBox.Location = new System.Drawing.Point(3, 2);
             this.attachpointGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.attachpointGroupBox.Name = "attachpointGroupBox";
             this.attachpointGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.attachpointGroupBox.Size = new System.Drawing.Size(263, 604);
+            this.attachpointGroupBox.Size = new System.Drawing.Size(257, 600);
             this.attachpointGroupBox.TabIndex = 1;
             this.attachpointGroupBox.TabStop = false;
             this.attachpointGroupBox.Text = "Attachpoints";
             // 
-            // settingsTableLayoutPanel
+            // utilMainTableLayoutPanel
             // 
-            this.settingsTableLayoutPanel.ColumnCount = 1;
-            this.settingsTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.settingsTableLayoutPanel.Controls.Add(this.grnExportGroupBox, 0, 1);
-            this.settingsTableLayoutPanel.Controls.Add(this.brgImportGroupBox, 0, 0);
-            this.settingsTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.settingsTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.settingsTableLayoutPanel.Name = "settingsTableLayoutPanel";
-            this.settingsTableLayoutPanel.RowCount = 2;
-            this.settingsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.settingsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.settingsTableLayoutPanel.Size = new System.Drawing.Size(764, 604);
-            this.settingsTableLayoutPanel.TabIndex = 0;
+            this.utilMainTableLayoutPanel.ColumnCount = 1;
+            this.utilMainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilMainTableLayoutPanel.Controls.Add(this.grnExportGroupBox, 0, 1);
+            this.utilMainTableLayoutPanel.Controls.Add(this.brgImportGroupBox, 0, 0);
+            this.utilMainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.utilMainTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.utilMainTableLayoutPanel.Name = "utilMainTableLayoutPanel";
+            this.utilMainTableLayoutPanel.RowCount = 2;
+            this.utilMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilMainTableLayoutPanel.Size = new System.Drawing.Size(764, 604);
+            this.utilMainTableLayoutPanel.TabIndex = 0;
             // 
             // grnExportGroupBox
             // 
@@ -873,6 +846,21 @@
             this.brgImportAttachScaleCheckBox.TabIndex = 0;
             this.brgImportAttachScaleCheckBox.Text = "Uniform Attachpoint Scale";
             this.brgImportAttachScaleCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // headerFormatStyle1
+            // 
+            headerStateStyle4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            headerStateStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            headerStateStyle4.ForeColor = System.Drawing.Color.White;
+            headerStateStyle4.FrameWidth = 1F;
+            this.headerFormatStyle1.Hot = headerStateStyle4;
+            headerStateStyle5.BackColor = System.Drawing.Color.Gray;
+            headerStateStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            headerStateStyle5.ForeColor = System.Drawing.Color.White;
+            headerStateStyle5.FrameWidth = 1F;
+            this.headerFormatStyle1.Normal = headerStateStyle5;
+            headerStateStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.headerFormatStyle1.Pressed = headerStateStyle6;
             // 
             // mainMenuStrip
             // 
@@ -994,7 +982,6 @@
             this.grnTestToolStripMenuItem.Name = "grnTestToolStripMenuItem";
             this.grnTestToolStripMenuItem.Size = new System.Drawing.Size(71, 24);
             this.grnTestToolStripMenuItem.Text = "GrnTest";
-            this.grnTestToolStripMenuItem.Visible = false;
             // 
             // openGrnTestToolStripMenuItem
             // 
@@ -1099,18 +1086,76 @@
             this.animLengthValueToolStripStatusLabel.Size = new System.Drawing.Size(17, 20);
             this.animLengthValueToolStripStatusLabel.Text = "0";
             // 
-            // brgSideTableLayoutPanel
+            // grnDataSplitContainer
             // 
-            this.brgSideTableLayoutPanel.ColumnCount = 1;
-            this.brgSideTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.brgSideTableLayoutPanel.Controls.Add(this.brgObjectsGroupBox, 0, 0);
-            this.brgSideTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.brgSideTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.brgSideTableLayoutPanel.Name = "brgSideTableLayoutPanel";
-            this.brgSideTableLayoutPanel.RowCount = 1;
-            this.brgSideTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.brgSideTableLayoutPanel.Size = new System.Drawing.Size(263, 604);
-            this.brgSideTableLayoutPanel.TabIndex = 1;
+            this.grnDataSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnDataSplitContainer.Location = new System.Drawing.Point(3, 3);
+            this.grnDataSplitContainer.Name = "grnDataSplitContainer";
+            // 
+            // grnDataSplitContainer.Panel1
+            // 
+            this.grnDataSplitContainer.Panel1.Controls.Add(this.grnSideTableLayoutPanel);
+            // 
+            // grnDataSplitContainer.Panel2
+            // 
+            this.grnDataSplitContainer.Panel2.Controls.Add(this.grnMainTableLayoutPanel);
+            this.grnDataSplitContainer.Size = new System.Drawing.Size(1031, 604);
+            this.grnDataSplitContainer.SplitterDistance = 263;
+            this.grnDataSplitContainer.TabIndex = 0;
+            // 
+            // grnSideTableLayoutPanel
+            // 
+            this.grnSideTableLayoutPanel.ColumnCount = 1;
+            this.grnSideTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.grnSideTableLayoutPanel.Controls.Add(this.grnObjectsGroupBox, 0, 0);
+            this.grnSideTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnSideTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.grnSideTableLayoutPanel.Name = "grnSideTableLayoutPanel";
+            this.grnSideTableLayoutPanel.RowCount = 1;
+            this.grnSideTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.grnSideTableLayoutPanel.Size = new System.Drawing.Size(263, 604);
+            this.grnSideTableLayoutPanel.TabIndex = 0;
+            // 
+            // grnMainTableLayoutPanel
+            // 
+            this.grnMainTableLayoutPanel.ColumnCount = 1;
+            this.grnMainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.grnMainTableLayoutPanel.Controls.Add(this.richTextBox1, 0, 1);
+            this.grnMainTableLayoutPanel.Controls.Add(this.grnPropsGroupBox, 0, 0);
+            this.grnMainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnMainTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.grnMainTableLayoutPanel.Name = "grnMainTableLayoutPanel";
+            this.grnMainTableLayoutPanel.RowCount = 2;
+            this.grnMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
+            this.grnMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
+            this.grnMainTableLayoutPanel.Size = new System.Drawing.Size(764, 604);
+            this.grnMainTableLayoutPanel.TabIndex = 0;
+            // 
+            // grnObjectsTreeListView
+            // 
+            this.grnObjectsTreeListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grnObjectsTreeListView.Location = new System.Drawing.Point(3, 17);
+            this.grnObjectsTreeListView.Name = "grnObjectsTreeListView";
+            this.grnObjectsTreeListView.OwnerDraw = true;
+            this.grnObjectsTreeListView.ShowGroups = false;
+            this.grnObjectsTreeListView.Size = new System.Drawing.Size(251, 581);
+            this.grnObjectsTreeListView.TabIndex = 0;
+            this.grnObjectsTreeListView.UseCompatibleStateImageBehavior = false;
+            this.grnObjectsTreeListView.View = System.Windows.Forms.View.Details;
+            this.grnObjectsTreeListView.VirtualMode = true;
+            // 
+            // utilSideTableLayoutPanel
+            // 
+            this.utilSideTableLayoutPanel.ColumnCount = 1;
+            this.utilSideTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilSideTableLayoutPanel.Controls.Add(this.attachpointGroupBox, 0, 0);
+            this.utilSideTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.utilSideTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.utilSideTableLayoutPanel.Name = "utilSideTableLayoutPanel";
+            this.utilSideTableLayoutPanel.RowCount = 1;
+            this.utilSideTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilSideTableLayoutPanel.Size = new System.Drawing.Size(263, 604);
+            this.utilSideTableLayoutPanel.TabIndex = 2;
             // 
             // MaxPluginForm
             // 
@@ -1123,6 +1168,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MaxPluginForm";
             this.Text = "AoM Model Plugin";
+            this.Load += new System.EventHandler(this.MaxPluginForm_Load);
             this.materialGroupBox.ResumeLayout(false);
             this.materialGroupBox.PerformLayout();
             this.materialFlagsGroupBox.ResumeLayout(false);
@@ -1132,6 +1178,7 @@
             this.brgDataSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.brgDataSplitContainer)).EndInit();
             this.brgDataSplitContainer.ResumeLayout(false);
+            this.brgSideTableLayoutPanel.ResumeLayout(false);
             this.brgObjectsGroupBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.brgObjectsTreeListView)).EndInit();
             this.brgFlagsTableLayoutPanel.ResumeLayout(false);
@@ -1146,9 +1193,7 @@
             this.brgMeshInterpTypeFlowLayoutPanel.PerformLayout();
             this.brgMaterialTableLayoutPanel.ResumeLayout(false);
             this.grnSettingsTabPage.ResumeLayout(false);
-            this.grnSettingsMainPanel.ResumeLayout(false);
             this.grnPropsGroupBox.ResumeLayout(false);
-            this.grnSettingsSidePanel.ResumeLayout(false);
             this.grnObjectsGroupBox.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.utilitiesSplitContainer.Panel1.ResumeLayout(false);
@@ -1156,7 +1201,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.utilitiesSplitContainer)).EndInit();
             this.utilitiesSplitContainer.ResumeLayout(false);
             this.attachpointGroupBox.ResumeLayout(false);
-            this.settingsTableLayoutPanel.ResumeLayout(false);
+            this.utilMainTableLayoutPanel.ResumeLayout(false);
             this.grnExportGroupBox.ResumeLayout(false);
             this.grnExportGroupBox.PerformLayout();
             this.brgImportGroupBox.ResumeLayout(false);
@@ -1165,7 +1210,14 @@
             this.mainMenuStrip.PerformLayout();
             this.mainStatusStrip.ResumeLayout(false);
             this.mainStatusStrip.PerformLayout();
-            this.brgSideTableLayoutPanel.ResumeLayout(false);
+            this.grnDataSplitContainer.Panel1.ResumeLayout(false);
+            this.grnDataSplitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.grnDataSplitContainer)).EndInit();
+            this.grnDataSplitContainer.ResumeLayout(false);
+            this.grnSideTableLayoutPanel.ResumeLayout(false);
+            this.grnMainTableLayoutPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.grnObjectsTreeListView)).EndInit();
+            this.utilSideTableLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1222,15 +1274,12 @@
         public System.Windows.Forms.ToolStripStatusLabel matsValueToolStripStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel animLengthToolStripStatusLabel;
         public System.Windows.Forms.ToolStripStatusLabel animLengthValueToolStripStatusLabel;
-        private System.Windows.Forms.Panel grnSettingsSidePanel;
-        private System.Windows.Forms.Panel grnSettingsMainPanel;
         private System.Windows.Forms.GroupBox grnExportGroupBox;
         public System.Windows.Forms.CheckBox grnExportAnimCheckBox;
         public System.Windows.Forms.CheckBox grnExportModelCheckBox;
         private System.Windows.Forms.GroupBox grnPropsGroupBox;
         private System.Windows.Forms.ListBox grnPropsListBox;
         private System.Windows.Forms.GroupBox grnObjectsGroupBox;
-        public System.Windows.Forms.ListBox grnObjectsListBox;
         public System.Windows.Forms.CheckedListBox materialFlagsCheckedListBox;
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
         public MaxCustomControls.MaxTextBox specularLevelMaxTextBox;
@@ -1253,7 +1302,7 @@
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.SplitContainer utilitiesSplitContainer;
-        private System.Windows.Forms.TableLayoutPanel settingsTableLayoutPanel;
+        private System.Windows.Forms.TableLayoutPanel utilMainTableLayoutPanel;
         private System.Windows.Forms.SplitContainer brgDataSplitContainer;
         private System.Windows.Forms.TableLayoutPanel brgFlagsTableLayoutPanel;
         private System.Windows.Forms.FlowLayoutPanel brgMeshAnimTypeFlowLayoutPanel;
@@ -1264,5 +1313,10 @@
         private System.Windows.Forms.TableLayoutPanel brgAttachpointTableLayoutPanel;
         private BrightIdeasSoftware.HeaderFormatStyle headerFormatStyle1;
         private System.Windows.Forms.TableLayoutPanel brgSideTableLayoutPanel;
+        private System.Windows.Forms.SplitContainer grnDataSplitContainer;
+        private System.Windows.Forms.TableLayoutPanel grnSideTableLayoutPanel;
+        private System.Windows.Forms.TableLayoutPanel grnMainTableLayoutPanel;
+        public BrightIdeasSoftware.TreeListView grnObjectsTreeListView;
+        private System.Windows.Forms.TableLayoutPanel utilSideTableLayoutPanel;
     }
 }

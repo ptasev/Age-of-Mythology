@@ -5,6 +5,7 @@ namespace AoMEngineLibrary.AMP
     using AoMEngineLibrary.Extensions;
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
+    using AoMEngineLibrary.Graphics.Grn;
     using BrightIdeasSoftware;
     using ManagedServices;
     using MaxCustomControls;
@@ -74,7 +75,6 @@ namespace AoMEngineLibrary.AMP
         public MaxPluginForm()
         {
             InitializeComponent();
-            //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
             this.DoubleBuffered = true;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
@@ -98,6 +98,7 @@ namespace AoMEngineLibrary.AMP
             }
 
             // Brg Tab
+            brgDataSplitContainer.Panel2MinSize = 350;
             brgObjectsGroupBox.ForeColor = uiUp.GetTextColor();
             brgImportGroupBox.ForeColor = uiUp.GetTextColor();
             brgMeshInterpTypeGroupBox.ForeColor = uiUp.GetTextColor();
@@ -122,7 +123,7 @@ namespace AoMEngineLibrary.AMP
             skinBoneRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
             interpolationTypeCheckBox.CheckStateChanged += brgMeshInterpolationTypeCheckBox_CheckStateChanged;
 
-            // Brg Objects View
+            // Tree List View Style
             HeaderFormatStyle treelistviewstyle = new HeaderFormatStyle();
             treelistviewstyle.SetBackColor(uiUp.GetControlColor());
             treelistviewstyle.SetForeColor(uiUp.GetTextColor());
@@ -131,6 +132,8 @@ namespace AoMEngineLibrary.AMP
             treelistviewstyle.Hot.BackColor = uiUp.GetEditControlColor();
             treelistviewstyle.Hot.FrameColor = uiUp.GetButtonLightShadow();
             treelistviewstyle.Hot.FrameWidth = 1;
+
+            // Brg Objects View
             this.brgObjectsTreeListView.MouseEnter += TreeListView_MouseEnter;
             this.brgObjectsTreeListView.SelectedIndexChanged += brgObjectsTreeListView_SelectionChanged;
             this.brgObjectsTreeListView.OwnerDraw = true;
@@ -162,8 +165,9 @@ namespace AoMEngineLibrary.AMP
                 return null;
             };
             OLVColumn nameCol = new OLVColumn("Name", "Name");
-            nameCol.Width = 300;
+            nameCol.Width = 675;
             this.brgObjectsTreeListView.Columns.Add(nameCol);
+
 
             // Attachpoints
             attachpointListBox.MouseDoubleClick += attachpointListBox_MouseDoubleClick;
@@ -207,24 +211,79 @@ namespace AoMEngineLibrary.AMP
             materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
 
             // Grn Tab
+            grnDataSplitContainer.Panel2MinSize = 350;
             grnExportGroupBox.ForeColor = uiUp.GetTextColor();
             grnObjectsGroupBox.ForeColor = uiUp.GetTextColor();
             grnPropsGroupBox.ForeColor = uiUp.GetTextColor();
 
-            grnObjectsListBox.SelectedIndexChanged += grnObjectsListBox_SelectedIndexChanged;
-            grnObjectsListBox.BackColor = uiUp.GetEditControlColor();
-            grnObjectsListBox.ForeColor = uiUp.GetTextColor();
-            grnObjectsListBox.BorderStyle = BorderStyle.None;
             grnPropsListBox.BackColor = uiUp.GetEditControlColor();
             grnPropsListBox.ForeColor = uiUp.GetTextColor();
             grnPropsListBox.BorderStyle = BorderStyle.None;
 
+            // Grn Tree View
+            this.grnObjectsTreeListView.MouseEnter += TreeListView_MouseEnter;
+            this.grnObjectsTreeListView.SelectedIndexChanged += grnObjectsTreeListView_SelectedIndexChanged;
+            this.grnObjectsTreeListView.OwnerDraw = true;
+            this.grnObjectsTreeListView.RowHeight = 10;
+            this.grnObjectsTreeListView.BorderStyle = BorderStyle.FixedSingle;
+            this.grnObjectsTreeListView.OverlayText.BorderColor = uiUp.GetButtonDarkShadow();
+            this.grnObjectsTreeListView.OverlayText.BorderWidth = 2;
+            this.grnObjectsTreeListView.BackColor = uiUp.GetEditControlColor();
+            this.grnObjectsTreeListView.ForeColor = uiUp.GetTextColor();
+            this.grnObjectsTreeListView.HeaderFormatStyle = treelistviewstyle;
+            this.grnObjectsTreeListView.FullRowSelect = true;
+            this.grnObjectsTreeListView.HideSelection = false;
+            this.grnObjectsTreeListView.CanExpandGetter = delegate(object rowObject)
+            {
+                if (rowObject is GrnBone)
+                {
+                    int rowIndex = grn.File.Bones.IndexOf((GrnBone)rowObject);
+                    return grn.File.Bones.Exists(x => x.ParentIndex == rowIndex);
+                }
+                else if (rowObject is GrnMaterial)
+                {
+                    return ((GrnMaterial)rowObject).DiffuseTexture != null;
+                }
+
+                return false;
+            };
+            this.grnObjectsTreeListView.ChildrenGetter = delegate(object rowObject)
+            {
+                if (rowObject is GrnBone)
+                {
+                    int rowIndex = grn.File.Bones.IndexOf((GrnBone)rowObject);
+                    List<GrnBone> bones = grn.File.Bones.FindAll(x => x.ParentIndex == rowIndex);
+                    bones.Remove((GrnBone)rowObject);
+                    return bones;
+                }
+                else if (rowObject is GrnMaterial)
+                {
+                    return new object[] { ((GrnMaterial)rowObject).DiffuseTexture };
+                }
+
+                return null;
+            };
+            nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 675;
+            this.grnObjectsTreeListView.Columns.Add(nameCol);
+        }
+        private void MaxPluginForm_Load(object sender, EventArgs e)
+        {
+#if !DEBUG
+            HideDebugUI();
+#endif
             Settings.Read();
             brg = new BrgMax(this);
             grn = new GrnMax(this);
             brg.LoadUI();
             grn.LoadUI();
             model = brg;
+        }
+        private void HideDebugUI()
+        {
+            this.grnTestToolStripMenuItem.Visible = false;
+            this.richTextBox1.Visible = false;
+            this.grnMainTableLayoutPanel.SetRowSpan(this.grnPropsGroupBox, 2);
         }
 
         private void TreeListView_MouseEnter(object sender, EventArgs e)
@@ -456,7 +515,7 @@ namespace AoMEngineLibrary.AMP
         {
             attachpointListBox.Focus();
         }
-        void attachpointListBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void attachpointListBox_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             int index = attachpointListBox.IndexFromPoint(e.Location);
             if (index != System.Windows.Forms.ListBox.NoMatches)
@@ -471,7 +530,7 @@ namespace AoMEngineLibrary.AMP
         {
             materialFlagsCheckedListBox.Focus();
         }
-        void materialFlagsCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void materialFlagsCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (this.brgObjectsTreeListView.SelectedObject == null ||
                 !(this.brgObjectsTreeListView.SelectedObject is BrgMaterial))
@@ -559,7 +618,7 @@ namespace AoMEngineLibrary.AMP
                 materialFlagsCheckedListBox.ItemCheck += materialFlagsCheckedListBox_ItemCheck;
             }
         }
-        void brgMeshFlagsCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void brgMeshFlagsCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (this.brgObjectsTreeListView.SelectedObject == null ||
                 !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
@@ -585,7 +644,7 @@ namespace AoMEngineLibrary.AMP
 
             brgMeshFlagsCheckedListBox.ItemCheck += brgMeshFlagsCheckedListBox_ItemCheck;
         }
-        void brgMeshFormatCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void brgMeshFormatCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (this.brgObjectsTreeListView.SelectedObject == null ||
                 !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
@@ -611,7 +670,7 @@ namespace AoMEngineLibrary.AMP
 
             brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
         }
-        void brgMeshAnimTypeRadioButton_CheckedChanged(object sender, EventArgs e)
+        private void brgMeshAnimTypeRadioButton_CheckedChanged(object sender, EventArgs e)
         {
             if (this.brgObjectsTreeListView.SelectedObject == null ||
                 !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
@@ -657,7 +716,7 @@ namespace AoMEngineLibrary.AMP
             nonuniRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
             skinBoneRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
         }
-        void brgMeshInterpolationTypeCheckBox_CheckStateChanged(object sender, EventArgs e)
+        private void brgMeshInterpolationTypeCheckBox_CheckStateChanged(object sender, EventArgs e)
         {
             if (this.brgObjectsTreeListView.SelectedObject == null ||
                 !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
@@ -750,15 +809,17 @@ namespace AoMEngineLibrary.AMP
             }
         }
 
-        void grnObjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void grnObjectsTreeListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (grnObjectsListBox.SelectedIndex >= 0)
+            if (this.grnObjectsTreeListView.SelectedObject == null)
             {
-                grnPropsListBox.Items.Clear();
-                foreach (KeyValuePair<string, string> prop in grn.File.DataExtensions[grnObjectsListBox.SelectedIndex])
-                {
-                    grnPropsListBox.Items.Add(prop.Key + " -- " + prop.Value);
-                }
+                return;
+            }
+
+            this.grnPropsListBox.Items.Clear();
+            foreach (KeyValuePair<string, string> prop in grn.File.DataExtensions[((IGrnObject)this.grnObjectsTreeListView.SelectedObject).DataExtensionIndex])
+            {
+                this.grnPropsListBox.Items.Add(prop.Key + " -- " + prop.Value);
             }
         }
         #endregion

@@ -95,6 +95,7 @@
     <Compile Include="Graphics\Grn\GrnMaterial.cs" />
     <Compile Include="Graphics\Grn\GrnMesh.cs" />
     <Compile Include="Graphics\Grn\GrnTexture.cs" />
+    <Compile Include="Graphics\Grn\IGrnObject.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnAnimationTransformTrackKeysNode.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnBoneNode.cs" />
     <Compile Include="Graphics\Grn\Nodes\GrnDataExtensionPropertyNode.cs" />
