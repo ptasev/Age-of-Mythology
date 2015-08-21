@@ -82,6 +82,18 @@
         }
         public static bool TryGetIdByName(string name, out int nId)
         {
+            if (name.Equals("righthandtag", StringComparison.InvariantCultureIgnoreCase))
+            {
+                nId = 50;
+                return true;
+            }
+
+            if (name.Equals("lefthandtag", StringComparison.InvariantCultureIgnoreCase))
+            {
+                nId = 51;
+                return true;
+            }
+
             for (int i = 0; i < AttachpointNames.Length; i++)
             {
                 if (AttachpointNames[i].Equals(name, StringComparison.InvariantCultureIgnoreCase))

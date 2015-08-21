@@ -378,9 +378,9 @@ struct {
 
 				if ((((mHeader.properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (mHeader.properties & COLORCHANNEL) == COLORCHANNEL) && !((mHeader.properties & SECONDARYMESH) == SECONDARYMESH)) || (mHeader.properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
 					struct VertColor {
-						ubyte R;
-						ubyte G;
 						ubyte B;
+						ubyte G;
+						ubyte R;
 						ubyte A;
 					} vertexColor[mHeader.numVertices];
 				}

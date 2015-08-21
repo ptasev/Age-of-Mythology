@@ -12,7 +12,7 @@
     using System.Threading.Tasks;
     using System.Windows.Forms;
 
-    public class GrnMax : IModelMaxUi
+    public class GrnMax : IModelMaxUI
     {
         public GrnFile File { get; set; }
         public MaxPluginForm Plugin { get; set; }
@@ -1118,7 +1118,7 @@
         #endregion
 
         #region UI
-        public void LoadUi()
+        public void LoadUI()
         {
             this.Plugin.Text = MaxPluginForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
 
@@ -1150,7 +1150,7 @@
             }
         }
 
-        public void SaveUi()
+        public void SaveUI()
         {
             // Export Settings
             this.ExportSetting = (GrnExportSetting)0;

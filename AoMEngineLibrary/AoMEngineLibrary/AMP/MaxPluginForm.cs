@@ -2,8 +2,10 @@
 
 namespace AoMEngineLibrary.AMP
 {
+    using AoMEngineLibrary.Extensions;
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
+    using BrightIdeasSoftware;
     using ManagedServices;
     using MaxCustomControls;
     using MiscUtil;
@@ -65,7 +67,7 @@ namespace AoMEngineLibrary.AMP
         }
 
         public static CuiUpdater uiUp;
-        IModelMaxUi model;
+        IModelMaxUI model;
         BrgMax brg;
         GrnMax grn;
 
@@ -73,6 +75,7 @@ namespace AoMEngineLibrary.AMP
         {
             InitializeComponent();
             //this.mainTabControl.TabPages.Remove(this.grnSettingsTabPage);
+            this.DoubleBuffered = true;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
             this.MaximizeBox = false;
@@ -94,31 +97,75 @@ namespace AoMEngineLibrary.AMP
                 mainTabControl.TabPages[i].ForeColor = uiUp.GetTextColor();
             }
 
-            // General Tab
-            generalDataGroupBox.ForeColor = uiUp.GetTextColor();
+            // Brg Tab
+            brgObjectsGroupBox.ForeColor = uiUp.GetTextColor();
             brgImportGroupBox.ForeColor = uiUp.GetTextColor();
-            interpTypeGroupBox.ForeColor = uiUp.GetTextColor();
+            brgMeshInterpTypeGroupBox.ForeColor = uiUp.GetTextColor();
             attachpointGroupBox.ForeColor = uiUp.GetTextColor();
-            genMeshFlagsGroupBox.ForeColor = uiUp.GetTextColor();
-            genMeshFormatGroupBox.ForeColor = uiUp.GetTextColor();
-            genMeshAnimTypeGroupBox.ForeColor = uiUp.GetTextColor();
+            brgMeshFlagsGroupBox.ForeColor = uiUp.GetTextColor();
+            brgMeshFormatGroupBox.ForeColor = uiUp.GetTextColor();
+            brgMeshAnimTypeGroupBox.ForeColor = uiUp.GetTextColor();
 
-            genMeshFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
-            genMeshFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
-            genMeshFlagsCheckedListBox.BorderStyle = BorderStyle.None;
-            genMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
-            genMeshFormatCheckedListBox.BackColor = uiUp.GetEditControlColor();
-            genMeshFormatCheckedListBox.ForeColor = uiUp.GetTextColor();
-            genMeshFormatCheckedListBox.BorderStyle = BorderStyle.None;
-            genMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
+            brgMeshFlagsCheckedListBox.ItemCheck += brgMeshFlagsCheckedListBox_ItemCheck;
+            brgMeshFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
+            brgMeshFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
+            brgMeshFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
+            brgMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
+            brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
+            brgMeshFormatCheckedListBox.BackColor = uiUp.GetEditControlColor();
+            brgMeshFormatCheckedListBox.ForeColor = uiUp.GetTextColor();
+            brgMeshFormatCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
+            brgMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
+
+            keyframeRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+            nonuniRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+            skinBoneRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+            interpolationTypeCheckBox.CheckStateChanged += brgMeshInterpolationTypeCheckBox_CheckStateChanged;
+
+            // Brg Objects View
+            HeaderFormatStyle treelistviewstyle = new HeaderFormatStyle();
+            treelistviewstyle.SetBackColor(uiUp.GetControlColor());
+            treelistviewstyle.SetForeColor(uiUp.GetTextColor());
+            treelistviewstyle.Normal.FrameColor = uiUp.GetButtonLightShadow();
+            treelistviewstyle.Normal.FrameWidth = 1;
+            treelistviewstyle.Hot.BackColor = uiUp.GetEditControlColor();
+            treelistviewstyle.Hot.FrameColor = uiUp.GetButtonLightShadow();
+            treelistviewstyle.Hot.FrameWidth = 1;
+            this.brgObjectsTreeListView.MouseEnter += TreeListView_MouseEnter;
+            this.brgObjectsTreeListView.SelectedIndexChanged += brgObjectsTreeListView_SelectionChanged;
+            this.brgObjectsTreeListView.OwnerDraw = true;
+            this.brgObjectsTreeListView.RowHeight = 10;
+            this.brgObjectsTreeListView.BorderStyle = BorderStyle.FixedSingle;
+            this.brgObjectsTreeListView.OverlayText.BorderColor = uiUp.GetButtonDarkShadow();
+            this.brgObjectsTreeListView.OverlayText.BorderWidth = 2;
+            this.brgObjectsTreeListView.BackColor = uiUp.GetEditControlColor();
+            this.brgObjectsTreeListView.ForeColor = uiUp.GetTextColor();
+            this.brgObjectsTreeListView.HeaderFormatStyle = treelistviewstyle;
+            this.brgObjectsTreeListView.FullRowSelect = true;
+            this.brgObjectsTreeListView.HideSelection = false;
+            this.brgObjectsTreeListView.CanExpandGetter = delegate(object rowObject)
+            {
+                if (rowObject is BrgMesh)
+                {
+                    return ((BrgMesh)rowObject).MeshAnimations.Count > 0;
+                }
+
+                return false;
+            };
+            this.brgObjectsTreeListView.ChildrenGetter = delegate(object rowObject)
+            {
+                if (rowObject is BrgMesh)
+                {
+                    return ((BrgMesh)rowObject).MeshAnimations;
+                }
+
+                return null;
+            };
+            OLVColumn nameCol = new OLVColumn("Name", "Name");
+            nameCol.Width = 300;
+            this.brgObjectsTreeListView.Columns.Add(nameCol);
 
             // Attachpoints
-            attachpointComboBox.SelectedIndexChanged += attachpointComboBox_SelectedIndexChanged;
-            //attachpointComboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            //attachpointComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
-            attachpointComboBox.FlatStyle = FlatStyle.Flat;
-            attachpointComboBox.BackColor = uiUp.GetEditControlColor();
-            attachpointComboBox.ForeColor = uiUp.GetTextColor();
             attachpointListBox.MouseDoubleClick += attachpointListBox_MouseDoubleClick;
             attachpointListBox.BackColor = uiUp.GetEditControlColor();
             attachpointListBox.ForeColor = uiUp.GetTextColor();
@@ -151,20 +198,15 @@ namespace AoMEngineLibrary.AMP
             opacityMaxTextBox.ForeColor = uiUp.GetTextColor();
             specularLevelMaxTextBox.BackColor = uiUp.GetEditControlColor();
             specularLevelMaxTextBox.ForeColor = uiUp.GetTextColor();
-            materialSideGroupBox.BackColor = uiUp.GetControlColor();
-            materialSideGroupBox.ForeColor = uiUp.GetTextColor();
             materialFlagsGroupBox.BackColor = uiUp.GetControlColor();
             materialFlagsGroupBox.ForeColor = uiUp.GetTextColor();
-            materialListBox.SelectedIndexChanged += materialListBox_SelectedIndexChanged;
-            materialListBox.BackColor = uiUp.GetEditControlColor();
-            materialListBox.ForeColor = uiUp.GetTextColor();
+            materialFlagsCheckedListBox.ItemCheck += materialFlagsCheckedListBox_ItemCheck;
             materialFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
             materialFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
             materialFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
 
-            // Grn Settings
-            grnSettingsGroupBox.ForeColor = uiUp.GetTextColor();
+            // Grn Tab
             grnExportGroupBox.ForeColor = uiUp.GetTextColor();
             grnObjectsGroupBox.ForeColor = uiUp.GetTextColor();
             grnPropsGroupBox.ForeColor = uiUp.GetTextColor();
@@ -177,15 +219,17 @@ namespace AoMEngineLibrary.AMP
             grnPropsListBox.ForeColor = uiUp.GetTextColor();
             grnPropsListBox.BorderStyle = BorderStyle.None;
 
-            //plugin = new MaxPlugin();
-            //this.Controls.Add(plugin);
-            //plugin.Dock = DockStyle.Fill;
             Settings.Read();
             brg = new BrgMax(this);
             grn = new GrnMax(this);
-            brg.LoadUi();
-            grn.LoadUi();
+            brg.LoadUI();
+            grn.LoadUI();
             model = brg;
+        }
+
+        private void TreeListView_MouseEnter(object sender, EventArgs e)
+        {
+            ((TreeListView)sender).Focus();
         }
 
         #region UiColors
@@ -268,7 +312,7 @@ namespace AoMEngineLibrary.AMP
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             model.Clear();
-            model.LoadUi();
+            model.LoadUI();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -289,7 +333,7 @@ namespace AoMEngineLibrary.AMP
                 try
                 {
                     model.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    model.LoadUi();
+                    model.LoadUI();
                 }
                 catch (Exception ex)
                 {
@@ -328,9 +372,9 @@ namespace AoMEngineLibrary.AMP
             {
                 try
                 {
-                    model.SaveUi();
+                    model.SaveUI();
                     model.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
-                    model.LoadUi();
+                    model.LoadUI();
                 }
                 catch (Exception ex)
                 {
@@ -352,7 +396,7 @@ namespace AoMEngineLibrary.AMP
                 return;
             }
 
-            model.SaveUi();
+            model.SaveUI();
             //ProgDialog = new ProgressDialog();
             //Thread importThread = new Thread(model.Import);
             //importThread.IsBackground = true;
@@ -360,7 +404,7 @@ namespace AoMEngineLibrary.AMP
             //ProgDialog.ShowDialog();
             //importThread.Join();
             model.Import();
-            model.LoadUi();
+            model.LoadUI();
             debug();
             Maxscript.Output.Clear();
             try
@@ -374,9 +418,9 @@ namespace AoMEngineLibrary.AMP
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            model.SaveUi();
+            model.SaveUI();
             model.Export();
-            model.LoadUi();
+            model.LoadUI();
             try
             {
             }
@@ -420,35 +464,6 @@ namespace AoMEngineLibrary.AMP
                 BrgAttachpoint att = new BrgAttachpoint();
                 att.NameId = BrgAttachpoint.GetIdByName((string)attachpointListBox.Items[index]);
                 Maxscript.NewDummy("newDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
-
-                //if (brg.File.Meshes.Count == 0)
-                //{
-                //    brg.File.Meshes.Add(new BrgMesh(brg.File));
-                //}
-                //brg.File.Meshes[0].Attachpoints.Add(att);
-                //brg.LoadUiAttachpoint();
-                //attachpointComboBox.SelectedIndex = attachpointComboBox.Items.Count - 1;
-            }
-        }
-        void attachpointComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (attachpointComboBox.SelectedItem != null && brg.File.Meshes.Count > 0)
-            {
-                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName());
-                if (Maxscript.QueryBoolean("selectDummy != undefined"))
-                {
-                    Maxscript.Command("select selectDummy");
-                }
-                //else
-                //{
-                //    DialogResult dlgR = MessageBox.Show("Could not find \"" + ((BrgAttachpoint)attachpointComboBox.SelectedItem).GetMaxName() + "\"! Would you like to delete it?", "ABE",
-                //        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
-                //    if (dlgR == DialogResult.Yes)
-                //    {
-                //        brg.File.Meshes[0].Attachpoints.Remove(((BrgAttachpoint)attachpointComboBox.SelectedItem).Index);
-                //        brg.LoadUiAttachpoint();
-                //    }
-                //}
             }
         }
 
@@ -456,11 +471,23 @@ namespace AoMEngineLibrary.AMP
         {
             materialFlagsCheckedListBox.Focus();
         }
-        void materialListBox_SelectedIndexChanged(object sender, EventArgs e)
+        void materialFlagsCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            if (materialListBox.SelectedIndex >= 0)
+            if (this.brgObjectsTreeListView.SelectedObject == null ||
+                !(this.brgObjectsTreeListView.SelectedObject is BrgMaterial))
             {
-                brg.LoadUiMaterialData();
+                return;
+            }
+
+            BrgMaterial mat = (BrgMaterial)this.brgObjectsTreeListView.SelectedObject;
+            mat.Flags = this.materialFlagsCheckedListBox.GetEnum<BrgMatFlag>();
+            if (e.NewValue == CheckState.Checked)
+            {
+                mat.Flags |= (BrgMatFlag)this.materialFlagsCheckedListBox.Items[e.Index];
+            }
+            else
+            {
+                mat.Flags &= ~(BrgMatFlag)this.materialFlagsCheckedListBox.Items[e.Index];
             }
         }
         private void extractMatButton_Click(object sender, EventArgs e)
@@ -476,46 +503,176 @@ namespace AoMEngineLibrary.AMP
 
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                brg.SaveUi();
+                brg.SaveUI();
                 for (int i = 0; i < brg.File.Materials.Count; i++)
                 {
                     MtrlFile mtrl = new MtrlFile(brg.File.Materials[i]);
                     mtrl.Write(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
                     //brg.File.Materials[i].WriteExternal(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
                 }
-                brg.LoadUi();
+                brg.LoadUI();
             }
         }
 
-        public void SetCheckedListBoxSelectedEnums<T>(CheckedListBox box, uint enumVal)
+        private void brgObjectsTreeListView_SelectionChanged(object sender, EventArgs e)
         {
-            for (int i = 0; i < box.Items.Count; i++)
+            if (this.brgObjectsTreeListView.SelectedObject == null)
             {
-                uint prop = Operator.Convert<T, uint>(Operator.Convert<object, T>(box.Items[i]));
-                if ((enumVal & prop) == prop)
+                return;
+            }
+
+            if (this.brgObjectsTreeListView.SelectedObject is BrgAttachpoint)
+            {
+                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)this.brgObjectsTreeListView.SelectedObject).GetMaxName());
+                if (Maxscript.QueryBoolean("selectDummy != undefined"))
                 {
-                    box.SetItemChecked(i, true);
+                    Maxscript.Command("select selectDummy");
                 }
-                else
-                {
-                    box.SetItemChecked(i, false);
-                }
+                this.brgAttachpointTableLayoutPanel.BringToFront();
+            }
+            else if (this.brgObjectsTreeListView.SelectedObject is BrgMesh)
+            {
+                brgMeshFlagsCheckedListBox.ItemCheck -= brgMeshFlagsCheckedListBox_ItemCheck;
+                brgMeshFormatCheckedListBox.ItemCheck -= brgMeshFormatCheckedListBox_ItemCheck;
+                keyframeRadioButton.CheckedChanged -= brgMeshAnimTypeRadioButton_CheckedChanged;
+                nonuniRadioButton.CheckedChanged -= brgMeshAnimTypeRadioButton_CheckedChanged;
+                skinBoneRadioButton.CheckedChanged -= brgMeshAnimTypeRadioButton_CheckedChanged;
+                interpolationTypeCheckBox.CheckStateChanged -= brgMeshInterpolationTypeCheckBox_CheckStateChanged;
+
+                brg.LoadMeshUI();
+                this.brgFlagsTableLayoutPanel.BringToFront();
+
+                brgMeshFlagsCheckedListBox.ItemCheck += brgMeshFlagsCheckedListBox_ItemCheck;
+                brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
+                keyframeRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+                nonuniRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+                skinBoneRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+                interpolationTypeCheckBox.CheckStateChanged += brgMeshInterpolationTypeCheckBox_CheckStateChanged;
+            }
+            else if (this.brgObjectsTreeListView.SelectedObject is BrgMaterial)
+            {
+                materialFlagsCheckedListBox.ItemCheck -= materialFlagsCheckedListBox_ItemCheck;
+
+                brg.LoadMaterialUI();
+                this.brgMaterialTableLayoutPanel.BringToFront();
+
+                materialFlagsCheckedListBox.ItemCheck += materialFlagsCheckedListBox_ItemCheck;
             }
         }
-        public T GetCheckedListBoxSelectedEnums<T>(CheckedListBox box)
+        void brgMeshFlagsCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            if (!typeof(T).IsEnum)
+            if (this.brgObjectsTreeListView.SelectedObject == null ||
+                !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
             {
-                throw new ArgumentException("T must be an enumerated type");
+                return;
             }
 
-            T enumVal = Operator.Convert<int, T>(0);
-            for (int i = 0; i < box.CheckedItems.Count; i++)
+            brgMeshFlagsCheckedListBox.ItemCheck -= brgMeshFlagsCheckedListBox_ItemCheck;
+
+            BrgMesh mesh = (BrgMesh)this.brgObjectsTreeListView.SelectedObject;
+            mesh.Header.Flags = this.brgMeshFlagsCheckedListBox.GetEnum<BrgMeshFlag>();
+            if (e.NewValue == CheckState.Checked)
             {
-                enumVal = Operator.Convert<int, T>(Operator.Or<int>(Operator.Convert<T, int>(enumVal), Operator.Convert<T, int>(Operator.Convert<object, T>(box.CheckedItems[i]))));
+                mesh.Header.Flags |= (BrgMeshFlag)this.brgMeshFlagsCheckedListBox.Items[e.Index];
+            }
+            else
+            {
+                mesh.Header.Flags &= ~(BrgMeshFlag)this.brgMeshFlagsCheckedListBox.Items[e.Index];
             }
 
-            return enumVal;
+            brg.File.UpdateMeshSettings(mesh.Header.Flags, mesh.Header.Format, mesh.Header.AnimationType, mesh.Header.InterpolationType);
+            this.brgMeshFlagsCheckedListBox.SetEnum<BrgMeshFlag>(mesh.Header.Flags);
+
+            brgMeshFlagsCheckedListBox.ItemCheck += brgMeshFlagsCheckedListBox_ItemCheck;
+        }
+        void brgMeshFormatCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (this.brgObjectsTreeListView.SelectedObject == null ||
+                !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
+            {
+                return;
+            }
+
+            brgMeshFormatCheckedListBox.ItemCheck -= brgMeshFormatCheckedListBox_ItemCheck;
+
+            BrgMesh mesh = (BrgMesh)this.brgObjectsTreeListView.SelectedObject;
+            mesh.Header.Format = this.brgMeshFormatCheckedListBox.GetEnum<BrgMeshFormat>();
+            if (e.NewValue == CheckState.Checked)
+            {
+                mesh.Header.Format |= (BrgMeshFormat)this.brgMeshFormatCheckedListBox.Items[e.Index];
+            }
+            else
+            {
+                mesh.Header.Format &= ~(BrgMeshFormat)this.brgMeshFormatCheckedListBox.Items[e.Index];
+            }
+
+            brg.File.UpdateMeshSettings(mesh.Header.Flags, mesh.Header.Format, mesh.Header.AnimationType, mesh.Header.InterpolationType);
+            this.brgMeshFormatCheckedListBox.SetEnum<BrgMeshFormat>(mesh.Header.Format);
+
+            brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
+        }
+        void brgMeshAnimTypeRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.brgObjectsTreeListView.SelectedObject == null ||
+                !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
+            {
+                return;
+            }
+
+            keyframeRadioButton.CheckedChanged -= brgMeshAnimTypeRadioButton_CheckedChanged;
+            nonuniRadioButton.CheckedChanged -= brgMeshAnimTypeRadioButton_CheckedChanged;
+            skinBoneRadioButton.CheckedChanged -= brgMeshAnimTypeRadioButton_CheckedChanged;
+
+            BrgMesh mesh = (BrgMesh)this.brgObjectsTreeListView.SelectedObject;
+
+            if (this.keyframeRadioButton.Checked)
+            {
+                mesh.Header.AnimationType = BrgMeshAnimType.KeyFrame;
+            }
+            else if (this.nonuniRadioButton.Checked)
+            {
+                mesh.Header.AnimationType = BrgMeshAnimType.NonUniform;
+            }
+            else if (this.skinBoneRadioButton.Checked)
+            {
+                mesh.Header.AnimationType = BrgMeshAnimType.SkinBone;
+            }
+
+            brg.File.UpdateMeshSettings(mesh.Header.Flags, mesh.Header.Format, mesh.Header.AnimationType, mesh.Header.InterpolationType);
+
+            if (mesh.Header.AnimationType == BrgMeshAnimType.KeyFrame)
+            {
+                this.keyframeRadioButton.Checked = true;
+            }
+            else if (mesh.Header.AnimationType == BrgMeshAnimType.NonUniform)
+            {
+                this.nonuniRadioButton.Checked = true;
+            }
+            else if (mesh.Header.AnimationType == BrgMeshAnimType.SkinBone)
+            {
+                this.skinBoneRadioButton.Checked = true;
+            }
+
+            keyframeRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+            nonuniRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+            skinBoneRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
+        }
+        void brgMeshInterpolationTypeCheckBox_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (this.brgObjectsTreeListView.SelectedObject == null ||
+                !(this.brgObjectsTreeListView.SelectedObject is BrgMesh))
+            {
+                return;
+            }
+
+            interpolationTypeCheckBox.CheckStateChanged -= brgMeshInterpolationTypeCheckBox_CheckStateChanged;
+
+            BrgMesh mesh = (BrgMesh)this.brgObjectsTreeListView.SelectedObject;
+            mesh.Header.InterpolationType = (BrgMeshInterpolationType)Convert.ToByte(this.interpolationTypeCheckBox.Checked);
+            brg.File.UpdateMeshSettings(mesh.Header.Flags, mesh.Header.Format, mesh.Header.AnimationType, mesh.Header.InterpolationType);
+            this.interpolationTypeCheckBox.Checked = Convert.ToBoolean(mesh.Header.InterpolationType);
+
+            interpolationTypeCheckBox.CheckStateChanged += brgMeshInterpolationTypeCheckBox_CheckStateChanged;
         }
         #endregion
 
@@ -582,9 +739,9 @@ namespace AoMEngineLibrary.AMP
             {
                 try
                 {
-                    grn.SaveUi();
+                    grn.SaveUI();
                     grn.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
-                    grn.LoadUi();
+                    grn.LoadUI();
                 }
                 catch (Exception ex)
                 {
@@ -608,21 +765,20 @@ namespace AoMEngineLibrary.AMP
 
         private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            model.SaveUi();
+            model.SaveUI();
 
-            if (mainTabControl.SelectedIndex == 0 ||
-                mainTabControl.SelectedIndex == 1)
+            if (mainTabControl.SelectedIndex == 0)
             {
                 this.model = this.brg;
                 //MessageBox.Show("brg");
             }
-            else
+            else if (mainTabControl.SelectedIndex == 1)
             {
                 this.model = this.grn;
                 //MessageBox.Show("grn");
             }
 
-            model.LoadUi();
+            model.LoadUI();
         }
 
         [System.Diagnostics.Conditional("DEBUG")] // Don't allow calls to this func in release mode

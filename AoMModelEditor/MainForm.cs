@@ -63,7 +63,7 @@ namespace AoMModelEditor
             }
         }
 
-        IModelUi model;
+        IModelUI model;
         BrgUi brg;
         GrnUi grn;
 
@@ -176,8 +176,8 @@ namespace AoMModelEditor
             Settings.Read();
             brg = new BrgUi(this);
             grn = new GrnUi(this);
-            brg.LoadUi();
-            grn.LoadUi();
+            brg.LoadUI();
+            grn.LoadUI();
             model = brg;
         }
 
@@ -213,7 +213,7 @@ namespace AoMModelEditor
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             model.Clear();
-            model.LoadUi();
+            model.LoadUI();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -234,7 +234,7 @@ namespace AoMModelEditor
                 try
                 {
                     model.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    model.LoadUi();
+                    model.LoadUI();
                 }
                 catch (Exception ex)
                 {
@@ -273,9 +273,9 @@ namespace AoMModelEditor
             {
                 try
                 {
-                    model.SaveUi();
+                    model.SaveUI();
                     model.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
-                    model.LoadUi();
+                    model.LoadUI();
                 }
                 catch (Exception ex)
                 {
@@ -297,9 +297,9 @@ namespace AoMModelEditor
                 return;
             }
 
-            model.SaveUi();
+            model.SaveUI();
             model.Import();
-            model.LoadUi();
+            model.LoadUI();
             debug();
             Maxscript.Output.Clear();
             try
@@ -313,9 +313,9 @@ namespace AoMModelEditor
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            model.SaveUi();
+            model.SaveUI();
             model.Export();
-            model.LoadUi();
+            model.LoadUI();
             try
             {
             }
@@ -360,14 +360,14 @@ namespace AoMModelEditor
 
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                brg.SaveUi();
+                brg.SaveUI();
                 for (int i = 0; i < brg.File.Materials.Count; i++)
                 {
                     MtrlFile mtrl = new MtrlFile(brg.File.Materials[i]);
                     mtrl.Write(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
                     //brg.File.Materials[i].WriteExternal(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
                 }
-                brg.LoadUi();
+                brg.LoadUI();
             }
         }
 

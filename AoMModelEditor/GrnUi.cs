@@ -12,7 +12,7 @@
     using System.Threading.Tasks;
     using System.Windows.Forms;
 
-    public class GrnUi : IModelUi
+    public class GrnUi : IModelUI
     {
         public GrnFile File { get; set; }
         public MainForm Plugin { get; set; }
@@ -62,7 +62,7 @@
         #endregion
 
         #region UI
-        public void LoadUi()
+        public void LoadUI()
         {
             this.Plugin.Text = MainForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
 
@@ -168,7 +168,7 @@
             this.Plugin.grnObjectListView.Columns.Add(fileNameCol);
         }
 
-        public void SaveUi()
+        public void SaveUI()
         {
             // Export Settings
             this.ExportSetting = (GrnExportSetting)0;

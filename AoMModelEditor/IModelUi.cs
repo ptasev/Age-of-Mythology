@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
     using AoMEngineLibrary.Graphics.Model;
 
-    public interface IModelUi
+    public interface IModelUI
     {
         MainForm Plugin { get; set; }
         string FileName { get; set; }
@@ -17,8 +17,8 @@
         void Write(System.IO.FileStream stream);
         void Clear();
 
-        void LoadUi();
-        void SaveUi();
+        void LoadUI();
+        void SaveUI();
 
         void Import();
         void Export();

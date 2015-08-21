@@ -42,6 +42,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JonSkeet.MiscUtil.0.1\lib\net35-Client\MiscUtil.dll</HintPath>
     </Reference>
+    <Reference Include="ObjectListView">
+      <HintPath>..\packages\ObjectListView.Official.2.8.1\lib\net20\ObjectListView.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -64,6 +67,7 @@
       <DependentUpon>ProgressDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Anim\AnimFile.cs" />
+    <Compile Include="Extensions\CheckedListBoxExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Graphics\Brg\BrgAsetHeader.cs" />
     <Compile Include="Graphics\Brg\BrgAttachpoint.cs" />

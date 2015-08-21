@@ -12,7 +12,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public sealed class BrgUi : IModelUi
+    public sealed class BrgUi : IModelUI
     {
         public BrgFile File { get; set; }
         public MainForm Plugin { get; set; }
@@ -45,7 +45,7 @@
             this.File = new BrgFile();
             this.File.Meshes.Add(new BrgMesh(this.File));
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
-            this.File.Meshes[0].Header.InterpolationType = 0;
+            this.File.Meshes[0].Header.InterpolationType = BrgMeshInterpolationType.Default;
             this.File.Meshes[0].Header.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
             this.File.Meshes[0].Header.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
             this.File.Meshes[0].Header.AnimationType = BrgMeshAnimType.KeyFrame;
@@ -63,7 +63,7 @@
         #endregion
 
         #region UI
-        public void LoadUi()
+        public void LoadUI()
         {
             this.Plugin.Text = MainForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
 
@@ -191,7 +191,7 @@
             this.Plugin.brgObjectListView.Columns.Add(posCol);
         }
 
-        public void SaveUi()
+        public void SaveUI()
         {
             this.uniformAttachpointScale = this.Plugin.brgImportAttachScaleCheckBox.Checked;
             this.modelAtCenter = this.Plugin.brgImportCenterModelCheckBox.Checked;

@@ -11,26 +11,19 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public sealed class BrgMax : IModelMaxUi
+    public sealed class BrgMax : IModelMaxUI
     {
         public BrgFile File { get; set; }
         public MaxPluginForm Plugin { get; set; }
         public string FileName { get; set; }
         public int FilterIndex { get { return 1; } }
 
-        public BrgMeshInterpolationType InterpolationType { get; set; }
-        public BrgMeshFlag Flags { get; set; }
-        public BrgMeshFormat Format { get; set; }
-        public BrgMeshAnimType AnimationType { get; set; }
-
-        private BrgMaterial lastMatSelected;
         private bool uniformAttachpointScale;
         private bool modelAtCenter;
 
         public BrgMax(MaxPluginForm plugin)
         {
             this.Clear();
-            this.File = new BrgFile();
             this.FileName = "Untitled";
             this.Plugin = plugin;
         }
@@ -49,11 +42,12 @@
         public void Clear()
         {
             this.File = new BrgFile();
+            this.File.Meshes.Add(new BrgMesh(this.File));
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
-            this.InterpolationType = 0;
-            this.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
-            this.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
-            this.AnimationType = BrgMeshAnimType.KeyFrame;
+            this.File.Meshes[0].Header.InterpolationType = BrgMeshInterpolationType.Default;
+            this.File.Meshes[0].Header.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
+            this.File.Meshes[0].Header.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
+            this.File.Meshes[0].Header.AnimationType = BrgMeshAnimType.KeyFrame;
         }
         #endregion
 
@@ -375,6 +369,10 @@
         public void Export()
         {
             BrgFile brg = this.File;
+            BrgMeshFlag flags = brg.Meshes[0].Header.Flags;
+            BrgMeshFormat format = brg.Meshes[0].Header.Format;
+            BrgMeshAnimType animationType = brg.Meshes[0].Header.AnimationType;
+            BrgMeshInterpolationType interpolationType = brg.Meshes[0].Header.InterpolationType;
 
             Maxscript.Command("ExportBrgData()");
             int meshCount = Maxscript.QueryInteger("brgMeshes.count");
@@ -479,7 +477,7 @@
                         {
                             brg.Meshes[0].MeshAnimations.Add(new BrgMesh(brg));
                         }
-                        brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType);
+                        brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
                         this.ExportBrgMesh(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshKeys[i], matIdMapping);
                     }
                     else
@@ -488,7 +486,7 @@
                         {
                             brg.Meshes.Add(new BrgMesh(brg));
                         }
-                        brg.UpdateMeshSettings(i, this.Flags, this.Format, this.AnimationType, this.InterpolationType);
+                        brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
                         this.ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i], matIdMapping);
                     }
                 }
@@ -499,7 +497,6 @@
                     Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
                 }
             }
-            brg.Header.NumMaterials = brg.Materials.Count;
 
             // Export Attachpoints, and Update some Mesh data
             HashSet<int> usedFaceMaterials = new HashSet<int>();
@@ -545,6 +542,7 @@
                 }
             }
             brg.Materials = usedMats;
+            brg.Header.NumMaterials = brg.Materials.Count;
         }
         private void ExportBrgMesh(string mainObject, BrgMesh mesh, float time, Dictionary<int, int> matIdMapping)
         {
@@ -852,107 +850,51 @@
         #endregion
 
         #region UI
-        public void LoadUi()
+        public void LoadUI()
         {
             this.Plugin.Text = MaxPluginForm.PluginTitle + " - " + Path.GetFileName(this.FileName);
-            // Materials
-            this.LoadUiMaterial();
+
+            this.Plugin.brgObjectsTreeListView.ClearObjects();
+            this.Plugin.brgObjectsTreeListView.AddObject(this.File.Meshes[0]);
+            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Meshes[0].Attachpoints);
+            this.Plugin.brgObjectsTreeListView.SelectObject(this.File.Meshes[0], true);
+            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Materials);
 
             // General Info
-            this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
             this.Plugin.brgImportAttachScaleCheckBox.Checked = this.uniformAttachpointScale;
             this.Plugin.brgImportCenterModelCheckBox.Checked = this.modelAtCenter;
-            //MessageBox.Show("1");
 
-            if (this.File.Meshes.Count > 0)
+            this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
+            this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
+            this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes[0].MeshAnimations.Count + 1).ToString();
+            this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Meshes[0].ExtendedHeader.AnimationLength.ToString();
+            this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
+        }
+        public void LoadMeshUI()
+        {
+            BrgMesh mesh = (BrgMesh)this.Plugin.brgObjectsTreeListView.SelectedObject;
+
+            this.Plugin.interpolationTypeCheckBox.Checked = Convert.ToBoolean(mesh.Header.InterpolationType);
+            this.Plugin.brgMeshFlagsCheckedListBox.SetEnum<BrgMeshFlag>(mesh.Header.Flags);
+            this.Plugin.brgMeshFormatCheckedListBox.SetEnum<BrgMeshFormat>(mesh.Header.Format);
+            
+            if (mesh.Header.AnimationType == BrgMeshAnimType.KeyFrame)
             {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
-                this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
-                this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes[0].MeshAnimations.Count + 1).ToString();
-                //MessageBox.Show("2.1");
-                this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Meshes[0].ExtendedHeader.AnimationLength.ToString();
-                //MessageBox.Show("2.2");
-                this.Plugin.interpolationTypeCheckBox.Checked = Convert.ToBoolean(this.File.Meshes[0].Header.InterpolationType);
-                //MessageBox.Show("2.3");
-
-                // Attachpoints
-                LoadUiAttachpoint();
-
-                for (int i = 0; i < this.Plugin.genMeshFlagsCheckedListBox.Items.Count; i++)
-                {
-                    if (this.File.Meshes[0].Header.Flags.HasFlag((BrgMeshFlag)this.Plugin.genMeshFlagsCheckedListBox.Items[i]))
-                    {
-                        this.Plugin.genMeshFlagsCheckedListBox.SetItemChecked(i, true);
-                    }
-                    else
-                    {
-                        this.Plugin.genMeshFlagsCheckedListBox.SetItemChecked(i, false);
-                    }
-                }
-                for (int i = 0; i < this.Plugin.genMeshFormatCheckedListBox.Items.Count; i++)
-                {
-                    if (this.File.Meshes[0].Header.Format.HasFlag((BrgMeshFormat)this.Plugin.genMeshFormatCheckedListBox.Items[i]))
-                    {
-                        this.Plugin.genMeshFormatCheckedListBox.SetItemChecked(i, true);
-                    }
-                    else
-                    {
-                        this.Plugin.genMeshFormatCheckedListBox.SetItemChecked(i, false);
-                    }
-                }
-                if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.KeyFrame)
-                {
-                    this.Plugin.keyframeRadioButton.Checked = true;
-                }
-                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.NonUniform)
-                {
-                    this.Plugin.nonuniRadioButton.Checked = true;
-                }
-                else if (this.File.Meshes[0].Header.AnimationType == BrgMeshAnimType.SkinBone)
-                {
-                    this.Plugin.skinBoneRadioButton.Checked = true;
-                }
+                this.Plugin.keyframeRadioButton.Checked = true;
             }
-            else
+            else if (mesh.Header.AnimationType == BrgMeshAnimType.NonUniform)
             {
-                this.Plugin.vertsValueToolStripStatusLabel.Text = "0";
-                this.Plugin.facesValueToolStripStatusLabel.Text = "0";
-                this.Plugin.meshesValueToolStripStatusLabel.Text = "0";
-                this.Plugin.animLengthValueToolStripStatusLabel.Text = "0.0";
-                this.Plugin.interpolationTypeCheckBox.Checked = Convert.ToBoolean(this.InterpolationType);
-                this.Plugin.SetCheckedListBoxSelectedEnums<BrgMeshFlag>(this.Plugin.genMeshFlagsCheckedListBox, (uint)this.Flags);
-                this.Plugin.SetCheckedListBoxSelectedEnums<BrgMeshFormat>(this.Plugin.genMeshFormatCheckedListBox, (uint)this.Format);
-
-                if (this.AnimationType == BrgMeshAnimType.KeyFrame)
-                {
-                    this.Plugin.keyframeRadioButton.Checked = true;
-                }
-                else if (this.AnimationType == BrgMeshAnimType.NonUniform)
-                {
-                    this.Plugin.nonuniRadioButton.Checked = true;
-                }
-                else if (this.AnimationType == BrgMeshAnimType.SkinBone)
-                {
-                    this.Plugin.skinBoneRadioButton.Checked = true;
-                }
+                this.Plugin.nonuniRadioButton.Checked = true;
+            }
+            else if (mesh.Header.AnimationType == BrgMeshAnimType.SkinBone)
+            {
+                this.Plugin.skinBoneRadioButton.Checked = true;
             }
         }
-        public void LoadUiMaterial()
+        public void LoadMaterialUI()
         {
-            this.Plugin.materialListBox.DataSource = null;
-            this.Plugin.materialListBox.DataSource = this.File.Materials;
-            this.Plugin.materialListBox.DisplayMember = "EditorName";
+            BrgMaterial mat = (BrgMaterial)this.Plugin.brgObjectsTreeListView.SelectedObject;
 
-        }
-        public void LoadUiMaterialData()
-        {
-            if (this.lastMatSelected != null)
-            {
-                this.lastMatSelected.Flags = this.Plugin.
-                    GetCheckedListBoxSelectedEnums<BrgMatFlag>(this.Plugin.materialFlagsCheckedListBox);
-            }
-            BrgMaterial mat = this.File.Materials[this.Plugin.materialListBox.SelectedIndex];
-            this.lastMatSelected = mat;
             // Update Info
             this.Plugin.diffuseMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.DiffuseColor.R * Byte.MaxValue),
                 Convert.ToByte(mat.DiffuseColor.G * Byte.MaxValue),
@@ -981,58 +923,13 @@
             this.Plugin.bumpMapMaxTextBox.Text = mat.BumpMap;
 
             // Update Flags box
-            for (int i = 0; i < this.Plugin.materialFlagsCheckedListBox.Items.Count; i++)
-            {
-                if (mat.Flags.HasFlag((BrgMatFlag)this.Plugin.materialFlagsCheckedListBox.Items[i]))
-                {
-                    this.Plugin.materialFlagsCheckedListBox.SetItemChecked(i, true);
-                }
-                else
-                {
-                    this.Plugin.materialFlagsCheckedListBox.SetItemChecked(i, false);
-                }
-            }
-        }
-        public void LoadUiAttachpoint()
-        {
-            //attachpointComboBox.DataSource = null;
-            //attachpointComboBox.DataSource = file.Mesh[0].attachpoints.Values;
-            this.Plugin.attachpointComboBox.Items.Clear();
-            foreach (BrgAttachpoint att in this.File.Meshes[0].Attachpoints)
-            {
-                this.Plugin.attachpointComboBox.Items.Add(att);
-            }
-            this.Plugin.attachpointComboBox.ValueMember = "Index";
-            this.Plugin.attachpointComboBox.DisplayMember = "MaxName";
+            this.Plugin.materialFlagsCheckedListBox.SetEnum<BrgMatFlag>(mat.Flags);
         }
 
-        public void SaveUi()
+        public void SaveUI()
         {
             this.uniformAttachpointScale = this.Plugin.brgImportAttachScaleCheckBox.Checked;
             this.modelAtCenter = this.Plugin.brgImportCenterModelCheckBox.Checked;
-            this.InterpolationType = (BrgMeshInterpolationType)Convert.ToByte(this.Plugin.interpolationTypeCheckBox.Checked);
-            this.Flags = this.Plugin.
-                GetCheckedListBoxSelectedEnums<BrgMeshFlag>(this.Plugin.genMeshFlagsCheckedListBox);
-            this.Format = this.Plugin.
-                GetCheckedListBoxSelectedEnums<BrgMeshFormat>(this.Plugin.genMeshFormatCheckedListBox);
-            if (this.Plugin.keyframeRadioButton.Checked)
-            {
-                this.AnimationType = BrgMeshAnimType.KeyFrame;
-            }
-            else if (this.Plugin.nonuniRadioButton.Checked)
-            {
-                this.AnimationType = BrgMeshAnimType.NonUniform;
-            }
-            else if (this.Plugin.skinBoneRadioButton.Checked)
-            {
-                this.AnimationType = BrgMeshAnimType.SkinBone;
-            }
-            this.File.UpdateMeshSettings(this.Flags, this.Format, this.AnimationType, this.InterpolationType);
-            if (this.lastMatSelected != null)
-            {
-                this.lastMatSelected.Flags = this.Plugin.
-                    GetCheckedListBoxSelectedEnums<BrgMatFlag>(this.Plugin.materialFlagsCheckedListBox);
-            }
         }
         #endregion
     }
