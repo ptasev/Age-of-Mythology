@@ -37,6 +37,7 @@
             this.nmMapRadioButton = new System.Windows.Forms.RadioButton();
             this.specMapRadioButton = new System.Windows.Forms.RadioButton();
             this.glossMapRadioButton = new System.Windows.Forms.RadioButton();
+            this.allMapRadioButton = new System.Windows.Forms.RadioButton();
             this.importSettingsGroupBox = new System.Windows.Forms.GroupBox();
             this.importSettingsTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.defaultCompressionGroupBox = new System.Windows.Forms.GroupBox();
@@ -55,7 +56,6 @@
             this.outputGroupBox = new System.Windows.Forms.GroupBox();
             this.outputTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.outputRichTextBox = new System.Windows.Forms.RichTextBox();
-            this.allMapRadioButton = new System.Windows.Forms.RadioButton();
             this.mainTableLayoutPanel.SuspendLayout();
             this.exportSettingsGroupBox.SuspendLayout();
             this.exportSettingsTableLayoutPanel.SuspendLayout();
@@ -90,7 +90,7 @@
             this.mainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 85F));
             this.mainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 115F));
             this.mainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.mainTableLayoutPanel.Size = new System.Drawing.Size(622, 433);
+            this.mainTableLayoutPanel.Size = new System.Drawing.Size(624, 441);
             this.mainTableLayoutPanel.TabIndex = 0;
             // 
             // exportSettingsGroupBox
@@ -99,7 +99,7 @@
             this.exportSettingsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.exportSettingsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.exportSettingsGroupBox.Name = "exportSettingsGroupBox";
-            this.exportSettingsGroupBox.Size = new System.Drawing.Size(616, 74);
+            this.exportSettingsGroupBox.Size = new System.Drawing.Size(618, 74);
             this.exportSettingsGroupBox.TabIndex = 0;
             this.exportSettingsGroupBox.TabStop = false;
             this.exportSettingsGroupBox.Text = "Export Settings";
@@ -110,11 +110,11 @@
             this.exportSettingsTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.exportSettingsTableLayoutPanel.Controls.Add(this.mapGenerationGroupBox, 0, 0);
             this.exportSettingsTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.exportSettingsTableLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.exportSettingsTableLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.exportSettingsTableLayoutPanel.Name = "exportSettingsTableLayoutPanel";
             this.exportSettingsTableLayoutPanel.RowCount = 1;
             this.exportSettingsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.exportSettingsTableLayoutPanel.Size = new System.Drawing.Size(610, 53);
+            this.exportSettingsTableLayoutPanel.Size = new System.Drawing.Size(612, 55);
             this.exportSettingsTableLayoutPanel.TabIndex = 0;
             // 
             // mapGenerationGroupBox
@@ -123,7 +123,7 @@
             this.mapGenerationGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mapGenerationGroupBox.Location = new System.Drawing.Point(3, 3);
             this.mapGenerationGroupBox.Name = "mapGenerationGroupBox";
-            this.mapGenerationGroupBox.Size = new System.Drawing.Size(604, 47);
+            this.mapGenerationGroupBox.Size = new System.Drawing.Size(606, 49);
             this.mapGenerationGroupBox.TabIndex = 0;
             this.mapGenerationGroupBox.TabStop = false;
             this.mapGenerationGroupBox.Text = "Map Generation";
@@ -136,9 +136,9 @@
             this.mapGenFlowLayoutPanel.Controls.Add(this.glossMapRadioButton);
             this.mapGenFlowLayoutPanel.Controls.Add(this.allMapRadioButton);
             this.mapGenFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mapGenFlowLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.mapGenFlowLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.mapGenFlowLayoutPanel.Name = "mapGenFlowLayoutPanel";
-            this.mapGenFlowLayoutPanel.Size = new System.Drawing.Size(598, 26);
+            this.mapGenFlowLayoutPanel.Size = new System.Drawing.Size(600, 30);
             this.mapGenFlowLayoutPanel.TabIndex = 0;
             // 
             // noneMapRadioButton
@@ -146,7 +146,7 @@
             this.noneMapRadioButton.AutoSize = true;
             this.noneMapRadioButton.Location = new System.Drawing.Point(3, 3);
             this.noneMapRadioButton.Name = "noneMapRadioButton";
-            this.noneMapRadioButton.Size = new System.Drawing.Size(63, 21);
+            this.noneMapRadioButton.Size = new System.Drawing.Size(51, 17);
             this.noneMapRadioButton.TabIndex = 0;
             this.noneMapRadioButton.TabStop = true;
             this.noneMapRadioButton.Text = "None";
@@ -155,9 +155,9 @@
             // nmMapRadioButton
             // 
             this.nmMapRadioButton.AutoSize = true;
-            this.nmMapRadioButton.Location = new System.Drawing.Point(72, 3);
+            this.nmMapRadioButton.Location = new System.Drawing.Point(60, 3);
             this.nmMapRadioButton.Name = "nmMapRadioButton";
-            this.nmMapRadioButton.Size = new System.Drawing.Size(74, 21);
+            this.nmMapRadioButton.Size = new System.Drawing.Size(58, 17);
             this.nmMapRadioButton.TabIndex = 1;
             this.nmMapRadioButton.TabStop = true;
             this.nmMapRadioButton.Text = "Normal";
@@ -166,9 +166,9 @@
             // specMapRadioButton
             // 
             this.specMapRadioButton.AutoSize = true;
-            this.specMapRadioButton.Location = new System.Drawing.Point(152, 3);
+            this.specMapRadioButton.Location = new System.Drawing.Point(124, 3);
             this.specMapRadioButton.Name = "specMapRadioButton";
-            this.specMapRadioButton.Size = new System.Drawing.Size(85, 21);
+            this.specMapRadioButton.Size = new System.Drawing.Size(67, 17);
             this.specMapRadioButton.TabIndex = 2;
             this.specMapRadioButton.TabStop = true;
             this.specMapRadioButton.Text = "Specular";
@@ -177,13 +177,24 @@
             // glossMapRadioButton
             // 
             this.glossMapRadioButton.AutoSize = true;
-            this.glossMapRadioButton.Location = new System.Drawing.Point(243, 3);
+            this.glossMapRadioButton.Location = new System.Drawing.Point(197, 3);
             this.glossMapRadioButton.Name = "glossMapRadioButton";
-            this.glossMapRadioButton.Size = new System.Drawing.Size(65, 21);
+            this.glossMapRadioButton.Size = new System.Drawing.Size(51, 17);
             this.glossMapRadioButton.TabIndex = 3;
             this.glossMapRadioButton.TabStop = true;
             this.glossMapRadioButton.Text = "Gloss";
             this.glossMapRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // allMapRadioButton
+            // 
+            this.allMapRadioButton.AutoSize = true;
+            this.allMapRadioButton.Location = new System.Drawing.Point(254, 3);
+            this.allMapRadioButton.Name = "allMapRadioButton";
+            this.allMapRadioButton.Size = new System.Drawing.Size(36, 17);
+            this.allMapRadioButton.TabIndex = 4;
+            this.allMapRadioButton.TabStop = true;
+            this.allMapRadioButton.Text = "All";
+            this.allMapRadioButton.UseVisualStyleBackColor = true;
             // 
             // importSettingsGroupBox
             // 
@@ -191,7 +202,7 @@
             this.importSettingsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.importSettingsGroupBox.Location = new System.Drawing.Point(3, 83);
             this.importSettingsGroupBox.Name = "importSettingsGroupBox";
-            this.importSettingsGroupBox.Size = new System.Drawing.Size(616, 79);
+            this.importSettingsGroupBox.Size = new System.Drawing.Size(618, 79);
             this.importSettingsGroupBox.TabIndex = 1;
             this.importSettingsGroupBox.TabStop = false;
             this.importSettingsGroupBox.Text = "Import Settings";
@@ -204,11 +215,11 @@
             this.importSettingsTableLayoutPanel.Controls.Add(this.defaultCompressionGroupBox, 0, 0);
             this.importSettingsTableLayoutPanel.Controls.Add(this.mipsGroupBox, 1, 0);
             this.importSettingsTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.importSettingsTableLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.importSettingsTableLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.importSettingsTableLayoutPanel.Name = "importSettingsTableLayoutPanel";
             this.importSettingsTableLayoutPanel.RowCount = 1;
             this.importSettingsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.importSettingsTableLayoutPanel.Size = new System.Drawing.Size(610, 58);
+            this.importSettingsTableLayoutPanel.Size = new System.Drawing.Size(612, 60);
             this.importSettingsTableLayoutPanel.TabIndex = 0;
             // 
             // defaultCompressionGroupBox
@@ -217,7 +228,7 @@
             this.defaultCompressionGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.defaultCompressionGroupBox.Location = new System.Drawing.Point(3, 3);
             this.defaultCompressionGroupBox.Name = "defaultCompressionGroupBox";
-            this.defaultCompressionGroupBox.Size = new System.Drawing.Size(514, 52);
+            this.defaultCompressionGroupBox.Size = new System.Drawing.Size(516, 54);
             this.defaultCompressionGroupBox.TabIndex = 0;
             this.defaultCompressionGroupBox.TabStop = false;
             this.defaultCompressionGroupBox.Text = "Default Compression";
@@ -227,9 +238,9 @@
             this.defaultCompressionFlowLayoutPanel.Controls.Add(this.defaultCompressionComboBox);
             this.defaultCompressionFlowLayoutPanel.Controls.Add(this.defaultCompressionLabel);
             this.defaultCompressionFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.defaultCompressionFlowLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.defaultCompressionFlowLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.defaultCompressionFlowLayoutPanel.Name = "defaultCompressionFlowLayoutPanel";
-            this.defaultCompressionFlowLayoutPanel.Size = new System.Drawing.Size(508, 31);
+            this.defaultCompressionFlowLayoutPanel.Size = new System.Drawing.Size(510, 35);
             this.defaultCompressionFlowLayoutPanel.TabIndex = 1;
             // 
             // defaultCompressionComboBox
@@ -237,7 +248,7 @@
             this.defaultCompressionComboBox.FormattingEnabled = true;
             this.defaultCompressionComboBox.Location = new System.Drawing.Point(3, 3);
             this.defaultCompressionComboBox.Name = "defaultCompressionComboBox";
-            this.defaultCompressionComboBox.Size = new System.Drawing.Size(121, 24);
+            this.defaultCompressionComboBox.Size = new System.Drawing.Size(121, 21);
             this.defaultCompressionComboBox.TabIndex = 0;
             // 
             // defaultCompressionLabel
@@ -246,7 +257,7 @@
             this.defaultCompressionLabel.Location = new System.Drawing.Point(130, 6);
             this.defaultCompressionLabel.Margin = new System.Windows.Forms.Padding(3, 6, 3, 3);
             this.defaultCompressionLabel.Name = "defaultCompressionLabel";
-            this.defaultCompressionLabel.Size = new System.Drawing.Size(254, 17);
+            this.defaultCompressionLabel.Size = new System.Drawing.Size(191, 13);
             this.defaultCompressionLabel.TabIndex = 1;
             this.defaultCompressionLabel.Text = "Only used for files without a BTI fmt tag";
             // 
@@ -254,9 +265,9 @@
             // 
             this.mipsGroupBox.Controls.Add(this.mipsFlowLayoutPanel);
             this.mipsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mipsGroupBox.Location = new System.Drawing.Point(523, 3);
+            this.mipsGroupBox.Location = new System.Drawing.Point(525, 3);
             this.mipsGroupBox.Name = "mipsGroupBox";
-            this.mipsGroupBox.Size = new System.Drawing.Size(84, 52);
+            this.mipsGroupBox.Size = new System.Drawing.Size(84, 54);
             this.mipsGroupBox.TabIndex = 1;
             this.mipsGroupBox.TabStop = false;
             this.mipsGroupBox.Text = "Mips";
@@ -265,9 +276,9 @@
             // 
             this.mipsFlowLayoutPanel.Controls.Add(this.mipsNumericUpDown);
             this.mipsFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mipsFlowLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.mipsFlowLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.mipsFlowLayoutPanel.Name = "mipsFlowLayoutPanel";
-            this.mipsFlowLayoutPanel.Size = new System.Drawing.Size(78, 31);
+            this.mipsFlowLayoutPanel.Size = new System.Drawing.Size(78, 35);
             this.mipsFlowLayoutPanel.TabIndex = 0;
             // 
             // mipsNumericUpDown
@@ -275,7 +286,7 @@
             this.mipsNumericUpDown.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mipsNumericUpDown.Location = new System.Drawing.Point(3, 3);
             this.mipsNumericUpDown.Name = "mipsNumericUpDown";
-            this.mipsNumericUpDown.Size = new System.Drawing.Size(72, 22);
+            this.mipsNumericUpDown.Size = new System.Drawing.Size(72, 20);
             this.mipsNumericUpDown.TabIndex = 0;
             // 
             // progressGroupBox
@@ -284,7 +295,7 @@
             this.progressGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.progressGroupBox.Location = new System.Drawing.Point(3, 168);
             this.progressGroupBox.Name = "progressGroupBox";
-            this.progressGroupBox.Size = new System.Drawing.Size(616, 109);
+            this.progressGroupBox.Size = new System.Drawing.Size(618, 109);
             this.progressGroupBox.TabIndex = 2;
             this.progressGroupBox.TabStop = false;
             this.progressGroupBox.Text = "Progress";
@@ -299,23 +310,23 @@
             this.progressTableLayoutPanel.Controls.Add(this.convertButton, 0, 2);
             this.progressTableLayoutPanel.Controls.Add(this.percentageLabel, 1, 0);
             this.progressTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.progressTableLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.progressTableLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.progressTableLayoutPanel.Name = "progressTableLayoutPanel";
             this.progressTableLayoutPanel.RowCount = 3;
             this.progressTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.progressTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.progressTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
-            this.progressTableLayoutPanel.Size = new System.Drawing.Size(610, 88);
+            this.progressTableLayoutPanel.Size = new System.Drawing.Size(612, 90);
             this.progressTableLayoutPanel.TabIndex = 0;
             // 
             // progressBar
             // 
             this.progressTableLayoutPanel.SetColumnSpan(this.progressBar, 2);
             this.progressBar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.progressBar.Location = new System.Drawing.Point(3, 17);
+            this.progressBar.Location = new System.Drawing.Point(3, 18);
             this.progressBar.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(604, 17);
+            this.progressBar.Size = new System.Drawing.Size(606, 18);
             this.progressBar.TabIndex = 0;
             // 
             // processingLabel
@@ -324,7 +335,7 @@
             this.processingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.processingLabel.Location = new System.Drawing.Point(3, 0);
             this.processingLabel.Name = "processingLabel";
-            this.processingLabel.Size = new System.Drawing.Size(554, 17);
+            this.processingLabel.Size = new System.Drawing.Size(556, 18);
             this.processingLabel.TabIndex = 1;
             this.processingLabel.Text = "Processing ...";
             // 
@@ -332,9 +343,9 @@
             // 
             this.progressTableLayoutPanel.SetColumnSpan(this.convertButton, 2);
             this.convertButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.convertButton.Location = new System.Drawing.Point(3, 37);
+            this.convertButton.Location = new System.Drawing.Point(3, 39);
             this.convertButton.Name = "convertButton";
-            this.convertButton.Size = new System.Drawing.Size(604, 48);
+            this.convertButton.Size = new System.Drawing.Size(606, 48);
             this.convertButton.TabIndex = 2;
             this.convertButton.Text = "Convert";
             this.convertButton.UseVisualStyleBackColor = true;
@@ -344,9 +355,9 @@
             // 
             this.percentageLabel.AutoSize = true;
             this.percentageLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.percentageLabel.Location = new System.Drawing.Point(563, 0);
+            this.percentageLabel.Location = new System.Drawing.Point(565, 0);
             this.percentageLabel.Name = "percentageLabel";
-            this.percentageLabel.Size = new System.Drawing.Size(44, 17);
+            this.percentageLabel.Size = new System.Drawing.Size(44, 18);
             this.percentageLabel.TabIndex = 3;
             this.percentageLabel.Text = "100%";
             // 
@@ -356,7 +367,7 @@
             this.outputGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.outputGroupBox.Location = new System.Drawing.Point(3, 283);
             this.outputGroupBox.Name = "outputGroupBox";
-            this.outputGroupBox.Size = new System.Drawing.Size(616, 147);
+            this.outputGroupBox.Size = new System.Drawing.Size(618, 155);
             this.outputGroupBox.TabIndex = 3;
             this.outputGroupBox.TabStop = false;
             this.outputGroupBox.Text = "Output";
@@ -367,11 +378,11 @@
             this.outputTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.outputTableLayoutPanel.Controls.Add(this.outputRichTextBox, 0, 0);
             this.outputTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.outputTableLayoutPanel.Location = new System.Drawing.Point(3, 18);
+            this.outputTableLayoutPanel.Location = new System.Drawing.Point(3, 16);
             this.outputTableLayoutPanel.Name = "outputTableLayoutPanel";
             this.outputTableLayoutPanel.RowCount = 1;
             this.outputTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.outputTableLayoutPanel.Size = new System.Drawing.Size(610, 126);
+            this.outputTableLayoutPanel.Size = new System.Drawing.Size(612, 136);
             this.outputTableLayoutPanel.TabIndex = 0;
             // 
             // outputRichTextBox
@@ -379,31 +390,22 @@
             this.outputRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.outputRichTextBox.Location = new System.Drawing.Point(3, 3);
             this.outputRichTextBox.Name = "outputRichTextBox";
-            this.outputRichTextBox.Size = new System.Drawing.Size(604, 120);
+            this.outputRichTextBox.Size = new System.Drawing.Size(606, 130);
             this.outputRichTextBox.TabIndex = 0;
             this.outputRichTextBox.Text = "";
             // 
-            // allMapRadioButton
-            // 
-            this.allMapRadioButton.AutoSize = true;
-            this.allMapRadioButton.Location = new System.Drawing.Point(314, 3);
-            this.allMapRadioButton.Name = "allMapRadioButton";
-            this.allMapRadioButton.Size = new System.Drawing.Size(44, 21);
-            this.allMapRadioButton.TabIndex = 4;
-            this.allMapRadioButton.TabStop = true;
-            this.allMapRadioButton.Text = "All";
-            this.allMapRadioButton.UseVisualStyleBackColor = true;
-            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(622, 433);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.ClientSize = new System.Drawing.Size(624, 441);
             this.Controls.Add(this.mainTableLayoutPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximumSize = new System.Drawing.Size(640, 480);
+            this.MinimumSize = new System.Drawing.Size(640, 480);
             this.Name = "Form1";
             this.Text = "AoM DDT Converter";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.mainTableLayoutPanel.ResumeLayout(false);
             this.exportSettingsGroupBox.ResumeLayout(false);
             this.exportSettingsTableLayoutPanel.ResumeLayout(false);

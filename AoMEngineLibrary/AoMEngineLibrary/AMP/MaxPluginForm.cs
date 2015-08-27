@@ -208,6 +208,7 @@ namespace AoMEngineLibrary.AMP
             materialFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
             materialFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
             materialFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
+            materialFlagsCheckedListBox.MultiColumn = true;
             materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
 
             // Grn Tab
@@ -281,6 +282,7 @@ namespace AoMEngineLibrary.AMP
         }
         private void HideDebugUI()
         {
+            Maxscript.OutputCommands = false;
             this.grnTestToolStripMenuItem.Visible = false;
             this.richTextBox1.Visible = false;
             this.grnMainTableLayoutPanel.SetRowSpan(this.grnPropsGroupBox, 2);
@@ -831,11 +833,13 @@ namespace AoMEngineLibrary.AMP
             if (mainTabControl.SelectedIndex == 0)
             {
                 this.model = this.brg;
+                this.brgObjectsTreeListView.Focus();
                 //MessageBox.Show("brg");
             }
             else if (mainTabControl.SelectedIndex == 1)
             {
                 this.model = this.grn;
+                this.grnObjectsTreeListView.Focus();
                 //MessageBox.Show("grn");
             }
 
@@ -848,6 +852,25 @@ namespace AoMEngineLibrary.AMP
 #if DEBUGBOX
             MessageBox.Show(message);
 #endif
+        }
+
+        private void brgObjectsTreeListView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W)
+            {
+                int itemCount = this.brgObjectsTreeListView.GetItemCount();
+                int index = this.brgObjectsTreeListView.SelectedIndex;
+                for (int i = 0; i < itemCount; ++i)
+                {
+                    index = ++index % itemCount;
+                    if (this.brgObjectsTreeListView.GetModelObject(index) is BrgMaterial)
+                    {
+                        this.brgObjectsTreeListView.SelectedIndex = index;
+                        e.Handled = true;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

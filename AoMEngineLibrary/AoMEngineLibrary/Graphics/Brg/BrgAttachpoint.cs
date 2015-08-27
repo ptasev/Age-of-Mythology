@@ -84,13 +84,13 @@
         {
             if (name.Equals("righthandtag", StringComparison.InvariantCultureIgnoreCase))
             {
-                nId = 50;
+                nId = 4;
                 return true;
             }
 
             if (name.Equals("lefthandtag", StringComparison.InvariantCultureIgnoreCase))
             {
-                nId = 51;
+                nId = 3;
                 return true;
             }
 

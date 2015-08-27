@@ -77,16 +77,6 @@ namespace AoMModelEditor
             //f2.Materials[0].id = 12212;
             //int eq = f.Materials.IndexOf(f2.Materials[0]);
 
-            //foreach (string s in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\models", "*.brg", SearchOption.AllDirectories))
-            //{
-            //    BrgFile file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-            //    for (int i = 0; i < file.Materials.Count; i++)
-            //    {
-            //        MtrlFile mtrl = new MtrlFile(file.Materials[i]);
-            //        mtrl.Write(File.Open(Path.Combine(@"C:\Games\Steam\steamapps\common\Age of Mythology\mods\AoSW\materials", Path.GetFileNameWithoutExtension(s) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
-            //    }
-            //}
-
             // Brg Objects Viewer
             this.brgObjectListView.FormatCell += objectListView1_FormatCell;
             this.brgObjectListView.CellEditStarting += objectListView1_CellEditStarting;

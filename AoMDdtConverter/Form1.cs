@@ -46,20 +46,25 @@
             : this()
         {
             this.args = args.ToList();
-            foreach (string f in args)
+            //this.args = new List<string>();
+            //this.args.Add(@"C:\Games\Steam\steamapps\common\Age of Mythology\tools\TextureCompiler_v2\converted\agamemnon map.ddt");
+            //this.args.Add(@"C:\Users\Petar\Desktop\TEXTURES\terrain\converted");
+            HashSet<string> filteredFiles = new HashSet<string>();
+            foreach (string f in this.args)
             {
                 FileInfo fi = new FileInfo(f);
 
                 if (fi.Attributes.HasFlag(FileAttributes.Directory))
                 {
-                    this.args.Remove(f);
-                    HashSet<string> filteredFiles = new HashSet<string>();
                     filteredFiles.UnionWith(Directory.GetFiles(f, "*.ddt", SearchOption.TopDirectoryOnly));
                     filteredFiles.UnionWith(Directory.GetFiles(f, "*.tga", SearchOption.TopDirectoryOnly));
-                    this.args.AddRange(filteredFiles);
+                }
+                else
+                {
+                    filteredFiles.Add(f);
                 }
             }
-            //this.args = new string[1] { @"C:\Games\Steam\steamapps\common\Age of Mythology\tools\TextureCompiler_v2\converted\agamemnon map.ddt"};
+            this.args = filteredFiles.ToList();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -287,15 +292,18 @@
             string stderror = process.StandardError.ReadToEnd();
 
             process.WaitForExit();
-            Thread upOut = new Thread( () => this.UpdateProcessOutput(stdoutput, stderror));
-            upOut.Start();
-            upOut.Join();
+            this.UpdateProcessOutput(stdoutput, stderror);
         }
 
         private void UpdateProcessOutput(string std, string err)
         {
             this.UpdateOutput(std);
             this.UpdateOutput(err);
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            this.Size = this.MinimumSize;
         }
     }
 }

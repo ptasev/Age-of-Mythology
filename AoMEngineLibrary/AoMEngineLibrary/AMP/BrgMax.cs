@@ -856,9 +856,9 @@
 
             this.Plugin.brgObjectsTreeListView.ClearObjects();
             this.Plugin.brgObjectsTreeListView.AddObject(this.File.Meshes[0]);
+            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Materials);
             this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Meshes[0].Attachpoints);
             this.Plugin.brgObjectsTreeListView.SelectObject(this.File.Meshes[0], true);
-            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Materials);
 
             // General Info
             this.Plugin.brgImportAttachScaleCheckBox.Checked = this.uniformAttachpointScale;
