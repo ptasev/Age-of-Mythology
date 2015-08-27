@@ -70,6 +70,10 @@
                 output.Add("--######################################## " + name + " ########################################");
             }
         }
+        public static void Format(string message, string arguments, params object[] args)
+        {
+            Command("format \"" + message + "\" " + arguments, args);
+        }
         public static void AtTime(float time, string command, params object[] args)
         {
             Command("at time " + time.ToString(cult) + "s (" + command + ")", args);

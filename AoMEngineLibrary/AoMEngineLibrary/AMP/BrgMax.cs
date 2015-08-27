@@ -55,6 +55,8 @@
         public void Import()
         {
             BrgFile brg = this.File as BrgFile;
+            Maxscript.Command("importStartTime = timeStamp()");
+            //Maxscript.Command("cui.expertModeOn();disableSceneRedraw()");
             Maxscript.Command("frameRate = 30 --{0}", Math.Round(1 / this.File.Animation.TimeStep));
             Maxscript.Interval(0, this.File.Animation.Duration);
 
@@ -98,6 +100,10 @@
                     Maxscript.Command("{0}.material = matGroup", mainObject);
                 }
             }
+
+            //Maxscript.Command("cui.expertModeOff();enableSceneRedraw()");
+            Maxscript.Command("importEndTime = timeStamp()");
+            Maxscript.Format("Import took % seconds\n", "((importEndTime - importStartTime) / 1000.0)");
         }
         private void ImportBrgMesh(string mainObject, BrgMesh mesh, float time)
         {
@@ -121,7 +127,7 @@
             {
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
-                    Maxscript.AnimateAtTime(time, "meshOp.setVert {0} {1} {2}", mainObject, i + 1,
+                    Maxscript.AnimateAtTime(time, "meshSetVertFunc {0} {1} {2}", mainObject, i + 1,
                         Maxscript.Point3Literal<float>(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
                     //Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
                     //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
@@ -210,31 +216,32 @@
                 Maxscript.CommentTitle("Load Normals for first Frame");
                 Maxscript.Command("max modify mode");
                 Maxscript.Command("select {0}", mainObject);
-                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+                Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
                 Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
+                Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
                 for (int i = 0; i < mesh.Faces.Count; ++i)
                 {
-                    Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalID {1} {2} {3}",
-                        mainObject, i + 1, 1, mesh.Faces[i].Indices[0] + 1);
-                    Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalID {1} {2} {3}",
-                        mainObject, i + 1, 2, mesh.Faces[i].Indices[2] + 1);
-                    Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalID {1} {2} {3}",
-                        mainObject, i + 1, 3, mesh.Faces[i].Indices[1] + 1);
+                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                        i + 1, 1, mesh.Faces[i].Indices[0] + 1);
+                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                        i + 1, 2, mesh.Faces[i].Indices[2] + 1);
+                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                        i + 1, 3, mesh.Faces[i].Indices[1] + 1);
                 }
+                Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
+                Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
                 for (int i = 0; i < mesh.Normals.Count; i++)
                 {
-                    Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalExplicit {1}", mainObject, i + 1);
-                    Maxscript.Command("{0}.modifiers[#edit_normals].SetNormal {1} {2}", mainObject, i + 1,
+                    //Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalExplicit {1}", mainObject, i + 1);
+                    Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1,
                         Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
                 }
-                //Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
                 Maxscript.Command("collapseStack {0}", mainObject);
-                //Maxscript.Command("maxOps.CollapseNodeTo {0} 1 true", mainObject);
 
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
                 {
                     Maxscript.Command("select {0}", mainObject);
-                    Maxscript.Command("addModifier {0} (Unwrap_UVW())", mainObject);
+                    Maxscript.Command("addModifier {0} (Unwrap_UVW()) ui:off", mainObject);
 
                     Maxscript.Command("select {0}.verts", mainObject);
                     Maxscript.Animate("{0}.Unwrap_UVW.moveSelected [0,0,0]", mainObject);

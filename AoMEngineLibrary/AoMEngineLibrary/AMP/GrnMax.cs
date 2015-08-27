@@ -58,11 +58,16 @@
         #region Import/Export
         public void Import()
         {
-            //this.Plugin.richTextBox1.AppendText(this.boneMap.Count.ToString() + Environment.NewLine + Environment.NewLine);
+            Maxscript.Command("importStartTime = timeStamp()");
             string mainObject = "mainObject";
             string boneArray = "boneArray";
 
-            if (!this.matGroupInit)
+            if (this.File.Meshes.Count > 0 || Maxscript.QueryBoolean("boneArray == undefined or not(isvalidnode boneArray[1])"))
+            {
+                this.boneMap = new Dictionary<string, int>();
+            }
+            //if (!this.matGroupInit)
+            if (this.File.Materials.Count > 0)
             {
                 Maxscript.Command("matGroup = multimaterial numsubs:{0}", this.File.Materials.Count);
                 this.matGroupInit = true;
@@ -76,7 +81,6 @@
             for (int i = 0; i < this.File.Meshes.Count; i++)
             {
                 this.ImportMesh(this.File.Meshes[i], mainObject, boneArray);
-                Maxscript.Command("select {0}", mainObject);
                 Maxscript.Command("{0}.material = matGroup", mainObject);
             }
             //this.Plugin.ProgDialog.SetProgressValue(70);
@@ -96,6 +100,8 @@
             //this.Plugin.ProgDialog.SetProgressValue(100);
 
             Maxscript.Command("max zoomext sel all");
+            Maxscript.Command("importEndTime = timeStamp()");
+            Maxscript.Format("Import took % seconds\n", "((importEndTime - importStartTime) / 1000.0)");
             //if (this.Plugin.ProgDialog.InvokeRequired)
             //{
             //    this.Plugin.ProgDialog.BeginInvoke(new Action(() => this.Plugin.ProgDialog.Close()));
@@ -118,23 +124,13 @@
 
                 if (this.boneMap.ContainsKey(bone.Name))
                 {
-                    string bPos = Maxscript.NewPoint3<float>("bPos", bone.Position.X, bone.Position.Y, bone.Position.Z);
-                    //Maxscript.Command("bRot = quat {0} {1} {2} {3}", bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-                    //Maxscript.Command("{0}[{1}].rotation = {2}", boneArray, this.boneMap[bone.Name] + 1, "bRot");
-                    //Maxscript.Command("{0}[{1}].position = {2}", boneArray, this.boneMap[bone.Name] + 1, bPos);
-                    //Maxscript.Command("{0}[{1}].scale = {2}", boneArray, this.boneMap[bone.Name] + 1,
-                    //    Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
                     Maxscript.Command("{0}[{1}].transform = {2}", boneArray, this.boneMap[bone.Name] + 1,
                         this.GetBoneLocalTransform(bone, "boneTransMat"));
-
-                    //Maxscript.Command("{0}[{1}].transform = {2}", boneArray, boneMap[bone.Name] + 1, 
-                    //    GrnMax.GetBoneLocalTransform(bone, "boneTransMat"));
                 }
                 else
                 {
                     this.boneMap.Add(bone.Name, this.boneMap.Count);
-                    this.CreateBone(bone);
-                    Maxscript.Append(boneArray, "boneNode");
+                    Maxscript.Append(boneArray, this.CreateBone(bone));
                 }
 
                 if (bone.ParentIndex > 0)
@@ -143,21 +139,7 @@
                         this.boneMap[this.File.Bones[bone.ParentIndex].Name] + 1);
                     Maxscript.Command("{0}[{1}].transform *= {0}[{1}].parent.transform", boneArray, this.boneMap[bone.Name] + 1);
                 }
-                //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.ParentIndex + " " + Environment.NewLine);
-                //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
             }
-
-            //List<GrnBone> bones = this.File.Bones.OrderBy(b => b.ParentIndex).ToList();
-            //for (int i = 0; i < bones.Count; ++i)
-            //{
-            //    GrnBone bone = bones[i];
-            //    if (bone.Name == "__Root")
-            //    {
-            //        continue;
-            //    }
-
-            //    this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.ParentIndex + " " + Environment.NewLine);
-            //}
         }
         private void ImportMesh(GrnMesh mesh, string mainObject, string boneArray)
         {
@@ -176,32 +158,19 @@
 
             for (int i = 0; i < mesh.Vertices.Count; ++i)
             {
-                Maxscript.Append(vertArray, Maxscript.NewPoint3<float>("v",
-                    mesh.Vertices[i].X, mesh.Vertices[i].Y, mesh.Vertices[i].Z));
+                Maxscript.Append(vertArray, Maxscript.Point3Literal(mesh.Vertices[i]));
             }
 
             for (int i = 0; i < mesh.TextureCoordinates.Count; ++i)
             {
-                Maxscript.Append(texVerts, Maxscript.NewPoint3<float>("tV",
-                    mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, mesh.TextureCoordinates[i].Z));
+                Maxscript.Append(texVerts, Maxscript.Point3Literal(mesh.TextureCoordinates[i]));
             }
 
             foreach (var face in mesh.Faces)
             {
                 Maxscript.Append(faceMats, face.MaterialIndex + 1);
-                Maxscript.Append(faceArray, Maxscript.NewPoint3<Int32>("fV", 
-                    face.Indices[0] + 1, face.Indices[1] + 1, face.Indices[2] + 1));
-                Maxscript.Append(tFaceArray, Maxscript.NewPoint3<Int32>("tFV", 
-                    face.TextureIndices[0] + 1, face.TextureIndices[1] + 1, face.TextureIndices[2] + 1));
-                //normArray[face.Indices[0]] = face.NormalIndices[0];
-                //normArray[face.Indices[1]] = face.NormalIndices[1];
-                //normArray[face.Indices[2]] = face.NormalIndices[2];
-                //Maxscript.Command("{0}[{1}] = {2}", normArray, face.Indices[0] + 1,
-                //    Maxscript.Point3Literal(mesh.Normals[face.NormalIndices[0]]));
-                //Maxscript.Command("{0}[{1}] = {2}", normArray, face.Indices[1] + 1,
-                //    Maxscript.Point3Literal(mesh.Normals[face.NormalIndices[1]]));
-                //Maxscript.Command("{0}[{1}] = {2}", normArray, face.Indices[2] + 1,
-                //    Maxscript.Point3Literal(mesh.Normals[face.NormalIndices[2]]));
+                Maxscript.Append(faceArray, Maxscript.Point3Literal(face.Indices[0] + 1, face.Indices[1] + 1, face.Indices[2] + 1));
+                Maxscript.Append(tFaceArray, Maxscript.Point3Literal(face.TextureIndices[0] + 1, face.TextureIndices[1] + 1, face.TextureIndices[2] + 1));
             }
 
             Maxscript.Command("meshBone = getNodeByName \"{0}\"", mesh.Name);
@@ -220,24 +189,23 @@
             }
 
             Maxscript.Command("max modify mode");
-            Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+            Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
             Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
+            Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
             for (int i = 0; i < mesh.Faces.Count; ++i)
             {
-                Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalID {1} {2} {3}",
-                    mainObject, i + 1, 1, mesh.Faces[i].NormalIndices[0] + 1);
-                Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalID {1} {2} {3}",
-                    mainObject, i + 1, 2, mesh.Faces[i].NormalIndices[1] + 1);
-                Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalID {1} {2} {3}",
-                    mainObject, i + 1, 3, mesh.Faces[i].NormalIndices[2] + 1);
+                Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                    i + 1, 1, mesh.Faces[i].NormalIndices[0] + 1);
+                Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                    i + 1, 2, mesh.Faces[i].NormalIndices[1] + 1);
+                Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                    i + 1, 3, mesh.Faces[i].NormalIndices[2] + 1);
             }
+            Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
+            Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
             for (int i = 0; i < mesh.Normals.Count; i++)
             {
-                //Maxscript.Command("setNormal {0} {1} {2}[{1}]", mainObject, i + 1, normArray);
-                //Maxscript.Command("setNormal {0} {1} {2}", mainObject, i + 1, Maxscript.Point3Literal(mesh.Normals[normArray[i]]));
-                Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalExplicit {1}", mainObject, i + 1);
-                Maxscript.Command("{0}.modifiers[#edit_normals].SetNormal {1} {2}", mainObject, i + 1,
-                    Maxscript.Point3Literal(mesh.Normals[i]));
+                Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1, Maxscript.Point3Literal(mesh.Normals[i]));
             }
             Maxscript.Command("maxOps.CollapseNodeTo {0} 1 true", mainObject);
 
@@ -245,16 +213,18 @@
             Maxscript.Command("skinMod = Skin()");
             Maxscript.Command("addModifier {0} skinMod", mainObject);
             Maxscript.Command("modPanel.setCurrentObject skinMod");
+            Maxscript.Command("skinAddBoneFunc = skinOps.addBone");
             for (int i = 0; i < mesh.BoneBindings.Count; ++i)
             {
                 GrnBoneBinding boneBinding = mesh.BoneBindings[i];
                 string boundingScale = Maxscript.NewPoint3<float>("boundingScale",
                     (boneBinding.OBBMax.X - boneBinding.OBBMin.X), (boneBinding.OBBMax.Y - boneBinding.OBBMin.Y), (boneBinding.OBBMax.Z - boneBinding.OBBMin.Z));
                 Maxscript.Command("{0}[{1}].boxsize = {2}", boneArray, this.boneMap[this.File.Bones[boneBinding.BoneIndex].Name] + 1, boundingScale);
-                Maxscript.Command("skinOps.addBone skinMod {0}[{1}] {2}", boneArray,
+                Maxscript.Command("skinAddBoneFunc skinMod {0}[{1}] {2}", boneArray,
                     this.boneMap[this.File.Bones[boneBinding.BoneIndex].Name] + 1, i + 1 == mesh.BoneBindings.Count ? 1 : 0);
             }
             Maxscript.Command("completeRedraw()"); // would get "Exceeded the vertex countSkin:skin" error without this
+            Maxscript.Command("skinReplaceVertWeightsFunc = skinOps.ReplaceVertexWeights");
             for (int i = 0; i < mesh.VertexWeights.Count; ++i)
             {
                 // Index correspond to order that the bones were added to Skin mod
@@ -265,9 +235,9 @@
                     Maxscript.Append(boneIndexArray, mesh.VertexWeights[i].BoneIndices[j] + 1);
                     Maxscript.Append(weightsArray, mesh.VertexWeights[i].Weights[j]);
                 }
-                Maxscript.Command("skinOps.ReplaceVertexWeights skinMod {0} {1} {2}",
+                Maxscript.Command("skinReplaceVertWeightsFunc skinMod {0} {1} {2}",
                     i + 1, 1, 0.0);
-                Maxscript.Command("skinOps.ReplaceVertexWeights skinMod {0} {1} {2}",
+                Maxscript.Command("skinReplaceVertWeightsFunc skinMod {0} {1} {2}",
                     i + 1, boneIndexArray, weightsArray);
             }
         }
@@ -286,7 +256,6 @@
                 // typically bones and bonetracks match up
                 // but won't if an anim file is imported on top of a regular model file
                 int boneArrayIndex = this.boneMap[this.File.Bones[i].Name] + 1;
-                //this.Plugin.richTextBox1.AppendText(i + " " + this.File.GetDataExtensionObjectName(bone.DataExtensionIndex) + " " + bone.Scales[0] + Environment.NewLine);
 
                 Vector3D pos = new Vector3D();
                 Quaternion rot = new Quaternion();
@@ -316,46 +285,9 @@
                         scale = bone.Scales[index];
                     }
 
-                    //Maxscript.Command("addNewKey {0}[{1}][3].controller {2}s", boneArray, boneArrayIndex, keys[j]);
                     Maxscript.AnimateAtTime(keys[j], "{0}[{1}][3].controller.value = {2}",
                         boneArray, boneArrayIndex, this.GetBoneLocalTransform("bAnimMatrix", pos, rot, scale));
-                    //Maxscript.Command("{0}[{1}][3].controller.keys[{2}].value = {3}",
-                    //    boneArray, boneArrayIndex, j + 1, this.GetBoneLocalTransform("bAnimMatrix", pos, rot, scale));
                 }
-
-                //Maxscript.Command("{0}[{1}][3][1].controller = Bezier_Position()", boneArray, boneArrayIndex);
-                //for (int j = 0; j < bone.PositionKeys.Count; ++j)
-                //{
-                //    //Maxscript.Command("addNewKey {0}[{1}][3][1].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-                //    //Maxscript.Command("{0}[{1}][3][1].controller.keys[{2}].value = {3}",
-                //    //    boneArray, boneArrayIndex, j + 1, Maxscript.Point3Literal(bone.Positions[j]));
-                //    Maxscript.Command("addNewKey {0}[{1}][3][1][1].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-                //    Maxscript.Command("addNewKey {0}[{1}][3][1][2].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-                //    Maxscript.Command("addNewKey {0}[{1}][3][1][3].controller {2}s", boneArray, boneArrayIndex, bone.PositionKeys[j]);
-
-                //    Maxscript.Command("{0}[{1}][3][1][1].controller.keys[{2}].value = {3}",
-                //        boneArray, boneArrayIndex, j + 1, bone.Positions[j].X);
-                //    Maxscript.Command("{0}[{1}][3][1][2].controller.keys[{2}].value = {3}",
-                //        boneArray, boneArrayIndex, j + 1, bone.Positions[j].Y);
-                //    Maxscript.Command("{0}[{1}][3][1][3].controller.keys[{2}].value = {3}",
-                //        boneArray, boneArrayIndex, j + 1, bone.Positions[j].Z);
-                //}
-
-                //Maxscript.Command("{0}[{1}][3][2].controller = Bezier_Rotation()", boneArray, boneArrayIndex);
-                //for (int j = 0; j < bone.RotationKeys.Count; ++j)
-                //{
-                //    Maxscript.Command("addNewKey {0}[{1}][3][2].controller {2}s", boneArray, boneArrayIndex, bone.RotationKeys[j]);
-                //    Maxscript.Command("{0}[{1}][3][2].controller.keys[{2}].value = {3}", 
-                //        boneArray, boneArrayIndex, j + 1, Maxscript.QuatLiteral(bone.Rotations[j]));
-                //}
-
-                //Maxscript.Command("{0}[{1}][3][3].controller = Bezier_Scale()", boneArray, boneArrayIndex);
-                //for (int j = 0; j < bone.ScaleKeys.Count; ++j)
-                //{
-                //    Maxscript.Command("addNewKey {0}[{1}][3][3].controller {2}s", boneArray, boneArrayIndex, bone.ScaleKeys[j]);
-                //    Maxscript.Command("{0}[{1}][3][3].controller.keys[{2}].value = {3}", boneArray, boneArrayIndex, j + 1,
-                //        Maxscript.Point3Literal(bone.Scales[j].A1, bone.Scales[j].B2, bone.Scales[j].C3));
-                //}
             }
         }
         private string ImportMaterial(GrnMaterial mat)
