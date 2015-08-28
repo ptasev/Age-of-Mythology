@@ -189,8 +189,11 @@
             }
 
             Maxscript.Command("max modify mode");
+            Maxscript.Command("select {0}", mainObject);
             Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
             Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
+
+            Maxscript.Command("{0}.modifiers[#edit_normals].Break selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
             Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
             for (int i = 0; i < mesh.Faces.Count; ++i)
             {
@@ -201,13 +204,13 @@
                 Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
                     i + 1, 3, mesh.Faces[i].NormalIndices[2] + 1);
             }
-            Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
             Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
+            Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
             for (int i = 0; i < mesh.Normals.Count; i++)
             {
                 Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1, Maxscript.Point3Literal(mesh.Normals[i]));
             }
-            Maxscript.Command("maxOps.CollapseNodeTo {0} 1 true", mainObject);
+            Maxscript.Command("collapseStack {0}", mainObject);
 
             // Bones
             Maxscript.Command("skinMod = Skin()");

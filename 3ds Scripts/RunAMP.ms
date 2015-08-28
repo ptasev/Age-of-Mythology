@@ -5,6 +5,7 @@ global averagedNormals
 global keys
 
 -- Customize -> Preferences -> General -> Ui Display Group -> Uncheck "Display Topology-Depence Warning" checkbox
+global meshSetVertFunc = meshOp.setVert
 
 -- Normals, this is used for testing currently
 function CalcAveNorms mObject =
@@ -43,40 +44,91 @@ function CalcAveNorms mObject =
 )
 
 -- BRG ====================================================================================================
+global brgMeshes
+global brgtotalNumVerts
+global brgtotalNumFaces
+global brgVertIndices
+global brgVertTVIndices
+global brgFaceArray
+
 function ConvertAnimKeys frm =
 (
 	if frm < animationRange.start or frm > animationRange.end then
 	(
-		0.0
+		-1.0
 	)
 	else
 	(
 		(frm - animationRange.start) as integer / 4800.0
 	)
 )
-function GetModelAnimKeys =
+function GetBrgNodeKeys brgNode =
+(
+	if (brgNode[#transform] != undefined) then
+	(
+		numBoneKeys = brgNode[#transform].controller.keys.count
+		for j = 1 to numBoneKeys do
+		(
+			appendIfUnique keys (ConvertAnimKeys brgNode[#transform].controller.keys[j].time)
+		)
+		
+		if (brgNode[#transform][#position] != undefined) then
+		(
+			numBoneKeys = brgNode[#transform][#position].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys brgNode[#transform][#position].keys[j].time)
+			)
+		)
+		
+		if (brgNode[#transform][#rotation] != undefined) then
+		(
+			numBoneKeys = brgNode[#transform][#rotation].keys.count
+			local rotKeys
+			if (numBoneKeys == -1) then
+			( 
+				numBoneKeys = brgNode[#transform][#rotation][1].keys.count
+				rotKeys = brgNode[#transform][#rotation][1].keys
+			)
+			else rotKeys = brgNode[#transform][#rotation].keys
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys rotKeys[j].time)
+			)
+		)
+		
+		if (brgNode[#transform][#scale] != undefined) then
+		(
+			numBoneKeys = brgNode[#transform][#scale].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys brgNode[#transform][#scale].keys[j].time)
+			)
+		)
+	)
+)
+function GetBrgMeshKeys brgMesh =
 (
 	max modify mode
-	keys = #()
-	if (mainObject.modifiers[#Unwrap_UVW] != undefined and \
-		mainObject.Unwrap_UVW[1] != undefined and \
-		mainObject.Unwrap_UVW[1].keys != undefined) then
+	if (brgMesh.modifiers[#Unwrap_UVW] != undefined and \
+		brgMesh.Unwrap_UVW[1] != undefined and \
+		brgMesh.Unwrap_UVW[1].keys != undefined) then
 	(
-		modPanel.setCurrentObject mainObject.modifiers[#Unwrap_UVW] ui:true
-		numTexKeys = mainObject.Unwrap_UVW[1].keys.count
+		modPanel.setCurrentObject brgMesh.modifiers[#Unwrap_UVW] ui:true
+		numTexKeys = brgMesh.Unwrap_UVW[1].keys.count
 		for i = 1 to numTexKeys do
 		(
-			appendIfUnique keys (ConvertAnimKeys mainObject.Unwrap_UVW[1].keys[i].time)
+			appendIfUnique keys (ConvertAnimKeys brgMesh.Unwrap_UVW[1].keys[i].time)
 		)
 	)
 	
-	if (mainObject.modifiers[#skin] != undefined) then
+	if (brgMesh.modifiers[#skin] != undefined) then
 	(
-		modPanel.setCurrentObject mainObject.modifiers[#skin] ui:true
-		numBones = skinops.getnumberbones mainObject.modifiers[#skin]
+		modPanel.setCurrentObject brgMesh.modifiers[#skin] ui:true
+		numBones = skinops.getnumberbones brgMesh.modifiers[#skin]
 		for i = 1 to numBones do
 		(
-			boneName = skinops.getbonename mainObject.modifiers[#skin] i 0
+			boneName = skinops.getbonename brgMesh.modifiers[#skin] i 0
 			boneNode = getNodeByName boneName
 			
 			if (boneNode[#transform] != undefined) then
@@ -121,32 +173,145 @@ function GetModelAnimKeys =
 					)
 				)
 			)
-			
--- 			numBoneKeys = boneNode.controller.keys.count
--- 			for j = 1 to numBoneKeys do
--- 			(
--- 				appendIfUnique keys ((boneNode.controller.keys[j].time as float) / 4800.0)
--- 			)
 		)
 	)
 	
-	numAnimKeys = mainObject.baseobject.mesh[1].keys.count
+	numAnimKeys = brgMesh.baseobject.mesh[1].keys.count
 	for i = 1 to numAnimKeys do
 	(
-		appendIfUnique keys (ConvertAnimKeys mainObject.baseobject.mesh[1].keys[i].time)
+		appendIfUnique keys (ConvertAnimKeys brgMesh.baseobject.mesh[1].keys[i].time)
 	)
+	GetBrgNodeKeys brgMesh
 	
 	if keys.count <= 0 then
 	(
 		appendIfUnique keys (ConvertAnimKeys animationRange.start)
 	)
 	
-	--newKeys = #()
-	--for i = 1 to keys.count do (if keys[i] >= 0 then append newKeys keys[i])
-	--keys = newKeys;
 	sort keys
+	
+	if keys[1] < 0.0 then
+	(
+		deleteItem keys 1
+	)
 )
 
+function ExportBrgVertNormals tim =
+(
+	local origNumMeshVerts = mainObject.numverts
+	local numMeshVerts = brgVertIndices.count
+	averagedNormals = #()
+	averagedNormals.count = numMeshVerts
+	
+	local convertVertSelFunc = mainObject.modifiers[#edit_normals].ConvertVertexSelection
+	local getVertNormalFunc = mainObject.modifiers[#edit_normals].GetNormal
+	
+	local vertexNormalIds
+	local averageNormal
+	for v = 1 to numMeshVerts do
+	(
+		vertexNormalIds = #{}
+		averageNormal = [0,0,0]
+		
+		at time tim (convertVertSelFunc #{brgVertIndices[v]} vertexNormalIds)
+		at time tim (for n in vertexNormalIds do averageNormal += getVertNormalFunc n)
+		
+		averageNormal = normalize (averageNormal / vertexNormalIds.numberset)
+		averagedNormals[v] = averageNormal
+	)
+	
+-- 	origNumMeshVerts += 1
+-- 	for v = origNumMeshVerts to numMeshVerts do
+-- 	(
+-- 		averagedNormals[v] = averagedNormals[brgVertIndices[v]]
+-- 	)
+)
+function GetMeshSnapshotAtTime mObject tim =
+(
+	tim = ((tim * FrameRate) as time) -- convert time from seconds to frames
+	local mMesh =  at time tim (snapshotAsMesh mObject)
+	meshop.DeleteIsoVerts mMesh
+	mMesh
+)
+function ExportPreservedTexCoordData mMesh =
+(
+	brgVertIndices = #()
+	brgVertTVIndices = #()
+	brgFaceArray = #()
+	
+	local lastVert = mMesh.numverts
+	local lastFace = mMesh.numfaces
+	brgVertIndices.count = lastVert
+	brgVertTVIndices.count = lastVert
+	brgFaceArray.count = lastFace
+	
+	local VertsUsage = for v = 1 to lastVert collect #{}
+	local FaceUsage = for v = 1 to lastVert collect #{}
+	local meshGetMapFaceFunc = meshop.getMapFace
+	for f = 1 to lastFace do
+	(
+		theFace = getFace mMesh f
+		theMapFace = meshGetMapFaceFunc mMesh 1 f
+		append VertsUsage[theFace.x] theMapFace.x
+		append VertsUsage[theFace.y] theMapFace.y
+		append VertsUsage[theFace.z] theMapFace.z
+		append FaceUsage [theFace.x] f
+		append FaceUsage [theFace.y] f
+		append FaceUsage [theFace.z] f
+		brgFaceArray[f] = theFace
+	)
+	
+	local mMeshVertCount = lastVert
+	for v = 1 to mMeshVertCount do
+	(	
+		local theMapVertsArray = VertsUsage[v] as array
+		brgVertIndices[v] = v
+		brgVertTVIndices[v] = theMapVertsArray[1]
+		if theMapVertsArray.count > 1 do
+		(
+			local theFacesArray = FaceUsage[v] as array
+			for mapv = 2 to theMapVertsArray.count do
+			(
+				local theMapVert = theMapVertsArray[mapv]
+				lastVert += 1
+				append brgVertIndices v
+				append brgVertTVIndices theMapVert
+				for f in theFacesArray do
+				(
+					local theFaceDef = brgFaceArray[f]--getFace mMesh f
+					local theMapFaceDef = meshGetMapFaceFunc mMesh 1 f
+					local changed = false
+					
+					if theMapFaceDef.x == theMapVert and theFaceDef.x == v do 
+					(
+						theFaceDef.x = lastVert
+						--brgFaceArray[f] = theFaceDef
+						changed = true
+					)
+					if theMapFaceDef.y == theMapVert and theFaceDef.y == v do 
+					(
+						theFaceDef.y = lastVert
+						--brgFaceArray[f] = theFaceDef
+						changed = true
+					)
+					if theMapFaceDef.z == theMapVert and theFaceDef.z == v do 
+					(
+						theFaceDef.z = lastVert
+						--brgFaceArray[f] = theFaceDef
+						changed = true
+					)
+					
+					if changed then
+					(
+						brgFaceArray[f] = theFaceDef
+					)
+				)--end f loop
+			)--end mapv loop
+		)
+	)
+	
+	mMesh
+)
 function SplitVertsByMapVerts theMesh tim =
 (
 	averagedNormals = #()
@@ -232,6 +397,39 @@ function GetExportData tim =
 	meshop.DeleteIsoVerts mainMesh
 	SplitVertsByMapVerts mainMesh tim
 )
+function ExportBrgNode brgNode =
+(
+	local brgNodeClass = classof brgNode
+	
+	if brgNodeClass == Editable_Mesh then
+	(
+		append brgMeshes brgNode
+		brgtotalNumVerts += brgNode.numverts
+		brgtotalNumFaces += brgNode.numfaces
+	)
+	
+	for child in brgNode.children do
+	(
+		if (not child.isHidden) then
+		(
+			ExportBrgNode child
+		)
+	)
+)
+function ExportBrgData =
+(
+	brgMeshes = #()
+	brgtotalNumVerts = 0
+	brgtotalNumFaces = 0
+	keys = #()
+	
+	ExportBrgNode rootNode
+	
+	for brgMesh in brgMeshes do
+	(
+		GetBrgMeshKeys brgMesh
+	)
+)
 
 -- GRN ====================================================================================================
 global sceneDummies
@@ -263,13 +461,14 @@ function ExportSkinBBData =
 		--if notFound then undefined else boneArray[i]
 		if not notFound then
 		(
-			local boneBoxSize = grnBones[i].boxsize / 2
-			--local copiedBone = copy grnBones[i]
-			--copiedBone.transform *= inverse(copiedBone.parent.transform)
+			--local boneBoxSize = grnBones[i].boxsize / 2
+			local copiedBones = #();
+			maxops.clonenodes #(grnBones[i]) newNodes:&copiedBones
+			copiedBones[1].transform *= inverse(copiedBones[1].transform)
 			append grnSkinBBIndices i
-			append grnSkinBBMaxs boneBoxSize--copiedBone.max--grnBones[i].max
-			append grnSkinBBMins -boneBoxSize--copiedBone.min--grnBones[i].min
-			--delete copiedBone
+			append grnSkinBBMaxs copiedBones[1].max--boneBoxSize--copiedBone.max--grnBones[i].max
+			append grnSkinBBMins copiedBones[1].min---boneBoxSize--copiedBone.min--grnBones[i].min
+			for obj in copiedBones where isValidNode obj do (delete obj)
 		)
 	)
 )
@@ -301,17 +500,22 @@ function ExportSkinData =
 function ExportGrnNode grnNode parentIndex =
 (
 	local grnNodeClass = classof grnNode
-	if grnNodeClass == Dummy or grnNodeClass == BoneGeometry then
+	if grnNodeClass == Dummy or \
+		grnNodeClass == BoneGeometry or \
+		grnNodeClass == Biped_Object or \
+		grnNodeClass == Editable_Mesh or \
+		grnNodeClass == Box then
 	(
 		append sceneDummies grnNode
 		append grnBones grnNode
 		append grnBoneParents parentIndex
+		--format "%\n" grnNode.name
 	)
-	else if grnNodeClass == Editable_Mesh then
+	
+	if grnNodeClass == Editable_Mesh and \
+		grnNode.modifiers[#skin] != undefined then
 	(
 		append grnMeshes grnNode
-		append grnBones grnNode
-		append grnBoneParents parentIndex
 	)
 	
 	--format "%, %, %" grnBones.count grnNode parentIndex
@@ -319,7 +523,10 @@ function ExportGrnNode grnNode parentIndex =
 	local selfIndex = grnBones.count
 	for child in grnNode.children do
 	(
-		ExportGrnNode child selfIndex--(parentIndex + 1)
+		if (not child.isHidden) then
+		(
+			ExportGrnNode child selfIndex--(parentIndex + 1)
+		)
 	)
 )
 function ExportGrnData =
@@ -345,9 +552,105 @@ function CalculateAveragedNormals mObject =
 	)
 )
 
+function GetBoneAnimKeys boneNode =
+(
+	keys = #()
+	
+	if (boneNode[#transform] != undefined) then
+	(
+		numBoneKeys = boneNode[#transform].controller.keys.count
+		for j = 1 to numBoneKeys do
+		(
+			appendIfUnique keys (ConvertAnimKeys boneNode[#transform].controller.keys[j].time)
+		)
+		
+		if (boneNode[#transform][#position] != undefined) then
+		(
+			numBoneKeys = boneNode[#transform][#position].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#position].keys[j].time)
+			)
+		)
+		
+		if (boneNode[#transform][#rotation] != undefined) then
+		(
+			numBoneKeys = boneNode[#transform][#rotation].keys.count
+			local rotKeys
+			if (numBoneKeys == -1) then
+			( 
+				numBoneKeys = boneNode[#transform][#rotation][1].keys.count
+				rotKeys = boneNode[#transform][#rotation][1].keys
+			)
+			else rotKeys = boneNode[#transform][#rotation].keys
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys rotKeys[j].time)
+			)
+		)
+		
+		if (boneNode[#transform][#scale] != undefined) then
+		(
+			numBoneKeys = boneNode[#transform][#scale].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#scale].keys[j].time)
+			)
+		)
+		
+		if (boneNode[#transform][#vertical] != undefined) then
+		(
+			numBoneKeys = boneNode[#transform][#vertical].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#vertical].keys[j].time)
+			)
+		)
+		
+		if (boneNode[#transform][#horizontal] != undefined) then
+		(
+			numBoneKeys = boneNode[#transform][#horizontal].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#horizontal].keys[j].time)
+			)
+		)
+		
+		if (boneNode[#transform][#turning] != undefined) then
+		(
+			numBoneKeys = boneNode[#transform][#turning].keys.count
+			for j = 1 to numBoneKeys do
+			(
+				appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#turning].keys[j].time)
+			)
+		)
+	)
+	
+	if (classof boneNode == Editable_Mesh) then
+	(
+		numAnimKeys = boneNode.baseobject.mesh[1].keys.count
+		for i = 1 to numAnimKeys do
+		(
+			appendIfUnique keys (ConvertAnimKeys boneNode.baseobject.mesh[1].keys[i].time)
+		)
+	)
+	
+	if keys.count <= 0 then
+	(
+		appendIfUnique keys (ConvertAnimKeys animationRange.start)
+	)
+	
+	sort keys
+	
+	if keys[1] < 0.0 then
+	(
+		deleteItem keys 1
+	)
+)
+
 (
 	ael = (dotnetclass "System.Reflection.Assembly").Load ((dotnetclass "System.IO.File").ReadAllBytes "..\AoMEngineLibrary.dll")
-	ampForm = ael.CreateInstance "AoMEngineLibrary.MaxPluginForm"
+	ampForm = ael.CreateInstance "AoMEngineLibrary.AMP.MaxPluginForm"
 	--dotNet.setLifeTimeControl ampForm #dotNet
 	--thePtr = DotNetObject "System.IntPtr" (windows.getMAXHWND())
 	--ampForm.Show ((dotnetclass "System.Windows.Forms.Control").fromHandle thePtr)

@@ -111,11 +111,13 @@ namespace AoMEngineLibrary.AMP
             brgMeshFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
             brgMeshFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
             brgMeshFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
+            brgMeshFlagsCheckedListBox.MultiColumn = true;
             brgMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
             brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
             brgMeshFormatCheckedListBox.BackColor = uiUp.GetEditControlColor();
             brgMeshFormatCheckedListBox.ForeColor = uiUp.GetTextColor();
             brgMeshFormatCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
+            brgMeshFormatCheckedListBox.MultiColumn = true;
             brgMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
 
             keyframeRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
@@ -406,7 +408,7 @@ namespace AoMEngineLibrary.AMP
         [System.Diagnostics.Conditional("DEBUG")]
         private void debug()
         {
-            using (TextWriter writer = File.CreateText(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\lp skult.grn.txt.ms"))//Path.GetFileName(file.FileName) + ".txt"))
+            using (TextWriter writer = File.CreateText(@"C:\Users\Petar\Desktop\lp skult.grn.txt.ms"))//Path.GetFileName(file.FileName) + ".txt"))
             {
                 for (int i = 0; i < Maxscript.Output.Count; i++)
                 {

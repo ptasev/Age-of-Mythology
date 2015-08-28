@@ -55,15 +55,14 @@
         public void Import()
         {
             BrgFile brg = this.File as BrgFile;
+            Maxscript.Output.Clear();
             Maxscript.Command("importStartTime = timeStamp()");
-            //Maxscript.Command("cui.expertModeOn();disableSceneRedraw()");
             Maxscript.Command("frameRate = 30 --{0}", Math.Round(1 / this.File.Animation.TimeStep));
             Maxscript.Interval(0, this.File.Animation.Duration);
 
             if (this.File.Meshes.Count > 0)
             {
                 string mainObject = "mainObj";
-                //System.Windows.Forms.MessageBox.Show(file.Meshes[0].MeshAnimations.Count + " " + file.Animation.MeshChannel.MeshTimes.Count);
                 for (int i = 0; i <= this.File.Meshes[0].MeshAnimations.Count; i++)
                 {
                     Maxscript.CommentTitle("ANIMATE FRAME " + i);
@@ -101,7 +100,6 @@
                 }
             }
 
-            //Maxscript.Command("cui.expertModeOff();enableSceneRedraw()");
             Maxscript.Command("importEndTime = timeStamp()");
             Maxscript.Format("Import took % seconds\n", "((importEndTime - importStartTime) / 1000.0)");
         }
@@ -123,23 +121,19 @@
             }
 
             Maxscript.CommentTitle("Load Vertices/Normals/UVWs");
+            Maxscript.Command("uvwSetVertPosFunc = {0}.Unwrap_UVW.SetVertexPosition", mainObject);
             for (int i = 0; i < mesh.Vertices.Count; i++)
             {
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
                     Maxscript.AnimateAtTime(time, "meshSetVertFunc {0} {1} {2}", mainObject, i + 1,
-                        Maxscript.Point3Literal<float>(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
-                    //Maxscript.AnimateAtTime(time, "setNormal {0} {1} {2}", mainObject, i + 1,
-                    //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
-                    //Maxscript.AnimateAtTime(time, "{0}.Edit_Normals.SetNormal {1} {2}", mainObject, i + 1,
-                    //    Maxscript.NewPoint3Literal<float>(-this.Normals[i].X, -this.Normals[i].Z, this.Normals[i].Y));
-                    //Maxscript.AnimateAtTime(time, "{0}.Edit_Normals.SetNormalExplicit {1}", mainObject, i + 1);
+                        Maxscript.Point3Literal(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) &&
                         mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                     {
-                        Maxscript.Animate("{0}.Unwrap_UVW.SetVertexPosition {1}s {2} {3}", mainObject, time, i + 1,
-                            Maxscript.Point3Literal<float>(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
+                        Maxscript.Animate("uvwSetVertPosFunc {0}s {1} {2}", time, i + 1,
+                            Maxscript.Point3Literal(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
                     }
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
@@ -158,16 +152,11 @@
                 }
                 else
                 {
-                    Maxscript.Append(vertArray, Maxscript.NewPoint3<float>("v",
-                        -mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
-
-                    //Maxscript.Append(normArray, Maxscript.NewPoint3<float>("n",
-                    //    -mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
+                    Maxscript.Append(vertArray, Maxscript.Point3Literal(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                     {
-                        Maxscript.Append(texVerts, Maxscript.NewPoint3<float>("tV",
-                            mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
+                        Maxscript.Append(texVerts, Maxscript.Point3Literal(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
                     }
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
@@ -191,17 +180,17 @@
                     Maxscript.CommentTitle("Load Face Materials");
                     foreach (var fMat in mesh.Faces)
                     {
-                        Maxscript.Append(faceMats, fMat.MaterialIndex.ToString());
+                        Maxscript.Append(faceMats, fMat.MaterialIndex);
                     }
                 }
 
                 Maxscript.CommentTitle("Load Faces");
                 foreach (var face in mesh.Faces)
                 {
-                    Maxscript.Append(faceArray, Maxscript.NewPoint3<Int32>("fV", face.Indices[0] + 1, face.Indices[2] + 1, face.Indices[1] + 1));
+                    Maxscript.Append(faceArray, Maxscript.Point3Literal(face.Indices[0] + 1, face.Indices[2] + 1, face.Indices[1] + 1));
                 }
 
-                Maxscript.AnimateAtTime(time, Maxscript.NewMeshLiteral(mainObject, vertArray, normArray, faceArray, faceMats, texVerts));
+                Maxscript.Command(Maxscript.NewMeshLiteral(mainObject, vertArray, faceArray, faceMats, texVerts));
                 Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
 
                 Maxscript.Command("dummy name:\"Dummy_hotspot\" pos:{0} boxsize:[10,10,0]", Maxscript.Point3Literal(-mesh.Header.HotspotPosition.X, -mesh.Header.HotspotPosition.Z, mesh.Header.HotspotPosition.Y));
@@ -210,33 +199,43 @@
                 Maxscript.Command("buildTVFaces {0}", mainObject);
                 for (int i = 1; i <= mesh.Faces.Count; i++)
                 {
-                    Maxscript.Command("setTVFace {0} {1} (getFace {0} {1})", mainObject, i);
+                    Maxscript.Command("setTVFace {0} {1} {2}[{1}]", mainObject, i, faceArray);
                 }
 
                 Maxscript.CommentTitle("Load Normals for first Frame");
-                Maxscript.Command("max modify mode");
-                Maxscript.Command("select {0}", mainObject);
-                Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
-                Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
-                Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
-                for (int i = 0; i < mesh.Faces.Count; ++i)
+                if (Maxscript.QueryInteger("(maxVersion())[1]") >= 17000)
                 {
-                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                        i + 1, 1, mesh.Faces[i].Indices[0] + 1);
-                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                        i + 1, 2, mesh.Faces[i].Indices[2] + 1);
-                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                        i + 1, 3, mesh.Faces[i].Indices[1] + 1);
+                    for (int i = 0; i < mesh.Normals.Count; i++)
+                    {
+                        Maxscript.Command("setNormal {0} {1} {2}", mainObject, i + 1,
+                                Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
+                    }
                 }
-                Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
-                Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
-                for (int i = 0; i < mesh.Normals.Count; i++)
+                else
                 {
-                    //Maxscript.Command("{0}.modifiers[#edit_normals].SetNormalExplicit {1}", mainObject, i + 1);
-                    Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1,
-                        Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
+                    Maxscript.Command("max modify mode");
+                    Maxscript.Command("select {0}", mainObject);
+                    Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
+                    Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
+                    Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
+                    for (int i = 0; i < mesh.Faces.Count; ++i)
+                    {
+                        Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                            i + 1, 1, mesh.Faces[i].Indices[0] + 1);
+                        Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                            i + 1, 2, mesh.Faces[i].Indices[2] + 1);
+                        Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                            i + 1, 3, mesh.Faces[i].Indices[1] + 1);
+                    }
+                    Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
+                    Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
+                    for (int i = 0; i < mesh.Normals.Count; i++)
+                    {
+                        Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1,
+                            Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
+                    }
+                    Maxscript.Command("collapseStack {0}", mainObject);
                 }
-                Maxscript.Command("collapseStack {0}", mainObject);
 
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
                 {
@@ -259,7 +258,6 @@
                 BrgAttachpoint att = mesh.Attachpoints[i];
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
-                    //Maxscript.Command("attachpoint = getNodeByName \"{0}\"", att.GetMaxName());
                     Maxscript.Command("attachpoint = {0}[{1}]", attachDummyArray, i + 1);
                     Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
                     Maxscript.AnimateAtTime(time, "attachpoint.position = {0}", att.GetMaxPosition());
@@ -376,12 +374,15 @@
         public void Export()
         {
             BrgFile brg = this.File;
+            Maxscript.Command("exportStartTime = timeStamp()");
             BrgMeshFlag flags = brg.Meshes[0].Header.Flags;
             BrgMeshFormat format = brg.Meshes[0].Header.Format;
             BrgMeshAnimType animationType = brg.Meshes[0].Header.AnimationType;
             BrgMeshInterpolationType interpolationType = brg.Meshes[0].Header.InterpolationType;
 
             Maxscript.Command("ExportBrgData()");
+            int totalNumVerts = Maxscript.QueryInteger("brgtotalNumVerts");
+            int totalNumFaces = Maxscript.QueryInteger("brgtotalNumFaces");
             int meshCount = Maxscript.QueryInteger("brgMeshes.count");
             if (meshCount == 0)
             {
@@ -432,14 +433,25 @@
                         this.ExportBrgMaterial(mainObject, mat);
 
                         int matListIndex = brg.Materials.IndexOf(mat);
+                        int actualMatId = Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1);
                         if (matListIndex >= 0)
                         {
-                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), brg.Materials[matListIndex].Id);
+                            if (!matIdMapping.ContainsKey(actualMatId))
+                            {
+                                matIdMapping.Add(actualMatId, brg.Materials[matListIndex].Id);
+                            }
                         }
                         else
                         {
                             brg.Materials.Add(mat);
-                            matIdMapping.Add(Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1), mat.Id);
+                            if (matIdMapping.ContainsKey(actualMatId))
+                            {
+                                matIdMapping[actualMatId] = mat.Id;
+                            }
+                            else
+                            {
+                                matIdMapping.Add(actualMatId, mat.Id);
+                            }
                         }
                     }
                 }
@@ -463,14 +475,17 @@
                 }
                 else
                 {
-                    throw new Exception("Not all meshes have a material applied!");
+                    if (flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    {
+                        throw new Exception("Not all meshes have a material applied! " + Maxscript.QueryString("{0}.name", mainObject));
+                    }
                 }
 
                 // Add Edit_Normals Mod
                 hadEditNormMod = false;
                 if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
                 {
-                    Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+                    Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
                 }
                 else { hadEditNormMod = true; }
                 Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
@@ -482,7 +497,10 @@
                     {
                         if (m == 0)
                         {
-                            brg.Meshes[0].MeshAnimations.Add(new BrgMesh(brg));
+                            BrgMesh mesh = new BrgMesh(brg);
+                            mesh.Vertices = new List<Vector3D>(totalNumVerts);
+                            mesh.Faces = new List<Face>(totalNumFaces);
+                            brg.Meshes[0].MeshAnimations.Add(mesh);
                         }
                         brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
                         this.ExportBrgMesh(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshKeys[i], matIdMapping);
@@ -491,7 +509,10 @@
                     {
                         if (m == 0)
                         {
-                            brg.Meshes.Add(new BrgMesh(brg));
+                            BrgMesh mesh = new BrgMesh(brg);
+                            mesh.Vertices = new List<Vector3D>(totalNumVerts);
+                            mesh.Faces = new List<Face>(totalNumFaces);
+                            brg.Meshes.Add(mesh);
                         }
                         brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
                         this.ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i], matIdMapping);
@@ -507,6 +528,8 @@
 
             // Export Attachpoints, and Update some Mesh data
             HashSet<int> usedFaceMaterials = new HashSet<int>();
+            string attachDummy = Maxscript.NewArray("attachDummy");
+            Maxscript.Command("{0} = for helpObj in ($helpers/Dummy_*) where classof helpObj == Dummy collect helpObj", attachDummy);//"$helpers/Dummy_* as array");
             for (int i = 0; i < brg.Header.NumMeshes; i++)
             {
                 BrgMesh mesh;
@@ -519,16 +542,14 @@
                     mesh = brg.Meshes[i];
                 }
 
-                this.ExportAttachpoints(mesh, brg.Animation.MeshKeys[i]);
+                this.ExportAttachpoints(attachDummy, mesh, brg.Animation.MeshKeys[i]);
                 HashSet<int> diffFaceMats = new HashSet<int>();
-                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) &&
+                    mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                 {
                     for (int j = 0; j < mesh.Faces.Count; ++j)
                     {
-                        if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                        {
-                            diffFaceMats.Add(mesh.Faces[j].MaterialIndex);
-                        }
+                        diffFaceMats.Add(mesh.Faces[j].MaterialIndex);
                     }
 
                     if (diffFaceMats.Count > 0)
@@ -550,10 +571,25 @@
             }
             brg.Materials = usedMats;
             brg.Header.NumMaterials = brg.Materials.Count;
+
+            Maxscript.Command("exportEndTime = timeStamp()");
+            Maxscript.Format("Export took % seconds\n", "((exportEndTime - exportStartTime) / 1000.0)");
         }
         private void ExportBrgMesh(string mainObject, BrgMesh mesh, float time, Dictionary<int, int> matIdMapping)
         {
             time += Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
+
+            string mainMesh = "mainMesh";
+            // Figure out the proper data to import
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            {
+                Maxscript.Command("{0} = ExportPreservedTexCoordData (GetMeshSnapshotAtTime {1} {2})", mainMesh, mainObject, time);
+            }
+            else
+            {
+                Maxscript.Command("{0} = GetMeshSnapshotAtTime {1} {2}", mainMesh, mainObject, time);
+            }
+            Maxscript.Command("ExportBrgVertNormals {0}", time);
 
             Maxscript.SetVarAtTime(time, "meshCenter", "{0}.center", mainObject);
             mesh.Header.CenterPosition = new Vector3D
@@ -582,12 +618,8 @@
             mesh.Header.MinimumExtent = new Vector3D(-bBox.X, -bBox.Z, -bBox.Y);
             mesh.Header.MaximumExtent = new Vector3D(bBox.X, bBox.Z, bBox.Y);
 
-            string mainMesh = "mainMesh";
-
-            // Figure out the proper data to import
-            Maxscript.Command("GetExportData {0}", time);
-            int numVertices = Maxscript.QueryInteger("{0}.numverts", mainMesh);
-            int numFaces = Maxscript.QueryInteger("{0}.numfaces", mainMesh);
+            int numVertices = Maxscript.QueryInteger("brgVertIndices.count");
+            int numFaces = Maxscript.QueryInteger("brgFaceArray.count");
             int currNumVertices = mesh.Vertices.Count;
 
             //System.Windows.Forms.MessageBox.Show("1 " + numVertices);
@@ -596,7 +628,7 @@
                 //System.Windows.Forms.MessageBox.Show("1.1");
                 try
                 {
-                    Maxscript.Command("vertex = getVert {0} {1}", mainMesh, i + 1);
+                    Maxscript.Command("vertex = getVert {0} brgVertIndices[{1}]", mainMesh, i + 1);
                     //System.Windows.Forms.MessageBox.Show("1.4");
                     mesh.Vertices.Add(new Vector3D(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
 
@@ -613,23 +645,6 @@
                 }
             }
 
-            // Map Verts to TVerts
-            int[] vertexMask = new int[numVertices];
-            for (int i = 0; i < numFaces; i++)
-            {
-                Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
-                Maxscript.Command("tFace = getTVFace {0} {1}", mainMesh, i + 1);
-                int vert1 = Maxscript.QueryInteger("face[1]") - 1;
-                int vert2 = Maxscript.QueryInteger("face[2]") - 1;
-                int vert3 = Maxscript.QueryInteger("face[3]") - 1;
-                int tVert1 = Maxscript.QueryInteger("tFace[1]");
-                int tVert2 = Maxscript.QueryInteger("tFace[2]");
-                int tVert3 = Maxscript.QueryInteger("tFace[3]");
-
-                vertexMask[vert1] = tVert1;
-                vertexMask[vert2] = tVert2;
-                vertexMask[vert3] = tVert3;
-            }
             //System.Windows.Forms.MessageBox.Show("2");
             if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
             {
@@ -637,11 +652,8 @@
                 {
                     for (int i = 0; i < numVertices; i++)
                     {
-                        if (vertexMask[i] > 0)
-                        {
-                            Maxscript.Command("tVert = getTVert {0} {1}", mainMesh, vertexMask[i]);// i + 1);
-                            mesh.TextureCoordinates.Add(new Vector3D(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
-                        }
+                        Maxscript.Command("tVert = getTVert {0} brgVertTVIndices[{1}]", mainMesh, i + 1);
+                        mesh.TextureCoordinates.Add(new Vector3D(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
                     }
                 }
             }
@@ -660,15 +672,11 @@
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        f.MaterialIndex = (Int16)matIdMapping[Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1)];
-                        if (f.MaterialIndex == 2)
-                        {
-                            //MaxPluginForm.DebugBox("yo " + i);
-                        }
+                        f.MaterialIndex = (Int16)matIdMapping[Maxscript.QueryInteger("getFaceMatId {0} {1}", mainMesh, i + 1)];
                     }
 
                     //System.Windows.Forms.MessageBox.Show("3.1");
-                    Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
+                    Maxscript.Command("face = brgFaceArray[{0}]", i + 1);
                     f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1 + currNumVertices));
                     f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1 + currNumVertices));
                     f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices));
@@ -683,13 +691,10 @@
                 }
             }
         }
-        private void ExportAttachpoints(BrgMesh mesh, float time)
+        private void ExportAttachpoints(string attachDummy, BrgMesh mesh, float time)
         {
             time += Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
             //System.Windows.Forms.MessageBox.Show("4");
-            string attachDummy = Maxscript.NewArray("attachDummy");
-            Maxscript.SetVarAtTime(time, attachDummy, "for helpObj in ($helpers/Dummy_*) where classof helpObj == Dummy collect helpObj");//"$helpers/Dummy_* as array");
-            //Maxscript.SetVarAtTime(time, attachDummy, "$helpers/atpt??* as array");
             int numAttachpoints = Maxscript.QueryInteger("{0}.count", attachDummy);
 
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
@@ -703,7 +708,6 @@
                     if (!BrgAttachpoint.TryGetIdByName(aName.Substring(6), out nameId)) continue;
                     BrgAttachpoint att = new BrgAttachpoint();
                     //System.Windows.Forms.MessageBox.Show(aName);
-                    //int index = Convert.ToInt32((Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1)).Substring(4, 2));
                     //System.Windows.Forms.MessageBox.Show("5.1");
                     //System.Windows.Forms.MessageBox.Show(mesh.Attachpoints.Count + " " + i);
                     att.NameId = nameId;
