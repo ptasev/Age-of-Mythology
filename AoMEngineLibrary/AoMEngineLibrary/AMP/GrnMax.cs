@@ -144,13 +144,11 @@
         private void ImportMesh(GrnMesh mesh, string mainObject, string boneArray)
         {
             string vertArray = "";
-            //string normArray = "";
             string texVerts = "";
             string faceMats = "";
             string faceArray = "";
             string tFaceArray = "";
             vertArray = Maxscript.NewArray("vertArray");
-            //normArray = Maxscript.NewArray("normArray");
             texVerts = Maxscript.NewArray("texVerts");
             faceMats = Maxscript.NewArray("faceMats");
             faceArray = Maxscript.NewArray("faceArray");
@@ -256,7 +254,7 @@
                     continue;
                 }
                 GrnBoneTrack bone = this.File.Animation.BoneTracks[i];
-                // typically bones and bonetracks match up
+                // typically bones and bonetracks match up in a file
                 // but won't if an anim file is imported on top of a regular model file
                 int boneArrayIndex = this.boneMap[this.File.Bones[i].Name] + 1;
 
@@ -406,6 +404,7 @@
 
         public void Export()
         {
+            Maxscript.Command("exportStartTime = timeStamp()");
             this.Clear();
 
             Maxscript.Command("ExportGrnData()");
@@ -446,6 +445,9 @@
                     this.ExportMaterial(i, "mainObject");
                 }
             }
+
+            Maxscript.Command("exportEndTime = timeStamp()");
+            Maxscript.Format("Export took % seconds\n", "((exportEndTime - exportStartTime) / 1000.0)");
         }
         private void ExportSkeleton()
         {
@@ -457,14 +459,6 @@
 
             for (int i = 1; i <= numBones; ++i)
             {
-                //if (!this.ExportSetting.HasFlag(GrnExportSetting.Model) &&
-                //    this.ExportSetting.HasFlag(GrnExportSetting.Animation) &&
-                //    Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
-                //{
-                //    MaxPluginForm.DebugBox("d " + i);
-                //    continue;
-                //}
-
                 try
                 {
                     GrnBone bone = new GrnBone(this.File);
@@ -486,7 +480,6 @@
                     bone.Scale = scale;
 
                     this.File.Bones.Add(bone);
-                    //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
                 }
                 catch (Exception ex)
                 {
@@ -500,6 +493,7 @@
             bool hadEditNormMod = false;
             string mainObject = "mainObject";
             Maxscript.Command("{0} = grnMeshes[{1}]", mainObject, meshIndex + 1);
+            string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject);
             mesh.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("{0}.name", mainObject));
 
             // Setup Normals
@@ -512,65 +506,61 @@
             Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
             //Maxscript.Command("CalculateAveragedNormals {0}", mainObject);
 
-            int numVertices = Maxscript.QueryInteger("meshop.getnumverts {0}", mainObject);
-            int numFaces = Maxscript.QueryInteger("meshop.getnumfaces {0}", mainObject);
-            int numNorms = Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNumNormals()", mainObject);
+            int numVertices = Maxscript.QueryInteger("meshop.getnumverts {0}", mainMesh);
+            int numFaces = Maxscript.QueryInteger("meshop.getnumfaces {0}", mainMesh);
 
             for (int i = 0; i < numVertices; i++)
             {
                 try
                 {
-                    Maxscript.Command("vertex = meshop.getVert {0} {1}", mainObject, i + 1);
+                    Maxscript.Command("vertex = meshGetVertFunc {0} {1}", mainMesh, i + 1);
                     mesh.Vertices.Add(new Vector3D(
                         Maxscript.QueryFloat("vertex.x"),
                         Maxscript.QueryFloat("vertex.y"),
                         Maxscript.QueryFloat("vertex.z")));
-
-                    //mesh.Normals.Add(new Vector3D(
-                    //    Maxscript.QueryFloat("{0}[{1}].x", "averagedNormals", i + 1),
-                    //    Maxscript.QueryFloat("{0}[{1}].y", "averagedNormals", i + 1),
-                    //    Maxscript.QueryFloat("{0}[{1}].z", "averagedNormals", i + 1)));
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Import Verts/Normals " + i.ToString(), ex);
+                    throw new Exception("Import Verts " + i.ToString(), ex);
                 }
             }
 
+            int numNorms = Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNumNormals()", mainObject);
+            Maxscript.Command("getVertNormalFunc = {0}.modifiers[#edit_normals].GetNormal", mainObject);
             for (int i = 0; i < numNorms; ++i)
             {
-                    Maxscript.Command("currentNormal = {0}.modifiers[#edit_normals].GetNormal {1}", 
-                        mainObject, i + 1);
+                Maxscript.Command("currentNormal = getVertNormalFunc {0}", i + 1);
                     mesh.Normals.Add(new Vector3D(
                         Maxscript.QueryFloat("currentNormal.x"),
                         Maxscript.QueryFloat("currentNormal.y"),
                         Maxscript.QueryFloat("currentNormal.z")));
             }
 
-            int numTexVertices = Maxscript.QueryInteger("meshop.getnumtverts {0}", mainObject);
+            int numTexVertices = Maxscript.QueryInteger("meshop.getnumtverts {0}", mainMesh);
             for (int i = 0; i < numTexVertices; i++)
             {
-                Maxscript.Command("tVert = meshop.getmapvert {0} 1 {1}", mainObject, i + 1);
+                Maxscript.Command("tVert = meshGetMapVertFunc {0} 1 {1}", mainMesh, i + 1);
                 mesh.TextureCoordinates.Add(new Vector3D(
                     Maxscript.QueryFloat("tVert.x"),
                     Maxscript.QueryFloat("tVert.y"),
                     Maxscript.QueryFloat("tVert.z")));
             }
 
+            Maxscript.Command("meshGetNormalIdFunc = {0}.modifiers[#edit_normals].GetNormalID", mainObject);
             for (int i = 0; i < numFaces; ++i)
             {
                 Face f = new Face();
                 f.MaterialIndex = (Int16)(Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1) - 1);
+
                 Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1));
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1));
-                f.NormalIndices.Add(Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNormalID {1} {2}",
-                    mainObject, i + 1, 1) - 1);
-                f.NormalIndices.Add(Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNormalID {1} {2}",
-                    mainObject, i + 1, 2) - 1);
-                f.NormalIndices.Add(Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNormalID {1} {2}",
-                    mainObject, i + 1, 3) - 1);
+
+                f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 1) - 1);
+                f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 2) - 1);
+                f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 3) - 1);
+
                 Maxscript.Command("tFace = getTVFace {0} {1}", mainObject, i + 1);
                 f.TextureIndices.Add(Maxscript.QueryInteger("tFace.x") - 1);
                 f.TextureIndices.Add(Maxscript.QueryInteger("tFace.y") - 1);
@@ -631,11 +621,6 @@
 
             for (int i = 1; i <= numBones; ++i)
             {
-                //if (Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
-                //{
-                //    continue;
-                //}
-
                 GrnBoneTrack bone = new GrnBoneTrack();
                 bone.DataExtensionIndex = this.File.Bones[i].DataExtensionIndex;
 
@@ -650,18 +635,6 @@
                     Maxscript.Command("keys = makeUniqueArray keys");
                     Maxscript.Command("sort keys");
                     Maxscript.Command("grnBoneAnimKeys[{0}] = keys", i);
-
-                    //Maxscript.Command("posParentNode = biped.getPosParentNode grnBones[{0}]", i);
-                    //Maxscript.Command("rotParentNode = biped.getRotParentNode grnBones[{0}]", i);
-                    //if (Maxscript.QueryBoolean("grnBones[{0}].parent != posParentNode", i) ||
-                    //    Maxscript.QueryBoolean("grnBones[{0}].parent != rotParentNode", i))
-                    //{
-                    //    //Maxscript.Command("origKeys = deepcopy keys");
-                    //    //Maxscript.Command("GetBoneAnimKeys grnBones[grnBoneParents[{0}]]", i);
-                    //    //Maxscript.Command("join keys origKeys");
-                    //    //Maxscript.Command("keys = makeUniqueArray keys");
-                    //    //Maxscript.Command("sort keys");
-                    //}
                 }
 
                 int numKeys = Maxscript.QueryInteger("keys.count");
@@ -688,38 +661,6 @@
                         Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
                     }
                     this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
-                    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value", i);
-                    //if (this.File.Bones[i].ParentIndex > 0 && 
-                    //    (Maxscript.QueryBoolean("classof grnBones[{0}] == Biped_Object", i) ||
-                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == BipSlave_Control", i) ||
-                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == Vertical_Horizontal_Turn", i)))
-                    //{
-                    //    //Vector3D posPNode = new Vector3D();
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(grnBones[{0}].parent[3].controller.value)", i);
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatPos", "boneTransMat * inverse(posParentNode[3].controller.value)");
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(grnBones[{0}].parent[3].controller.value)", i);
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(rotParentNode[3].controller.value) * inverse(posParentNode[3].controller.value)");
-                    //    //if (Maxscript.QueryBoolean("grnBones[{0}].parent != posParentNode", i))
-                    //    //{
-                    //    //    Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMatRot * inverse(transmatrix grnBones[{0}].parent[3].controller.value.translation)", i);
-                    //    //}
-                    //    //if (Maxscript.QueryBoolean("grnBones[{0}].parent != rotParentNode", i))
-                    //    //{
-                    //    //    Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMatRot * inverse(grnBones[{0}].parent[3].controller.value.rotation as matrix3)", i);
-                    //    //}
-                    //    //this.GetTransformPRS("boneTransMatPos", out posPNode, out rot, out scale);
-                    //    Maxscript.SetVarAtTime(time + startTime, "bonePTransMat", "grnBones[{0}].parent[3].controller.value", i);
-                    //    Maxscript.Command("boneTransMat = boneTransMat * inverse(bonePTransMat)");
-                    //    this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
-                    //    //pos = posPNode;
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "boneTransMat * inverse(grnBones[{0}].parent.transform)", i);
-                    //    ////Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value * inverse(grnBones[{0}].parent[3].controller.value)", i);
-                    //    //this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
-                    //}
-                    //else
-                    //{
-                    //    this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
-                    //}
 
                     bone.PositionKeys.Add(time);
                     bone.Positions.Add(pos);
@@ -750,32 +691,6 @@
                         Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
                     }
                     this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
-                    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value", i);
-                    //if (this.File.Bones[i].ParentIndex > 0 &&
-                    //    (Maxscript.QueryBoolean("classof grnBones[{0}] == Biped_Object", i) ||
-                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == BipSlave_Control", i) ||
-                    //    Maxscript.QueryBoolean("classof grnBones[{0}][3].controller == Vertical_Horizontal_Turn", i)))
-                    //{
-                    //    //Vector3D posPNode = new Vector3D();
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatPos", "boneTransMat * inverse(posParentNode[3].controller.value)");
-                    //    //this.GetTransformPRS("boneTransMatPos", out posPNode, out rotCurrent, out scaleCurrent);
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMatRot", "boneTransMat * inverse(rotParentNode[3].controller.value)");
-                    //    //this.GetTransformPRS("boneTransMatRot", out posCurrent, out rotCurrent, out scaleCurrent);
-                    //    //posCurrent = posPNode;
-                    //    //sliderTime = frameNum
-                    //    //forceCompleteRedraw()
-                    //    //Maxscript.Command("sliderTime = {0}s", time + startTime);
-                    //    //Maxscript.Command("forceCompleteRedraw()");
-                    //    Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}].transform", i);
-                    //    Maxscript.SetVarAtTime(time + startTime, "bonePTransMat", "grnBones[{0}].parent.transform", i);
-                    //    Maxscript.Command("boneTransMat = boneTransMat * inverse(bonePTransMat)", i);
-                    //    //Maxscript.SetVarAtTime(time + startTime, "boneTransMat", "grnBones[{0}][3].controller.value * inverse(grnBones[{0}].parent[3].controller.value)", i);
-                    //    this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
-                    //}
-                    //else
-                    //{
-                    //    this.GetTransformPRS("boneTransMat", out posCurrent, out rotCurrent, out scaleCurrent);
-                    //}
 
                     if (pos != posCurrent || j + 1 == numKeys)
                     {
@@ -799,47 +714,6 @@
                     }
                 }
 
-                //int numPosKeys = Maxscript.QueryInteger("grnBones[{0}][3][1].controller.keys.count", i);
-                //Maxscript.Command("sort grnBones[{0}][3][1].controller.keys", i);
-                //for (int j = 0; j < numPosKeys; ++j)
-                //{
-                //    try
-                //    {
-                //        bone.PositionKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][1].controller.keys[{1}].time as float / 4800", i, j + 1));
-                //        bone.Positions.Add(new Vector3D(
-                //            Maxscript.QueryFloat("grnBones[{0}][3][1][1].controller.keys[{1}].value", i, j + 1),
-                //            Maxscript.QueryFloat("grnBones[{0}][3][1][2].controller.keys[{1}].value", i, j + 1),
-                //            Maxscript.QueryFloat("grnBones[{0}][3][1][3].controller.keys[{1}].value", i, j + 1)));
-                //    }
-                //    catch (Exception ex) { throw new Exception("Pos Controller Bone " + i + " key " + (j + 1), ex); }
-                //}
-
-                //int numRotKeys = Maxscript.QueryInteger("grnBones[{0}][3][2].controller.keys.count", i);
-                //for (int j = 0; j < numRotKeys; ++j)
-                //{
-                //    bone.RotationKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][2].controller.keys[{1}].time as float / 4800", i, j + 1));
-                //    Maxscript.Command("rotQuat = grnBones[{0}][3][2].controller.keys[{1}].value as quat", i, j + 1);
-                //    bone.Rotations.Add(new Quaternion(
-                //        Maxscript.QueryFloat("rotQuat.w"),
-                //        Maxscript.QueryFloat("rotQuat.x"),
-                //        Maxscript.QueryFloat("rotQuat.y"),
-                //        Maxscript.QueryFloat("rotQuat.z")));
-                //}
-
-                //int numScaleKeys = Maxscript.QueryInteger("grnBones[{0}][3][3].controller.keys.count", i);
-                //for (int j = 0; j < numScaleKeys; ++j)
-                //{
-                //    bone.ScaleKeys.Add(Maxscript.QueryFloat("grnBones[{0}][3][3].controller.keys[{1}].time as float / 4800", i, j + 1));
-                //    Maxscript.Command("bTrackScale = grnBones[{0}][3][3].controller.keys[{1}].value", i, j + 1);
-                //    Matrix3x3 scaleMatrix = new Matrix3x3();
-                //    scaleMatrix.A1 = Maxscript.QueryFloat("bTrackScale.x");
-                //    scaleMatrix.B2 = Maxscript.QueryFloat("bTrackScale.y");
-                //    scaleMatrix.C3 = Maxscript.QueryFloat("bTrackScale.z");
-                //    bone.Scales.Add(scaleMatrix);
-                //}
-
-                //this.Plugin.richTextBox1.AppendText(i + " " + Maxscript.QueryString("grnBones[{0}].name", i) + Environment.NewLine);
-                //this.Plugin.richTextBox1.AppendText(bone.Rotations[0].ToString() + Environment.NewLine);
                 this.File.Animation.BoneTracks.Add(bone);
                 this.File.Animation.Duration = Math.Max(this.File.Animation.Duration, bone.PositionKeys.Last());
                 this.File.Animation.Duration = Math.Max(this.File.Animation.Duration, bone.RotationKeys.Last());
@@ -923,22 +797,8 @@
         {
             string boneNode = "boneNode";
 
-            string bPos = Maxscript.NewPoint3<float>("bPos", bone.Position.X, bone.Position.Y, bone.Position.Z);
-            Maxscript.Command("bRot = quat {0} {1} {2} {3}", bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-            //Maxscript.Command("boneScaleMatrix = matrix3 [{0}, {1}, {2}] [{3}, {4}, {5}] [{6}, {7}, {8}] [0,0,0]",
-            //    bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
-            //    bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
-            //    bone.Scale.C1, bone.Scale.C2, bone.Scale.C3);
-            //Maxscript.Command("boneNode = dummy name:\"{0}\" boxsize:[0.25,0.25,0.25]", bone.Name);
-            //Maxscript.Command("boneNode.scale = {0}", Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
-            //Maxscript.Command("boneNode.rotation = bRot");
-            //Maxscript.Command("boneNode.position = bPos");
-            //Maxscript.Command("boneNode.transform = boneScaleMatrix * boneNode.transform");
-            //this.Plugin.richTextBox1.AppendText(bone.Name + " " + bone.Position + Environment.NewLine);
-
             Maxscript.Command("boneNode = dummy name:\"{0}\" boxsize:[0.25,0.25,0.25]", bone.Name);
             Maxscript.Command("boneNode.transform = {0}", this.GetBoneLocalTransform(bone, "boneTransMat"));
-            //Maxscript.Command("boneNode.boxsize = [0.25,0.25,0.25]");
 
             //this.GetBoneLocalTransform(bone, "tfm");
             //Maxscript.Command("boneNode = bonesys.createbone tfm.row4 (tfm.row4 + 0.01 * (normalize tfm.row1)) (normalize tfm.row3)");
@@ -950,34 +810,18 @@
             //Maxscript.Command("boneNode.setBoneEnable false 0");
             //Maxscript.Command("boneNode.pos.controller = TCB_position ()");
             //Maxscript.Command("boneNode.rotation.controller = TCB_rotation ()");
-            
-            //GrnBone bone = MeshFile.Bones[boneIndex];
-            //string world = GetBoneWorldTransform(MeshFile, boneIndex, "m3World");
-            //string worldP = GetBoneWorldTransform(MeshFile, bone.ParentIndex, "m3WorldP");
-            //Maxscript.Command("{0} = BoneSys.createBone {1}.translation {2}.translation [0, 0, 1]", boneNode, world, worldP);
-            //Maxscript.Command("{0}.transform = {1}", boneNode, world);
 
             return boneNode;
         }
         private string GetBoneLocalTransform(GrnBone bone, string nameM3)
         {
             Maxscript.Command("{0} = matrix3 1", nameM3);
-            //Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] {10})", nameM3,
-            //    bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
-            //    bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
-            //    bone.Scale.C1, bone.Scale.C2, bone.Scale.C3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = transmatrix {1}", nameM3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = (inverse(quat {1} {2} {3} {4}) as matrix3) * {0}", nameM3, bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-            //Maxscript.Command("{0}.scale = {1}", nameM3, Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
-            //Maxscript.Command("{0}.rotation = inverse(quat {1} {2} {3} {4})", nameM3, bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-            //Maxscript.Command("{0}.position = {1}", nameM3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] [0,0,0]) * {0}", nameM3,
                 bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
                 bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
                 bone.Scale.C1, bone.Scale.C2, bone.Scale.C3);
-            //Maxscript.Command("{0}.rotation = {1}", nameM3, Maxscript.QuatLiteral(bone.Rotation));
-            //Maxscript.Command("{0} *= scaleMatrix {1}", nameM3, 
-            //    Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
 
             return nameM3;
         }

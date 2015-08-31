@@ -6,6 +6,12 @@ global keys
 
 -- Customize -> Preferences -> General -> Ui Display Group -> Uncheck "Display Topology-Depence Warning" checkbox
 global meshSetVertFunc = meshOp.setVert
+global meshGetVertFunc = meshOp.getVert
+global meshGetMapVertFunc = meshop.getmapvert
+global skinGetBoneNameFunc = skinOps.GetBoneName
+global skinGetVertWeightCountFunc = skinOps.GetVertexWeightCount
+global skinGetVertWeightFunc = skinops.getvertexweight
+global skinGetVertWeightBoneIDFunc = skinOps.GetVertexWeightBoneID
 
 -- Normals, this is used for testing currently
 function CalcAveNorms mObject =
@@ -450,7 +456,7 @@ function ExportSkinBBData =
 	local bonesCount = skinops.getnumberbones skinMod
 	for boneID = 1 to bonesCount do
 	(
-		local boneName = (skinOps.GetBoneName skinMod boneID 1)
+		local boneName = (skinGetBoneNameFunc skinMod boneID 1)
 		local notFound = true
 		local i = 0
 		while notFound and i < grnBones.count do
@@ -483,11 +489,11 @@ function ExportSkinData =
 	(
 		append grnSkinWeights #()
 		-- loop through all bones affecting this vertex
-		vertex_bone_count = skinOps.GetVertexWeightCount skinMod i
+		vertex_bone_count = skinGetVertWeightCountFunc skinMod i
 		for bn = 1 to vertex_bone_count do
 		(
-			weight = skinops.getvertexweight skinMod i bn
-			boneId = skinOps.GetVertexWeightBoneID skinMod i bn
+			weight = skinGetVertWeightFunc skinMod i bn
+			boneId = skinGetVertWeightBoneIDFunc skinMod i bn
 			if weight > 0 then
 			(
 				append grnSkinWeights[i] [boneId - 1, weight]
