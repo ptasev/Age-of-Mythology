@@ -39,6 +39,11 @@
         {
             reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.TransformChannelIndex = reader.ReadInt32();
+            if (this.PreviousSibling != null && 
+                ((GrnAnimationTransformTrackKeysNode)this.PreviousSibling).TransformChannelIndex == this.TransformChannelIndex)
+            {
+                return;
+            }
 
             // read 5 unknowns
             for (int i = 0; i < 5; ++i)

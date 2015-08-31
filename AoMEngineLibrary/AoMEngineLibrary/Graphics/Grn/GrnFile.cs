@@ -133,6 +133,13 @@
                 this.Animation.BoneTracks = new List<GrnBoneTrack>(animTransTrackKeys.Count);
                 for (int i = 0; i < animTransTrackKeys.Count; i++)
                 {
+                    if (animTransTrackKeys[i].PreviousSibling != null &&
+                        ((GrnAnimationTransformTrackKeysNode)animTransTrackKeys[i].PreviousSibling).TransformChannelIndex == animTransTrackKeys[i].TransformChannelIndex)
+                    {
+                        animTransTrackKeys.RemoveAt(i);
+                        --i;
+                        continue;
+                    }
                     this.Animation.BoneTracks.Add(new GrnBoneTrack());
                     this.Animation.BoneTracks[i].Read(transformChannels, animTransTrackKeys[i]);
                 }
@@ -183,17 +190,17 @@
             for (int i = 0; i < this.Animation.BoneTracks.Count; ++i)
             {
                 //this.Animation.Duration = Math.Max(this.Animation.Duration, this.Animation.BoneTracks[i].PositionKeys.Last());
-                if (this.Animation.BoneTracks[i].PositionKeys.Last() > this.Animation.Duration)
+                if (this.Animation.BoneTracks[i].PositionKeys.LastOrDefault() > this.Animation.Duration)
                 {
-                    this.Animation.Duration = this.Animation.BoneTracks[i].PositionKeys.Last();
+                    this.Animation.Duration = this.Animation.BoneTracks[i].PositionKeys.LastOrDefault();
                 }
-                if (this.Animation.BoneTracks[i].RotationKeys.Last() > this.Animation.Duration)
+                if (this.Animation.BoneTracks[i].RotationKeys.LastOrDefault() > this.Animation.Duration)
                 {
-                    this.Animation.Duration = this.Animation.BoneTracks[i].RotationKeys.Last();
+                    this.Animation.Duration = this.Animation.BoneTracks[i].RotationKeys.LastOrDefault();
                 }
-                if (this.Animation.BoneTracks[i].ScaleKeys.Last() > this.Animation.Duration)
+                if (this.Animation.BoneTracks[i].ScaleKeys.LastOrDefault() > this.Animation.Duration)
                 {
-                    this.Animation.Duration = this.Animation.BoneTracks[i].ScaleKeys.Last();
+                    this.Animation.Duration = this.Animation.BoneTracks[i].ScaleKeys.LastOrDefault();
                 }
             }
         }

@@ -72,6 +72,8 @@ namespace AoMModelEditor
             InitializeComponent();
             this.Icon = Properties.Resources.Cyclops;
 
+            //GrnFile f = new GrnFile();
+            //f.Read(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\autom_idlea.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //BrgFile f = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\cavalry g prodromos_attacka.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
             //BrgFile f2 = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\cavalry g prodromos_attacka.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
             //f2.Materials[0].id = 12212;

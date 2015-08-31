@@ -203,39 +203,30 @@
                 }
 
                 Maxscript.CommentTitle("Load Normals for first Frame");
-                if (Maxscript.QueryInteger("(maxVersion())[1]") >= 17000)
+                Maxscript.Command("max modify mode");
+                Maxscript.Command("select {0}", mainObject);
+                Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
+                Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
+
+                Maxscript.Command("{0}.modifiers[#edit_normals].Break selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
+                Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
+                for (int i = 0; i < mesh.Faces.Count; ++i)
                 {
-                    for (int i = 0; i < mesh.Normals.Count; i++)
-                    {
-                        Maxscript.Command("setNormal {0} {1} {2}", mainObject, i + 1,
-                                Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
-                    }
+                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                        i + 1, 1, mesh.Faces[i].Indices[0] + 1);
+                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                        i + 1, 2, mesh.Faces[i].Indices[2] + 1);
+                    Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
+                        i + 1, 3, mesh.Faces[i].Indices[1] + 1);
                 }
-                else
+                Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
+                Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
+                for (int i = 0; i < mesh.Normals.Count; i++)
                 {
-                    Maxscript.Command("max modify mode");
-                    Maxscript.Command("select {0}", mainObject);
-                    Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
-                    Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals]", mainObject);
-                    Maxscript.Command("meshSetNormalIdFunc = {0}.modifiers[#edit_normals].SetNormalID", mainObject);
-                    for (int i = 0; i < mesh.Faces.Count; ++i)
-                    {
-                        Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                            i + 1, 1, mesh.Faces[i].Indices[0] + 1);
-                        Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                            i + 1, 2, mesh.Faces[i].Indices[2] + 1);
-                        Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                            i + 1, 3, mesh.Faces[i].Indices[1] + 1);
-                    }
-                    Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
-                    Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
-                    for (int i = 0; i < mesh.Normals.Count; i++)
-                    {
-                        Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1,
-                            Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
-                    }
-                    Maxscript.Command("collapseStack {0}", mainObject);
+                    Maxscript.Command("meshSetNormalFunc {0} {1}", i + 1,
+                        Maxscript.Point3Literal(-mesh.Normals[i].X, -mesh.Normals[i].Z, mesh.Normals[i].Y));
                 }
+                Maxscript.Command("collapseStack {0}", mainObject);
 
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
                 {
@@ -499,6 +490,8 @@
                         {
                             BrgMesh mesh = new BrgMesh(brg);
                             mesh.Vertices = new List<Vector3D>(totalNumVerts);
+                            mesh.Normals = new List<Vector3D>(totalNumVerts);
+                            mesh.TextureCoordinates = new List<Vector3D>(totalNumVerts);
                             mesh.Faces = new List<Face>(totalNumFaces);
                             brg.Meshes[0].MeshAnimations.Add(mesh);
                         }
@@ -511,6 +504,8 @@
                         {
                             BrgMesh mesh = new BrgMesh(brg);
                             mesh.Vertices = new List<Vector3D>(totalNumVerts);
+                            mesh.Normals = new List<Vector3D>(totalNumVerts);
+                            mesh.TextureCoordinates = new List<Vector3D>(totalNumVerts);
                             mesh.Faces = new List<Face>(totalNumFaces);
                             brg.Meshes.Add(mesh);
                         }

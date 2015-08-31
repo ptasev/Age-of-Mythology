@@ -104,6 +104,11 @@
             Command("{0} = bone name:\"{1}\" rotation:{3} position:{2}", varName, name, position, rotation);
             return varName;
         }
+        public static string SnapshotAsMesh(string varName, string varNode)
+        {
+            Command("{0} = snapshotAsMesh {1}", varName, varNode);
+            return varName;
+        }
         public static string SnapshotAsMesh(string varName, string varNode, float time)
         {
             Command("{1} = at time {0}s (snapshotAsMesh {2})", time, varName, varNode);
