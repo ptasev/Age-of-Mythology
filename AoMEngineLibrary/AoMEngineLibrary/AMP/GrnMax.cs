@@ -3,6 +3,7 @@
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Grn;
     using AoMEngineLibrary.Graphics.Model;
+    using Autodesk.Max;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -144,13 +145,11 @@
         private void ImportMesh(GrnMesh mesh, string mainObject, string boneArray)
         {
             string vertArray = "";
-            //string normArray = "";
             string texVerts = "";
             string faceMats = "";
             string faceArray = "";
             string tFaceArray = "";
             vertArray = Maxscript.NewArray("vertArray");
-            //normArray = Maxscript.NewArray("normArray");
             texVerts = Maxscript.NewArray("texVerts");
             faceMats = Maxscript.NewArray("faceMats");
             faceArray = Maxscript.NewArray("faceArray");
@@ -256,7 +255,7 @@
                     continue;
                 }
                 GrnBoneTrack bone = this.File.Animation.BoneTracks[i];
-                // typically bones and bonetracks match up
+                // typically bones and bonetracks match up in a file
                 // but won't if an anim file is imported on top of a regular model file
                 int boneArrayIndex = this.boneMap[this.File.Bones[i].Name] + 1;
 
@@ -406,6 +405,7 @@
 
         public void Export()
         {
+            Maxscript.Command("exportStartTime = timeStamp()");
             this.Clear();
 
             Maxscript.Command("ExportGrnData()");
@@ -446,6 +446,9 @@
                     this.ExportMaterial(i, "mainObject");
                 }
             }
+
+            Maxscript.Command("exportEndTime = timeStamp()");
+            Maxscript.Format("Export took % seconds\n", "((exportEndTime - exportStartTime) / 1000.0)");
         }
         private void ExportSkeleton()
         {
@@ -457,14 +460,6 @@
 
             for (int i = 1; i <= numBones; ++i)
             {
-                //if (!this.ExportSetting.HasFlag(GrnExportSetting.Model) &&
-                //    this.ExportSetting.HasFlag(GrnExportSetting.Animation) &&
-                //    Maxscript.QueryBoolean("grnBones[{0}].isanimated == false", i))
-                //{
-                //    MaxPluginForm.DebugBox("d " + i);
-                //    continue;
-                //}
-
                 try
                 {
                     GrnBone bone = new GrnBone(this.File);
@@ -486,7 +481,6 @@
                     bone.Scale = scale;
 
                     this.File.Bones.Add(bone);
-                    //this.Plugin.richTextBox1.AppendText(i + " " + bone.Name + " " + bone.Scale + " " + Environment.NewLine);
                 }
                 catch (Exception ex)
                 {
@@ -500,81 +494,121 @@
             bool hadEditNormMod = false;
             string mainObject = "mainObject";
             Maxscript.Command("{0} = grnMeshes[{1}]", mainObject, meshIndex + 1);
+            string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject);
             mesh.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("{0}.name", mainObject));
 
             // Setup Normals
             Maxscript.Command("max modify mode");
             if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
             {
-                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
+                //Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
             }
             else { hadEditNormMod = true; }
-            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
+            //Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
             //Maxscript.Command("CalculateAveragedNormals {0}", mainObject);
 
-            int numVertices = Maxscript.QueryInteger("meshop.getnumverts {0}", mainObject);
-            int numFaces = Maxscript.QueryInteger("meshop.getnumfaces {0}", mainObject);
+            IGlobal global = GlobalInterface.Instance;
+            IInterface13 intfc = global.COREInterface13;
+            IIGameScene igc = global.IGameInterface;
+            igc.InitialiseIGame(false);
+            IINode node = global.MAXScriptInterface.GetINodeByHandle((uint)Maxscript.QueryInteger("{0}.handle", mainObject));
+            IIGameNode ign = igc.GetIGameNode(node);
+            IIGameObject igo = ign.IGameObject;
+            IIGameMesh igm = global.IGameMesh.Marshal(igo.NativePointer);
+            IMesh im = igm.MaxMesh;
+
+            int numVertices = Maxscript.QueryInteger("meshop.getnumverts {0}", mainMesh);
+            int numFaces = Maxscript.QueryInteger("meshop.getnumfaces {0}", mainMesh);
+
+            //if (igm.InitializeData)
+            //{
+                for (int i = 0; i < numVertices; i++)
+                {
+                    try
+                    {
+                        IPoint3 v = igm.GetVertex(i, false);
+                        mesh.Vertices.Add(new Vector3D(v.X,v.Y,v.Z));
+                        //Maxscript.Command("vertex = meshGetVertFunc {0} {1}", mainMesh, i + 1);
+                        //mesh.Vertices.Add(new Vector3D(
+                        //    Maxscript.QueryFloat("vertex.x"),
+                        //    Maxscript.QueryFloat("vertex.y"),
+                        //    Maxscript.QueryFloat("vertex.z")));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Import Verts/Normals " + i.ToString(), ex);
+                    }
+                }
+            //}
+
+            Maxscript.Command("getVertNormalFunc = {0}.modifiers[#edit_normals].GetNormal", mainObject);
             int numNorms = Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNumNormals()", mainObject);
-
-            for (int i = 0; i < numVertices; i++)
+            //igm.SetCreateOptimizedNormalList();
+            //MessageBox.Show(igm.NumberOfNormals.ToString());
+            IMeshNormalSpec normalSpec = im.SpecifiedNormals;
+            if (normalSpec.NumNormals == 0)
             {
-                try
-                {
-                    Maxscript.Command("vertex = meshop.getVert {0} {1}", mainObject, i + 1);
-                    mesh.Vertices.Add(new Vector3D(
-                        Maxscript.QueryFloat("vertex.x"),
-                        Maxscript.QueryFloat("vertex.y"),
-                        Maxscript.QueryFloat("vertex.z")));
-
-                    //mesh.Normals.Add(new Vector3D(
-                    //    Maxscript.QueryFloat("{0}[{1}].x", "averagedNormals", i + 1),
-                    //    Maxscript.QueryFloat("{0}[{1}].y", "averagedNormals", i + 1),
-                    //    Maxscript.QueryFloat("{0}[{1}].z", "averagedNormals", i + 1)));
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Import Verts/Normals " + i.ToString(), ex);
-                }
+                normalSpec.SetParent(im);
+                normalSpec.CheckNormals();
+            }
+            //MessageBox.Show(normalSpec.NumNormals.ToString());
+            for (int i = 0; i < normalSpec.NumNormals; ++i)
+            {
+                IPoint3 n = normalSpec.Normal(i);// igm.GetNormal(i, false);
+                mesh.Normals.Add(new Vector3D(n.X,n.Y,n.Z));
+                //Maxscript.Command("currentNormal = getVertNormalFunc {0}", i + 1);
+                //mesh.Normals.Add(new Vector3D(
+                //    Maxscript.QueryFloat("currentNormal.x"),
+                //    Maxscript.QueryFloat("currentNormal.y"),
+                //    Maxscript.QueryFloat("currentNormal.z")));
             }
 
-            for (int i = 0; i < numNorms; ++i)
-            {
-                    Maxscript.Command("currentNormal = {0}.modifiers[#edit_normals].GetNormal {1}", 
-                        mainObject, i + 1);
-                    mesh.Normals.Add(new Vector3D(
-                        Maxscript.QueryFloat("currentNormal.x"),
-                        Maxscript.QueryFloat("currentNormal.y"),
-                        Maxscript.QueryFloat("currentNormal.z")));
-            }
-
-            int numTexVertices = Maxscript.QueryInteger("meshop.getnumtverts {0}", mainObject);
+            int numTexVertices = Maxscript.QueryInteger("meshop.getnumtverts {0}", mainMesh);
+            numTexVertices = im.NumTVerts;
             for (int i = 0; i < numTexVertices; i++)
             {
-                Maxscript.Command("tVert = meshop.getmapvert {0} 1 {1}", mainObject, i + 1);
-                mesh.TextureCoordinates.Add(new Vector3D(
-                    Maxscript.QueryFloat("tVert.x"),
-                    Maxscript.QueryFloat("tVert.y"),
-                    Maxscript.QueryFloat("tVert.z")));
+                IPoint3 tv = im.TVerts[i];
+                mesh.TextureCoordinates.Add(new Vector3D(tv.X,tv.Y,tv.Z));
+                //Maxscript.Command("tVert = getTVert {0} {1}", mainMesh, i + 1);
+                //mesh.TextureCoordinates.Add(new Vector3D(
+                //    Maxscript.QueryFloat("tVert.x"),
+                //    Maxscript.QueryFloat("tVert.y"),
+                //    Maxscript.QueryFloat("tVert.z")));
             }
 
+            Maxscript.Command("meshGetNormalIdFunc = {0}.modifiers[#edit_normals].GetNormalID", mainObject);
+            //MessageBox.Show(normalSpec.NumFaces.ToString());
             for (int i = 0; i < numFaces; ++i)
             {
                 Face f = new Face();
-                f.MaterialIndex = (Int16)(Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1) - 1);
-                Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);
-                f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
-                f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1));
-                f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1));
-                f.NormalIndices.Add(Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNormalID {1} {2}",
-                    mainObject, i + 1, 1) - 1);
-                f.NormalIndices.Add(Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNormalID {1} {2}",
-                    mainObject, i + 1, 2) - 1);
-                f.NormalIndices.Add(Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNormalID {1} {2}",
-                    mainObject, i + 1, 3) - 1);
-                Maxscript.Command("tFace = getTVFace {0} {1}", mainObject, i + 1);
-                f.TextureIndices.Add(Maxscript.QueryInteger("tFace.x") - 1);
-                f.TextureIndices.Add(Maxscript.QueryInteger("tFace.y") - 1);
-                f.TextureIndices.Add(Maxscript.QueryInteger("tFace.z") - 1);
+                f.MaterialIndex = (Int16)im.GetFaceMtlIndex(i);
+                //f.MaterialIndex = (Int16)(Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1) - 1);
+
+                IFace ff = im.Faces[i];
+                f.Indices.Add((Int16)ff.GetVert(0));
+                f.Indices.Add((Int16)ff.GetVert(1));
+                f.Indices.Add((Int16)ff.GetVert(2));
+                //Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
+                //f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
+                //f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1));
+                //f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1));
+
+                IMeshNormalFace nf = normalSpec.Face(i);
+                f.NormalIndices.Add(nf.GetNormalID(0));
+                f.NormalIndices.Add(nf.GetNormalID(1));
+                f.NormalIndices.Add(nf.GetNormalID(2));
+                //f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 1) - 1);
+                //f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 2) - 1);
+                //f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 3) - 1);
+
+                ITVFace tf = im.TvFace[i];
+                f.TextureIndices.Add((int)tf.GetTVert(0));
+                f.TextureIndices.Add((int)tf.GetTVert(1));
+                f.TextureIndices.Add((int)tf.GetTVert(2));
+                //Maxscript.Command("tFace = getTVFace {0} {1}", mainMesh, i + 1);
+                //f.TextureIndices.Add(Maxscript.QueryInteger("tFace.x") - 1);
+                //f.TextureIndices.Add(Maxscript.QueryInteger("tFace.y") - 1);
+                //f.TextureIndices.Add(Maxscript.QueryInteger("tFace.z") - 1);
                 mesh.Faces.Add(f);
             }
             // Delete normals mod if it wasn't there in the first place
@@ -583,21 +617,32 @@
                 Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
             }
 
+            IIGameSkin igs = igm.IGameSkin;
             if (Maxscript.QueryBoolean("{0}.modifiers[#skin] != undefined", mainObject))
             {
                 Maxscript.Command("skinMod = {0}.modifiers[#skin]", mainObject);
                 Maxscript.Command("modPanel.setCurrentObject skinMod ui:true");
                 Maxscript.Command("ExportSkinData()");
                 int numBVerts = Maxscript.QueryInteger("grnSkinWeights.count");
+                numBVerts = igs.NumOfSkinnedVerts;
                 for (int i = 0; i < numBVerts; ++i)
                 {
                     mesh.VertexWeights.Add(new VertexWeight());
                     Maxscript.Command("skinWeightArray = grnSkinWeights[{0}]", i + 1);
                     int numVWs = Maxscript.QueryInteger("skinWeightArray.count");
+                    numVWs = igs.GetNumberOfBones(i);
                     for (int j = 0; j < numVWs; ++j)
                     {
-                        mesh.VertexWeights[i].BoneIndices.Add(Maxscript.QueryInteger("skinWeightArray[{0}][1]", j + 1));
-                        mesh.VertexWeights[i].Weights.Add(Maxscript.QueryFloat("skinWeightArray[{0}][2]", j + 1));
+                        if (i == 0)
+                        {
+                            MessageBox.Show(numVWs.ToString());
+                            MessageBox.Show(igs.GetBoneID(0, 0).ToString());
+                            MessageBox.Show(igs.GetBoneIndex(igs.GetBone(igs.GetBoneID(0, 0), true), true).ToString());
+                        }
+                        mesh.VertexWeights[i].BoneIndices.Add(igs.GetBoneID(i, j) - 1);
+                        mesh.VertexWeights[i].Weights.Add(igs.GetWeight(i, j));
+                        //mesh.VertexWeights[i].BoneIndices.Add(Maxscript.QueryInteger("skinWeightArray[{0}][1]", j + 1));
+                        //mesh.VertexWeights[i].Weights.Add(Maxscript.QueryFloat("skinWeightArray[{0}][2]", j + 1));
                     }
                 }
 
@@ -618,6 +663,13 @@
                         Maxscript.QueryFloat("bbMin.z"));
                 }
             }
+
+            //normalSpec.ReleaseInterface();
+            ign.ReleaseIGameObject();
+            node.ReleaseInterface();
+            //gnode.ReleaseIGameObject();
+            igc.ReleaseIGame();
+            intfc.ReleaseInterface();
         }
         private void ExportAnimation()
         {
@@ -923,22 +975,8 @@
         {
             string boneNode = "boneNode";
 
-            string bPos = Maxscript.NewPoint3<float>("bPos", bone.Position.X, bone.Position.Y, bone.Position.Z);
-            Maxscript.Command("bRot = quat {0} {1} {2} {3}", bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-            //Maxscript.Command("boneScaleMatrix = matrix3 [{0}, {1}, {2}] [{3}, {4}, {5}] [{6}, {7}, {8}] [0,0,0]",
-            //    bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
-            //    bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
-            //    bone.Scale.C1, bone.Scale.C2, bone.Scale.C3);
-            //Maxscript.Command("boneNode = dummy name:\"{0}\" boxsize:[0.25,0.25,0.25]", bone.Name);
-            //Maxscript.Command("boneNode.scale = {0}", Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
-            //Maxscript.Command("boneNode.rotation = bRot");
-            //Maxscript.Command("boneNode.position = bPos");
-            //Maxscript.Command("boneNode.transform = boneScaleMatrix * boneNode.transform");
-            //this.Plugin.richTextBox1.AppendText(bone.Name + " " + bone.Position + Environment.NewLine);
-
             Maxscript.Command("boneNode = dummy name:\"{0}\" boxsize:[0.25,0.25,0.25]", bone.Name);
             Maxscript.Command("boneNode.transform = {0}", this.GetBoneLocalTransform(bone, "boneTransMat"));
-            //Maxscript.Command("boneNode.boxsize = [0.25,0.25,0.25]");
 
             //this.GetBoneLocalTransform(bone, "tfm");
             //Maxscript.Command("boneNode = bonesys.createbone tfm.row4 (tfm.row4 + 0.01 * (normalize tfm.row1)) (normalize tfm.row3)");
@@ -950,34 +988,18 @@
             //Maxscript.Command("boneNode.setBoneEnable false 0");
             //Maxscript.Command("boneNode.pos.controller = TCB_position ()");
             //Maxscript.Command("boneNode.rotation.controller = TCB_rotation ()");
-            
-            //GrnBone bone = MeshFile.Bones[boneIndex];
-            //string world = GetBoneWorldTransform(MeshFile, boneIndex, "m3World");
-            //string worldP = GetBoneWorldTransform(MeshFile, bone.ParentIndex, "m3WorldP");
-            //Maxscript.Command("{0} = BoneSys.createBone {1}.translation {2}.translation [0, 0, 1]", boneNode, world, worldP);
-            //Maxscript.Command("{0}.transform = {1}", boneNode, world);
 
             return boneNode;
         }
         private string GetBoneLocalTransform(GrnBone bone, string nameM3)
         {
             Maxscript.Command("{0} = matrix3 1", nameM3);
-            //Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] {10})", nameM3,
-            //    bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
-            //    bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
-            //    bone.Scale.C1, bone.Scale.C2, bone.Scale.C3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = transmatrix {1}", nameM3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = (inverse(quat {1} {2} {3} {4}) as matrix3) * {0}", nameM3, bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-            //Maxscript.Command("{0}.scale = {1}", nameM3, Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
-            //Maxscript.Command("{0}.rotation = inverse(quat {1} {2} {3} {4})", nameM3, bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
-            //Maxscript.Command("{0}.position = {1}", nameM3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] [0,0,0]) * {0}", nameM3,
                 bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
                 bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
                 bone.Scale.C1, bone.Scale.C2, bone.Scale.C3);
-            //Maxscript.Command("{0}.rotation = {1}", nameM3, Maxscript.QuatLiteral(bone.Rotation));
-            //Maxscript.Command("{0} *= scaleMatrix {1}", nameM3, 
-            //    Maxscript.Point3Literal(bone.Scale.A1, bone.Scale.B2, bone.Scale.C3));
 
             return nameM3;
         }
