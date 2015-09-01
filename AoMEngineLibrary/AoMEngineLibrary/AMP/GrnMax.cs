@@ -161,7 +161,7 @@
 
             for (int i = 0; i < mesh.TextureCoordinates.Count; ++i)
             {
-                Maxscript.Append(texVerts, Maxscript.Point3Literal(mesh.TextureCoordinates[i]));
+                Maxscript.Append(texVerts, Maxscript.Point3Literal(mesh.TextureCoordinates[i].X, 1f-mesh.TextureCoordinates[i].Y, mesh.TextureCoordinates[i].Z));
             }
 
             foreach (var face in mesh.Faces)
@@ -436,16 +436,6 @@
                 this.File.Animation.TimeStep = 1f;
             }
 
-            if (this.ExportSetting.HasFlag(GrnExportSetting.Model))
-            {
-                int numMaterials = Maxscript.QueryInteger("{0}.material.materialList.count", "mainObject");
-                for (int i = 0; i < numMaterials; i++)
-                {
-                    this.File.Materials.Add(new GrnMaterial(this.File));
-                    this.ExportMaterial(i, "mainObject");
-                }
-            }
-
             Maxscript.Command("exportEndTime = timeStamp()");
             Maxscript.Format("Export took % seconds\n", "((exportEndTime - exportStartTime) / 1000.0)");
         }
@@ -496,6 +486,8 @@
             string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject);
             mesh.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("{0}.name", mainObject));
 
+            Dictionary<int, int> matIdMapping = this.ExportMeshMaterial(mainObject);
+
             // Setup Normals
             Maxscript.Command("max modify mode");
             if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
@@ -542,7 +534,7 @@
                 Maxscript.Command("tVert = meshGetMapVertFunc {0} 1 {1}", mainMesh, i + 1);
                 mesh.TextureCoordinates.Add(new Vector3D(
                     Maxscript.QueryFloat("tVert.x"),
-                    Maxscript.QueryFloat("tVert.y"),
+                    1f-Maxscript.QueryFloat("tVert.y"),
                     Maxscript.QueryFloat("tVert.z")));
             }
 
@@ -550,7 +542,15 @@
             for (int i = 0; i < numFaces; ++i)
             {
                 Face f = new Face();
-                f.MaterialIndex = (Int16)(Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1) - 1);
+                Int32 matIndex = Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1);
+                if (matIdMapping.ContainsKey(matIndex))
+                {
+                    f.MaterialIndex = (Int16)(matIdMapping[matIndex]);
+                }
+                else
+                {
+                    f.MaterialIndex = (Int16)(matIndex - 1);
+                }
 
                 Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
@@ -606,6 +606,121 @@
                         Maxscript.QueryFloat("bbMin.x"),
                         Maxscript.QueryFloat("bbMin.y"),
                         Maxscript.QueryFloat("bbMin.z"));
+                }
+            }
+        }
+        private Dictionary<int, int> ExportMeshMaterial(string mainObject)
+        {
+            Dictionary<int, int> matIdMapping = new Dictionary<int, int>();
+            if (Maxscript.QueryBoolean("classof {0}.material == Multimaterial", mainObject))
+            {
+                int numMaterials = Maxscript.QueryInteger("{0}.material.materialList.count", "mainObject");
+                for (int i = 0; i < numMaterials; ++i)
+                {
+                    GrnMaterial mat = new GrnMaterial(this.File);
+                    int id = this.File.Materials.Count;
+                    Maxscript.Command("mat = {0}.material.materialList[{1}]", mainObject, i + 1);
+                    this.ExportMaterial(mat);
+
+                    int matListIndex = this.File.Materials.IndexOf(mat);
+                    int actualMatId = Maxscript.QueryInteger("{0}.material.materialIdList[{1}]", mainObject, i + 1);
+                    if (matListIndex >= 0)
+                    {
+                        if (!matIdMapping.ContainsKey(actualMatId))
+                        {
+                            matIdMapping.Add(actualMatId, matListIndex);
+                        }
+                        this.File.DataExtensions.RemoveAt(mat.DataExtensionIndex);
+                    }
+                    else
+                    {
+                        this.File.Materials.Add(mat);
+                        if (matIdMapping.ContainsKey(actualMatId))
+                        {
+                            matIdMapping[actualMatId] = id;
+                        }
+                        else
+                        {
+                            matIdMapping.Add(actualMatId, id);
+                        }
+                    }
+                }
+            }
+            else if (Maxscript.QueryBoolean("classof {0}.material == Standardmaterial", mainObject))
+            {
+                GrnMaterial mat = new GrnMaterial(this.File);
+                int id = this.File.Materials.Count;
+                Maxscript.Command("mat = {0}.material", mainObject);
+                this.ExportMaterial(mat);
+
+                int matListIndex = this.File.Materials.IndexOf(mat);
+                if (matListIndex >= 0)
+                {
+                    matIdMapping.Add(1, matListIndex);
+                    this.File.DataExtensions.RemoveAt(mat.DataExtensionIndex);
+                }
+                else
+                {
+                    this.File.Materials.Add(mat);
+                    matIdMapping.Add(1, id);
+                }
+            }
+
+            return matIdMapping;
+        }
+        private void ExportMaterial(GrnMaterial mat)
+        {
+            mat.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.name"));
+
+            mat.DiffuseColor = new Color3D(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
+                Maxscript.QueryFloat("mat.diffuse.g") / 255f,
+                Maxscript.QueryFloat("mat.diffuse.b") / 255f);
+            mat.AmbientColor = new Color3D(Maxscript.QueryFloat("mat.ambient.r") / 255f,
+                Maxscript.QueryFloat("mat.ambient.g") / 255f,
+                Maxscript.QueryFloat("mat.ambient.b") / 255f);
+            mat.SpecularColor = new Color3D(Maxscript.QueryFloat("mat.specular.r") / 255f,
+                Maxscript.QueryFloat("mat.specular.g") / 255f,
+                Maxscript.QueryFloat("mat.specular.b") / 255f);
+            mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
+                Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
+                Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
+            mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
+            mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
+
+            if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
+            {
+                GrnTexture tex = new GrnTexture(this.File);
+                tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.name"));
+                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.filename")));
+
+                int texIndex = this.File.Textures.IndexOf(tex);
+                if (texIndex >= 0)
+                {
+                    mat.DiffuseTextureIndex = texIndex;
+                    this.File.DataExtensions.RemoveAt(tex.DataExtensionIndex);
+                }
+                else
+                {
+                    mat.DiffuseTextureIndex = this.File.Textures.Count;
+                    this.File.Textures.Add(tex);
+                }
+            }
+            else if (Maxscript.QueryBoolean("(classof mat.diffusemap) == CompositeTextureMap") && Maxscript.QueryBoolean("(classof mat.diffusemap.mapList[1]) == BitmapTexture"))
+            {
+                GrnTexture tex = new GrnTexture(this.File);
+                tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].name"));
+                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")));
+
+                int texIndex = this.File.Textures.IndexOf(tex);
+                if (texIndex >= 0)
+                {
+                    mat.DiffuseTextureIndex = texIndex;
+                    this.File.DataExtensions.RemoveAt(tex.DataExtensionIndex);
+                }
+                else
+                {
+                    mat.DiffuseTextureIndex = this.File.Textures.Count;
+                    this.File.Textures.Add(tex);
                 }
             }
         }
@@ -732,64 +847,6 @@
                 rootBoneTrack.Positions.Add(new Vector3D(0, 0, 0));
                 rootBoneTrack.Rotations.Add(new Quaternion(1, 0, 0, 0));
                 rootBoneTrack.Scales.Add(Matrix3x3.Identity);
-            }
-        }
-        private void ExportMaterial(int matIndex, string mainObject)
-        {
-            GrnMaterial mat = this.File.Materials[matIndex];
-            Maxscript.Command("mat = {0}.material[{1}]", mainObject, matIndex + 1);
-            mat.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.name"));
-
-            mat.DiffuseColor = new Color3D(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
-                Maxscript.QueryFloat("mat.diffuse.g") / 255f,
-                Maxscript.QueryFloat("mat.diffuse.b") / 255f);
-            mat.AmbientColor = new Color3D(Maxscript.QueryFloat("mat.ambient.r") / 255f,
-                Maxscript.QueryFloat("mat.ambient.g") / 255f,
-                Maxscript.QueryFloat("mat.ambient.b") / 255f);
-            mat.SpecularColor = new Color3D(Maxscript.QueryFloat("mat.specular.r") / 255f,
-                Maxscript.QueryFloat("mat.specular.g") / 255f,
-                Maxscript.QueryFloat("mat.specular.b") / 255f);
-            mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
-                Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
-                Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
-            mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
-            mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
-            int opacityType = Maxscript.QueryInteger("mat.opacityType");
-
-            if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
-            {
-                GrnTexture tex = new GrnTexture(this.File);
-                tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.name"));
-                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.filename")));
-
-                int texIndex = this.File.Textures.IndexOf(tex);
-                if (texIndex >= 0)
-                {
-                    mat.DiffuseTextureIndex = texIndex;
-                }
-                else
-                {
-                    mat.DiffuseTextureIndex = this.File.Textures.Count;
-                    this.File.Textures.Add(tex);
-                }
-            }
-            else if (Maxscript.QueryBoolean("(classof mat.diffusemap) == CompositeTextureMap") && Maxscript.QueryBoolean("(classof mat.diffusemap.mapList[1]) == BitmapTexture"))
-            {
-                GrnTexture tex = new GrnTexture(this.File);
-                tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].name"));
-                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")));
-
-                int texIndex = this.File.Textures.IndexOf(tex);
-                if (texIndex >= 0)
-                {
-                    mat.DiffuseTextureIndex = texIndex;
-                    this.File.DataExtensions.RemoveAt(tex.DataExtensionIndex);
-                }
-                else
-                {
-                    mat.DiffuseTextureIndex = this.File.Textures.Count;
-                    this.File.Textures.Add(tex);
-                }
             }
         }
 
