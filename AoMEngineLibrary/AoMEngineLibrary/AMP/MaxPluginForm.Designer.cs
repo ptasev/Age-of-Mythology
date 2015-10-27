@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            BrightIdeasSoftware.HeaderStateStyle headerStateStyle40 = new BrightIdeasSoftware.HeaderStateStyle();
-            BrightIdeasSoftware.HeaderStateStyle headerStateStyle41 = new BrightIdeasSoftware.HeaderStateStyle();
-            BrightIdeasSoftware.HeaderStateStyle headerStateStyle42 = new BrightIdeasSoftware.HeaderStateStyle();
+            BrightIdeasSoftware.HeaderStateStyle headerStateStyle4 = new BrightIdeasSoftware.HeaderStateStyle();
+            BrightIdeasSoftware.HeaderStateStyle headerStateStyle5 = new BrightIdeasSoftware.HeaderStateStyle();
+            BrightIdeasSoftware.HeaderStateStyle headerStateStyle6 = new BrightIdeasSoftware.HeaderStateStyle();
             this.specularLevelLabel = new System.Windows.Forms.Label();
             this.materialGroupBox = new System.Windows.Forms.GroupBox();
             this.extractMatButton = new System.Windows.Forms.Button();
@@ -58,6 +58,8 @@
             this.brgSideTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.brgObjectsGroupBox = new System.Windows.Forms.GroupBox();
             this.brgObjectsTreeListView = new BrightIdeasSoftware.TreeListView();
+            this.brgMaterialTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.brgAttachpointTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.brgFlagsTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.brgMeshFormatGroupBox = new System.Windows.Forms.GroupBox();
             this.brgMeshFormatCheckedListBox = new System.Windows.Forms.CheckedListBox();
@@ -72,8 +74,6 @@
             this.brgMeshInterpTypeGroupBox = new System.Windows.Forms.GroupBox();
             this.brgMeshInterpTypeFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.interpolationTypeCheckBox = new System.Windows.Forms.CheckBox();
-            this.brgMaterialTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.brgAttachpointTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.grnSettingsTabPage = new System.Windows.Forms.TabPage();
             this.grnDataSplitContainer = new System.Windows.Forms.SplitContainer();
             this.grnSideTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
@@ -125,6 +125,10 @@
             this.matsValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.animLengthValueToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.brgOptionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.brgOptionsTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.brgExportGroupBox = new System.Windows.Forms.GroupBox();
+            this.extractMatButton2 = new System.Windows.Forms.Button();
             this.materialGroupBox.SuspendLayout();
             this.materialFlagsGroupBox.SuspendLayout();
             this.mainTabControl.SuspendLayout();
@@ -136,6 +140,7 @@
             this.brgSideTableLayoutPanel.SuspendLayout();
             this.brgObjectsGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.brgObjectsTreeListView)).BeginInit();
+            this.brgMaterialTableLayoutPanel.SuspendLayout();
             this.brgFlagsTableLayoutPanel.SuspendLayout();
             this.brgMeshFormatGroupBox.SuspendLayout();
             this.brgMeshFlagsGroupBox.SuspendLayout();
@@ -144,7 +149,6 @@
             this.brgMeshAnimTypeFlowLayoutPanel.SuspendLayout();
             this.brgMeshInterpTypeGroupBox.SuspendLayout();
             this.brgMeshInterpTypeFlowLayoutPanel.SuspendLayout();
-            this.brgMaterialTableLayoutPanel.SuspendLayout();
             this.grnSettingsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grnDataSplitContainer)).BeginInit();
             this.grnDataSplitContainer.Panel1.SuspendLayout();
@@ -167,6 +171,9 @@
             this.brgImportGroupBox.SuspendLayout();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
+            this.brgOptionsGroupBox.SuspendLayout();
+            this.brgOptionsTableLayoutPanel.SuspendLayout();
+            this.brgExportGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // specularLevelLabel
@@ -450,6 +457,35 @@
             this.brgObjectsTreeListView.SelectionChanged += new System.EventHandler(this.brgObjectsTreeListView_SelectionChanged);
             this.brgObjectsTreeListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.brgObjectsTreeListView_KeyDown);
             // 
+            // brgMaterialTableLayoutPanel
+            // 
+            this.brgMaterialTableLayoutPanel.ColumnCount = 1;
+            this.brgMaterialTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.brgMaterialTableLayoutPanel.Controls.Add(this.materialFlagsGroupBox, 0, 1);
+            this.brgMaterialTableLayoutPanel.Controls.Add(this.materialGroupBox, 0, 0);
+            this.brgMaterialTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgMaterialTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.brgMaterialTableLayoutPanel.Margin = new System.Windows.Forms.Padding(2);
+            this.brgMaterialTableLayoutPanel.Name = "brgMaterialTableLayoutPanel";
+            this.brgMaterialTableLayoutPanel.RowCount = 2;
+            this.brgMaterialTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 130F));
+            this.brgMaterialTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.brgMaterialTableLayoutPanel.Size = new System.Drawing.Size(573, 486);
+            this.brgMaterialTableLayoutPanel.TabIndex = 1;
+            // 
+            // brgAttachpointTableLayoutPanel
+            // 
+            this.brgAttachpointTableLayoutPanel.ColumnCount = 1;
+            this.brgAttachpointTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgAttachpointTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgAttachpointTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.brgAttachpointTableLayoutPanel.Margin = new System.Windows.Forms.Padding(2);
+            this.brgAttachpointTableLayoutPanel.Name = "brgAttachpointTableLayoutPanel";
+            this.brgAttachpointTableLayoutPanel.RowCount = 1;
+            this.brgAttachpointTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgAttachpointTableLayoutPanel.Size = new System.Drawing.Size(573, 486);
+            this.brgAttachpointTableLayoutPanel.TabIndex = 2;
+            // 
             // brgFlagsTableLayoutPanel
             // 
             this.brgFlagsTableLayoutPanel.ColumnCount = 1;
@@ -622,35 +658,6 @@
             this.interpolationTypeCheckBox.TabIndex = 17;
             this.interpolationTypeCheckBox.Text = "Conform to Terrain";
             this.interpolationTypeCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // brgMaterialTableLayoutPanel
-            // 
-            this.brgMaterialTableLayoutPanel.ColumnCount = 1;
-            this.brgMaterialTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.brgMaterialTableLayoutPanel.Controls.Add(this.materialFlagsGroupBox, 0, 1);
-            this.brgMaterialTableLayoutPanel.Controls.Add(this.materialGroupBox, 0, 0);
-            this.brgMaterialTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.brgMaterialTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.brgMaterialTableLayoutPanel.Margin = new System.Windows.Forms.Padding(2);
-            this.brgMaterialTableLayoutPanel.Name = "brgMaterialTableLayoutPanel";
-            this.brgMaterialTableLayoutPanel.RowCount = 2;
-            this.brgMaterialTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 130F));
-            this.brgMaterialTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.brgMaterialTableLayoutPanel.Size = new System.Drawing.Size(573, 486);
-            this.brgMaterialTableLayoutPanel.TabIndex = 1;
-            // 
-            // brgAttachpointTableLayoutPanel
-            // 
-            this.brgAttachpointTableLayoutPanel.ColumnCount = 1;
-            this.brgAttachpointTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.brgAttachpointTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.brgAttachpointTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.brgAttachpointTableLayoutPanel.Margin = new System.Windows.Forms.Padding(2);
-            this.brgAttachpointTableLayoutPanel.Name = "brgAttachpointTableLayoutPanel";
-            this.brgAttachpointTableLayoutPanel.RowCount = 1;
-            this.brgAttachpointTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.brgAttachpointTableLayoutPanel.Size = new System.Drawing.Size(573, 486);
-            this.brgAttachpointTableLayoutPanel.TabIndex = 2;
             // 
             // grnSettingsTabPage
             // 
@@ -835,8 +842,8 @@
             // 
             this.utilMainTableLayoutPanel.ColumnCount = 1;
             this.utilMainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilMainTableLayoutPanel.Controls.Add(this.brgOptionsGroupBox, 0, 0);
             this.utilMainTableLayoutPanel.Controls.Add(this.grnExportGroupBox, 0, 1);
-            this.utilMainTableLayoutPanel.Controls.Add(this.brgImportGroupBox, 0, 0);
             this.utilMainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.utilMainTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.utilMainTableLayoutPanel.Margin = new System.Windows.Forms.Padding(2);
@@ -844,6 +851,7 @@
             this.utilMainTableLayoutPanel.RowCount = 2;
             this.utilMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.utilMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.utilMainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.utilMainTableLayoutPanel.Size = new System.Drawing.Size(573, 486);
             this.utilMainTableLayoutPanel.TabIndex = 0;
             // 
@@ -892,10 +900,10 @@
             this.brgImportGroupBox.Margin = new System.Windows.Forms.Padding(2);
             this.brgImportGroupBox.Name = "brgImportGroupBox";
             this.brgImportGroupBox.Padding = new System.Windows.Forms.Padding(2);
-            this.brgImportGroupBox.Size = new System.Drawing.Size(569, 239);
+            this.brgImportGroupBox.Size = new System.Drawing.Size(276, 214);
             this.brgImportGroupBox.TabIndex = 19;
             this.brgImportGroupBox.TabStop = false;
-            this.brgImportGroupBox.Text = "Brg Import";
+            this.brgImportGroupBox.Text = "Import";
             // 
             // brgImportCenterModelCheckBox
             // 
@@ -921,18 +929,18 @@
             // 
             // headerFormatStyle1
             // 
-            headerStateStyle40.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            headerStateStyle40.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            headerStateStyle40.ForeColor = System.Drawing.Color.White;
-            headerStateStyle40.FrameWidth = 1F;
-            this.headerFormatStyle1.Hot = headerStateStyle40;
-            headerStateStyle41.BackColor = System.Drawing.Color.Gray;
-            headerStateStyle41.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            headerStateStyle41.ForeColor = System.Drawing.Color.White;
-            headerStateStyle41.FrameWidth = 1F;
-            this.headerFormatStyle1.Normal = headerStateStyle41;
-            headerStateStyle42.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.headerFormatStyle1.Pressed = headerStateStyle42;
+            headerStateStyle4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            headerStateStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            headerStateStyle4.ForeColor = System.Drawing.Color.White;
+            headerStateStyle4.FrameWidth = 1F;
+            this.headerFormatStyle1.Hot = headerStateStyle4;
+            headerStateStyle5.BackColor = System.Drawing.Color.Gray;
+            headerStateStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            headerStateStyle5.ForeColor = System.Drawing.Color.White;
+            headerStateStyle5.FrameWidth = 1F;
+            this.headerFormatStyle1.Normal = headerStateStyle5;
+            headerStateStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.headerFormatStyle1.Pressed = headerStateStyle6;
             // 
             // mainMenuStrip
             // 
@@ -1157,6 +1165,57 @@
             this.animLengthValueToolStripStatusLabel.Size = new System.Drawing.Size(13, 17);
             this.animLengthValueToolStripStatusLabel.Text = "0";
             // 
+            // brgOptionsGroupBox
+            // 
+            this.brgOptionsGroupBox.Controls.Add(this.brgOptionsTableLayoutPanel);
+            this.brgOptionsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgOptionsGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.brgOptionsGroupBox.Name = "brgOptionsGroupBox";
+            this.brgOptionsGroupBox.Size = new System.Drawing.Size(567, 237);
+            this.brgOptionsGroupBox.TabIndex = 2;
+            this.brgOptionsGroupBox.TabStop = false;
+            this.brgOptionsGroupBox.Text = "Brg Options";
+            // 
+            // brgOptionsTableLayoutPanel
+            // 
+            this.brgOptionsTableLayoutPanel.ColumnCount = 2;
+            this.brgOptionsTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgOptionsTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgOptionsTableLayoutPanel.Controls.Add(this.brgImportGroupBox, 0, 0);
+            this.brgOptionsTableLayoutPanel.Controls.Add(this.brgExportGroupBox, 1, 0);
+            this.brgOptionsTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgOptionsTableLayoutPanel.Location = new System.Drawing.Point(3, 16);
+            this.brgOptionsTableLayoutPanel.Margin = new System.Windows.Forms.Padding(2);
+            this.brgOptionsTableLayoutPanel.Name = "brgOptionsTableLayoutPanel";
+            this.brgOptionsTableLayoutPanel.RowCount = 1;
+            this.brgOptionsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.brgOptionsTableLayoutPanel.Size = new System.Drawing.Size(561, 218);
+            this.brgOptionsTableLayoutPanel.TabIndex = 20;
+            // 
+            // brgExportGroupBox
+            // 
+            this.brgExportGroupBox.Controls.Add(this.extractMatButton2);
+            this.brgExportGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brgExportGroupBox.Location = new System.Drawing.Point(282, 2);
+            this.brgExportGroupBox.Margin = new System.Windows.Forms.Padding(2);
+            this.brgExportGroupBox.Name = "brgExportGroupBox";
+            this.brgExportGroupBox.Padding = new System.Windows.Forms.Padding(2);
+            this.brgExportGroupBox.Size = new System.Drawing.Size(277, 214);
+            this.brgExportGroupBox.TabIndex = 20;
+            this.brgExportGroupBox.TabStop = false;
+            this.brgExportGroupBox.Text = "Export";
+            // 
+            // extractMatButton2
+            // 
+            this.extractMatButton2.Location = new System.Drawing.Point(4, 17);
+            this.extractMatButton2.Margin = new System.Windows.Forms.Padding(2);
+            this.extractMatButton2.Name = "extractMatButton2";
+            this.extractMatButton2.Size = new System.Drawing.Size(269, 27);
+            this.extractMatButton2.TabIndex = 15;
+            this.extractMatButton2.Text = "Extract All Materials for EE";
+            this.extractMatButton2.UseVisualStyleBackColor = true;
+            this.extractMatButton2.Click += new System.EventHandler(this.extractMatButton_Click);
+            // 
             // MaxPluginForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1179,6 +1238,7 @@
             this.brgSideTableLayoutPanel.ResumeLayout(false);
             this.brgObjectsGroupBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.brgObjectsTreeListView)).EndInit();
+            this.brgMaterialTableLayoutPanel.ResumeLayout(false);
             this.brgFlagsTableLayoutPanel.ResumeLayout(false);
             this.brgMeshFormatGroupBox.ResumeLayout(false);
             this.brgMeshFlagsGroupBox.ResumeLayout(false);
@@ -1189,7 +1249,6 @@
             this.brgMeshInterpTypeGroupBox.ResumeLayout(false);
             this.brgMeshInterpTypeFlowLayoutPanel.ResumeLayout(false);
             this.brgMeshInterpTypeFlowLayoutPanel.PerformLayout();
-            this.brgMaterialTableLayoutPanel.ResumeLayout(false);
             this.grnSettingsTabPage.ResumeLayout(false);
             this.grnDataSplitContainer.Panel1.ResumeLayout(false);
             this.grnDataSplitContainer.Panel2.ResumeLayout(false);
@@ -1216,6 +1275,9 @@
             this.mainMenuStrip.PerformLayout();
             this.mainStatusStrip.ResumeLayout(false);
             this.mainStatusStrip.PerformLayout();
+            this.brgOptionsGroupBox.ResumeLayout(false);
+            this.brgOptionsTableLayoutPanel.ResumeLayout(false);
+            this.brgExportGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1316,5 +1378,9 @@
         private System.Windows.Forms.TableLayoutPanel grnMainTableLayoutPanel;
         public BrightIdeasSoftware.TreeListView grnObjectsTreeListView;
         private System.Windows.Forms.TableLayoutPanel utilSideTableLayoutPanel;
+        private System.Windows.Forms.GroupBox brgOptionsGroupBox;
+        private System.Windows.Forms.TableLayoutPanel brgOptionsTableLayoutPanel;
+        private System.Windows.Forms.GroupBox brgExportGroupBox;
+        private System.Windows.Forms.Button extractMatButton2;
     }
 }

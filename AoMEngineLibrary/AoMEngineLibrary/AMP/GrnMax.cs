@@ -99,6 +99,8 @@
             }
             //this.Plugin.ProgDialog.SetProgressValue(100);
 
+            Maxscript.Command("max select none");
+            Maxscript.Command("max zoomext sel all");
             Maxscript.Command("max zoomext sel all");
             Maxscript.Command("importEndTime = timeStamp()");
             Maxscript.Format("Import took % seconds\n", "((importEndTime - importStartTime) / 1000.0)");
@@ -691,7 +693,7 @@
             {
                 GrnTexture tex = new GrnTexture(this.File);
                 tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.name"));
-                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.filename")));
+                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileNameWithoutExtension(Maxscript.QueryString("mat.diffusemap.filename")) + ".tga");
 
                 int texIndex = this.File.Textures.IndexOf(tex);
                 if (texIndex >= 0)
@@ -709,7 +711,7 @@
             {
                 GrnTexture tex = new GrnTexture(this.File);
                 tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].name"));
-                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileName(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")));
+                this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileNameWithoutExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")) + ".tga");
 
                 int texIndex = this.File.Textures.IndexOf(tex);
                 if (texIndex >= 0)

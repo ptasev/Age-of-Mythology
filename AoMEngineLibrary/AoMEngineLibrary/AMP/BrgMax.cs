@@ -190,8 +190,10 @@
                     Maxscript.Append(faceArray, Maxscript.Point3Literal(face.Indices[0] + 1, face.Indices[2] + 1, face.Indices[1] + 1));
                 }
 
-                Maxscript.Command(Maxscript.NewMeshLiteral(mainObject, vertArray, faceArray, faceMats, texVerts));
-                Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
+                int mObjNum = 0;
+                while (Maxscript.QueryInteger("($objects/{0}* as array).count", mainObject + mObjNum) > 0) { ++mObjNum; }
+                Maxscript.Command("{0} = {1}", mainObject, Maxscript.NewMeshLiteral(mainObject + mObjNum, vertArray, faceArray, faceMats, texVerts));
+                //Maxscript.Command("{0} = getNodeByName \"{0}\"", mainObject);
 
                 Maxscript.Command("dummy name:\"Dummy_hotspot\" pos:{0} boxsize:[10,10,0]", Maxscript.Point3Literal(-mesh.Header.HotspotPosition.X, -mesh.Header.HotspotPosition.Z, mesh.Header.HotspotPosition.Y));
 
@@ -814,6 +816,12 @@
             if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
             {
                 mat.DiffuseMap = Maxscript.QueryString("getFilenameFile(mat.diffusemap.filename)");
+                int parenthIndex = mat.DiffuseMap.IndexOf('(');
+                if (parenthIndex > 0)
+                {
+                    mat.DiffuseMap = mat.DiffuseMap.Remove(parenthIndex);
+                }
+
                 if (mat.DiffuseMap.Length > 0)
                 {
                     mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1;
@@ -827,6 +835,11 @@
             {
                 mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1 | BrgMatFlag.PixelXForm1;
                 mat.DiffuseMap = Maxscript.QueryString("getFilenameFile(mat.diffusemap.mapList[1].filename)");
+                int parenthIndex = mat.DiffuseMap.IndexOf('(');
+                if (parenthIndex > 0)
+                {
+                    mat.DiffuseMap = mat.DiffuseMap.Remove(parenthIndex);
+                }
             }
 
             this.ExportMaterialFlagsFromName(mat);

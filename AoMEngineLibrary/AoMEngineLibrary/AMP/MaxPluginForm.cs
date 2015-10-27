@@ -106,18 +106,22 @@ namespace AoMEngineLibrary.AMP
             brgMeshFlagsGroupBox.ForeColor = uiUp.GetTextColor();
             brgMeshFormatGroupBox.ForeColor = uiUp.GetTextColor();
             brgMeshAnimTypeGroupBox.ForeColor = uiUp.GetTextColor();
+            brgOptionsGroupBox.ForeColor = uiUp.GetTextColor();
+            brgExportGroupBox.ForeColor = uiUp.GetTextColor();
 
             brgMeshFlagsCheckedListBox.ItemCheck += brgMeshFlagsCheckedListBox_ItemCheck;
             brgMeshFlagsCheckedListBox.BackColor = uiUp.GetEditControlColor();
             brgMeshFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
             brgMeshFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             brgMeshFlagsCheckedListBox.MultiColumn = true;
+            brgMeshFlagsCheckedListBox.CheckOnClick = true;
             brgMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
             brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
             brgMeshFormatCheckedListBox.BackColor = uiUp.GetEditControlColor();
             brgMeshFormatCheckedListBox.ForeColor = uiUp.GetTextColor();
             brgMeshFormatCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             brgMeshFormatCheckedListBox.MultiColumn = true;
+            brgMeshFormatCheckedListBox.CheckOnClick = true;
             brgMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
 
             keyframeRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
@@ -184,6 +188,9 @@ namespace AoMEngineLibrary.AMP
             extractMatButton.FlatStyle = FlatStyle.Flat;
             extractMatButton.BackColor = uiUp.GetEditControlColor();
             extractMatButton.ForeColor = uiUp.GetTextColor();
+            extractMatButton2.FlatStyle = FlatStyle.Flat;
+            extractMatButton2.BackColor = uiUp.GetEditControlColor();
+            extractMatButton2.ForeColor = uiUp.GetTextColor();
             materialGroupBox.BackColor = uiUp.GetControlColor();
             materialGroupBox.ForeColor = uiUp.GetTextColor();
             diffuseMaxTextBox.BackColor = uiUp.GetEditControlColor();
@@ -211,6 +218,7 @@ namespace AoMEngineLibrary.AMP
             materialFlagsCheckedListBox.ForeColor = uiUp.GetTextColor();
             materialFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             materialFlagsCheckedListBox.MultiColumn = true;
+            materialFlagsCheckedListBox.CheckOnClick = true;
             materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
 
             // Grn Tab
@@ -495,7 +503,7 @@ namespace AoMEngineLibrary.AMP
 
         private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("http://petar.outer-heaven.net/downloads/aom/amp/ReadME.html");
+            System.Diagnostics.Process.Start("http://modding.petartasev.com/AoM/AMP/ReadME.html");
         }
 
         private void beginnersGuideToolStripMenuItem_Click(object sender, EventArgs e)
