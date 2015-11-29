@@ -16,6 +16,8 @@ namespace AoMEngineLibrary.AMP
         public ProgressDialog()
         {
             InitializeComponent();
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.progressBar.Style = ProgressBarStyle.Marquee;
         }
 
         public void SetProgressText(string text)

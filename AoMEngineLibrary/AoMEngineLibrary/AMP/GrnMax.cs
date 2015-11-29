@@ -66,7 +66,7 @@
             {
                 this.boneMap = new Dictionary<string, int>();
             }
-            //if (!this.matGroupInit)
+
             if (this.File.Materials.Count > 0)
             {
                 Maxscript.Command("matGroup = multimaterial numsubs:{0}", this.File.Materials.Count);

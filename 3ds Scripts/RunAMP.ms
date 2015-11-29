@@ -26,20 +26,20 @@ function CalcAveNorms mObject =
 		local vertexFaces = (meshop.getFacesUsingVert mObject v as array)
 		--for f in 1 to $.numfaces do (meshop.unifyNormals mObject f)
 		for f in vertexFaces do (append faces (getFace mObject f))
-		for f in vertexFaces do (append faceRNormals (getFaceNormal mObject f))--(meshop.getFaceRNormals mObject f))
+		for f in vertexFaces do (append faceRNormals (meshop.getFaceRNormals mObject f))--(getFaceNormal mObject f))--(meshop.getFaceRNormals mObject f))
 		for f in 1 to faces.count do
 		(
 			if faces[f][1] == v then
 			(
-				averageNormal += faceRNormals[f]--[1]
+				averageNormal += faceRNormals[f][1]
 			)
 			else if faces[f][2] == v then
 			(
-				averageNormal += faceRNormals[f]--[2]
+				averageNormal += faceRNormals[f][2]
 			)
 			else if faces[f][3] == v then
 			(
-				averageNormal += faceRNormals[f]--[3]
+				averageNormal += faceRNormals[f][3]
 			)
 		)
 		
@@ -510,6 +510,7 @@ function ExportGrnNode grnNode parentIndex =
 		grnNodeClass == BoneGeometry or \
 		grnNodeClass == Biped_Object or \
 		grnNodeClass == Editable_Mesh or \
+		grnNodeClass == Editable_Poly or \
 		grnNodeClass == Box then
 	(
 		append sceneDummies grnNode

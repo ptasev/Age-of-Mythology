@@ -332,9 +332,6 @@
                 Maxscript.Command("mat.diffusemap = tex");
                 if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
                 {
-                    //Maxscript.Command("pcTex = BitmapTexture()");
-                    //Maxscript.Command("pcTex.name = \"{0}\"", mat.DiffuseMap);
-                    //Maxscript.Command("pcTex.filename = \"{0}\"", mat.DiffuseMap + ".tga");
                     Maxscript.Command("mat.filtermap = tex");
                 }
             }

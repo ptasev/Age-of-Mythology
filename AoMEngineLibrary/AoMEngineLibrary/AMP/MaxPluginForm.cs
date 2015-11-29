@@ -115,6 +115,7 @@ namespace AoMEngineLibrary.AMP
             brgMeshFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             brgMeshFlagsCheckedListBox.MultiColumn = true;
             brgMeshFlagsCheckedListBox.CheckOnClick = true;
+            brgMeshFlagsCheckedListBox.ColumnWidth = 150;
             brgMeshFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFlag));
             brgMeshFormatCheckedListBox.ItemCheck += brgMeshFormatCheckedListBox_ItemCheck;
             brgMeshFormatCheckedListBox.BackColor = uiUp.GetEditControlColor();
@@ -122,6 +123,7 @@ namespace AoMEngineLibrary.AMP
             brgMeshFormatCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             brgMeshFormatCheckedListBox.MultiColumn = true;
             brgMeshFormatCheckedListBox.CheckOnClick = true;
+            brgMeshFormatCheckedListBox.ColumnWidth = 150;
             brgMeshFormatCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMeshFormat));
 
             keyframeRadioButton.CheckedChanged += brgMeshAnimTypeRadioButton_CheckedChanged;
@@ -219,6 +221,7 @@ namespace AoMEngineLibrary.AMP
             materialFlagsCheckedListBox.BorderStyle = BorderStyle.FixedSingle;
             materialFlagsCheckedListBox.MultiColumn = true;
             materialFlagsCheckedListBox.CheckOnClick = true;
+            materialFlagsCheckedListBox.ColumnWidth = 150;
             materialFlagsCheckedListBox.DataSource = Enum.GetValues(typeof(BrgMatFlag));
 
             // Grn Tab
@@ -467,37 +470,49 @@ namespace AoMEngineLibrary.AMP
                 return;
             }
 
-            model.SaveUI();
-            //ProgDialog = new ProgressDialog();
+            //ProgressDialog ProgDialog = new ProgressDialog();
             //Thread importThread = new Thread(model.Import);
             //importThread.IsBackground = true;
             //importThread.Start();
-            //ProgDialog.ShowDialog();
+            //ProgDialog.Show(this);
             //importThread.Join();
-            model.Import();
-            model.LoadUI();
-            debug();
-            Maxscript.Output.Clear();
+
             try
             {
+                this.Enabled = false;
+                model.SaveUI();
+                model.Import();
+                model.LoadUI();
+                debug();
+                Maxscript.Output.Clear();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                this.Enabled = true;
+                //ProgDialog.Close();
+            }
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            model.SaveUI();
-            model.Export();
-            model.LoadUI();
             try
             {
+                this.Enabled = false;
+                model.SaveUI();
+                model.Export();
+                model.LoadUI();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Enabled = true;
             }
         }
 
