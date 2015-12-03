@@ -378,9 +378,6 @@
             {
                 throw new Exception("No Editable_Mesh objects detected!");
             }
-
-            // Call GetKeys function from max
-            Maxscript.Command("GetModelAnimKeys()");
             if (Maxscript.QueryBoolean("keys.Count == 0"))
             {
                 throw new Exception("Could not acquire animation keys!");

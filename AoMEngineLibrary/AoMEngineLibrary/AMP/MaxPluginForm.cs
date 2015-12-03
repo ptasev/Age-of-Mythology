@@ -488,7 +488,7 @@ namespace AoMEngineLibrary.AMP
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -508,7 +508,7 @@ namespace AoMEngineLibrary.AMP
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MaxPluginForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

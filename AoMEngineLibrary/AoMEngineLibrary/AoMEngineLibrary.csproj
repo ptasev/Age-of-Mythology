@@ -32,11 +32,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ManagedServices">
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Autodesk\3ds Max 2015\ManagedServices.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\3ds Max 2014\ManagedServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MaxCustomControls">
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Autodesk\MaxCustomControls.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\3ds Max 2014\MaxCustomControls.dll</HintPath>
     </Reference>
     <Reference Include="MiscUtil, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d3c42c4bfacf7596, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
