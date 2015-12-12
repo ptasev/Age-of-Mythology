@@ -20,7 +20,7 @@
         void LoadUI();
         void SaveUI();
 
-        void Import();
-        void Export();
+        void Import(string fileName);
+        void Export(string fileName);
     }
 }

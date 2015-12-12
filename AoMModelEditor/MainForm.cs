@@ -279,42 +279,58 @@ namespace AoMModelEditor
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
-            if (dlgR == DialogResult.Yes)
+            if (!string.IsNullOrEmpty(Settings.OpenFileDialogFileName))
             {
-                Maxscript.Command("resetMaxFile #noprompt");
-                //Maxscript.Command("if checkForSave() do resetMaxFile #noprompt");
+                openFileDialog.InitialDirectory = Settings.OpenFileDialogFileName;
             }
-            else if (dlgR == DialogResult.Cancel)
+            else if (!string.IsNullOrEmpty(model.FileName))
             {
-                return;
+                openFileDialog.InitialDirectory = Path.GetDirectoryName(model.FileName);
             }
+            openFileDialog.FileName = Path.GetFileNameWithoutExtension(model.FileName);
+            openFileDialog.FilterIndex = 3;
 
-            model.SaveUI();
-            model.Import();
-            model.LoadUI();
-            debug();
-            Maxscript.Output.Clear();
-            try
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                model.SaveUI();
+                model.Import(openFileDialog.FileName);
+                model.LoadUI();
+                debug();
+                try
+                {
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to export model!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            model.SaveUI();
-            model.Export();
-            model.LoadUI();
-            try
+            if (!string.IsNullOrEmpty(Settings.SaveFileDialogFileName))
             {
+                saveFileDialog.InitialDirectory = Settings.SaveFileDialogFileName;
             }
-            catch (Exception ex)
+            else if (!string.IsNullOrEmpty(model.FileName))
             {
-                MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                saveFileDialog.InitialDirectory = Path.GetDirectoryName(model.FileName);
+            }
+            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(model.FileName);
+            saveFileDialog.FilterIndex = 3;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                model.SaveUI();
+                model.Export(saveFileDialog.FileName);
+                model.LoadUI();
+                try
+                {
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to import model!" + Environment.NewLine + Environment.NewLine + ex.Message, MainForm.PluginTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

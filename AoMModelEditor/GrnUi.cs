@@ -49,12 +49,12 @@
         #endregion
 
         #region Import/Export
-        public void Import()
+        public void Import(string fileName)
         {
 
         }
 
-        public void Export()
+        public void Export(string fileName)
         {
             this.Clear();
 
