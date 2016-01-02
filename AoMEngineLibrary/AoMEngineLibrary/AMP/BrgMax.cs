@@ -571,6 +571,7 @@
             time += Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
 
             string mainMesh = "mainMesh";
+            string mainObjectName = Maxscript.QueryString("{0}.name", mainObject);
             // Figure out the proper data to import
             if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
             {
@@ -632,7 +633,7 @@
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error at Export Verts/Normals " + i, ex);
+                    throw new Exception("In mesh " + mainObjectName + " error exporting verts/normals index " + (i + 1) + ".");
                 }
             }
 
@@ -663,7 +664,15 @@
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        f.MaterialIndex = (Int16)matIdMapping[Maxscript.QueryInteger("getFaceMatId {0} {1}", mainMesh, i + 1)];
+                        int faceMatId = Maxscript.QueryInteger("getFaceMatId {0} {1}", mainMesh, i + 1);
+                        if (matIdMapping.ContainsKey(faceMatId))
+                        {
+                            f.MaterialIndex = (Int16)matIdMapping[faceMatId];
+                        }
+                        else
+                        {
+                            throw new Exception("In mesh " + mainObjectName + " face index " + (i + 1) + " has an invalid material id " + faceMatId + ".");
+                        }
                     }
 
                     //System.Windows.Forms.MessageBox.Show("3.1");

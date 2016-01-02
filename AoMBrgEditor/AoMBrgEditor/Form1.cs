@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
+using System.Xml.Linq;
 
 namespace AoMBrgEditor
 {
@@ -24,9 +25,57 @@ namespace AoMBrgEditor
             string output = "";
             HashSet<int> ttt = new HashSet<int>();
             GrnFile grnFile = new GrnFile();
+            //MtrlFile mf = new MtrlFile();
+            //mf.Read(File.Open(@"C:\Games\Steam\SteamApps\common\Age of Mythology\materials\animal alfred_attacka_0.mtrl", FileMode.Open, FileAccess.Read, FileShare.Read));
+
+            List<string> newData = new List<string>();
+            Dictionary<int, int> strIds = new Dictionary<int, int>();
+            using (StreamReader reader = new StreamReader(File.Open(@"C:\Users\Petar\Desktop\SWConv\SW.txt", FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                int i = 0;
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    int spIndex = line.IndexOf(' ');
+                    int id = Convert.ToInt32(line.Substring(0, spIndex));
+                    int newId = i + 137000;
+                    strIds.Add(id, newId);
+                    newData.Add(newId + " " + line.Substring(spIndex + 1));
+                    ++i;
+                }
+            }
+
+            using (StreamWriter writer = new StreamWriter(File.Open(@"C:\Users\Petar\Desktop\SWConv\SW2.txt", FileMode.Create, FileAccess.Write, FileShare.Read)))
+            {
+                for (int i = 0; i < newData.Count; ++i)
+                {
+                    writer.WriteLine(newData[i]);
+                }
+            }
+
+            int unitId = 37000;
+            XDocument doc = XDocument.Load(File.Open(@"C:\Users\Petar\Desktop\SWConv\SW.xml", FileMode.Open, FileAccess.Read, FileShare.Read));
+            foreach (XElement unit in doc.Root.Elements("unit"))
+            {
+                XAttribute xid = unit.Attribute("id");
+                xid.Value = unitId.ToString();
+                unit.Element("dbid").Value = unitId.ToString();
+                ++unitId;
+
+                XElement xDispNameId = unit.Element("displaynameid");
+                if (xDispNameId.Value.Contains("x") || xDispNameId.Value.Contains("X"))
+                {
+                    continue;
+                }
+
+                int oldDispId = Convert.ToInt32(xDispNameId.Value);
+                xDispNameId.Value = strIds[oldDispId].ToString();
+            }
+            doc.Save(File.Open(@"C:\Users\Petar\Desktop\SWConv\SW2.xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+
             //@"C:\Users\Petar\Desktop\Nieuwe map (3)\Output"
             //bool areEq = this.AreEqual(AoMEngineLibrary.Graphics.Model.Matrix3x3.Identity, new AoMEngineLibrary.Graphics.Model.Matrix3x3(0.9999996f, 0f, 0f, 0f, 0.9999996f, 0f, 0f, 0f, 0.9999996f));
-            grnFile.DumpData(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read), @"C:\Users\Petar\Desktop\Nieuwe map (3)\Output");
+            //grnFile.DumpData(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read), @"C:\Users\Petar\Desktop\Nieuwe map (3)\Output");
             //grnFile.Read(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajax_17youmayfeel.grn", FileMode.Open, FileAccess.Read, FileShare.Read));
             //grnFile.Read(File.Open(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\ajaxC.grn", FileMode.Open, FileAccess.Read, FileShare.Read));

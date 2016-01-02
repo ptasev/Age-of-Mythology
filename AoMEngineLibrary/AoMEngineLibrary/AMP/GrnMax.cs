@@ -498,7 +498,6 @@
             }
             else { hadEditNormMod = true; }
             Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
-            //Maxscript.Command("CalculateAveragedNormals {0}", mainObject);
 
             int numVertices = Maxscript.QueryInteger("meshop.getnumverts {0}", mainMesh);
             int numFaces = Maxscript.QueryInteger("meshop.getnumfaces {0}", mainMesh);
@@ -551,7 +550,7 @@
                 }
                 else
                 {
-                    f.MaterialIndex = (Int16)(matIndex - 1);
+                    throw new Exception("In mesh " + mesh.Name + " face index " + (i + 1) + " has an invalid material id " + matIndex + ".");
                 }
 
                 Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);

@@ -222,7 +222,7 @@
                     this.unk4[i] = reader.ReadInt32();
                 }
 
-                this.Texture = reader.ReadString(0x0);
+                this.Texture = reader.ReadString();
             }
         }
 
