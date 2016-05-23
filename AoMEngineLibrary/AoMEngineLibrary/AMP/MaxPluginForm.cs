@@ -518,7 +518,7 @@ namespace AoMEngineLibrary.AMP
 
         private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("http://modding.petartasev.com/AoM/AMP/ReadME.html");
+            System.Diagnostics.Process.Start("http://www.petartasev.com/modding/age-of-mythology/model-plugin/");
         }
 
         private void beginnersGuideToolStripMenuItem_Click(object sender, EventArgs e)
