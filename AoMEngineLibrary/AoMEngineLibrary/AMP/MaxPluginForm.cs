@@ -20,8 +20,8 @@ namespace AoMEngineLibrary.AMP
 
     public partial class MaxPluginForm : MaxForm
     {
-        // 7.0 -- Improved material export, Grn support, Multiple Mesh Export Support
-        public static string PluginTitle = "AMP 7.0";
+        // 7.2 -- Fix getting all the animation keys in brg, Fix normal export with skinned mesh in brg, Fix bug with grn skin not exporting on the first run of AMP
+        public static string PluginTitle = "AMP 7.1";
         public static class Settings
         {
             private static string fileName = Application.StartupPath + "\\AoMEngineLibraryPluginSettings.xml";
@@ -459,7 +459,7 @@ namespace AoMEngineLibrary.AMP
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
+            DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", MaxPluginForm.PluginTitle, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
             if (dlgR == DialogResult.Yes)
             {
                 Maxscript.Command("resetMaxFile #noprompt");

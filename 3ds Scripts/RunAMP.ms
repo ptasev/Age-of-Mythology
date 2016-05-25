@@ -49,14 +49,6 @@ function CalcAveNorms mObject =
 	)
 )
 
--- BRG ====================================================================================================
-global brgMeshes
-global brgtotalNumVerts
-global brgtotalNumFaces
-global brgVertIndices
-global brgVertTVIndices
-global brgFaceArray
-
 function ConvertAnimKeys frm =
 (
 	if frm < animationRange.start or frm > animationRange.end then
@@ -68,139 +60,35 @@ function ConvertAnimKeys frm =
 		(frm - animationRange.start) as integer / 4800.0
 	)
 )
-function GetBrgNodeKeys brgNode =
+
+function GetNodeAnimKeyTimes theSubAnim =
 (
-	if (brgNode[#transform] != undefined) then
+	-- loop to the number of sub animation tracks (.numsubs)
+	for subIndx = 1 to theSubAnim.numSubs do
 	(
-		numBoneKeys = brgNode[#transform].controller.keys.count
-		for j = 1 to numBoneKeys do
-		(
-			appendIfUnique keys (ConvertAnimKeys brgNode[#transform].controller.keys[j].time)
-		)
+		local childSubAnim = getSubAnim theSubAnim subIndx
 		
-		if (brgNode[#transform][#position] != undefined) then
+		if childSubAnim.controller != undefined then
 		(
-			numBoneKeys = brgNode[#transform][#position].keys.count
-			for j = 1 to numBoneKeys do
+			local controllerKeys = childSubAnim.controller.keys
+			local controllerKeysCount = controllerKeys.count
+			for ki = 1 to controllerKeysCount do
 			(
-				appendIfUnique keys (ConvertAnimKeys brgNode[#transform][#position].keys[j].time)
+				appendIfUnique keys (ConvertAnimKeys controllerKeys[ki].time)
 			)
 		)
 		
-		if (brgNode[#transform][#rotation] != undefined) then
-		(
-			numBoneKeys = brgNode[#transform][#rotation].keys.count
-			local rotKeys
-			if (numBoneKeys == -1) then
-			( 
-				numBoneKeys = brgNode[#transform][#rotation][1].keys.count
-				rotKeys = brgNode[#transform][#rotation][1].keys
-			)
-			else rotKeys = brgNode[#transform][#rotation].keys
-			for j = 1 to numBoneKeys do
-			(
-				appendIfUnique keys (ConvertAnimKeys rotKeys[j].time)
-			)
-		)
-		
-		if (brgNode[#transform][#scale] != undefined) then
-		(
-			numBoneKeys = brgNode[#transform][#scale].keys.count
-			for j = 1 to numBoneKeys do
-			(
-				appendIfUnique keys (ConvertAnimKeys brgNode[#transform][#scale].keys[j].time)
-			)
-		)
+		GetNodeAnimKeyTimes childSubAnim
 	)
 )
-function GetBrgMeshKeys brgMesh =
-(
-	max modify mode
-	if (brgMesh.modifiers[#Unwrap_UVW] != undefined and \
-		brgMesh.Unwrap_UVW[1] != undefined and \
-		brgMesh.Unwrap_UVW[1].keys != undefined) then
-	(
-		modPanel.setCurrentObject brgMesh.modifiers[#Unwrap_UVW] ui:true
-		numTexKeys = brgMesh.Unwrap_UVW[1].keys.count
-		for i = 1 to numTexKeys do
-		(
-			appendIfUnique keys (ConvertAnimKeys brgMesh.Unwrap_UVW[1].keys[i].time)
-		)
-	)
-	
-	if (brgMesh.modifiers[#skin] != undefined) then
-	(
-		modPanel.setCurrentObject brgMesh.modifiers[#skin] ui:true
-		numBones = skinops.getnumberbones brgMesh.modifiers[#skin]
-		for i = 1 to numBones do
-		(
-			boneName = skinops.getbonename brgMesh.modifiers[#skin] i 0
-			boneNode = getNodeByName boneName
-			
-			if (boneNode[#transform] != undefined) then
-			(
-				numBoneKeys = boneNode[#transform].controller.keys.count
-				for j = 1 to numBoneKeys do
-				(
-					appendIfUnique keys (ConvertAnimKeys boneNode[#transform].controller.keys[j].time)
-				)
-				
-				if (boneNode[#transform][#position] != undefined) then
-				(
-					numBoneKeys = boneNode[#transform][#position].keys.count
-					for j = 1 to numBoneKeys do
-					(
-						appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#position].keys[j].time)
-					)
-				)
-				
-				if (boneNode[#transform][#rotation] != undefined) then
-				(
-					numBoneKeys = boneNode[#transform][#rotation].keys.count
-					local rotKeys
-					if (numBoneKeys == -1) then
-					( 
-						numBoneKeys = boneNode[#transform][#rotation][1].keys.count
-						rotKeys = boneNode[#transform][#rotation][1].keys
-					)
-					else rotKeys = boneNode[#transform][#rotation].keys
-					for j = 1 to numBoneKeys do
-					(
-						appendIfUnique keys (ConvertAnimKeys rotKeys[j].time)
-					)
-				)
-				
-				if (boneNode[#transform][#scale] != undefined) then
-				(
-					numBoneKeys = boneNode[#transform][#scale].keys.count
-					for j = 1 to numBoneKeys do
-					(
-						appendIfUnique keys (ConvertAnimKeys boneNode[#transform][#scale].keys[j].time)
-					)
-				)
-			)
-		)
-	)
-	
-	numAnimKeys = brgMesh.baseobject.mesh[1].keys.count
-	for i = 1 to numAnimKeys do
-	(
-		appendIfUnique keys (ConvertAnimKeys brgMesh.baseobject.mesh[1].keys[i].time)
-	)
-	GetBrgNodeKeys brgMesh
-	
-	if keys.count <= 0 then
-	(
-		appendIfUnique keys (ConvertAnimKeys animationRange.start)
-	)
-	
-	sort keys
-	
-	if keys[1] < 0.0 then
-	(
-		deleteItem keys 1
-	)
-)
+
+-- BRG ====================================================================================================
+global brgMeshes
+global brgtotalNumVerts
+global brgtotalNumFaces
+global brgVertIndices
+global brgVertTVIndices
+global brgFaceArray
 
 function ExportBrgVertNormals tim =
 (
@@ -209,205 +97,105 @@ function ExportBrgVertNormals tim =
 	averagedNormals = #()
 	averagedNormals.count = numMeshVerts
 	
-	local convertVertSelFunc = mainObject.modifiers[#edit_normals].ConvertVertexSelection
-	local getVertNormalFunc = mainObject.modifiers[#edit_normals].GetNormal
+	-- create a temporary object around the mesh that has modifiers collapsed into it
+	local tempObject = Editable_Mesh()
+	tempObject.mesh = mainMesh
+	addModifier tempObject (Edit_Normals()) ui:off
+	modPanel.setCurrentObject tempObject.modifiers[#edit_normals] ui:true
+	
+	local convertVertSelFunc = tempObject.modifiers[#edit_normals].ConvertVertexSelection
+	local getVertNormalFunc = tempObject.modifiers[#edit_normals].GetNormal
 	
 	local vertexNormalIds
 	local averageNormal
+	local vertexIndex
 	for v = 1 to numMeshVerts do
 	(
 		vertexNormalIds = #{}
 		averageNormal = [0,0,0]
+		vertexIndex = brgVertIndices[v]
 		
-		at time tim (convertVertSelFunc #{brgVertIndices[v]} vertexNormalIds)
+		at time tim (convertVertSelFunc #{vertexIndex} vertexNormalIds)
 		at time tim (for n in vertexNormalIds do averageNormal += getVertNormalFunc n)
 		
 		averageNormal = normalize (averageNormal / vertexNormalIds.numberset)
 		averagedNormals[v] = averageNormal
 	)
 	
--- 	origNumMeshVerts += 1
--- 	for v = origNumMeshVerts to numMeshVerts do
--- 	(
--- 		averagedNormals[v] = averagedNormals[brgVertIndices[v]]
--- 	)
+	delete tempObject
 )
 function GetMeshSnapshotAtTime mObject tim =
 (
 	tim = ((tim * FrameRate) as time) -- convert time from seconds to frames
 	local mMesh =  at time tim (snapshotAsMesh mObject)
-	meshop.DeleteIsoVerts mMesh
 	mMesh
 )
+
 function ExportPreservedTexCoordData mMesh =
 (
+	local currVertexIndex = 1
 	brgVertIndices = #()
+	local brgVertTVMap = #()
 	brgVertTVIndices = #()
 	brgFaceArray = #()
 	
-	local lastVert = mMesh.numverts
-	local lastFace = mMesh.numfaces
-	brgVertIndices.count = lastVert
-	brgVertTVIndices.count = lastVert
-	brgFaceArray.count = lastFace
-	
-	local VertsUsage = for v = 1 to lastVert collect #{}
-	local FaceUsage = for v = 1 to lastVert collect #{}
+	local numFaces = mMesh.numfaces
 	local meshGetMapFaceFunc = meshop.getMapFace
-	for f = 1 to lastFace do
+	for fi = 1 to numFaces do
 	(
-		theFace = getFace mMesh f
-		theMapFace = meshGetMapFaceFunc mMesh 1 f
-		append VertsUsage[theFace.x] theMapFace.x
-		append VertsUsage[theFace.y] theMapFace.y
-		append VertsUsage[theFace.z] theMapFace.z
-		append FaceUsage [theFace.x] f
-		append FaceUsage [theFace.y] f
-		append FaceUsage [theFace.z] f
-		brgFaceArray[f] = theFace
-	)
-	
-	local mMeshVertCount = lastVert
-	for v = 1 to mMeshVertCount do
-	(	
-		local theMapVertsArray = VertsUsage[v] as array
-		brgVertIndices[v] = v
-		brgVertTVIndices[v] = theMapVertsArray[1]
-		if theMapVertsArray.count > 1 do
+		local theFace = getFace mMesh fi
+		local theMapFace = meshGetMapFaceFunc mMesh 1 fi
+		
+		for vi = 1 to 3 do
 		(
-			local theFacesArray = FaceUsage[v] as array
-			for mapv = 2 to theMapVertsArray.count do
+			local vertexIndex = theFace[vi]
+			local tvIndex = theMapFace[vi]
+			if (findItem brgVertIndices vertexIndex) > 0 then
 			(
-				local theMapVert = theMapVertsArray[mapv]
-				lastVert += 1
-				append brgVertIndices v
-				append brgVertTVIndices theMapVert
-				for f in theFacesArray do
+				local tvMap = brgVertTVMap[vertexIndex]
+				if tvMap[tvIndex] != undefined then
 				(
-					local theFaceDef = brgFaceArray[f]--getFace mMesh f
-					local theMapFaceDef = meshGetMapFaceFunc mMesh 1 f
-					local changed = false
+					theFace[vi] = tvMap[tvIndex]
+				)
+				else
+				(
+					append brgVertIndices vertexIndex
+					append brgVertTVIndices tvIndex
 					
-					if theMapFaceDef.x == theMapVert and theFaceDef.x == v do 
-					(
-						theFaceDef.x = lastVert
-						--brgFaceArray[f] = theFaceDef
-						changed = true
-					)
-					if theMapFaceDef.y == theMapVert and theFaceDef.y == v do 
-					(
-						theFaceDef.y = lastVert
-						--brgFaceArray[f] = theFaceDef
-						changed = true
-					)
-					if theMapFaceDef.z == theMapVert and theFaceDef.z == v do 
-					(
-						theFaceDef.z = lastVert
-						--brgFaceArray[f] = theFaceDef
-						changed = true
-					)
+					tvMap[tvIndex] = currVertexIndex
+					theFace[vi] = currVertexIndex
 					
-					if changed then
-					(
-						brgFaceArray[f] = theFaceDef
-					)
-				)--end f loop
-			)--end mapv loop
+					currVertexIndex += 1
+				)
+			)
+			else
+			(
+				append brgVertIndices vertexIndex
+				append brgVertTVIndices tvIndex
+				
+				-- update tvmap
+				local tvMap = #()
+				tvMap[tvIndex] = currVertexIndex
+				brgVertTVMap[vertexIndex] = tvMap
+				-- update face
+				theFace[vi] = currVertexIndex
+				
+				currVertexIndex += 1
+			)
 		)
+		
+		-- add face to array
+		append brgFaceArray theFace
 	)
 	
 	mMesh
-)
-function SplitVertsByMapVerts theMesh tim =
-(
-	averagedNormals = #()
-	--first collect two arrays of bitarrays - one containing the map vertices for each mesh vertex,
-	--the other containing the faces using each mesh vertex:
-	--convertToMesh theMesh 
-	lastVert = theMesh.numverts
-	lastFace = theMesh.numfaces
-	VertsUsage = for v = 1 to lastVert collect #{}
-	FaceUsage = for v = 1 to lastVert collect #{}
-	for f = 1 to lastFace do
-	(
-		theFace = getFace theMesh f
-		theMapFace = meshop.getMapFace theMesh 1 f
-		append VertsUsage[theFace.x] theMapFace.x
-		append VertsUsage[theFace.y] theMapFace.y
-		append VertsUsage[theFace.z] theMapFace.z
-		append FaceUsage [theFace.x] f
-		append FaceUsage [theFace.y] f
-		append FaceUsage [theFace.z] f
-	)
-	--Now we can go though the mesh vertex array and see if we have 2 or more map vertices.
-	--If yes, we count from 2 to the number of map verts and create new mesh vertices with the
-	--same position as the current mesh vertex. Then we go through the list of collected faces
-	--using that vertex and see which of the 3 components matches the current vertex and its
-	--corresponding map vertex matches the current map vertex. We repoint that component of the face
-	--to the new mesh vertex. Thus, for each previously existing map vertex, we get a new mesh vertex
-	--at the end of the vertex list. 
-
-	for v = 1 to VertsUsage.count do
-	(
-		-- first calculate the averageNormal, and set in array
-		vertexNormalIds = #{}
-		at time tim (mainObject.modifiers[#edit_normals].ConvertVertexSelection #{v} vertexNormalIds)
-        averageNormal = [0,0,0]
-		at time tim (for n in vertexNormalIds do averageNormal += mainObject.modifiers[#edit_normals].GetNormal n)
-		averageNormal = normalize (averageNormal / vertexNormalIds.numberset)
-		averagedNormals[v] = averageNormal
-		
-		theMapVertsArray = VertsUsage[v] as array
-		if theMapVertsArray.count > 1 do
-		(
-			theFacesArray = FaceUsage[v] as array
-			theVertPos = getVert theMesh v
-			for mapv = 2 to theMapVertsArray.count do
-			(
-				theMapVert = theMapVertsArray[mapv]
-				newIndex = theMesh.numverts+1
-				setNumVerts theMesh newIndex true
-				setVert theMesh newIndex theVertPos
-                averagedNormals[newIndex] = averageNormal -- set the same normal to the copied vertex
-				for f in theFacesArray do
-				(
-					theFaceDef = getFace theMesh f
-					theMapFaceDef = meshOp.getMapFace theMesh 1 f
-					if theMapFaceDef.x == theMapVert and theFaceDef.x == v do 
-					(
-						theFaceDef.x = newIndex 
-						setFace theMesh f theFaceDef
-					)				
-					if theMapFaceDef.y == theMapVert and theFaceDef.y == v do 
-					(
-						theFaceDef.y = newIndex 
-						setFace theMesh f theFaceDef
-					)				
-					if theMapFaceDef.z == theMapVert and theFaceDef.z == v do 
-					(
-						theFaceDef.z = newIndex 
-						setFace theMesh f theFaceDef
-					)				
-				)--end f loop
-			)--end v loop
-		)
-	)
-	--update theMesh
-)
-
-function GetExportData tim =
-(
-	tim = ((tim * FrameRate) as time) -- convert time from seconds to frames
-	mainMesh = at time tim (snapshotAsMesh mainObject)
-	
-	meshop.DeleteIsoVerts mainMesh
-	SplitVertsByMapVerts mainMesh tim
 )
 function ExportBrgNode brgNode =
 (
 	local brgNodeClass = classof brgNode
 	
-	if brgNodeClass == Editable_Mesh then
+	if brgNodeClass == Editable_Mesh then--or \
+		--brgNodeClass == TriMeshGeometry then
 	(
 		append brgMeshes brgNode
 		brgtotalNumVerts += brgNode.numverts
@@ -431,9 +219,37 @@ function ExportBrgData =
 	
 	ExportBrgNode rootNode
 	
+	max modify mode
 	for brgMesh in brgMeshes do
 	(
-		GetBrgMeshKeys brgMesh
+		--GetBrgMeshKeys brgMesh
+		GetNodeAnimKeyTimes brgMesh
+		
+		-- loop through animatable of brgMesh bones
+		if (brgMesh.modifiers[#skin] != undefined) then
+		(
+			modPanel.setCurrentObject brgMesh.modifiers[#skin] ui:true
+			local numBones = skinops.getnumberbones brgMesh.modifiers[#skin]
+			for i = 1 to numBones do
+			(
+				local boneName = skinops.getbonename brgMesh.modifiers[#skin] i 0
+				local boneNode = getNodeByName boneName
+				
+				GetNodeAnimKeyTimes boneNode
+			)
+		)
+	)
+	
+	if keys.count <= 0 then
+	(
+		appendIfUnique keys (ConvertAnimKeys animationRange.start)
+	)
+	
+	sort keys
+	
+	if keys[1] < 0.0 then
+	(
+		deleteItem keys 1
 	)
 )
 
@@ -446,6 +262,8 @@ global grnSkinWeights
 global grnSkinBBIndices
 global grnSkinBBMaxs
 global grnSkinBBMins
+global skinMod
+
 function ExportSkinBBData =
 (
 	grnSkinBBIndices = #()
@@ -544,19 +362,6 @@ function ExportGrnData =
 	grnBoneParents = #()
 	--rootNode = getNodeByName "__Root"
 	ExportGrnNode rootNode -1
-)
-function CalculateAveragedNormals mObject =
-(
-	averagedNormals = #()
-	for v in 1 to (meshop.getnumverts mObject) do
-	(
-		vertexNormalIds = #{}
-		mObject.modifiers[#edit_normals].ConvertVertexSelection #{v} vertexNormalIds
-		averageNormal = [0,0,0]
-		for n in vertexNormalIds do averageNormal += mObject.modifiers[#edit_normals].GetNormal n
-		averageNormal = normalize (averageNormal / vertexNormalIds.numberset)
-		averagedNormals[v] = averageNormal
-	)
 )
 
 function GetBoneAnimKeys boneNode =

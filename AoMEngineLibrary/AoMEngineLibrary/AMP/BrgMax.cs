@@ -400,7 +400,6 @@
             brg.Animation.TimeStep = brg.Animation.Duration / (float)brg.Header.NumMeshes;
 
             string mainObject = "mainObject";
-            bool hadEditNormMod = false;
             brg.Materials = new List<BrgMaterial>();
             brg.Meshes = new List<BrgMesh>(brg.Header.NumMeshes);
             for (int m = 0; m < meshCount; ++m)
@@ -468,15 +467,6 @@
                     }
                 }
 
-                // Add Edit_Normals Mod
-                hadEditNormMod = false;
-                if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
-                {
-                    Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", mainObject);
-                }
-                else { hadEditNormMod = true; }
-                Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
-
                 // Mesh Animations
                 for (int i = 0; i < brg.Header.NumMeshes; i++)
                 {
@@ -508,12 +498,6 @@
                         brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
                         this.ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i], matIdMapping);
                     }
-                }
-
-                // Delete normals mod if it wasn't there in the first place
-                if (!hadEditNormMod)
-                {
-                    Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
                 }
             }
 
