@@ -510,15 +510,15 @@
         }
         public string GetDataExtensionProperty(int dataExtensionIndex, string property)
         {
-            foreach (KeyValuePair<string, string> dataExtProp in this.DataExtensions[dataExtensionIndex])
+            string propValue;
+            if (this.DataExtensions[dataExtensionIndex].TryGetValue(property, out propValue))
             {
-                if (dataExtProp.Key == property)
-                {
-                    return dataExtProp.Value;
-                }
+                return propValue;
             }
-
-            return string.Empty;
+            else
+            {
+                return string.Empty;
+            }
         }
         public void SetDataExtensionFileName(int dataExtensionIndex, string value)
         {
@@ -526,16 +526,13 @@
         }
         public void SetDataExtensionProperty(int dataExtensionIndex, string property, string value)
         {
-            for (int i = 0; i < this.DataExtensions[dataExtensionIndex].Count; ++i)
+            if (this.DataExtensions[dataExtensionIndex].ContainsKey(property))
             {
-                if (this.DataExtensions[dataExtensionIndex].ContainsKey(property))
-                {
-                    this.DataExtensions[dataExtensionIndex][property] = value;
-                }
-                else
-                {
-                    this.DataExtensions[dataExtensionIndex].Add(property, value);
-                }
+                this.DataExtensions[dataExtensionIndex][property] = value;
+            }
+            else
+            {
+                this.DataExtensions[dataExtensionIndex].Add(property, value);
             }
         }
     }

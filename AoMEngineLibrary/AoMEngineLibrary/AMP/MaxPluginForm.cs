@@ -20,8 +20,8 @@ namespace AoMEngineLibrary.AMP
 
     public partial class MaxPluginForm : MaxForm
     {
-        // 7.2 -- Fix getting all the animation keys in brg, Fix normal export with skinned mesh in brg, Fix bug with grn skin not exporting on the first run of AMP
-        public static string PluginTitle = "AMP 7.1";
+        // 7.2 -- Fix getting all the animation keys in brg, Exporting normals is now done after applying all modifier to the mesh, Fixed bugs with exporting grn mesh skin, Added more descriptive errors
+        public const string PluginTitle = "AMP 7.2";
         public static class Settings
         {
             private static string fileName = Application.StartupPath + "\\AoMEngineLibraryPluginSettings.xml";

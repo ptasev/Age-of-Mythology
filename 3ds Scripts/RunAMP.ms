@@ -12,6 +12,7 @@ global skinGetBoneNameFunc = skinOps.GetBoneName
 global skinGetVertWeightCountFunc = skinOps.GetVertexWeightCount
 global skinGetVertWeightFunc = skinops.getvertexweight
 global skinGetVertWeightBoneIDFunc = skinOps.GetVertexWeightBoneID
+global skinGetNumVertsFunc = skinOps.GetNumberVertices
 
 -- Normals, this is used for testing currently
 function CalcAveNorms mObject =
@@ -128,6 +129,7 @@ function GetMeshSnapshotAtTime mObject tim =
 (
 	tim = ((tim * FrameRate) as time) -- convert time from seconds to frames
 	local mMesh =  at time tim (snapshotAsMesh mObject)
+	meshop.DeleteIsoVerts mMesh
 	mMesh
 )
 
@@ -274,6 +276,7 @@ function ExportSkinBBData =
 	local bonesCount = skinops.getnumberbones skinMod
 	for boneID = 1 to bonesCount do
 	(
+		modPanel.setCurrentObject skinMod ui:false
 		local boneName = (skinGetBoneNameFunc skinMod boneID 1)
 		local notFound = true
 		local i = 0
@@ -300,7 +303,7 @@ function ExportSkinData =
 (
 	-- get bone info
 	grnSkinWeights = #()
-	vertexCount = meshop.getnumverts mainObject
+	local vertexCount = skinGetNumVertsFunc skinMod--meshop.getnumverts mainObject
 
 	-- loop through all mesh vertices in this mesh
 	for i = 1 to vertexCount do

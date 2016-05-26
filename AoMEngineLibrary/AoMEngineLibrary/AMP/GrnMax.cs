@@ -20,7 +20,6 @@
         public int FilterIndex { get { return 2; } }
 
         private Dictionary<string, int> boneMap;
-        private bool matGroupInit;
 
         private GrnExportSetting ExportSetting { get; set; }
 
@@ -30,7 +29,6 @@
             this.FileName = "Untitled";
             this.Plugin = plugin;
             this.boneMap = new Dictionary<string, int>();
-            this.matGroupInit = false;
             this.ExportSetting = GrnExportSetting.Model;
         }
 
@@ -51,7 +49,6 @@
             this.File = new GrnFile();
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
             this.boneMap = new Dictionary<string, int>();
-            this.matGroupInit = false;
         }
         #endregion
 
@@ -70,7 +67,6 @@
             if (this.File.Materials.Count > 0)
             {
                 Maxscript.Command("matGroup = multimaterial numsubs:{0}", this.File.Materials.Count);
-                this.matGroupInit = true;
             }
 
             //this.Plugin.ProgDialog.SetProgressText("Importing skeleton...");
@@ -482,7 +478,6 @@
         private void ExportMesh(int meshIndex)
         {
             GrnMesh mesh = this.File.Meshes[meshIndex];
-            bool hadEditNormMod = false;
             string mainObject = "mainObject";
             Maxscript.Command("{0} = grnMeshes[{1}]", mainObject, meshIndex + 1);
             string mainMesh = Maxscript.SnapshotAsMesh("mainMesh", mainObject);
@@ -492,12 +487,11 @@
 
             // Setup Normals
             Maxscript.Command("max modify mode");
-            if (Maxscript.QueryBoolean("{0}.modifiers[#edit_normals] == undefined", mainObject))
-            {
-                Maxscript.Command("addModifier {0} (Edit_Normals())", mainObject);
-            }
-            else { hadEditNormMod = true; }
-            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", mainObject);
+            string tempObject = "tempObject";
+            Maxscript.Command("{0} = Editable_Mesh()", tempObject);
+            Maxscript.Command("{0}.mesh = {1}", tempObject, mainMesh);
+            Maxscript.Command("addModifier {0} (Edit_Normals()) ui:off", tempObject);
+            Maxscript.Command("modPanel.setCurrentObject {0}.modifiers[#edit_normals] ui:true", tempObject);
 
             int numVertices = Maxscript.QueryInteger("meshop.getnumverts {0}", mainMesh);
             int numFaces = Maxscript.QueryInteger("meshop.getnumfaces {0}", mainMesh);
@@ -514,36 +508,50 @@
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Import Verts " + i.ToString(), ex);
+                    throw new Exception("Error importing vertex at index " + (i + 1) + ".", ex);
                 }
             }
 
-            int numNorms = Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNumNormals()", mainObject);
-            Maxscript.Command("getVertNormalFunc = {0}.modifiers[#edit_normals].GetNormal", mainObject);
+            int numNorms = Maxscript.QueryInteger("{0}.modifiers[#edit_normals].GetNumNormals()", tempObject);
+            Maxscript.Command("getVertNormalFunc = {0}.modifiers[#edit_normals].GetNormal", tempObject);
             for (int i = 0; i < numNorms; ++i)
             {
-                Maxscript.Command("currentNormal = getVertNormalFunc {0}", i + 1);
+                try
+                {
+                    Maxscript.Command("currentNormal = getVertNormalFunc {0}", i + 1);
                     mesh.Normals.Add(new Vector3D(
                         Maxscript.QueryFloat("currentNormal.x"),
                         Maxscript.QueryFloat("currentNormal.y"),
                         Maxscript.QueryFloat("currentNormal.z")));
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error importing normal at index " + (i + 1) + ".", ex);
+                }
             }
 
             int numTexVertices = Maxscript.QueryInteger("meshop.getnumtverts {0}", mainMesh);
             for (int i = 0; i < numTexVertices; i++)
             {
+                try
+                { 
                 Maxscript.Command("tVert = meshGetMapVertFunc {0} 1 {1}", mainMesh, i + 1);
                 mesh.TextureCoordinates.Add(new Vector3D(
                     Maxscript.QueryFloat("tVert.x"),
                     1f-Maxscript.QueryFloat("tVert.y"),
                     Maxscript.QueryFloat("tVert.z")));
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error importing texture vertex at index " + (i + 1) + ".", ex);
+                }
             }
 
-            Maxscript.Command("meshGetNormalIdFunc = {0}.modifiers[#edit_normals].GetNormalID", mainObject);
+            Maxscript.Command("meshGetNormalIdFunc = {0}.modifiers[#edit_normals].GetNormalID", tempObject);
             for (int i = 0; i < numFaces; ++i)
             {
                 Face f = new Face();
-                Int32 matIndex = Maxscript.QueryInteger("getFaceMatID {0} {1}", mainObject, i + 1);
+                Int32 matIndex = Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1);
                 if (matIdMapping.ContainsKey(matIndex))
                 {
                     f.MaterialIndex = (Int16)(matIdMapping[matIndex]);
@@ -553,7 +561,7 @@
                     throw new Exception("In mesh " + mesh.Name + " face index " + (i + 1) + " has an invalid material id " + matIndex + ".");
                 }
 
-                Maxscript.Command("face = getFace {0} {1}", mainObject, i + 1);
+                Maxscript.Command("face = getFace {0} {1}", mainMesh, i + 1);
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1));
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1));
                 f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1));
@@ -562,23 +570,21 @@
                 f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 2) - 1);
                 f.NormalIndices.Add(Maxscript.QueryInteger("meshGetNormalIdFunc {0} {1}", i + 1, 3) - 1);
 
-                Maxscript.Command("tFace = getTVFace {0} {1}", mainObject, i + 1);
+                Maxscript.Command("tFace = getTVFace {0} {1}", mainMesh, i + 1);
                 f.TextureIndices.Add(Maxscript.QueryInteger("tFace.x") - 1);
                 f.TextureIndices.Add(Maxscript.QueryInteger("tFace.y") - 1);
                 f.TextureIndices.Add(Maxscript.QueryInteger("tFace.z") - 1);
                 mesh.Faces.Add(f);
             }
-            // Delete normals mod if it wasn't there in the first place
-            if (!hadEditNormMod)
-            {
-                Maxscript.Command("deleteModifier {0} {0}.modifiers[#edit_normals]", mainObject);
-            }
+            // Delete temporary object
+            Maxscript.Command("delete {0}", tempObject);
 
             if (Maxscript.QueryBoolean("{0}.modifiers[#skin] != undefined", mainObject))
             {
                 Maxscript.Command("skinMod = {0}.modifiers[#skin]", mainObject);
                 Maxscript.Command("modPanel.setCurrentObject skinMod ui:true");
                 Maxscript.Command("ExportSkinData()");
+
                 int numBVerts = Maxscript.QueryInteger("grnSkinWeights.count");
                 for (int i = 0; i < numBVerts; ++i)
                 {
@@ -608,6 +614,15 @@
                         Maxscript.QueryFloat("bbMin.y"),
                         Maxscript.QueryFloat("bbMin.z"));
                 }
+
+                if (numBVerts == 0 || numSkinBBs == 0)
+                {
+                    throw new Exception("Failed to export skin vertices in mesh " + mesh.Name + ".");
+                }
+            }
+            else
+            {
+                throw new Exception("Mesh " + mesh.Name + " has no skin.");
             }
         }
         private Dictionary<int, int> ExportMeshMaterial(string mainObject)
@@ -688,30 +703,22 @@
             mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
             mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
 
+            GrnTexture tex = null;
             if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
             {
-                GrnTexture tex = new GrnTexture(this.File);
+                tex = new GrnTexture(this.File);
                 tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.name"));
                 this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileNameWithoutExtension(Maxscript.QueryString("mat.diffusemap.filename")) + ".tga");
-
-                int texIndex = this.File.Textures.IndexOf(tex);
-                if (texIndex >= 0)
-                {
-                    mat.DiffuseTextureIndex = texIndex;
-                    this.File.DataExtensions.RemoveAt(tex.DataExtensionIndex);
-                }
-                else
-                {
-                    mat.DiffuseTextureIndex = this.File.Textures.Count;
-                    this.File.Textures.Add(tex);
-                }
             }
             else if (Maxscript.QueryBoolean("(classof mat.diffusemap) == CompositeTextureMap") && Maxscript.QueryBoolean("(classof mat.diffusemap.mapList[1]) == BitmapTexture"))
             {
-                GrnTexture tex = new GrnTexture(this.File);
+                tex = new GrnTexture(this.File);
                 tex.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].name"));
                 this.File.SetDataExtensionFileName(tex.DataExtensionIndex, Path.GetFileNameWithoutExtension(Maxscript.QueryString("mat.diffusemap.mapList[1].filename")) + ".tga");
+            }
 
+            if (tex != null)
+            {
                 int texIndex = this.File.Textures.IndexOf(tex);
                 if (texIndex >= 0)
                 {
@@ -722,6 +729,11 @@
                 {
                     mat.DiffuseTextureIndex = this.File.Textures.Count;
                     this.File.Textures.Add(tex);
+                    string fileNameNoExt = Path.GetFileNameWithoutExtension(tex.FileName);
+                    if (!fileNameNoExt.Equals(tex.Name))
+                    {
+                        throw new Exception("Texture name " + tex.Name + " must be set to " + fileNameNoExt + ".");
+                    }
                 }
             }
         }

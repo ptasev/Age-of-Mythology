@@ -365,6 +365,7 @@
         {
             BrgFile brg = this.File;
             Maxscript.Command("exportStartTime = timeStamp()");
+            //Maxscript.Command("print heapSize");
             BrgMeshFlag flags = brg.Meshes[0].Header.Flags;
             BrgMeshFormat format = brg.Meshes[0].Header.Format;
             BrgMeshAnimType animationType = brg.Meshes[0].Header.AnimationType;
@@ -547,6 +548,7 @@
             brg.Materials = usedMats;
             brg.Header.NumMaterials = brg.Materials.Count;
 
+            //Maxscript.Command("print heapSize");
             Maxscript.Command("exportEndTime = timeStamp()");
             Maxscript.Format("Export took % seconds\n", "((exportEndTime - exportStartTime) / 1000.0)");
         }
@@ -617,7 +619,7 @@
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("In mesh " + mainObjectName + " error exporting verts/normals index " + (i + 1) + ".");
+                    throw new Exception("In mesh " + mainObjectName + " error exporting verts/normals index " + (i + 1) + ".", ex);
                 }
             }
 
@@ -674,6 +676,8 @@
                     }
                 }
             }
+
+            Maxscript.Command("delete {0}", mainMesh);
         }
         private void ExportAttachpoints(string attachDummy, BrgMesh mesh, float time)
         {
