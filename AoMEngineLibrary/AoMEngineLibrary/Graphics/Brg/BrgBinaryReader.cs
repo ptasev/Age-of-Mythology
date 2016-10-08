@@ -5,6 +5,7 @@
     using MiscUtil.IO;
     using System;
     using System.Collections.Generic;
+    using System.Numerics;
     using System.Text;
 
     public class BrgBinaryReader : EndianBinaryReader
@@ -53,9 +54,9 @@
         }
 
         #region ReadVector3
-        public Vector3D ReadVector3D(bool isAom = true, bool isHalf = false)
+        public Vector3 ReadVector3D(bool isAom = true, bool isHalf = false)
         {
-            Vector3D v = new Vector3D();
+            Vector3 v = new Vector3();
 
             if (isAom)
             {
@@ -93,9 +94,9 @@
         #endregion
 
         #region ReadVector2
-        public Vector2D ReadVector2D(bool isHalf = false)
+        public Vector2 ReadVector2D(bool isHalf = false)
         {
-            Vector2D v = new Vector2D();
+            Vector2 v = new Vector2();
 
             if (!isHalf)
             {

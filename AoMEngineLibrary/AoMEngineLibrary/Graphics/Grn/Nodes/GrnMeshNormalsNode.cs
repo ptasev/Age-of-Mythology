@@ -5,13 +5,14 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
 
     public class GrnMeshNormalsNode : GrnNode
     {
-        public List<Vector3D> Normals
+        public List<Vector3> Normals
         {
             get;
             set;
@@ -20,7 +21,7 @@
         public GrnMeshNormalsNode(GrnNode parentNode)
             : base(parentNode, GrnNodeType.MeshNormals)
         {
-            this.Normals = new List<Vector3D>();
+            this.Normals = new List<Vector3>();
         }
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)

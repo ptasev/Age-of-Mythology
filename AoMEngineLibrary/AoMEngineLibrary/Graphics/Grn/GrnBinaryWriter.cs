@@ -4,6 +4,7 @@
     using MiscUtil.Conversion;
     using MiscUtil.IO;
     using System;
+    using System.Numerics;
     using System.Text;
 
     public class GrnBinaryWriter : EndianBinaryWriter
@@ -20,7 +21,7 @@
             this.Write((byte)0x0);
         }
 
-        public void Write(Vector3D v)
+        public void Write(Vector3 v)
         {
             this.Write(v.X);
             this.Write(v.Y);
@@ -33,17 +34,17 @@
             this.Write(q.Z);
             this.Write(q.W);
         }
-        public void Write(Matrix3x3 m)
+        public void WriteMatrix3x3(Matrix4x4 m)
         {
-            this.Write(m.A1);
-            this.Write(m.A2);
-            this.Write(m.A3);
-            this.Write(m.B1);
-            this.Write(m.B2);
-            this.Write(m.B3);
-            this.Write(m.C1);
-            this.Write(m.C2);
-            this.Write(m.C3);
+            this.Write(m.M11);
+            this.Write(m.M12);
+            this.Write(m.M13);
+            this.Write(m.M21);
+            this.Write(m.M22);
+            this.Write(m.M23);
+            this.Write(m.M31);
+            this.Write(m.M32);
+            this.Write(m.M33);
         }
     }
 }

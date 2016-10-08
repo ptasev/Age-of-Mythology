@@ -7,6 +7,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -256,9 +257,9 @@
                 // but won't if an anim file is imported on top of a regular model file
                 int boneArrayIndex = this.boneMap[this.File.Bones[i].Name] + 1;
 
-                Vector3D pos = new Vector3D();
+                Vector3 pos = new Vector3();
                 Quaternion rot = new Quaternion();
-                Matrix3x3 scale = Matrix3x3.Identity;
+                Matrix4x4 scale = Matrix4x4.Identity;
                 HashSet<float> uKeys = new HashSet<float>();
                 uKeys.UnionWith(bone.RotationKeys);
                 uKeys.UnionWith(bone.ScaleKeys);
@@ -442,7 +443,7 @@
             int numBones = Maxscript.QueryInteger("grnBones.count");
             this.File.Bones.Add(new GrnBone(this.File));
             this.File.Bones[0].DataExtensionIndex = this.File.AddDataExtension("__Root");
-            this.File.Bones[0].Rotation = new Quaternion(1, 0, 0, 0);
+            this.File.Bones[0].Rotation = new Quaternion(0, 0, 0, 1);
             this.File.Bones[0].ParentIndex = 0;
 
             for (int i = 1; i <= numBones; ++i)
@@ -459,9 +460,9 @@
                         Maxscript.Command("boneTransMat = boneTransMat * inverse(grnBones[{0}].parent.transform)", i);
                     }
 
-                    Vector3D pos;
+                    Vector3 pos;
                     Quaternion rot;
-                    Matrix3x3 scale;
+                    Matrix4x4 scale;
                     this.GetTransformPRS("boneTransMat", out pos, out rot, out scale);
                     bone.Position = pos;
                     bone.Rotation = rot;
@@ -501,7 +502,7 @@
                 try
                 {
                     Maxscript.Command("vertex = meshGetVertFunc {0} {1}", mainMesh, i + 1);
-                    mesh.Vertices.Add(new Vector3D(
+                    mesh.Vertices.Add(new Vector3(
                         Maxscript.QueryFloat("vertex.x"),
                         Maxscript.QueryFloat("vertex.y"),
                         Maxscript.QueryFloat("vertex.z")));
@@ -519,7 +520,7 @@
                 try
                 {
                     Maxscript.Command("currentNormal = getVertNormalFunc {0}", i + 1);
-                    mesh.Normals.Add(new Vector3D(
+                    mesh.Normals.Add(new Vector3(
                         Maxscript.QueryFloat("currentNormal.x"),
                         Maxscript.QueryFloat("currentNormal.y"),
                         Maxscript.QueryFloat("currentNormal.z")));
@@ -536,7 +537,7 @@
                 try
                 { 
                 Maxscript.Command("tVert = meshGetMapVertFunc {0} 1 {1}", mainMesh, i + 1);
-                mesh.TextureCoordinates.Add(new Vector3D(
+                mesh.TextureCoordinates.Add(new Vector3(
                     Maxscript.QueryFloat("tVert.x"),
                     1f-Maxscript.QueryFloat("tVert.y"),
                     Maxscript.QueryFloat("tVert.z")));
@@ -605,11 +606,11 @@
                     Maxscript.Command("bbMin = grnSkinBBMins[{0}]", i + 1);
                     mesh.BoneBindings.Add(new GrnBoneBinding());
                     mesh.BoneBindings[i].BoneIndex = Maxscript.QueryInteger("grnSkinBBIndices[{0}]", i + 1);
-                    mesh.BoneBindings[i].OBBMax = new Vector3D(
+                    mesh.BoneBindings[i].OBBMax = new Vector3(
                         Maxscript.QueryFloat("bbMax.x"),
                         Maxscript.QueryFloat("bbMax.y"),
                         Maxscript.QueryFloat("bbMax.z"));
-                    mesh.BoneBindings[i].OBBMin = new Vector3D(
+                    mesh.BoneBindings[i].OBBMin = new Vector3(
                         Maxscript.QueryFloat("bbMin.x"),
                         Maxscript.QueryFloat("bbMin.y"),
                         Maxscript.QueryFloat("bbMin.z"));
@@ -768,9 +769,9 @@
                 int numKeys = Maxscript.QueryInteger("keys.count");
                 float startTime = Maxscript.QueryFloat("animationRange.start.ticks / 4800.0");
                 float time = Maxscript.QueryFloat("keys[1]");
-                Vector3D pos = new Vector3D();
+                Vector3 pos = new Vector3();
                 Quaternion rot = new Quaternion();
-                Matrix3x3 scale = Matrix3x3.Identity;
+                Matrix4x4 scale = Matrix4x4.Identity;
 
                 if (numKeys > 0)
                 {
@@ -798,9 +799,9 @@
                     bone.Scales.Add(scale);
                 }
 
-                Vector3D posCurrent = new Vector3D();
+                Vector3 posCurrent = new Vector3();
                 Quaternion rotCurrent = new Quaternion();
-                Matrix3x3 scaleCurrent = Matrix3x3.Identity;
+                Matrix4x4 scaleCurrent = Matrix4x4.Identity;
                 for (int j = 1; j < numKeys; ++j)
                 {
                     time = Maxscript.QueryFloat("keys[{0}]", j + 1);
@@ -857,9 +858,9 @@
             rootBoneTrack.ScaleKeys.AddRange(rootTrackKeys);
             for (int i = 0; i < rootTrackKeys.Count; ++i)
             {
-                rootBoneTrack.Positions.Add(new Vector3D(0, 0, 0));
-                rootBoneTrack.Rotations.Add(new Quaternion(1, 0, 0, 0));
-                rootBoneTrack.Scales.Add(Matrix3x3.Identity);
+                rootBoneTrack.Positions.Add(new Vector3(0, 0, 0));
+                rootBoneTrack.Rotations.Add(new Quaternion(0, 0, 0, 1));
+                rootBoneTrack.Scales.Add(Matrix4x4.Identity);
             }
         }
 
@@ -889,50 +890,50 @@
             Maxscript.Command("{0} = transmatrix {1}", nameM3, Maxscript.Point3Literal(bone.Position));
             Maxscript.Command("{0} = (inverse(quat {1} {2} {3} {4}) as matrix3) * {0}", nameM3, bone.Rotation.X, bone.Rotation.Y, bone.Rotation.Z, bone.Rotation.W);
             Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] [0,0,0]) * {0}", nameM3,
-                bone.Scale.A1, bone.Scale.A2, bone.Scale.A3,
-                bone.Scale.B1, bone.Scale.B2, bone.Scale.B3,
-                bone.Scale.C1, bone.Scale.C2, bone.Scale.C3);
+                bone.Scale.M11, bone.Scale.M12, bone.Scale.M13,
+                bone.Scale.M21, bone.Scale.M22, bone.Scale.M23,
+                bone.Scale.M31, bone.Scale.M32, bone.Scale.M33);
 
             return nameM3;
         }
-        private string GetBoneLocalTransform(string nameM3, Vector3D pos, Quaternion rot, Matrix3x3 scale)
+        private string GetBoneLocalTransform(string nameM3, Vector3 pos, Quaternion rot, Matrix4x4 scale)
         {
             Maxscript.Command("{0} = matrix3 1", nameM3);
             Maxscript.Command("{0} = transmatrix {1}", nameM3, Maxscript.Point3Literal(pos));
             Maxscript.Command("{0} = (inverse(quat {1} {2} {3} {4}) as matrix3) * {0}", nameM3, rot.X, rot.Y, rot.Z, rot.W);
             Maxscript.Command("{0} = (matrix3 [{1}, {2}, {3}] [{4}, {5}, {6}] [{7}, {8}, {9}] [0,0,0]) * {0}", nameM3,
-                scale.A1, scale.A2, scale.A3,
-                scale.B1, scale.B2, scale.B3,
-                scale.C1, scale.C2, scale.C3);
+                scale.M11, scale.M12, scale.M13,
+                scale.M21, scale.M22, scale.M23,
+                scale.M31, scale.M32, scale.M33);
 
             return nameM3;
         }
-        private void GetTransformPRS(string nameM3, out Vector3D pos, out Quaternion rot, out Matrix3x3 scale)
+        private void GetTransformPRS(string nameM3, out Vector3 pos, out Quaternion rot, out Matrix4x4 scale)
         {
             Maxscript.Command("bRot = inverse({0}.rotation)", nameM3);
             Maxscript.Command("boneScTransMat = {0} * inverse({0}.rotation as matrix3)", nameM3);
             Maxscript.Command("{0} = inverse({0}.rotation as matrix3) * {0}", nameM3);
             Maxscript.Command("bPos = {0}.position", nameM3);
 
-            pos = new Vector3D(
+            pos = new Vector3(
                     Maxscript.QueryFloat("bPos.x"),
                     Maxscript.QueryFloat("bPos.y"),
                     Maxscript.QueryFloat("bPos.z"));
             rot = new Quaternion(
-                Maxscript.QueryFloat("bRot.w"),
                 Maxscript.QueryFloat("bRot.x"),
                 Maxscript.QueryFloat("bRot.y"),
-                Maxscript.QueryFloat("bRot.z"));
-            scale = new Matrix3x3();
-            scale.A1 = Maxscript.QueryFloat("boneScTransMat.row1.x");
-            scale.A2 = Maxscript.QueryFloat("boneScTransMat.row1.y");
-            scale.A3 = Maxscript.QueryFloat("boneScTransMat.row1.z");
-            scale.B1 = Maxscript.QueryFloat("boneScTransMat.row2.x");
-            scale.B2 = Maxscript.QueryFloat("boneScTransMat.row2.y");
-            scale.B3 = Maxscript.QueryFloat("boneScTransMat.row2.z");
-            scale.C1 = Maxscript.QueryFloat("boneScTransMat.row3.x");
-            scale.C2 = Maxscript.QueryFloat("boneScTransMat.row3.y");
-            scale.C3 = Maxscript.QueryFloat("boneScTransMat.row3.z");
+                Maxscript.QueryFloat("bRot.z"),
+                Maxscript.QueryFloat("bRot.w"));
+            scale = new Matrix4x4();
+            scale.M11 = Maxscript.QueryFloat("boneScTransMat.row1.x");
+            scale.M12 = Maxscript.QueryFloat("boneScTransMat.row1.y");
+            scale.M13 = Maxscript.QueryFloat("boneScTransMat.row1.z");
+            scale.M21 = Maxscript.QueryFloat("boneScTransMat.row2.x");
+            scale.M22 = Maxscript.QueryFloat("boneScTransMat.row2.y");
+            scale.M23 = Maxscript.QueryFloat("boneScTransMat.row2.z");
+            scale.M31 = Maxscript.QueryFloat("boneScTransMat.row3.x");
+            scale.M32 = Maxscript.QueryFloat("boneScTransMat.row3.y");
+            scale.M33 = Maxscript.QueryFloat("boneScTransMat.row3.z");
         }
         private string GetBoneWorldTransform(GrnFile file, int boneIndex, string nameM3)
         {
@@ -950,19 +951,19 @@
 
             return nameM3;
         }
-        private bool AreEqual(Matrix3x3 m1, Matrix3x3 m2)
+        private bool AreEqual(Matrix4x4 m1, Matrix4x4 m2)
         {
             float epsilon = 10e-6f;
 
-            return (Math.Abs(m1.A1 - m2.A1) < epsilon) &&
-                (Math.Abs(m1.A2 - m2.A2) < epsilon) &&
-                (Math.Abs(m1.A3 - m2.A3) < epsilon) &&
-                (Math.Abs(m1.B1 - m2.B1) < epsilon) &&
-                (Math.Abs(m1.B2 - m2.B2) < epsilon) &&
-                (Math.Abs(m1.B3 - m2.B3) < epsilon) &&
-                (Math.Abs(m1.C1 - m2.C1) < epsilon) &&
-                (Math.Abs(m1.C2 - m2.C2) < epsilon) &&
-                (Math.Abs(m1.C3 - m2.C3) < epsilon);
+            return (Math.Abs(m1.M11 - m2.M11) < epsilon) &&
+                (Math.Abs(m1.M12 - m2.M12) < epsilon) &&
+                (Math.Abs(m1.M13 - m2.M13) < epsilon) &&
+                (Math.Abs(m1.M21 - m2.M21) < epsilon) &&
+                (Math.Abs(m1.M22 - m2.M22) < epsilon) &&
+                (Math.Abs(m1.M23 - m2.M23) < epsilon) &&
+                (Math.Abs(m1.M31 - m2.M31) < epsilon) &&
+                (Math.Abs(m1.M32 - m2.M32) < epsilon) &&
+                (Math.Abs(m1.M33 - m2.M33) < epsilon);
         }
         #endregion
 

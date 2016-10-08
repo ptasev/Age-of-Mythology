@@ -5,13 +5,14 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
 
     public class GrnMeshVerticesNode : GrnNode
     {
-        public List<Vector3D> Vertices
+        public List<Vector3> Vertices
         {
             get;
             set;
@@ -20,7 +21,7 @@
         public GrnMeshVerticesNode(GrnNode parentNode)
             : base(parentNode, GrnNodeType.MeshVertices)
         {
-            this.Vertices = new List<Vector3D>();
+            this.Vertices = new List<Vector3>();
         }
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)

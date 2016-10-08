@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,18 +17,18 @@ namespace AoMEngineLibrary.Graphics.Grn
         public List<float> RotationKeys { get; set; }
         public List<float> ScaleKeys { get; set; }
 
-        public List<Vector3D> Positions { get; set; }
+        public List<Vector3> Positions { get; set; }
         public List<Quaternion> Rotations { get; set; }
-        public List<Matrix3x3> Scales { get; set; }
+        public List<Matrix4x4> Scales { get; set; }
 
         public GrnBoneTrack()
         {
             this.PositionKeys = new List<float>();
             this.RotationKeys = new List<float>();
             this.ScaleKeys = new List<float>();
-            this.Positions = new List<Vector3D>();
+            this.Positions = new List<Vector3>();
             this.Rotations = new List<Quaternion>();
-            this.Scales = new List<Matrix3x3>();
+            this.Scales = new List<Matrix4x4>();
         }
 
         public void Read(List<int> transformChannels, GrnAnimationTransformTrackKeysNode animTransTrackKeys)

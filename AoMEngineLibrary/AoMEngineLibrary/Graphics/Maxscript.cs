@@ -5,6 +5,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Numerics;
 
     public static class Maxscript
     {
@@ -138,7 +139,7 @@
         {
             return MaxscriptSDK.AssembleScript("[{0}, {1}, {2}]", X, Y, Z);
         }
-        public static string Point3Literal(Vector3D v)
+        public static string Point3Literal(Vector3 v)
         {
             return MaxscriptSDK.AssembleScript("[{0}, {1}, {2}]", v.X, v.Y, v.Z);
         }

@@ -5,6 +5,7 @@
     using MiscUtil.IO;
     using System;
     using System.Collections.Generic;
+    using System.Numerics;
     using System.Text;
 
     public class GrnBinaryReader : EndianBinaryReader
@@ -28,9 +29,9 @@
             return Encoding.UTF8.GetString(fnBytes.ToArray());
         }
 
-        public Vector3D ReadVector3D()
+        public Vector3 ReadVector3D()
         {
-            Vector3D v = new Vector3D();
+            Vector3 v = new Vector3();
 
             v.X = this.ReadSingle();
             v.Y = this.ReadSingle();
@@ -49,19 +50,19 @@
 
             return q;
         }
-        public Matrix3x3 ReadMatrix3x3()
+        public Matrix4x4 ReadMatrix3x3()
         {
-            Matrix3x3 m;
+            Matrix4x4 m = new Matrix4x4();
 
-            m.A1 = this.ReadSingle();
-            m.A2 = this.ReadSingle();
-            m.A3 = this.ReadSingle();
-            m.B1 = this.ReadSingle();
-            m.B2 = this.ReadSingle();
-            m.B3 = this.ReadSingle();
-            m.C1 = this.ReadSingle();
-            m.C2 = this.ReadSingle();
-            m.C3 = this.ReadSingle();
+            m.M11 = this.ReadSingle();
+            m.M12 = this.ReadSingle();
+            m.M13 = this.ReadSingle();
+            m.M21 = this.ReadSingle();
+            m.M22 = this.ReadSingle();
+            m.M23 = this.ReadSingle();
+            m.M31 = this.ReadSingle();
+            m.M32 = this.ReadSingle();
+            m.M33 = this.ReadSingle();
 
             return m;
         }

@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -12,7 +13,7 @@
     public class GrnMeshFieldNode : GrnNode
     {
         public Int32 Unknown { get; set; }
-        public List<Vector3D> TextureCoordinates
+        public List<Vector3> TextureCoordinates
         {
             get;
             set;
@@ -22,7 +23,7 @@
             : base(parentNode, GrnNodeType.MeshField)
         {
             this.Unknown = 3;
-            this.TextureCoordinates = new List<Vector3D>();
+            this.TextureCoordinates = new List<Vector3>();
         }
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)

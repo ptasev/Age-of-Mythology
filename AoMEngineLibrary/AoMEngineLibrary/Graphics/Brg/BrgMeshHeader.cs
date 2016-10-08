@@ -2,6 +2,7 @@
 {
     using AoMEngineLibrary.Graphics.Model;
     using System;
+    using System.Numerics;
 
     public class BrgMeshHeader
     {
@@ -12,14 +13,14 @@
         public BrgMeshInterpolationType InterpolationType { get; set; }
         public BrgMeshAnimType AnimationType { get; set; }
         public Int16 UserDataEntryCount { get; set; }
-        public Vector3D CenterPosition { get; set; }
+        public Vector3 CenterPosition { get; set; }
         public Single CenterRadius { get; set; }
-        public Vector3D MassPosition { get; set; }
-        public Vector3D HotspotPosition { get; set; }
+        public Vector3 MassPosition { get; set; }
+        public Vector3 HotspotPosition { get; set; }
         public Int16 ExtendedHeaderSize { get; set; }
         public BrgMeshFlag Flags { get; set; }
-        public Vector3D MinimumExtent { get; set; }
-        public Vector3D MaximumExtent { get; set; }
+        public Vector3 MinimumExtent { get; set; }
+        public Vector3 MaximumExtent { get; set; }
 
         public BrgMeshHeader()
         {

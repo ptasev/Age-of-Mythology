@@ -2,6 +2,7 @@
 {
     using AoMEngineLibrary.Graphics.Model;
     using System;
+    using System.Numerics;
 
     public class BrgAttachpoint
     {
@@ -18,12 +19,12 @@
 
         public int Index;
         public int NameId;
-        public Vector3D XVector;
-        public Vector3D YVector;
-        public Vector3D ZVector;
-        public Vector3D Position;
-        public Vector3D BoundingBoxMin;
-        public Vector3D BoundingBoxMax;
+        public Vector3 XVector;
+        public Vector3 YVector;
+        public Vector3 ZVector;
+        public Vector3 Position;
+        public Vector3 BoundingBoxMin;
+        public Vector3 BoundingBoxMax;
 
         public string Name
         {
@@ -52,12 +53,12 @@
         {
             Index = -1;
             NameId = -1;
-            XVector = new Vector3D(0, 1, 0);
-            YVector = new Vector3D(0, 0, -1);
-            ZVector = new Vector3D(-1, 0, 0);
-            Position = new Vector3D(0f);
-            BoundingBoxMin = new Vector3D(-0.25f);
-            BoundingBoxMax = new Vector3D(0.25f);
+            XVector = new Vector3(0, 1, 0);
+            YVector = new Vector3(0, 0, -1);
+            ZVector = new Vector3(-1, 0, 0);
+            Position = new Vector3(0f);
+            BoundingBoxMin = new Vector3(-0.25f);
+            BoundingBoxMax = new Vector3(0.25f);
         }
         public BrgAttachpoint(BrgAttachpoint prev)
         {

@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -18,9 +19,9 @@
         public List<float> ScaleKeys { get; set; }
         public Int32[] Unknown2 { get; set; }
 
-        public List<Vector3D> Positions { get; set; }
+        public List<Vector3> Positions { get; set; }
         public List<Quaternion> Rotations { get; set; }
-        public List<Matrix3x3> Scales { get; set; }
+        public List<Matrix4x4> Scales { get; set; }
 
         public GrnAnimationTransformTrackKeysNode(GrnNode parentNode)
             : base(parentNode, GrnNodeType.AnimationTransformTrackKeys)
@@ -30,9 +31,9 @@
             this.RotationKeys = new List<float>();
             this.ScaleKeys = new List<float>();
             this.Unknown2 = new Int32[4] { 0, 1, 2, 0 };
-            this.Positions = new List<Vector3D>();
+            this.Positions = new List<Vector3>();
             this.Rotations = new List<Quaternion>();
-            this.Scales = new List<Matrix3x3>();
+            this.Scales = new List<Matrix4x4>();
         }
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
@@ -129,7 +130,7 @@
             }
             for (int i = 0; i < this.Scales.Count; ++i)
             {
-                writer.Write(this.Scales[i]);
+                writer.WriteMatrix3x3(this.Scales[i]);
             }
         }
 

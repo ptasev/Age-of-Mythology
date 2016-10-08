@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -23,13 +24,13 @@
             set;
         }
 
-        public Vector3D OBBMin
+        public Vector3 OBBMin
         {
             get;
             set;
         }
 
-        public Vector3D OBBMax
+        public Vector3 OBBMax
         {
             get;
             set;

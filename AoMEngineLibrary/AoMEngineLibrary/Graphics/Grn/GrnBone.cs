@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,16 +22,16 @@ namespace AoMEngineLibrary.Graphics.Grn
         }
         public Int32 ParentIndex { get; set; }
         public Int32 DataExtensionIndex { get; set; }
-        public Vector3D Position { get; set; }
+        public Vector3 Position { get; set; }
         public Quaternion Rotation { get; set; }
-        public Matrix3x3 Scale { get; set; }
+        public Matrix4x4 Scale { get; set; }
 
         public GrnBone()
         {
             this.ParentIndex = -1;
-            this.Position = new Vector3D(0f, 0f, 0f);
+            this.Position = new Vector3(0f, 0f, 0f);
             this.Rotation = new Quaternion(0, 0, 0, 1);
-            this.Scale = Matrix3x3.Identity;
+            this.Scale = Matrix4x4.Identity;
         }
         public GrnBone(GrnFile parentFile)
             : this()

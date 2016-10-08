@@ -4,6 +4,7 @@
     using MiscUtil.Conversion;
     using MiscUtil.IO;
     using System;
+    using System.Numerics;
     using System.Text;
 
     public class BrgBinaryWriter : EndianBinaryWriter
@@ -39,7 +40,7 @@
         }
 
         #region Vector3
-        public void WriteVector3D(Vector3D v, bool isAom = true, bool isHalf = false)
+        public void WriteVector3D(Vector3 v, bool isAom = true, bool isHalf = false)
         {
             if (isAom)
             {

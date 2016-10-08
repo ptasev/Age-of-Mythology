@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -17,7 +18,7 @@
             set;
         }
 
-        public Vector3D Position
+        public Vector3 Position
         {
             get;
             set;
@@ -29,7 +30,7 @@
             set;
         }
 
-        public Matrix3x3 Scale
+        public Matrix4x4 Scale
         {
             get;
             set;
@@ -55,7 +56,7 @@
             writer.Write(this.ParentIndex);
             writer.Write(this.Position);
             writer.Write(this.Rotation);
-            writer.Write(this.Scale);
+            writer.WriteMatrix3x3(this.Scale);
         }
 
         public override void CreateFolderFile(string folder)
