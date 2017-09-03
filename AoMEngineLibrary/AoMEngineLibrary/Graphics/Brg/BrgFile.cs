@@ -2,8 +2,11 @@
 {
     using AoMEngineLibrary.Graphics.Model;
     using MiscUtil.Conversion;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     public class BrgFile : ModelFile<BrgMesh, BrgMaterial, Animation>
     {
@@ -206,13 +209,127 @@
 
                 if (this.Meshes[meshIndex].Header.AnimationType == BrgMeshAnimType.NonUniform)
                 {
-                    this.Meshes[meshIndex].NonUniformKeys = new float[this.Header.NumMeshes];
+                    this.Meshes[meshIndex].NonUniformKeys = new List<float>(this.Header.NumMeshes);
                     for (int i = 0; i < this.Header.NumMeshes; i++)
                     {
                         this.Meshes[meshIndex].NonUniformKeys[i] = this.Animation.MeshKeys[i] / this.Animation.Duration;
                     }
                 }
             }
+        }
+
+        public void ReadJson(Stream stream)
+        {
+            using (JsonReader reader = new JsonTextReader(new StreamReader(stream)))
+            {
+                ReadJson(reader);
+            }
+        }
+        public void ReadJson(JsonReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                {
+                    switch ((string)reader.Value)
+                    {
+                        case nameof(Header):
+                            Header.ReadJson(reader);
+                            break;
+                        case nameof(AsetHeader):
+                            AsetHeader.ReadJson(reader);
+                            break;
+                        case nameof(Animation):
+                            Animation.ReadJson(reader);
+                            break;
+                        case nameof(Meshes):
+                            while (reader.Read() && reader.TokenType == JsonToken.StartArray)
+                            {
+                                if (reader.TokenType == JsonToken.StartArray)
+                                {
+                                    continue;
+                                }
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                BrgMesh m = new BrgMesh(this);
+                                m.ReadJson(reader);
+                                Meshes.Add(m);
+                            }
+                            break;
+                        case nameof(Materials):
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.StartArray)
+                                {
+                                    continue;
+                                }
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                BrgMaterial m = new BrgMaterial(this);
+                                m.ReadJson(reader);
+                                Materials.Add(m);
+                            }
+                            break;
+                        default:
+                            throw new Exception("Unexpected property name!");
+                    }
+                }
+                else if (reader.TokenType != JsonToken.StartObject)
+                {
+                    throw new Exception("Unexpected token type! " + reader.TokenType);
+                }
+            }
+        }
+
+        public void WriteJson(Stream stream)
+        {
+            using (JsonWriter writer = new JsonTextWriter(new StreamWriter(stream)))
+            {
+                writer.Formatting = Formatting.Indented;
+                WriteJson(writer);
+            }
+        }
+        public void WriteJson(JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            writer.WritePropertyName(nameof(Header));
+            Header.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(AsetHeader));
+            AsetHeader.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(Animation));
+            Animation.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(Meshes));
+            writer.WriteStartArray();
+            foreach (BrgMesh mesh in Meshes)
+            {
+                mesh.WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(Materials));
+            writer.WriteStartArray();
+            foreach (BrgMaterial mat in Materials)
+            {
+                mat.WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WriteEndObject();
         }
     }
 }

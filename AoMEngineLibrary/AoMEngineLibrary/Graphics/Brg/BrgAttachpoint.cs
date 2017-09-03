@@ -1,6 +1,8 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
+    using Extensions;
+    using Newtonsoft.Json;
     using System;
     using System.Numerics;
 
@@ -117,7 +119,7 @@
             string xVector = Maxscript.NewPoint3<float>("xVector", -this.ZVector.X, -this.YVector.X, -this.XVector.X);
             string yVector = Maxscript.NewPoint3<float>("yVector", -this.ZVector.Z, -this.YVector.Z, -this.XVector.Z);
             string zVector = Maxscript.NewPoint3<float>("zVector", this.ZVector.Y, this.YVector.Y, this.XVector.Y);
-            string posVector = Maxscript.NewPoint3<float>("rotPosVect", 0, 0, 0);
+            string posVector = Maxscript.NewPoint3<float>("rotPosVect", 0f, 0f, 0f);
             return Maxscript.NewMatrix3("transformMatrix", xVector, yVector, zVector, posVector);
         }
         public string GetMaxPosition()
@@ -136,6 +138,79 @@
         {
             return String.Format("Dummy_{0}", this.Name);
             //return String.Format("atpt{0:D2}.{1}", Index, this.Name);
+        }
+
+        public void ReadJson(JsonReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                {
+                    switch ((string)reader.Value)
+                    {
+                        case nameof(Name):
+                            NameId = GetIdByName(reader.ReadAsString());
+                            break;
+                        case nameof(XVector):
+                            XVector = reader.ReadAsVector3();
+                            break;
+                        case nameof(YVector):
+                            YVector = reader.ReadAsVector3();
+                            break;
+                        case nameof(ZVector):
+                            ZVector = reader.ReadAsVector3();
+                            break;
+                        case nameof(Position):
+                            Position = reader.ReadAsVector3();
+                            break;
+                        case nameof(BoundingBoxMin):
+                            BoundingBoxMin = reader.ReadAsVector3();
+                            break;
+                        case nameof(BoundingBoxMax):
+                            BoundingBoxMax = reader.ReadAsVector3();
+                            break;
+                        default:
+                            throw new Exception("Unexpected property name!");
+                    }
+                }
+                else if (reader.TokenType != JsonToken.StartObject)
+                {
+                    throw new Exception("Unexpected token type! " + reader.TokenType);
+                }
+            }
+        }
+
+        public void WriteJson(JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            writer.WritePropertyName(nameof(Name));
+            writer.WriteValue(Name);
+
+            writer.WritePropertyName(nameof(XVector));
+            XVector.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(YVector));
+            YVector.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(ZVector));
+            ZVector.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(Position));
+            Position.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(BoundingBoxMin));
+            BoundingBoxMin.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(BoundingBoxMax));
+            BoundingBoxMax.WriteJson(writer);
+
+            writer.WriteEndObject();
         }
     }
 }

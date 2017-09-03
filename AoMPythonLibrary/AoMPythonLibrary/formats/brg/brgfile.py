@@ -1,3 +1,5 @@
+import os
+import subprocess
 import json
 from .brganimation import BRGAnimation
 from .brgmesh import BRGMesh
@@ -13,6 +15,18 @@ class BRGFile(object):
         self.animation = BRGAnimation()
         self.meshes = []
         self.materials = []
+
+    def open(self, filename):
+        ext = os.path.splitext(os.path.basename(filename))[1]
+        if ext == ".brg":
+            converter = os.path.abspath(
+                os.path.dirname(os.path.realpath(__file__)) +
+                "../../../../AoMModelViewer/AoMModelViewer.exe")
+            subprocess.run([converter, filename, "-s"])
+            self.read(filename + ".json")
+            os.remove(filename + ".json")
+        else:
+            self.read(filename)
 
     def read(self, filename):
         """

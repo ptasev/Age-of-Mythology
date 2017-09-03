@@ -17,7 +17,7 @@ class BRGFileImporter(object):
     def load(self):
         start_time = process_time()
 
-        self._file.read(self._filename)
+        self._file.open(self._filename)
 
         self._create_mesh()
 
@@ -183,18 +183,25 @@ class BRGFileImporter(object):
 
     def _vec_blender(self, vector):
         return Vector([-vector[0], -vector[2], vector[1]])
+    def _vec_blender2(self, vector):
+        return Vector([vector[0], -vector[1], -vector[2]])
 
     def _attachpoint_prs_blender(self, attachpoint):
         pos = self._vec_blender(attachpoint.position)
 
         rot = Matrix()
-        rot[0].xyz = self._vec_blender(attachpoint.zvector)
-        rot[1].xyz = self._vec_blender(attachpoint.yvector)
-        rot[2].xyz = self._vec_blender(attachpoint.xvector)
+        x = self._vec_blender2(attachpoint.zvector)
+        y = self._vec_blender2(attachpoint.xvector)
+        z = self._vec_blender2(attachpoint.yvector)
+        rot[0].xyz = (x[0], y[0], z[0])
+        rot[1].xyz = (x[1], y[1], z[1])
+        rot[2].xyz = (x[2], y[2], z[2])
         rot = rot.to_quaternion()
 
-        sca = (self._vec_blender(attachpoint.bounding_box_max)
-               - self._vec_blender(attachpoint.bounding_box_min))
+        bbmax = Vector(attachpoint.bounding_box_max)
+        bbmin = Vector(attachpoint.bounding_box_min)
+        sca = bbmax - bbmin
+        sca = [sca[0], sca[2], sca[1]]
 
         return pos, rot, sca
 

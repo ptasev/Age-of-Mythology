@@ -1,5 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
+    using Newtonsoft.Json;
     using System;
 
     public class BrgHeader
@@ -37,6 +38,74 @@
             writer.Write(this.NumMeshes);
             writer.Write(this.Reserved);
             writer.Write(1999922179);
+        }
+
+
+        public void ReadJson(JsonReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                {
+                    switch ((string)reader.Value)
+                    {
+                        case nameof(Magic):
+                            Magic = reader.ReadAsString();
+                            break;
+                        case nameof(Unknown01):
+                            Unknown01 = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(NumMaterials):
+                            NumMaterials = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(Unknown02):
+                            Unknown02 = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(NumMeshes):
+                            NumMeshes = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(Reserved):
+                            Reserved = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(Unknown03):
+                            Unknown03 = reader.ReadAsInt32().Value;
+                            break;
+                        default:
+                            throw new Exception("Unexpected token type! " + reader.TokenType);
+                    }
+                }
+                else if (reader.TokenType != JsonToken.StartObject)
+                {
+                    throw new Exception("Unexpected token type! " + reader.TokenType);
+                }
+            }
+        }
+
+        public void WriteJson(JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            writer.WritePropertyName("Magic");
+            writer.WriteValue(Magic);
+            writer.WritePropertyName("Unknown01");
+            writer.WriteValue(Unknown01);
+            writer.WritePropertyName("NumMaterials");
+            writer.WriteValue(NumMaterials);
+            writer.WritePropertyName("Unknown02");
+            writer.WriteValue(Unknown02);
+            writer.WritePropertyName("NumMeshes");
+            writer.WriteValue(NumMeshes);
+            writer.WritePropertyName("Reserved");
+            writer.WriteValue(Reserved);
+            writer.WritePropertyName("Unknown03");
+            writer.WriteValue(Unknown03);
+
+            writer.WriteEndObject();
         }
     }
 }

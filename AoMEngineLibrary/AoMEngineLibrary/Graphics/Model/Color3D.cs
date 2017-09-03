@@ -21,10 +21,12 @@
 */
 namespace AoMEngineLibrary.Graphics.Model
 {
+    using Extensions;
+    using Newtonsoft.Json;
     using System;
     using System.Globalization;
     using System.Runtime.InteropServices;
-using System.Xml.Serialization;
+    using System.Xml.Serialization;
 
     /// <summary>
     /// Represents a RGB color.
@@ -364,6 +366,35 @@ using System.Xml.Serialization;
             CultureInfo info = CultureInfo.CurrentCulture;
             return String.Format(info, "{{R:{0} G:{1} B:{2}}}",
                 new Object[] { R.ToString(info), G.ToString(info), B.ToString(info) });
+        }
+
+        public void ReadJson(JsonReader reader)
+        {
+            int count = 0;
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.StartArray)
+                {
+                    continue;
+                }
+                if (reader.TokenType == JsonToken.EndArray)
+                {
+                    break;
+                }
+
+                this[count++] = (float)(double)reader.Value;
+            }
+        }
+
+        public void WriteJson(JsonWriter writer)
+        {
+            writer.WriteStartArray();
+
+            writer.WriteRawValue(R.ToRoundTripString());
+            writer.WriteRawValue(G.ToRoundTripString());
+            writer.WriteRawValue(B.ToRoundTripString());
+
+            writer.WriteEndArray();
         }
     }
 }

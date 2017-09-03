@@ -1,9 +1,12 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
+    using Extensions;
+    using Newtonsoft.Json;
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Numerics;
 
     public class BrgMesh : Mesh
     {
@@ -17,28 +20,47 @@
         private float[] particleData;
 
         public List<BrgAttachpoint> Attachpoints { get; set; }
-        public float[] NonUniformKeys { get; set; }
+        public List<float> NonUniformKeys { get; set; }
 
-        public BrgMesh(BrgBinaryReader reader, BrgFile file)
+        public BrgMesh(BrgFile file)
             : base()
         {
             this.ParentFile = file;
-            this.Header = new BrgMeshHeader(reader);
+            this.Header = new BrgMeshHeader();
+            this.Header.Version = 22;
+            this.Header.ExtendedHeaderSize = 40;
 
             this.VertexMaterials = new List<Int16>();
+
+            this.ExtendedHeader = new BrgMeshExtendedHeader();
+            this.ExtendedHeader.MaterialLibraryTimestamp = 191738312;
+            this.ExtendedHeader.ExportedScaleFactor = 1f;
+
+            this.UserDataEntries = new BrgUserDataEntry[0];
+            this.particleData = new float[0];
+
+            this.Attachpoints = new List<BrgAttachpoint>();
+            this.NonUniformKeys = new List<float>();
+        }
+        public BrgMesh(BrgBinaryReader reader, BrgFile file)
+            : this(file)
+        {
+            this.ParentFile = file;
+            this.Header = new BrgMeshHeader(reader);
+            
             if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                this.Vertices = new List<Vector3D>(this.Header.NumVertices);
+                this.Vertices = new List<Vector3>(this.Header.NumVertices);
                 for (int i = 0; i < this.Header.NumVertices; i++)
                 {
                     this.Vertices.Add(reader.ReadVector3D(true, this.Header.Version == 22));
                 }
-                this.Normals = new List<Vector3D>(this.Header.NumVertices);
+                this.Normals = new List<Vector3>(this.Header.NumVertices);
                 for (int i = 0; i < this.Header.NumVertices; i++)
                 {
                     if (this.Header.Version >= 13 && this.Header.Version <= 17)
                     {
-                        reader.ReadInt16(); // No idea what this is
+                        reader.ReadInt16(); // TODO figure this out
                     }
                     else // v == 18, 19 or 22
                     {
@@ -51,10 +73,10 @@
                     this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
                     this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    this.TextureCoordinates = new List<Vector3D>(this.Header.NumVertices);
+                    this.TextureCoordinates = new List<Vector3>(this.Header.NumVertices);
                     for (int i = 0; i < this.Header.NumVertices; i++)
                     {
-                        this.TextureCoordinates.Add(new Vector3D(reader.ReadVector2D(this.Header.Version == 22), 0f));
+                        this.TextureCoordinates.Add(new Vector3(reader.ReadVector2D(this.Header.Version == 22), 0f));
                     }
                 }
 
@@ -103,8 +125,7 @@
             }
 
             this.ExtendedHeader = new BrgMeshExtendedHeader(reader, this.Header.ExtendedHeaderSize);
-
-            this.particleData = new float[0];
+            
             if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
                 this.particleData = new float[4 * this.Header.NumVertices];
@@ -175,14 +196,13 @@
                 for (int i = 0; i < numIndex; i++)
                 {
                     int duplicate = reader.ReadInt32(); // have yet to find a model with duplicates
-                    reader.ReadInt32(); // Skip the id (at least I think its an ID)
+                    reader.ReadInt32(); // TODO figure out what this means
                     for (int j = 0; j < duplicate; j++)
                     {
                         nameId.Add(i);
                     }
                 }
-
-                this.Attachpoints = new List<BrgAttachpoint>();
+                
                 for (int i = 0; i < nameId.Count; i++)
                 {
                     this.Attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
@@ -190,10 +210,6 @@
                     //attpts[reader.ReadByte()].NameId = nameId[i];
                 }
                 //attachpoints = new List<BrgAttachpoint>(attpts);
-            }
-            else
-            {
-                this.Attachpoints = new List<BrgAttachpoint>();
             }
 
             if (((this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
@@ -209,10 +225,9 @@
             }
 
             // Only seen on first mesh
-            this.NonUniformKeys = new float[0];
             if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
-                this.NonUniformKeys = new float[this.ExtendedHeader.NumNonUniformKeys];
+                this.NonUniformKeys = new List<float>(this.ExtendedHeader.NumNonUniformKeys);
                 for (int i = 0; i < this.ExtendedHeader.NumNonUniformKeys; i++)
                 {
                     this.NonUniformKeys[i] = reader.ReadSingle();
@@ -222,7 +237,7 @@
             if (this.Header.Version >= 14 && this.Header.Version <= 19)
             {
                 // Face Normals??
-                Vector3D[] legacy = new Vector3D[this.Header.NumFaces];
+                Vector3[] legacy = new Vector3[this.Header.NumFaces];
                 for (int i = 0; i < this.Header.NumFaces; i++)
                 {
                     legacy[i] = reader.ReadVector3D();
@@ -233,26 +248,6 @@
             {
                 reader.ReadBytes(ExtendedHeader.ShadowNameLength0 + ExtendedHeader.ShadowNameLength1);
             }
-        }
-        public BrgMesh(BrgFile file)
-            : base()
-        {
-            this.ParentFile = file;
-            this.Header = new BrgMeshHeader();
-            this.Header.Version = 22;
-            this.Header.ExtendedHeaderSize = 40;
-
-            this.VertexMaterials = new List<Int16>();
-
-            this.ExtendedHeader = new BrgMeshExtendedHeader();
-            this.ExtendedHeader.MaterialLibraryTimestamp = 191738312;
-            this.ExtendedHeader.ExportedScaleFactor = 1f;
-
-            this.UserDataEntries = new BrgUserDataEntry[0];
-            this.particleData = new float[0];
-
-            this.Attachpoints = new List<BrgAttachpoint>();
-            this.NonUniformKeys = new float[0];
         }
 
         public void Write(BrgBinaryWriter writer)
@@ -268,7 +263,7 @@
             }
             this.Header.NumFaces = (Int16)this.Faces.Count;
             this.Header.UserDataEntryCount = (Int16)this.UserDataEntries.Length;
-            this.Header.CenterRadius = this.Header.MaximumExtent.LongestAxisLength();
+            this.Header.CenterRadius = Math.Max(Math.Max(this.Header.MaximumExtent.X, this.Header.MaximumExtent.Y), this.Header.MaximumExtent.Z);
             this.Header.ExtendedHeaderSize = 40;
             this.Header.Write(writer);
 
@@ -331,7 +326,7 @@
                 }
             }
 
-            this.ExtendedHeader.NumNonUniformKeys = NonUniformKeys.Length;
+            this.ExtendedHeader.NumNonUniformKeys = NonUniformKeys.Count;
             this.ExtendedHeader.Write(writer);
 
             if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
@@ -438,11 +433,339 @@
 
             if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
-                for (int i = 0; i < this.NonUniformKeys.Length; i++)
+                for (int i = 0; i < this.NonUniformKeys.Count; i++)
                 {
                     writer.Write(this.NonUniformKeys[i]);
                 }
             }
+        }
+
+        public void ReadJson(JsonReader reader)
+        {
+            int count = 0;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                {
+                    switch ((string)reader.Value)
+                    {
+                        case nameof(Header):
+                            Header.ReadJson(reader);
+                            break;
+                        case nameof(ExtendedHeader):
+                            ExtendedHeader.ReadJson(reader);
+                            break;
+                        case nameof(UserDataEntries):
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.StartArray)
+                                {
+                                    continue;
+                                }
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                // TODO
+                            }
+                            break;
+                        case nameof(particleData):
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.StartArray)
+                                {
+                                    continue;
+                                }
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                // TODO
+                            }
+                            break;
+                        case nameof(NonUniformKeys):
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.StartArray)
+                                {
+                                    continue;
+                                }
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                NonUniformKeys.Add((float)(double)reader.Value);
+                            }
+                            break;
+                        case nameof(Attachpoints):
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.StartArray)
+                                {
+                                    continue;
+                                }
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                BrgAttachpoint a = new BrgAttachpoint();
+                                a.ReadJson(reader);
+                                Attachpoints.Add(a);
+                            }
+                            break;
+                        case nameof(Vertices):
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                Vector3 v = reader.ReadAsVector3();
+                                Vertices.Add(v);
+                            }
+                            break;
+                        case nameof(Normals):
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                Vector3 v = reader.ReadAsVector3();
+                                Normals.Add(v);
+                            }
+                            break;
+                        case nameof(TextureCoordinates):
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                Vector3 v = reader.ReadAsVector3();
+                                TextureCoordinates.Add(v);
+                            }
+                            break;
+                        case nameof(Colors):
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                Color4D c = new Color4D();
+                                c.ReadJson(reader);
+                                Colors.Add(c);
+                            }
+                            break;
+                        case nameof(Faces):
+                            count = 0;
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                Face f;
+                                if (Faces.Count <= count)
+                                {
+                                    f = new Face();
+                                    Faces.Add(f);
+                                }
+                                else
+                                {
+                                    f = Faces[count];
+                                }
+                                ++count;
+
+                                while (reader.Read())
+                                {
+                                    if (reader.TokenType == JsonToken.StartArray)
+                                    {
+                                        continue;
+                                    }
+                                    if (reader.TokenType == JsonToken.EndArray)
+                                    {
+                                        break;
+                                    }
+
+                                    f.Indices.Add((Int16)(Int64)reader.Value);
+                                }
+                            }
+                            break;
+                        case "FaceMaterials":
+                            count = 0;
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                Face f;
+                                if (Faces.Count <= count)
+                                {
+                                    f = new Face();
+                                    Faces.Add(f);
+                                }
+                                else
+                                {
+                                    f = Faces[count];
+                                }
+                                ++count;
+
+                                f.MaterialIndex = (Int16)(Int64)reader.Value;
+                            }
+                            break;
+                        case nameof(MeshAnimations):
+                            reader.Read(); // StartArray
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonToken.EndArray)
+                                {
+                                    break;
+                                }
+
+                                BrgMesh m = new BrgMesh(this.ParentFile);
+                                m.ReadJson(reader);
+                                MeshAnimations.Add(m);
+                            }
+                            break;
+                        default:
+                            throw new Exception("Unexpected property name!");
+                    }
+                }
+                else if (reader.TokenType != JsonToken.StartObject)
+                {
+                    throw new Exception("Unexpected token type! " + reader.TokenType);
+                }
+            }
+        }
+
+        public void WriteJson(JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            writer.WritePropertyName(nameof(Header));
+            Header.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(ExtendedHeader));
+            ExtendedHeader.WriteJson(writer);
+
+            writer.WritePropertyName(nameof(UserDataEntries));
+            writer.WriteStartArray();
+            for (int i = 0; i < UserDataEntries.Length; ++i)
+            {
+                UserDataEntries[i].WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(particleData));
+            writer.WriteStartArray();
+            for (int i = 0; i < particleData.Length; ++i)
+            {
+                writer.WriteRawValue(particleData[i].ToRoundTripString());
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(NonUniformKeys));
+            writer.WriteStartArray();
+            for (int i = 0; i < NonUniformKeys.Count; ++i)
+            {
+                writer.WriteRawValue(NonUniformKeys[i].ToRoundTripString());
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(Attachpoints));
+            writer.WriteStartArray();
+            foreach (BrgAttachpoint attachpoint in Attachpoints)
+            {
+                attachpoint.WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(Vertices));
+            writer.WriteStartArray();
+            for (int i = 0; i < Vertices.Count; ++i)
+            {
+                Vertices[i].WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(Normals));
+            writer.WriteStartArray();
+            for (int i = 0; i < Normals.Count; ++i)
+            {
+                Normals[i].WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(TextureCoordinates));
+            writer.WriteStartArray();
+            for (int i = 0; i < TextureCoordinates.Count; ++i)
+            {
+                TextureCoordinates[i].WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(Colors));
+            writer.WriteStartArray();
+            for (int i = 0; i < Colors.Count; ++i)
+            {
+                Colors[i].WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(Faces));
+            writer.WriteStartArray();
+            for (int i = 0; i < Faces.Count; ++i)
+            {
+                writer.WriteStartArray();
+                writer.WriteValue(Faces[i].Indices[0]);
+                writer.WriteValue(Faces[i].Indices[1]);
+                writer.WriteValue(Faces[i].Indices[2]);
+                writer.WriteEndArray();
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName("FaceMaterials");
+            writer.WriteStartArray();
+            for (int i = 0; i < Faces.Count; ++i)
+            {
+                writer.WriteValue(Faces[i].MaterialIndex);
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName(nameof(MeshAnimations));
+            writer.WriteStartArray();
+            for (int i = 0; i < MeshAnimations.Count; ++i)
+            {
+                ((BrgMesh)MeshAnimations[i]).WriteJson(writer);
+            }
+            writer.WriteEndArray();
+
+            writer.WriteEndObject();
         }
     }
 }

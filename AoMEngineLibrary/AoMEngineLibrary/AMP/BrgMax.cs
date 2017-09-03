@@ -8,6 +8,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -476,9 +477,9 @@
                         if (m == 0)
                         {
                             BrgMesh mesh = new BrgMesh(brg);
-                            mesh.Vertices = new List<Vector3D>(totalNumVerts);
-                            mesh.Normals = new List<Vector3D>(totalNumVerts);
-                            mesh.TextureCoordinates = new List<Vector3D>(totalNumVerts);
+                            mesh.Vertices = new List<Vector3>(totalNumVerts);
+                            mesh.Normals = new List<Vector3>(totalNumVerts);
+                            mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
                             mesh.Faces = new List<Face>(totalNumFaces);
                             brg.Meshes[0].MeshAnimations.Add(mesh);
                         }
@@ -490,9 +491,9 @@
                         if (m == 0)
                         {
                             BrgMesh mesh = new BrgMesh(brg);
-                            mesh.Vertices = new List<Vector3D>(totalNumVerts);
-                            mesh.Normals = new List<Vector3D>(totalNumVerts);
-                            mesh.TextureCoordinates = new List<Vector3D>(totalNumVerts);
+                            mesh.Vertices = new List<Vector3>(totalNumVerts);
+                            mesh.Normals = new List<Vector3>(totalNumVerts);
+                            mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
                             mesh.Faces = new List<Face>(totalNumFaces);
                             brg.Meshes.Add(mesh);
                         }
@@ -570,7 +571,7 @@
             Maxscript.Command("ExportBrgVertNormals {0}", time);
 
             Maxscript.SetVarAtTime(time, "meshCenter", "{0}.center", mainObject);
-            mesh.Header.CenterPosition = new Vector3D
+            mesh.Header.CenterPosition = new Vector3
             (
                 -Maxscript.QueryFloat("meshCenter.x"),
                 Maxscript.QueryFloat("meshCenter.z"),
@@ -580,7 +581,7 @@
             Maxscript.Command("grnd = getNodeByName \"Dummy_hotspot\"");
             if (!Maxscript.QueryBoolean("grnd == undefined"))
             {
-                mesh.Header.HotspotPosition = new Vector3D
+                mesh.Header.HotspotPosition = new Vector3
                 (
                     -Maxscript.QueryFloat("grnd.position.x"),
                     Maxscript.QueryFloat("grnd.position.z"),
@@ -590,11 +591,11 @@
 
             Maxscript.SetVarAtTime(time, "{0}BBMax", "{0}.max", mainObject);
             Maxscript.SetVarAtTime(time, "{0}BBMin", "{0}.min", mainObject);
-            Vector3D bBoxMax = new Vector3D(Maxscript.QueryFloat("{0}BBMax.X", mainObject), Maxscript.QueryFloat("{0}BBMax.Y", mainObject), Maxscript.QueryFloat("{0}BBMax.Z", mainObject));
-            Vector3D bBoxMin = new Vector3D(Maxscript.QueryFloat("{0}BBMin.X", mainObject), Maxscript.QueryFloat("{0}BBMin.Y", mainObject), Maxscript.QueryFloat("{0}BBMin.Z", mainObject));
-            Vector3D bBox = (bBoxMax - bBoxMin) / 2;
-            mesh.Header.MinimumExtent = new Vector3D(-bBox.X, -bBox.Z, -bBox.Y);
-            mesh.Header.MaximumExtent = new Vector3D(bBox.X, bBox.Z, bBox.Y);
+            Vector3 bBoxMax = new Vector3(Maxscript.QueryFloat("{0}BBMax.X", mainObject), Maxscript.QueryFloat("{0}BBMax.Y", mainObject), Maxscript.QueryFloat("{0}BBMax.Z", mainObject));
+            Vector3 bBoxMin = new Vector3(Maxscript.QueryFloat("{0}BBMin.X", mainObject), Maxscript.QueryFloat("{0}BBMin.Y", mainObject), Maxscript.QueryFloat("{0}BBMin.Z", mainObject));
+            Vector3 bBox = (bBoxMax - bBoxMin) / 2;
+            mesh.Header.MinimumExtent = new Vector3(-bBox.X, -bBox.Z, -bBox.Y);
+            mesh.Header.MaximumExtent = new Vector3(bBox.X, bBox.Z, bBox.Y);
 
             int numVertices = Maxscript.QueryInteger("brgVertIndices.count");
             int numFaces = Maxscript.QueryInteger("brgFaceArray.count");
@@ -608,10 +609,10 @@
                 {
                     Maxscript.Command("vertex = getVert {0} brgVertIndices[{1}]", mainMesh, i + 1);
                     //System.Windows.Forms.MessageBox.Show("1.4");
-                    mesh.Vertices.Add(new Vector3D(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
+                    mesh.Vertices.Add(new Vector3(-Maxscript.QueryFloat("vertex.x"), Maxscript.QueryFloat("vertex.z"), -Maxscript.QueryFloat("vertex.y")));
 
                     //System.Windows.Forms.MessageBox.Show("1.5");
-                    mesh.Normals.Add(new Vector3D(
+                    mesh.Normals.Add(new Vector3(
                         -Maxscript.QueryFloat("{0}[{1}].x", "averagedNormals", i + 1),
                         Maxscript.QueryFloat("{0}[{1}].z", "averagedNormals", i + 1),
                         -Maxscript.QueryFloat("{0}[{1}].y", "averagedNormals", i + 1)));
@@ -631,7 +632,7 @@
                     for (int i = 0; i < numVertices; i++)
                     {
                         Maxscript.Command("tVert = getTVert {0} brgVertTVIndices[{1}]", mainMesh, i + 1);
-                        mesh.TextureCoordinates.Add(new Vector3D(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
+                        mesh.TextureCoordinates.Add(new Vector3(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
                     }
                 }
             }
@@ -705,8 +706,8 @@
                     Maxscript.SetVarAtTime(time, "{0}Position", "{0}[{1}].position", attachDummy, i + 1);
                     Maxscript.SetVarAtTime(time, "{0}Scale", "{0}[{1}].scale * {0}[{1}].boxsize", attachDummy, i + 1);
                     //System.Windows.Forms.MessageBox.Show("5.3");
-                    Vector3D scale = new Vector3D(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
-                    Vector3D bBox = scale / 2;
+                    Vector3 scale = new Vector3(Maxscript.QueryFloat("{0}Scale.X", attachDummy), Maxscript.QueryFloat("{0}Scale.Y", attachDummy), Maxscript.QueryFloat("{0}Scale.Z", attachDummy));
+                    Vector3 bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
                     att.XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);

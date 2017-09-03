@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Age of Mythology BRG & GRN format",
     "author": "Petar Tasev",
-    "version": (1, 0, 2016, 513),
+    "version": (1, 0, 2017, 218),
     "blender": (2, 78, 0),
     "location": "File > Import-Export",
     "description": "Import-Export BRG & GRN mesh, attachpoints, skeleton, and animation",
@@ -14,86 +14,6 @@ bl_info = {
 import bpy
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty, IntProperty
-from bpy.types import Operator
-from AoMPythonLibrary.formats.brg.brgmaterial import BRGMaterialFlags
-
-class AoMMaterialProperties(bpy.types.PropertyGroup):
-    is_updating_bools = BoolProperty(
-        name="is_updating_bools",
-        description="control for UI draw",
-        default=False
-        )
-
-    def update_bools(self, context):
-        self.is_updating_bools = True
-
-        self.PixelXForm1 = self.has_flag(BRGMaterialFlags.PixelXForm1)
-        self.PlayerXFormColor1 = self.has_flag(BRGMaterialFlags.PlayerXFormColor1)
-
-        self.is_updating_bools = False
-    flags = IntProperty(
-        name="Flags",
-        description="Material Flags",
-        default=0,
-        update=update_bools
-        )
-    def update_flags(self, flag_bool, flag):
-        if self.is_updating_bools:
-            return
-        if flag_bool:
-            self.flags |= flag
-        else:
-            self.flags &= ~flag
-
-    def has_flag(self, flag):
-        return (self.flags & flag) == flag
-
-    def update_PixelXForm1(self, context):
-        self.update_flags(self.PixelXForm1, BRGMaterialFlags.PixelXForm1)
-    PixelXForm1 = BoolProperty(
-        name="PixelXForm1",
-        description="",
-        default=False,
-        update=update_PixelXForm1
-        )
-    def update_PlayerXFormColor1(self, context):
-        self.update_flags(self.PlayerXFormColor1, BRGMaterialFlags.PlayerXFormColor1)
-    PlayerXFormColor1 = BoolProperty(
-        name="PlayerXFormColor1",
-        description="Typical player color",
-        default=False,
-        update=update_PlayerXFormColor1
-        )
-
-class AoMMaterialPanel(bpy.types.Panel):
-    bl_idname = "MATERIAL_PT_aom_mat"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "material"
-    bl_label = "AoM Material"
-
-    @classmethod
-    def poll(cls, context):
-        return (context.object is not None) and \
-            (context.object.active_material is not None)
-
-    def draw(self, context):
-        mat = context.object.active_material
-        col = self.layout.column(align=True)
-        col.operator("material.aom_flags_default_set")
-        col.separator()
-        col.prop(mat.aom_data, "PixelXForm1")
-        col.prop(mat.aom_data, "PlayerXFormColor1")
-        col.separator()
-
-class AoMMaterialFlagsDefaultSet(bpy.types.Operator):
-    bl_idname = "material.aom_flags_default_set"
-    bl_label = "Set Default Flags"
-
-    def invoke(self, context, event):
-        mat = context.object.active_material
-        mat.aom_data.flags = 2048
-        return {"FINISHED"}
 
 class AoMAttachpointPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -184,7 +104,7 @@ class AoMAttachpointEmpty(bpy.types.Operator):
         scn.objects.active = empty
         return {"FINISHED"}
 
-class ImportBRG(Operator, ImportHelper):
+class ImportBRG(bpy.types.Operator, ImportHelper):
     """Load an Age of Mythology BRG file"""
     bl_idname = "import_scene.brg"  # important since its how bpy.ops.import_test.some_data is constructed
     bl_label = "Import BRG"
@@ -193,7 +113,7 @@ class ImportBRG(Operator, ImportHelper):
     filename_ext = ".brg"
 
     filter_glob = StringProperty(
-        default="*.brg",
+        default="*.brg;*.brg.json",
         options={'HIDDEN'},
     )
 
@@ -219,7 +139,7 @@ class ImportBRG(Operator, ImportHelper):
         return file_importer.load()
 
 
-class ExportBRG(Operator, ExportHelper):
+class ExportBRG(bpy.types.Operator, ExportHelper):
     """Save an Age of Mythology BRG file"""
     bl_idname = "export_scene.brg"
     bl_label = "Export BRG"
@@ -245,7 +165,7 @@ class ExportBRG(Operator, ExportHelper):
         return
 
 
-class ImportGRN(Operator, ImportHelper):
+class ImportGRN(bpy.types.Operator, ImportHelper):
     """Load an Age of Mythology GRN file"""
     bl_idname = "import_scene.grn"  # important since its how bpy.ops.import_test.some_data is constructed
     bl_label = "Import GRN"
@@ -271,7 +191,7 @@ class ImportGRN(Operator, ImportHelper):
         return
 
 
-class ExportGRN(Operator, ExportHelper):
+class ExportGRN(bpy.types.Operator, ExportHelper):
     """Save an Age of Mythology GRN file"""
     bl_idname = "export_scene.grn"
     bl_label = "Export GRN"
@@ -318,13 +238,11 @@ def register():
     bpy.types.INFO_MT_file_import.append(menu_func_import_grn)
     bpy.types.INFO_MT_file_export.append(menu_func_export_grn)
 
-    bpy.utils.register_class(AoMMaterialProperties)
-    bpy.types.Material.aom_data = bpy.props.PointerProperty(type=AoMMaterialProperties)
+    from . import brgmaterialui
+    brgmaterialui.register()
 
-    bpy.utils.register_class(AoMMaterialPanel)
     bpy.utils.register_class(AoMAttachpointPanel)
     bpy.utils.register_class(AoMAttachpointEmpty)
-    bpy.utils.register_class(AoMMaterialFlagsDefaultSet)
 
 def unregister():
     bpy.utils.unregister_class(ImportBRG)
@@ -336,11 +254,11 @@ def unregister():
     bpy.types.INFO_MT_file_import.remove(menu_func_import_grn)
     bpy.types.INFO_MT_file_export.remove(menu_func_export_grn)
 
-    bpy.utils.unregister_class(AoMMaterialProperties)
-    bpy.utils.unregister_class(AoMMaterialPanel)
+    from . import brgmaterialui
+    brgmaterialui.unregister()
+
     bpy.utils.unregister_class(AoMAttachpointPanel)
     bpy.utils.unregister_class(AoMAttachpointEmpty)
-    bpy.utils.unregister_class(AoMMaterialFlagsDefaultSet)
 
 
 if __name__ == "__main__":

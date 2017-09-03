@@ -1,5 +1,7 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
+    using Extensions;
+    using Newtonsoft.Json;
     using System;
 
     public class BrgMeshExtendedHeader
@@ -84,6 +86,127 @@
             writer.Write(this.ExportedScaleFactor);
             writer.Write(this.NumNonUniformKeys);
             writer.Write(this.NumUniqueMaterials);
+        }
+
+        public void ReadJson(JsonReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonToken.PropertyName)
+                {
+                    switch ((string)reader.Value)
+                    {
+                        case nameof(NumNameIndexes):
+                            NumNameIndexes = (Int16)reader.ReadAsInt32();
+                            break;
+                        case nameof(NumDummies):
+                            NumDummies = (Int16)reader.ReadAsInt32();
+                            break;
+                        case nameof(NameLength):
+                            NameLength = (Int16)reader.ReadAsInt32();
+                            break;
+                        case nameof(PointMaterial):
+                            PointMaterial = (Int16)reader.ReadAsInt32();
+                            break;
+                        case nameof(PointRadius):
+                            PointRadius = (float)reader.ReadAsDouble();
+                            break;
+                        case nameof(NumMaterials):
+                            NumMaterials = (byte)reader.ReadAsInt32();
+                            break;
+                        case nameof(ShadowNameLength0):
+                            ShadowNameLength0 = (byte)reader.ReadAsInt32();
+                            break;
+                        case nameof(ShadowNameLength1):
+                            ShadowNameLength1 = (byte)reader.ReadAsInt32();
+                            break;
+                        case nameof(ShadowNameLength2):
+                            ShadowNameLength2 = (byte)reader.ReadAsInt32();
+                            break;
+                        case nameof(AnimationLength):
+                            AnimationLength = (float)reader.ReadAsDouble();
+                            break;
+                        case nameof(MaterialLibraryTimestamp):
+                            MaterialLibraryTimestamp = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(Reserved):
+                            Reserved = (float)reader.ReadAsDouble();
+                            break;
+                        case nameof(ExportedScaleFactor):
+                            ExportedScaleFactor = (float)reader.ReadAsDouble();
+                            break;
+                        case nameof(NumNonUniformKeys):
+                            NumNonUniformKeys = reader.ReadAsInt32().Value;
+                            break;
+                        case nameof(NumUniqueMaterials):
+                            NumUniqueMaterials = reader.ReadAsInt32().Value;
+                            break;
+                        default:
+                            throw new Exception("Unexpected property name!");
+                    }
+                }
+                else if (reader.TokenType != JsonToken.StartObject)
+                {
+                    throw new Exception("Unexpected token type! " + reader.TokenType);
+                }
+            }
+        }
+
+        public void WriteJson(JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            writer.WritePropertyName(nameof(NumNameIndexes));
+            writer.WriteValue(NumNameIndexes);
+
+            writer.WritePropertyName(nameof(NumDummies));
+            writer.WriteValue(NumDummies);
+
+            writer.WritePropertyName(nameof(NameLength));
+            writer.WriteValue(NameLength);
+
+            writer.WritePropertyName(nameof(PointMaterial));
+            writer.WriteValue(PointMaterial);
+
+            writer.WritePropertyName(nameof(PointRadius));
+            writer.WriteRawValue(PointRadius.ToRoundTripString());
+
+            writer.WritePropertyName(nameof(NumMaterials));
+            writer.WriteValue(NumMaterials);
+
+            writer.WritePropertyName(nameof(ShadowNameLength0));
+            writer.WriteValue(ShadowNameLength0);
+
+            writer.WritePropertyName(nameof(ShadowNameLength1));
+            writer.WriteValue(ShadowNameLength1);
+
+            writer.WritePropertyName(nameof(ShadowNameLength2));
+            writer.WriteValue(ShadowNameLength2);
+
+            writer.WritePropertyName(nameof(AnimationLength));
+            writer.WriteRawValue(AnimationLength.ToRoundTripString());
+
+            writer.WritePropertyName(nameof(MaterialLibraryTimestamp));
+            writer.WriteValue(MaterialLibraryTimestamp);
+
+            writer.WritePropertyName(nameof(Reserved));
+            writer.WriteRawValue(Reserved.ToRoundTripString());
+
+            writer.WritePropertyName(nameof(ExportedScaleFactor));
+            writer.WriteRawValue(ExportedScaleFactor.ToRoundTripString());
+
+            writer.WritePropertyName(nameof(NumNonUniformKeys));
+            writer.WriteValue(NumNonUniformKeys);
+
+            writer.WritePropertyName(nameof(NumUniqueMaterials));
+            writer.WriteValue(NumUniqueMaterials);
+
+            writer.WriteEndObject();
         }
     }
 }
