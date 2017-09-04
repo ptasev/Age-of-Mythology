@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.Graphics
+﻿namespace AoMMaxPlugin
 {
     using AoMEngineLibrary.Graphics.Model;
     using ManagedServices;

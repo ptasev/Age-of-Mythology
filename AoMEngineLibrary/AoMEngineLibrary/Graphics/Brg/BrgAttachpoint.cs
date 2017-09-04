@@ -43,13 +43,6 @@
                 }
             }
         }
-        public string MaxName
-        {
-            get
-            {
-                return GetMaxName();
-            }
-        }
 
         public BrgAttachpoint()
         {
@@ -108,36 +101,6 @@
 
             nId = -1;
             return false;
-        }
-
-        public string GetMaxTransform()
-        {
-            //string xVector = Maxscript.NewPoint3<float>("xVector", this.z.X, this.y.X, this.x.X); // original
-            //string yVector = Maxscript.NewPoint3<float>("yVector", this.z.Z, this.y.Z, this.x.Z);
-            //string zVector = Maxscript.NewPoint3<float>("zVector", this.z.Y, this.y.Y, this.x.Y);
-
-            string xVector = Maxscript.NewPoint3<float>("xVector", -this.ZVector.X, -this.YVector.X, -this.XVector.X);
-            string yVector = Maxscript.NewPoint3<float>("yVector", -this.ZVector.Z, -this.YVector.Z, -this.XVector.Z);
-            string zVector = Maxscript.NewPoint3<float>("zVector", this.ZVector.Y, this.YVector.Y, this.XVector.Y);
-            string posVector = Maxscript.NewPoint3<float>("rotPosVect", 0f, 0f, 0f);
-            return Maxscript.NewMatrix3("transformMatrix", xVector, yVector, zVector, posVector);
-        }
-        public string GetMaxPosition()
-        {
-            return Maxscript.NewPoint3<float>("posVector", -this.Position.X, -this.Position.Z, this.Position.Y);
-        }
-        public string GetMaxBoxSize()
-        {
-            return Maxscript.NewPoint3<float>("boxSize", 1, 1, 1);
-        }
-        public string GetMaxScale()
-        {
-            return Maxscript.NewPoint3<float>("boundingScale", (this.BoundingBoxMax.X - this.BoundingBoxMin.X), (this.BoundingBoxMax.Z - this.BoundingBoxMin.Z), (this.BoundingBoxMax.Y - this.BoundingBoxMin.Y));
-        }
-        public string GetMaxName()
-        {
-            return String.Format("Dummy_{0}", this.Name);
-            //return String.Format("atpt{0:D2}.{1}", Index, this.Name);
         }
 
         public void ReadJson(JsonReader reader)

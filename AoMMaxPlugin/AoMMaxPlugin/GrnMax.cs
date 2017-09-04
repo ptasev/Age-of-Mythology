@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.AMP
+﻿namespace AoMMaxPlugin
 {
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Grn;

@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.AMP
+﻿namespace AoMMaxPlugin
 {
     partial class MaxPluginForm
     {
@@ -968,7 +968,7 @@
             // 
             // newToolStripMenuItem
             // 
-            this.newToolStripMenuItem.Image = global::AoMEngineLibrary.Properties.Resources.picture_empty;
+            this.newToolStripMenuItem.Image = global::AoMMaxPlugin.Properties.Resources.picture_empty;
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.newToolStripMenuItem.Text = "New";
@@ -976,7 +976,7 @@
             // 
             // openToolStripMenuItem
             // 
-            this.openToolStripMenuItem.Image = global::AoMEngineLibrary.Properties.Resources.folder_picture;
+            this.openToolStripMenuItem.Image = global::AoMMaxPlugin.Properties.Resources.folder_picture;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.openToolStripMenuItem.Text = "Open";
@@ -984,7 +984,7 @@
             // 
             // saveToolStripMenuItem
             // 
-            this.saveToolStripMenuItem.Image = global::AoMEngineLibrary.Properties.Resources.picture_save;
+            this.saveToolStripMenuItem.Image = global::AoMMaxPlugin.Properties.Resources.picture_save;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.saveToolStripMenuItem.Text = "Save";

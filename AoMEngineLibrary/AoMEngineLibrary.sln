@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMEngineLibrary", "AoMEngineLibrary\AoMEngineLibrary.csproj", "{6DBC106C-7292-4872-A41A-EB7CEEEF0092}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMFileConverter", "..\AoMFileConverter\AoMFileConverter\AoMFileConverter.csproj", "{0E2B3BB5-4214-4CF8-AC33-5D3A9CCE873E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelViewer", "..\AoMModelViewer\AoMModelViewer\AoMModelViewer.csproj", "{AE07071C-73AA-4EC4-A899-D0375D0BD130}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMMaxPlugin", "..\AoMMaxPlugin\AoMMaxPlugin\AoMMaxPlugin.csproj", "{23CE0F6B-64A4-4F27-888E-F036F3EB9832}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,8 +91,23 @@ Global
 		{AE07071C-73AA-4EC4-A899-D0375D0BD130}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AE07071C-73AA-4EC4-A899-D0375D0BD130}.Release|x64.ActiveCfg = Release|Any CPU
 		{AE07071C-73AA-4EC4-A899-D0375D0BD130}.Release|x64.Build.0 = Release|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Debug|x64.Build.0 = Debug|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Release|x64.ActiveCfg = Release|Any CPU
+		{23CE0F6B-64A4-4F27-888E-F036F3EB9832}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {064AD83C-2634-41F5-BBD4-475F061C4CE8}
 	EndGlobalSection
 EndGlobal

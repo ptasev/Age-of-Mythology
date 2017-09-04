@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AoMEngineLibrary.AMP
+namespace AoMMaxPlugin
 {
     public partial class ProgressDialog : MaxForm
     {

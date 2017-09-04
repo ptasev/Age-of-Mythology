@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.AMP
+﻿namespace AoMMaxPlugin
 {
     using System;
     using System.Collections.Generic;

@@ -1,6 +1,6 @@
 ﻿#define DEBUGBOX // allows the use of messageboxes in debug mode
 
-namespace AoMEngineLibrary.AMP
+namespace AoMMaxPlugin
 {
     using AoMEngineLibrary.Extensions;
     using AoMEngineLibrary.Graphics;
@@ -9,7 +9,6 @@ namespace AoMEngineLibrary.AMP
     using BrightIdeasSoftware;
     using ManagedServices;
     using MaxCustomControls;
-    using MiscUtil;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
