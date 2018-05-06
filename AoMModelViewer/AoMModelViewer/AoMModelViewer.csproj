@@ -65,6 +65,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GLTFFormatter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -104,6 +105,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="glTF2Loader">
+      <Version>1.1.1-alpha</Version>
+    </PackageReference>
     <PackageReference Include="HelixToolkit.Wpf">
       <Version>2015.1.715</Version>
     </PackageReference>

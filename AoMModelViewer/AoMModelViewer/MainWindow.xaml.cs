@@ -32,7 +32,7 @@ namespace AoMModelViewer
             string[] args = Environment.GetCommandLineArgs();
             BrgFile file;
 
-            if (args.Length > 1)
+            if (args.Length > 1 && false)
             {
                 file = new BrgFile(File.Open(args[1], FileMode.Open, FileAccess.Read, FileShare.Read));
                 file.WriteJson(File.Open(args[1] + ".json", FileMode.Create, FileAccess.Write, FileShare.Read));
@@ -46,6 +46,8 @@ namespace AoMModelViewer
                 //archer e slinger_attacka.brg
                 file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\infantry g hoplite head standard.brg", FileMode.Open, FileAccess.Read, FileShare.Write));
                 file.WriteJson(File.Open("infantry g hoplite head standard.brg.json.brg", FileMode.Create, FileAccess.Write, FileShare.Read));
+                var grnFile = new AoMEngineLibrary.Graphics.Grn.GrnFile();
+                grnFile.Read(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Write));
             }
 
             //BrgFile t = new BrgFile();
@@ -91,6 +93,15 @@ namespace AoMModelViewer
 
             //viewport3d.Children.Add(meshVis);
             viewport3d.Children.Add(modVis);
+
+            file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\animal aurochs_attacka.brg", FileMode.Open, FileAccess.Read));
+            glTFLoader.Schema.Gltf gltf;
+            using (var stream = File.Open("dataBuffer.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                GltfFormatter frmt = new GltfFormatter();
+                gltf = frmt.FromBrg(file, stream);
+            }
+            glTFLoader.Interface.SaveModel(gltf, "brgGltf.gltf");
         }
     }
 }
