@@ -46,12 +46,69 @@ namespace AoMModelViewer
             //FromBrgMesh(brg.Meshes[0]);
 
             // Create materials / textures
+            Sampler sampler = new Sampler();
+            sampler.MinFilter = Sampler.MinFilterEnum.LINEAR;
+            sampler.MagFilter = Sampler.MagFilterEnum.LINEAR;
+            sampler.WrapS = Sampler.WrapSEnum.CLAMP_TO_EDGE;
+            sampler.WrapT = Sampler.WrapTEnum.CLAMP_TO_EDGE;
+            gltf.Samplers = new Sampler[] { sampler };
+
+            List<glTFLoader.Schema.Image> images = new List<Image>();
+            List<glTFLoader.Schema.Texture> textures = new List<glTFLoader.Schema.Texture>();
+            List<glTFLoader.Schema.Material> materials = new List<glTFLoader.Schema.Material>();
+            Dictionary<int, int> brgMatGltfMatIndexMap = new Dictionary<int, int>();
+            var uniqueTextures = from mat in brg.Materials
+                                 group mat by mat.DiffuseMap into matGroup
+                                 select matGroup;
+            foreach (var matGroup in uniqueTextures)
+            {
+                int texIndex = textures.Count;
+                bool hasTex = false;
+                if (!string.IsNullOrWhiteSpace(matGroup.Key))
+                {
+                    Image im = new Image();
+                    im.Uri = matGroup.Key + ".png";
+
+                    glTFLoader.Schema.Texture tex = new glTFLoader.Schema.Texture();
+                    tex.Source = images.Count;
+                    tex.Sampler = 0;
+
+                    images.Add(im);
+                    textures.Add(tex);
+                    hasTex = true;
+                }
+
+                foreach (var brgMat in brg.Materials)
+                {
+                    glTFLoader.Schema.Material mat = new glTFLoader.Schema.Material();
+                    mat.PbrMetallicRoughness = new MaterialPbrMetallicRoughness();
+                    mat.PbrMetallicRoughness.MetallicFactor = 0.2f;
+                    mat.PbrMetallicRoughness.RoughnessFactor = 0.5f;
+
+                    if (hasTex)
+                    {
+                        mat.PbrMetallicRoughness.BaseColorTexture = new TextureInfo();
+                        mat.PbrMetallicRoughness.BaseColorTexture.Index = texIndex;
+                    }
+                    else
+                    {
+                        mat.PbrMetallicRoughness.BaseColorFactor =
+                            new float[] { brgMat.DiffuseColor.R, brgMat.DiffuseColor.G, brgMat.DiffuseColor.B, brgMat.Opacity };
+                    }
+
+                    brgMatGltfMatIndexMap.Add(brgMat.Id, materials.Count);
+                    materials.Add(mat);
+                }
+            }
+            gltf.Images = images.ToArray();
+            gltf.Textures = textures.ToArray();
+            gltf.Materials = materials.ToArray();
 
             // Create primitives from first brg mesh
             // TODO: check if there is at least 1 mesh, and 1 face
             var primitives = (from face in brg.Meshes[0].Faces
                              group face by face.MaterialIndex into faceGroup
-                             select new BrgMeshPrimitive(faceGroup.ToList())).ToList();
+                             select new BrgMeshPrimitive(faceGroup.ToList(), brgMatGltfMatIndexMap[faceGroup.Key])).ToList();
 
             // Load mesh data
             glTFLoader.Schema.Mesh mesh = new glTFLoader.Schema.Mesh();
@@ -340,10 +397,10 @@ namespace AoMModelViewer
             public List<Face> Faces { get; }
             public List<short> Indices { get; }
 
-            public BrgMeshPrimitive(List<Face> faces)
+            public BrgMeshPrimitive(List<Face> faces, int materialIndex)
             {
                 Faces = faces;
-                if (faces.Count > 0) MaterialIndex = faces[0].MaterialIndex;
+                if (faces.Count > 0) MaterialIndex = materialIndex;
                 Targets = new List<Dictionary<string, int>>();
 
                 Dictionary<short, short>  mapNewIndices = new Dictionary<short, short>();
@@ -376,6 +433,7 @@ namespace AoMModelViewer
                     primitive.Mode = MeshPrimitive.ModeEnum.TRIANGLES;
                     CreateIndexBuffer(mesh, formatter, bufferStream);
                     primitive.Indices = formatter.accessors.Count - 1;
+                    primitive.Material = MaterialIndex;
 
                     primitive.Attributes = CreateAttributes(mesh, formatter, bufferStream);
                 }
@@ -396,6 +454,13 @@ namespace AoMModelViewer
                 CreateNormalBuffer(mesh, formatter, bufferStream);
                 int normAccessor = formatter.accessors.Count - 1;
                 attributes.Add("NORMAL", normAccessor);
+
+                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                {
+                    CreateTexcoordBuffer(mesh, formatter, bufferStream);
+                    int texcoordAccessor = formatter.accessors.Count - 1;
+                    attributes.Add("TEXCOORD_0", texcoordAccessor);
+                }
 
                 return attributes;
             }
@@ -543,6 +608,43 @@ namespace AoMModelViewer
                 posAccessor.Min = new[] { min.X, min.Y, min.Z };
                 posAccessor.Name = "normalBufferViewAccessor";
                 posAccessor.Type = Accessor.TypeEnum.VEC3;
+
+                formatter.bufferViews.Add(posBufferView);
+                formatter.accessors.Add(posAccessor);
+            }
+            private void CreateTexcoordBuffer(BrgMesh mesh, GltfFormatter formatter, Stream bufferStream)
+            {
+                long bufferViewOffset;
+                using (BinaryWriter writer = new BinaryWriter(bufferStream, Encoding.UTF8, true))
+                {
+                    // padding
+                    writer.Write(new byte[(-bufferStream.Length) & (PaddingBytes(Accessor.ComponentTypeEnum.FLOAT) - 1)]);
+                    bufferViewOffset = bufferStream.Length;
+
+                    foreach (int index in Indices)
+                    {
+                        Vector3 vec = mesh.TextureCoordinates[index];
+
+                        writer.Write(vec.X);
+                        writer.Write(1.0f - vec.Y);
+                    }
+                }
+
+                BufferView posBufferView = new BufferView();
+                posBufferView.Buffer = 0;
+                posBufferView.ByteLength = Indices.Count * 8;
+                posBufferView.ByteOffset = (int)bufferViewOffset;
+                posBufferView.ByteStride = 8;
+                posBufferView.Name = "uvBufferView";
+                posBufferView.Target = BufferView.TargetEnum.ARRAY_BUFFER;
+
+                Accessor posAccessor = new Accessor();
+                posAccessor.BufferView = formatter.bufferViews.Count;
+                posAccessor.ByteOffset = 0;
+                posAccessor.ComponentType = Accessor.ComponentTypeEnum.FLOAT;
+                posAccessor.Count = Indices.Count;
+                posAccessor.Name = "uvBufferViewAccessor";
+                posAccessor.Type = Accessor.TypeEnum.VEC2;
 
                 formatter.bufferViews.Add(posBufferView);
                 formatter.accessors.Add(posAccessor);
