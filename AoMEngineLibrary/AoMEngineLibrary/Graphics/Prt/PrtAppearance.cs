@@ -34,7 +34,7 @@
             set;
         }
 
-        private PrtAppearance()
+        public PrtAppearance()
         {
             AppearanceWeights = new List<float>();
             AppearanceFiles = new List<string>();

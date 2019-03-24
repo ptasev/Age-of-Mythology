@@ -20,7 +20,7 @@
             set;
         }
 
-        private PrtCollision()
+        public PrtCollision()
         {
             CollisionTypes = new List<PrtCollisionType>();
         }

@@ -20,7 +20,7 @@
             set;
         }
 
-        private PrtOpacity()
+        public PrtOpacity()
         {
             OpacityStages = new List<PrtOpacityStage>();
         }

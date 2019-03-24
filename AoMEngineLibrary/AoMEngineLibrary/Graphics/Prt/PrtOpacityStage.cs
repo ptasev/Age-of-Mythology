@@ -9,7 +9,7 @@
         public float Hold { get; set; }
         public float Fade { get; set; }
 
-        private PrtOpacityStage()
+        public PrtOpacityStage()
         {
 
         }

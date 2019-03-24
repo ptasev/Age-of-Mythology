@@ -71,8 +71,11 @@ struct {
         bool UseMinVelocity;
         bool UseMaxVelocity;
         bool AlwaysActive;
-        bool SyncWithAttackAnim;
-        byte padding[3];
+        if (version >= 12)
+        {
+            bool SyncWithAttackAnim;
+            byte padding[3];
+        }
         int32 MaxParticles;
         PrtAppearanceType AppearanceType;
         float UpdateRadius;

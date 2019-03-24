@@ -64,6 +64,15 @@
         public PrtFile()
         {
             Version = 12;
+            Emitter = new PrtEmitter();
+            Shape = new PrtShape();
+            Appearance = new PrtAppearance();
+            Opacity = new PrtOpacity();
+            Scale = new PrtScale();
+            Color = new PrtColor();
+            Forces = new PrtForces();
+            Collision = new PrtCollision();
+            BrgFileName = string.Empty;
         }
         public PrtFile(Stream stream)
         {
@@ -71,7 +80,7 @@
             {
                 this.Version = reader.ReadInt32();
 
-                this.Emitter = new PrtEmitter(reader);
+                this.Emitter = new PrtEmitter(reader, Version);
                 this.Shape = new PrtShape(reader);
                 this.Appearance = new PrtAppearance(reader);
                 this.Opacity = new PrtOpacity(reader);
@@ -141,7 +150,7 @@
             XmlSerializer deserializer = new XmlSerializer(typeof(PrtFile));
             using (TextReader reader = new StreamReader(stream))
             {
-                return deserializer.Deserialize(reader) as PrtFile;
+                return (PrtFile)deserializer.Deserialize(reader);
             }
         }
 
@@ -151,7 +160,7 @@
             {
                 writer.Write(this.Version);
 
-                this.Emitter.Write(writer);
+                this.Emitter.Write(writer, Version);
                 this.Shape.Write(writer);
                 this.Appearance.Write(writer);
                 this.Opacity.Write(writer);

@@ -26,7 +26,7 @@
             set;
         }
 
-        private PrtScale()
+        public PrtScale()
         {
             ScaleStages = new List<PrtScaleStage>();
         }

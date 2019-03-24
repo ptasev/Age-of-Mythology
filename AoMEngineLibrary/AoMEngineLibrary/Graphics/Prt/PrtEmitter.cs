@@ -50,11 +50,11 @@
         public float MaxVelocity { get; set; }
         public float MaxVelocityVar { get; set; }
 
-        private PrtEmitter()
+        public PrtEmitter()
         {
 
         }
-        public PrtEmitter(PrtBinaryReader reader)
+        public PrtEmitter(PrtBinaryReader reader, int version)
         {
             this.TiedToEmitter = reader.ReadBoolean();
             this.IgnoreRotation = reader.ReadBoolean();
@@ -64,8 +64,12 @@
             this.UseMinVelocity = reader.ReadBoolean();
             this.UseMaxVelocity = reader.ReadBoolean();
             this.AlwaysActive = reader.ReadBoolean();
-            this.SyncWithAttackAnim = reader.ReadBoolean();
-            reader.ReadBytes(3); // 32 bit padding
+
+            if (version >= 12)
+            {
+                this.SyncWithAttackAnim = reader.ReadBoolean();
+                reader.ReadBytes(3); // 32 bit padding
+            }
 
             this.MaxParticles = reader.ReadInt32();
             this.AppearanceType = (PrtAppearanceType)reader.ReadInt32();
@@ -103,7 +107,7 @@
             this.MaxVelocityVar = reader.ReadSingle();
         }
 
-        public void Write(PrtBinaryWriter writer)
+        public void Write(PrtBinaryWriter writer, int version)
         {
             writer.Write(this.TiedToEmitter);
             writer.Write(this.IgnoreRotation);
@@ -113,8 +117,12 @@
             writer.Write(this.UseMinVelocity);
             writer.Write(this.UseMaxVelocity);
             writer.Write(this.AlwaysActive);
-            writer.Write(this.SyncWithAttackAnim);
-            writer.Write(new byte[3]); // 32 bit padding
+
+            if (version >= 12)
+            {
+                writer.Write(this.SyncWithAttackAnim);
+                writer.Write(new byte[3]); // 32 bit padding
+            }
 
             writer.Write(this.MaxParticles);
             writer.Write((Int32)this.AppearanceType);

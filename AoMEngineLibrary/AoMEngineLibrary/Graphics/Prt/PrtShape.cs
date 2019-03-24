@@ -23,7 +23,7 @@
         public float OffPlaneSpread { get; set; }
         public float BiasPointHeight { get; set; }
 
-        private PrtShape()
+        public PrtShape()
         {
 
         }

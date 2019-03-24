@@ -28,7 +28,7 @@
             set;
         }
 
-        private PrtColor()
+        public PrtColor()
         {
             PaletteColors = new List<Texel>();
             ColorStages = new List<PrtColorStage>();

@@ -22,8 +22,9 @@
         [XmlArrayItem("FileName")]
         public List<string> FileNames { get; set; }
 
-        private PrtCollisionType()
+        public PrtCollisionType()
         {
+            Name = string.Empty;
             FileNames = new List<string>();
         }
         public PrtCollisionType(PrtBinaryReader reader)
