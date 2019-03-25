@@ -61,7 +61,7 @@ namespace AoMFileConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AoM File Converter 1.0.
+        ///   Looks up a localized string similar to AoM File Converter 1.1.0.
         /// </summary>
         internal static string AppTitleLong {
             get {

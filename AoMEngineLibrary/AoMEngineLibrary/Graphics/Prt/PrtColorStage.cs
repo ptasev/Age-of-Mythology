@@ -5,6 +5,9 @@
     public class PrtColorStage
     {
         public bool UsePalette { get; set; }
+        public byte Unk1 { get; set; }
+        public byte Unk2 { get; set; }
+        public byte Unk3 { get; set; }
         public Texel Color { get; set; }
         public float Hold { get; set; }
         public float Fade { get; set; }
@@ -16,7 +19,12 @@
         public PrtColorStage(PrtBinaryReader reader)
         {
             this.UsePalette = reader.ReadBoolean();
-            reader.ReadBytes(3);
+
+            // There seems to be data here sometimes
+            // Not sure what this is (see sfx_e_inferno_smoke_circle.prt)
+            this.Unk1 = reader.ReadByte();
+            this.Unk2 = reader.ReadByte();
+            this.Unk3 = reader.ReadByte();
 
             this.Color = reader.ReadTexel();
             this.Hold = reader.ReadSingle();
@@ -26,7 +34,10 @@
         public void Write(PrtBinaryWriter writer)
         {
             writer.Write(this.UsePalette);
-            writer.Write(new byte[3]);
+
+            writer.Write(this.Unk1);
+            writer.Write(this.Unk2);
+            writer.Write(this.Unk3);
 
             writer.WriteTexel(this.Color);
             writer.Write(this.Hold);

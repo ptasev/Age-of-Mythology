@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>AFC - Readme</title>
+    <style type="text/css">
+        body
+        {
+            margin: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 990px;
+            background: #000000;
+            color: #dddddd;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        a
+        { 
+	        color: #65CDEB; 
+	        text-decoration: none; 
+        }
+
+        a:hover
+        { 
+	        color: #FFFFFF;
+        }
+
+        div#top
+        {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 2px solid #292929;
+            border-top: none;
+            text-align: center;
+        }
+
+        div.readme-main
+        {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 1px solid #292929;
+        }
+
+        div.red
+        {
+            margin: 0;
+            padding: 5px;
+            background: #900;
+            border: solid #c00;
+        }
+
+        div.yellow
+        {
+            margin: 0;
+            padding: 5px;
+            background: #c90;
+            border: solid #fc0;
+        }
+
+        h1
+        {
+            margin: 0;
+            padding: 0;
+	        color:#E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+        }
+
+        h2
+        {
+            margin: 0;
+	        color:#E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.4em;
+        }
+
+        h3
+        {
+            margin: 0;
+	        color:#E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.2em;
+        }
+
+        div.red + h2, h2 + div.yellow
+        {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="top">
+        <h1>AoM File Converter</h1>
+        version 1.1.0<br />
+        <p style="font-family: Georgia, 'Times New Roman', Times, serif;"><a href="https://ryder25.com/">Application Website</a></p>
+    </div>
+    <div class="readme-main">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#Reqs">Requirements</a></li>
+            <li><a href="#Inst">Installation</a></li>
+            <li><a href="#ApIn">Application Information</a></li>
+            <li><a href="#Usag">Usage</a></li>
+            <li><a href="#Issu">Issues</a></li>
+            <li><a href="#Chan">Changelog</a></li>
+            <li><a href="#Cred">Credits</a></li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Reqs"></a>Requirements</h2>
+        <ul>
+            <li>.NET Framework 4.6.2</li>
+        </ul>
+        <h2><a name="Inst"></a>Installation</h2>
+        <ol>
+            <li>Extract everything from the 7zip file.</li>
+            <li>Drag and drop any supported file on the <em>AoM File Converter.exe</em> file.</li>
+            <li>Enjoy! :)</li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="ApIn"></a>Application Information</h2>
+        <p>This simple application converts anim.txt, prt, mtrl, and brg files to xml for the Age of Mythology game.</p>
+        <h2><a name="Usag"></a>Usage</h2>
+        <p>Simply drag, and drop (or use Open With) an anim.txt, prt, and/or mtrl file on the EXE to convert it to an Xml file, or the other way around to convert it accordingly.</p>
+        <p>The output file will be in the same location as the input file, but with an added extension.</p>
+        <p>Drag a Brg file on the EXE to extract all of its Mtrl files into a materials folder in the same path as the brg file.</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Issu"></a>Issues</h2>
+        <ul>
+            <li>If you get errors try one of the following:
+                <ul>
+                    <li>Make sure the folder that you put the files in is not readonly.</li>
+                    <li>Make sure you have the requirements.</li>
+                    <li>Create an issue <a href="https://github.com/Ryder25/Age-of-Mythology/issues" target="_blank">here</a>.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Chan"></a>Changelog</h2>
+        <ul>
+            <li>
+                <strong>1.1.0+20190324</strong>
+                <ul>
+                    <li>Added support for version 11 prt files</li>
+                    <li>Changed versioning scheme to semantic versioning 2.0.0</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>1.0.2016.0909</strong>
+                <ul>
+                    <li>First Release</li>
+                </ul>
+            </li>
+        </ul>
+        <h2><a name="Cred"></a>Credits</h2>
+        <ul>
+            <li>Ryder25 - <small>For creating the program. (modding(at)ryder25(dot)com)</small></li>
+            <li>steves - <small>Providing the program icon. (http://steves.deviantart.com/art/10-Age-of-Mythology-XP-Icons-562480)</small></li>
+        </ul>
+    </div>
+</body>
+</html>
