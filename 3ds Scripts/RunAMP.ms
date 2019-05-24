@@ -441,7 +441,8 @@ function GetBoneAnimKeys boneNode =
 		)
 	)
 	
-	if (classof boneNode == Editable_Mesh) then
+	if (classof boneNode == Editable_Mesh and \
+		 boneNode.baseobject.mesh[1].keys != undefined) then
 	(
 		numAnimKeys = boneNode.baseobject.mesh[1].keys.count
 		for i = 1 to numAnimKeys do
