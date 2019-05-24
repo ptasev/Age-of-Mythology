@@ -114,6 +114,8 @@
             unk2 = new Texel[3] { new Color4D(1f), new Color4D(1f), new Color4D(1f) };
             unk3 = new Texel[3] { new Color4D(1f), new Color4D(1f), new Color4D(1f) };
             unk4 = new int[4];
+
+            Texture = string.Empty;
         }
         public MtrlFile(BrgMaterial mat)
             : this()
@@ -222,7 +224,10 @@
                     this.unk4[i] = reader.ReadInt32();
                 }
 
-                this.Texture = reader.ReadString();
+                if (nameLength > 0)
+                {
+                    this.Texture = reader.ReadString();
+                }
             }
         }
 
@@ -231,7 +236,8 @@
             using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), stream))
             {
                 writer.Write(1280463949); // MTRL
-                writer.Write((uint)Encoding.UTF8.GetByteCount(this.Texture));
+                UInt32 nameLength = (UInt32)Encoding.UTF8.GetByteCount(this.Texture);
+                writer.Write(nameLength);
                 for (int i = 0; i < 5; ++i)
                 {
                     writer.Write(this.unk[i]);
@@ -288,7 +294,10 @@
                     writer.Write(this.unk4[i]);
                 }
 
-                writer.WriteString(this.Texture);
+                if (nameLength > 0)
+                {
+                    writer.WriteString(this.Texture);
+                }
             }
         }
 
