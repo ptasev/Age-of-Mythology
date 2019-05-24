@@ -21,7 +21,7 @@ namespace AoMEngineLibrary.AMP
     public partial class MaxPluginForm : MaxForm
     {
         // 7.2 -- Fix getting all the animation keys in brg, Exporting normals is now done after applying all modifier to the mesh, Fixed bugs with exporting grn mesh skin, Added more descriptive errors
-        public const string PluginTitle = "AMP 7.2";
+        public const string PluginTitle = "AMP 7.3";
         public static class Settings
         {
             private static string fileName = Application.StartupPath + "\\AoMEngineLibraryPluginSettings.xml";
@@ -86,6 +86,18 @@ namespace AoMEngineLibrary.AMP
 
             // Update Colors
             uiUp = CuiUpdater.GetInstance();
+
+            // 3ds Max 2014-2016 changed API for these color commands for 2017-2020
+            Color buttonLightShadowColor = Color.FromArgb(255, 56, 56, 56);
+            Color buttonDarkShadowColor = Color.FromArgb(255, 100, 100, 100);
+            try
+            {
+                // 2017 API - added bool param
+                buttonLightShadowColor = uiUp.GetButtonLightShadow(false);
+                buttonDarkShadowColor = uiUp.GetButtonDarkShadow(false);
+            }
+            catch { }
+
             mainMenuStrip.Renderer = new ToolStripMaxPluginRenderer();
             mainStatusStrip.SizingGrip = false;
             mainStatusStrip.BackColor = uiUp.GetControlColor();
@@ -135,10 +147,10 @@ namespace AoMEngineLibrary.AMP
             HeaderFormatStyle treelistviewstyle = new HeaderFormatStyle();
             treelistviewstyle.SetBackColor(uiUp.GetControlColor());
             treelistviewstyle.SetForeColor(uiUp.GetTextColor());
-            treelistviewstyle.Normal.FrameColor = uiUp.GetButtonLightShadow();
+            treelistviewstyle.Normal.FrameColor = buttonLightShadowColor;
             treelistviewstyle.Normal.FrameWidth = 1;
             treelistviewstyle.Hot.BackColor = uiUp.GetEditControlColor();
-            treelistviewstyle.Hot.FrameColor = uiUp.GetButtonLightShadow();
+            treelistviewstyle.Hot.FrameColor = buttonLightShadowColor;
             treelistviewstyle.Hot.FrameWidth = 1;
 
             // Brg Objects View
@@ -147,7 +159,7 @@ namespace AoMEngineLibrary.AMP
             this.brgObjectsTreeListView.OwnerDraw = true;
             this.brgObjectsTreeListView.RowHeight = 10;
             this.brgObjectsTreeListView.BorderStyle = BorderStyle.FixedSingle;
-            this.brgObjectsTreeListView.OverlayText.BorderColor = uiUp.GetButtonDarkShadow();
+            this.brgObjectsTreeListView.OverlayText.BorderColor = buttonDarkShadowColor;
             this.brgObjectsTreeListView.OverlayText.BorderWidth = 2;
             this.brgObjectsTreeListView.BackColor = uiUp.GetEditControlColor();
             this.brgObjectsTreeListView.ForeColor = uiUp.GetTextColor();
@@ -240,7 +252,7 @@ namespace AoMEngineLibrary.AMP
             this.grnObjectsTreeListView.OwnerDraw = true;
             this.grnObjectsTreeListView.RowHeight = 10;
             this.grnObjectsTreeListView.BorderStyle = BorderStyle.FixedSingle;
-            this.grnObjectsTreeListView.OverlayText.BorderColor = uiUp.GetButtonDarkShadow();
+            this.grnObjectsTreeListView.OverlayText.BorderColor = buttonDarkShadowColor;
             this.grnObjectsTreeListView.OverlayText.BorderWidth = 2;
             this.grnObjectsTreeListView.BackColor = uiUp.GetEditControlColor();
             this.grnObjectsTreeListView.ForeColor = uiUp.GetTextColor();
@@ -419,6 +431,7 @@ namespace AoMEngineLibrary.AMP
         [System.Diagnostics.Conditional("DEBUG")]
         private void debug()
         {
+            return;
             using (TextWriter writer = File.CreateText(@"C:\Users\Petar\Desktop\lp skult.grn.txt.ms"))//Path.GetFileName(file.FileName) + ".txt"))
             {
                 for (int i = 0; i < Maxscript.Output.Count; i++)
@@ -518,12 +531,13 @@ namespace AoMEngineLibrary.AMP
 
         private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.petartasev.com/modding/age-of-mythology/model-plugin/");
+            System.Diagnostics.Process.Start("https://ryder25.com/modding/bang-engine/#AoMModelPlugin");
         }
 
         private void beginnersGuideToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("http://aom.heavengames.com/cgi-bin/forums/display.cgi?action=ct&f=19,29360,0,365");
+            System.Diagnostics.Process.Start("http://aom.heavengames.com/downloads/showfile.php?fileid=11367");
         }
 
         private void brgSettingsInfoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -779,11 +793,11 @@ namespace AoMEngineLibrary.AMP
                     grn.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
                     grn.Import();
                     debug();
-                    this.Text = "ABE - " + Path.GetFileName(openFileDialog.FileName);
+                    this.Text = "AMP - " + Path.GetFileName(openFileDialog.FileName);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to open file!" + Environment.NewLine + Environment.NewLine + ex.Message, "ABE", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed to open file!" + Environment.NewLine + Environment.NewLine + ex.Message, "AMP", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -794,7 +808,7 @@ namespace AoMEngineLibrary.AMP
 
             try
             {
-                DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "ABE", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
+                DialogResult dlgR = MessageBox.Show("Do you want to clear the scene?", "AMP", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
                 if (dlgR == DialogResult.Yes)
                 {
                     Maxscript.Command("resetMaxFile #noprompt");
@@ -831,7 +845,7 @@ namespace AoMEngineLibrary.AMP
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to save file!" + Environment.NewLine + Environment.NewLine + ex.Message, "ABE", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed to save file!" + Environment.NewLine + Environment.NewLine + ex.Message, "AMP", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
