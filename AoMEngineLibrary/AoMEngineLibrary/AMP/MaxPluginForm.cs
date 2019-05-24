@@ -88,15 +88,9 @@ namespace AoMEngineLibrary.AMP
             uiUp = CuiUpdater.GetInstance();
 
             // 3ds Max 2014-2016 changed API for these color commands for 2017-2020
-            Color buttonLightShadowColor = Color.FromArgb(255, 56, 56, 56);
-            Color buttonDarkShadowColor = Color.FromArgb(255, 100, 100, 100);
-            try
-            {
-                // 2017 API - added bool param
-                buttonLightShadowColor = uiUp.GetButtonLightShadow(false);
-                buttonDarkShadowColor = uiUp.GetButtonDarkShadow(false);
-            }
-            catch { }
+            // 2017 API - added bool param
+            Color buttonLightShadowColor = uiUp.GetButtonLightShadow(false);
+            Color buttonDarkShadowColor = uiUp.GetButtonDarkShadow(false);
 
             mainMenuStrip.Renderer = new ToolStripMaxPluginRenderer();
             mainStatusStrip.SizingGrip = false;
