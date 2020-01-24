@@ -56,11 +56,13 @@
                 GrnNode mainNode = GrnNode.ReadByNodeType(reader, null, nodeType);
                 //mainNode.CreateFolder(@"C:\Users\Petar\Desktop\Nieuwe map (3)\Output", 0);
 
-                GrnSectionNode dirNode = mainNode.FindNode<GrnSectionNode>(GrnNodeType.StandardFrameDirectory);
+                GrnSectionNode? dirNode = mainNode.FindNode<GrnSectionNode>(GrnNodeType.StandardFrameDirectory);
+                if (dirNode == null) throw new InvalidDataException("Grn file has no standard frame directory node");
                 uint directoryOffset = dirNode.Offset;
 
                 // 0StringTable
-                List<string> strings = dirNode.FindNode<GrnStringTableNode>(GrnNodeType.StringTable).Strings;
+                List<string>? strings = dirNode.FindNode<GrnStringTableNode>(GrnNodeType.StringTable)?.Strings;
+                if (strings == null) throw new InvalidDataException("Grn file has no string table.");
 
                 // 1DataExtension
                 this.ReadDataExtension(strings, dirNode.FindNodes<GrnNode>(GrnNodeType.DataExtension));
@@ -103,8 +105,9 @@
                 }
 
                 // 8Form
-                this.ReadFormBoneChannel(transformChannels, 
-                    dirNode.ChildNodes[8].FindNode<GrnFormBoneChannelsNode>(GrnNodeType.FormBoneChannels));
+                GrnFormBoneChannelsNode? formBoneChannels = dirNode.ChildNodes[8].FindNode<GrnFormBoneChannelsNode>(GrnNodeType.FormBoneChannels);
+                if (formBoneChannels == null) throw new InvalidDataException("Form node has no bone channels node.");
+                this.ReadFormBoneChannel(transformChannels, formBoneChannels);
                 List<GrnFormMeshNode> formMeshes = dirNode.ChildNodes[8].
                     FindNodes<GrnFormMeshNode>(GrnNodeType.FormMesh);
                 List<int> meshLinks = new List<int>(formMeshes.Count);
@@ -122,8 +125,11 @@
                 {
                     int meshIndex = meshLinks[renderPass[i].FormMeshIndex];
                     int matIndex = renderPass[i].MaterialIndex - 1;
-                    this.Meshes[meshIndex].ReadRenderPassTriangles(matIndex, 
-                        renderPass[i].FindNode<GrnRenderPassTrianglesNode>(GrnNodeType.RenderPassTriangles));
+                    GrnRenderPassTrianglesNode? triNode =
+                        renderPass[i].FindNode<GrnRenderPassTrianglesNode>(GrnNodeType.RenderPassTriangles);
+                    if (triNode == null)
+                        throw new InvalidDataException("Render pass node has no triangles node");
+                    this.Meshes[meshIndex].ReadRenderPassTriangles(matIndex, triNode);
                 }
 
                 // 10Animation
@@ -133,8 +139,8 @@
                 this.Animation.BoneTracks = new List<GrnBoneTrack>(animTransTrackKeys.Count);
                 for (int i = 0; i < animTransTrackKeys.Count; i++)
                 {
-                    if (animTransTrackKeys[i].PreviousSibling != null &&
-                        ((GrnAnimationTransformTrackKeysNode)animTransTrackKeys[i].PreviousSibling).TransformChannelIndex == animTransTrackKeys[i].TransformChannelIndex)
+                    GrnAnimationTransformTrackKeysNode? prevSibling = ((GrnAnimationTransformTrackKeysNode?)animTransTrackKeys[i].PreviousSibling);
+                    if (prevSibling != null && prevSibling.TransformChannelIndex == animTransTrackKeys[i].TransformChannelIndex)
                     {
                         animTransTrackKeys.RemoveAt(i);
                         --i;
@@ -156,9 +162,12 @@
                     GrnNodeType.DataExtensionProperty);
                 foreach (GrnDataExtensionPropertyNode dataExtProp in dataExtensionProperties)
                 {
-                    GrnDataExtensionPropertyValueNode dataExtensionPropertyValue = 
+                    GrnDataExtensionPropertyValueNode? dataExtensionPropertyValue = 
                         dataExtProp.FindNode<GrnDataExtensionPropertyValueNode>(
                         GrnNodeType.DataExtensionPropertyValue);
+                    if (dataExtensionPropertyValue == null)
+                        throw new InvalidDataException($"Data extension property has no value.");
+
                     this.DataExtensions[i].Add(strings[dataExtProp.StringTableIndex], 
                         strings[dataExtensionPropertyValue.StringTableIndex]);
                 }
@@ -169,9 +178,10 @@
             List<int> transformChannels = new List<int>(transformChannelNodes.Count);
             for (int i = 0; i < transformChannelNodes.Count; ++i)
             {
-                transformChannels.Add(
-                    ((GrnDataExtensionReferenceNode)transformChannelNodes[i].FirstChild)
-                    .DataExtensionIndex - 1);
+                var refNode = transformChannelNodes[i].FirstChild as GrnDataExtensionReferenceNode;
+                if (refNode == null)
+                    throw new InvalidDataException("Transform channel node has no data extension reference nodes.");
+                transformChannels.Add(refNode.DataExtensionIndex - 1);
             }
             return transformChannels;
         }

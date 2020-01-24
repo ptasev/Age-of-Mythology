@@ -7,18 +7,18 @@
     <Product>AoM Engine Library</Product>
     <Copyright>Copyright © Petar Tasev 2016</Copyright>
     <Description />
-    <AssemblyVersion>11.3.2016.0909</AssemblyVersion>
-    <FileVersion>11.3.2016.0909</FileVersion>
     <Version>11.3.0</Version>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="JonSkeet.MiscUtil" Version="0.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>

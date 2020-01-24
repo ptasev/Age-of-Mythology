@@ -8,22 +8,22 @@
 
     public class GrnNode
     {
-        public GrnNode ParentNode
+        public GrnNode? ParentNode
         {
             get;
             set;
         }
-        public GrnNode PreviousSibling
+        public GrnNode? PreviousSibling
         {
             get;
             internal set;
         }
-        public GrnNode NextSibling
+        public GrnNode? NextSibling
         {
             get;
             internal set;
         }
-        public GrnNode FirstChild
+        public GrnNode? FirstChild
         {
             get
             {
@@ -64,7 +64,7 @@
             set;
         }
 
-        public GrnNode(GrnNode parentNode, GrnNodeType nodeType)
+        public GrnNode(GrnNode? parentNode, GrnNodeType nodeType)
         {
             this.ParentNode = parentNode;
             this.PreviousSibling = null;
@@ -75,12 +75,16 @@
             this.Data = new byte[0];
         }
 
-        public static GrnNode ReadByNodeType(GrnBinaryReader reader, GrnNode parentNode, GrnNodeType nodeType)
+        public static GrnNode ReadByNodeType(GrnBinaryReader reader, GrnNode? parentNode, GrnNodeType nodeType)
         {
             GrnNode node;
             if (nodeType == GrnNodeType.FileDirectory)
             {
                 node = new GrnMainNode();
+            }
+            else if (parentNode == null)
+            {
+                throw new InvalidOperationException($"Cannot create a node of type {nodeType} without a parent.");
             }
             else if (nodeType == GrnNodeType.VersionFrameDirectory ||
                 nodeType == GrnNodeType.StandardFrameDirectory ||
@@ -264,7 +268,7 @@
                 return (int)(this.NextSibling.Offset - this.Offset);
             }
 
-            GrnNode parentNode = this.ParentNode;
+            GrnNode? parentNode = this.ParentNode;
             while (parentNode != null)
             {
                 if (parentNode.NextSibling != null &&
@@ -354,7 +358,7 @@
 
             return results;
         }
-        public virtual T FindNode<T>(GrnNodeType nodeType)
+        public virtual T? FindNode<T>(GrnNodeType nodeType)
             where T : GrnNode
         {
             if (this.NodeType == nodeType)
@@ -364,7 +368,7 @@
 
             for (int i = 0; i < this.ChildNodes.Count; ++i)
             {
-                T result = this.ChildNodes[i].FindNode<T>(nodeType);
+                T? result = this.ChildNodes[i].FindNode<T>(nodeType);
                 if (result != null)
                 {
                     return result;

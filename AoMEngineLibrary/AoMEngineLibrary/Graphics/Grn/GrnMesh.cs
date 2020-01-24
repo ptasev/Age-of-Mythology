@@ -24,26 +24,29 @@
         public List<VertexWeight> VertexWeights { get; set; }
         public List<GrnBoneBinding> BoneBindings { get; set; }
 
-        public GrnMesh()
+        public GrnMesh(GrnFile parentFile)
             : base()
         {
+            this.ParentFile = parentFile;
             this.VertexWeights = new List<VertexWeight>();
             this.BoneBindings = new List<GrnBoneBinding>();
-        }
-        public GrnMesh(GrnFile parentFile)
-            : this()
-        {
-            this.ParentFile = parentFile;
         }
 
         public void Read(GrnNode meshNode)
         {
-            this.Vertices = meshNode.FindNode<GrnMeshVerticesNode>(GrnNodeType.MeshVertices).Vertices;
-            this.Normals = meshNode.FindNode<GrnMeshNormalsNode>(GrnNodeType.MeshNormals).Normals;
-            this.TextureCoordinates = meshNode.FindNode<GrnMeshFieldNode>(GrnNodeType.MeshField).TextureCoordinates;
-            this.VertexWeights = meshNode.FindNode<GrnMeshWeightsNode>(GrnNodeType.MeshWeights).VertexWeights;
-            this.Faces = meshNode.FindNode<GrnMeshTrianglesNode>(GrnNodeType.MeshTriangles).Faces;
-            this.DataExtensionIndex = meshNode.FindNode<GrnDataExtensionReferenceNode>(GrnNodeType.DataExtensionReference).DataExtensionIndex - 1;
+            this.Vertices = meshNode.FindNode<GrnMeshVerticesNode>(GrnNodeType.MeshVertices)?.Vertices ??
+                throw new InvalidDataException("Mesh node has no vertices.");
+            this.Normals = meshNode.FindNode<GrnMeshNormalsNode>(GrnNodeType.MeshNormals)?.Normals ??
+                throw new InvalidDataException("Mesh node has no normals.");
+            this.TextureCoordinates = meshNode.FindNode<GrnMeshFieldNode>(GrnNodeType.MeshField)?.TextureCoordinates ??
+                throw new InvalidDataException("Mesh node has no texture coordinates.");
+            this.VertexWeights = meshNode.FindNode<GrnMeshWeightsNode>(GrnNodeType.MeshWeights)?.VertexWeights ??
+                throw new InvalidDataException("Mesh node has no vertex weights.");
+            this.Faces = meshNode.FindNode<GrnMeshTrianglesNode>(GrnNodeType.MeshTriangles)?.Faces ??
+                throw new InvalidDataException("Mesh node has no faces.");
+            GrnDataExtensionReferenceNode? dataRef = meshNode.FindNode<GrnDataExtensionReferenceNode>(GrnNodeType.DataExtensionReference);
+            if (dataRef == null) throw new InvalidDataException("Mesh node has no data extension refrence.");
+            this.DataExtensionIndex = dataRef.DataExtensionIndex - 1;
         }
         public void Write(GrnNode meshSecNode)
         {

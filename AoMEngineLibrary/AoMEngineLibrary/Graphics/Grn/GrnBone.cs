@@ -26,17 +26,13 @@ namespace AoMEngineLibrary.Graphics.Grn
         public Quaternion Rotation { get; set; }
         public Matrix4x4 Scale { get; set; }
 
-        public GrnBone()
+        public GrnBone(GrnFile parentFile)
         {
+            this.ParentFile = parentFile;
             this.ParentIndex = -1;
             this.Position = new Vector3(0f, 0f, 0f);
             this.Rotation = new Quaternion(0, 0, 0, 1);
             this.Scale = Matrix4x4.Identity;
-        }
-        public GrnBone(GrnFile parentFile)
-            : this()
-        {
-            this.ParentFile = parentFile;
         }
 
         public void Read(GrnBoneNode boneNode)

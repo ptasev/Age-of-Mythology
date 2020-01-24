@@ -49,6 +49,8 @@ namespace AoMEngineLibrary.Anim
                     }
                     else if (line == "}")
                     {
+                        if (elem.Parent == null)
+                            break;
                         elem = elem.Parent;
                     }
                     else

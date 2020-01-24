@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -9,7 +10,7 @@
     public class GrnSectionNode : GrnNode
     {
 
-        public GrnSectionNode(GrnNode parentNode, GrnNodeType nodeType)
+        public GrnSectionNode(GrnNode? parentNode, GrnNodeType nodeType)
             : base(parentNode, nodeType)
         {
 
@@ -69,7 +70,8 @@
             else
             {
                 writer.Write(0);
-                writer.Write(this.ParentNode.FirstChild.Offset);
+                writer.Write(this.ParentNode?.FirstChild?.Offset ??
+                    throw new InvalidDataException("Cannot write data of a SectionNode if it has no parent, or siblings"));
                 writer.Write(0);
             }
 

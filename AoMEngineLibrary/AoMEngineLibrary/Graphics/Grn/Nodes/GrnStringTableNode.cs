@@ -16,7 +16,7 @@
             set;
         }
 
-        public GrnStringTableNode(GrnNode parentNode)
+        public GrnStringTableNode(GrnNode? parentNode)
             : base(parentNode, GrnNodeType.StringTable)
         {
             this.Strings = new List<string>();

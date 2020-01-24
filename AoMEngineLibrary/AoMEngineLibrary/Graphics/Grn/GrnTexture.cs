@@ -4,6 +4,7 @@
     using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -28,21 +29,17 @@
             }
         }
 
-        public GrnTexture()
+        public GrnTexture(GrnFile parentFile)
             : base()
         {
-            this.DataExtensionIndex = 0;
-        }
-        public GrnTexture(GrnFile parentFile)
-            : this()
-        {
             this.ParentFile = parentFile;
+            this.DataExtensionIndex = 0;
         }
 
         internal void Read(GrnNode textureMap)
         {
             // -- Each TextureMap has width height, depth?, and dataExtRef
-            GrnTextureMapImageNode mapImage =
+            GrnTextureMapImageNode? mapImage =
                 textureMap.FindNode<GrnTextureMapImageNode>(
                 GrnNodeType.TextureMapImage);
             if (mapImage != null)
@@ -51,9 +48,10 @@
                 this.Height = mapImage.Height;
             }
 
-            this.DataExtensionIndex =
-                textureMap.FindNode<GrnDataExtensionReferenceNode>(
-                GrnNodeType.DataExtensionReference).DataExtensionIndex - 1;
+            GrnDataExtensionReferenceNode? dataRef = textureMap.FindNode<GrnDataExtensionReferenceNode>(
+                GrnNodeType.DataExtensionReference);
+            if (dataRef == null) throw new InvalidDataException("Texture map has no data extension reference node.");
+            this.DataExtensionIndex = dataRef.DataExtensionIndex - 1;
         }
         public void Write(GrnNode texSecNode)
         {

@@ -315,7 +315,7 @@
             XmlSerializer deserializer = new XmlSerializer(typeof(MtrlFile));
             using (TextReader reader = new StreamReader(stream))
             {
-                return deserializer.Deserialize(reader) as MtrlFile;
+                return (MtrlFile)deserializer.Deserialize(reader);
             }
         }
     }

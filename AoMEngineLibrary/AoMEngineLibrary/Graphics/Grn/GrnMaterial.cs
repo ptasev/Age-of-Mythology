@@ -39,22 +39,18 @@
             }
         }
 
-        public GrnMaterial()
+        public GrnMaterial(GrnFile parentFile)
             : base()
         {
+            this.ParentFile = parentFile;
             this.DataExtensionIndex = 0;
             this.DiffuseTextureIndex = 0;
-        }
-        public GrnMaterial(GrnFile parentFile)
-            : this()
-        {
-            this.ParentFile = parentFile;
         }
 
         internal void Read(GrnNode material)
         {
             // -- Each material has diffuseTex (0, textureIndex(+1), 1), and dataExtRef
-            GrnMaterialSimpleDiffuseTextureNode matDiffuse = 
+            GrnMaterialSimpleDiffuseTextureNode? matDiffuse = 
                 material.FindNode<GrnMaterialSimpleDiffuseTextureNode>(
                 GrnNodeType.MaterialSimpleDiffuseTexture);
             if (matDiffuse != null)
@@ -62,9 +58,10 @@
                 this.DiffuseTextureIndex = matDiffuse.TextureMapIndex - 1;
             }
 
-            this.DataExtensionIndex = 
-                material.FindNode<GrnDataExtensionReferenceNode>(
-                GrnNodeType.DataExtensionReference).DataExtensionIndex - 1;
+            GrnDataExtensionReferenceNode? refNode = material.FindNode<GrnDataExtensionReferenceNode>(
+                GrnNodeType.DataExtensionReference);
+            if (refNode == null) throw new InvalidDataException("Material node has no data extension reference.");
+            this.DataExtensionIndex = refNode.DataExtensionIndex - 1;
         }
         public void Write(GrnNode matSecNode)
         {
