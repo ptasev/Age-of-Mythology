@@ -443,35 +443,5 @@ namespace AoMEngineLibrary.Graphics.Model
             return String.Format(info, "{{R:{0} G:{1} B:{2} A:{3}}}",
                 new Object[] { R.ToString(info), G.ToString(info), B.ToString(info), A.ToString(info) });
         }
-
-        public void ReadJson(JsonReader reader)
-        {
-            int count = 0;
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonToken.StartArray)
-                {
-                    continue;
-                }
-                if (reader.TokenType == JsonToken.EndObject)
-                {
-                    break;
-                }
-
-                this[count++] = (float)(double)reader.Value;
-            }
-        }
-
-        public void WriteJson(JsonWriter writer)
-        {
-            writer.WriteStartArray();
-
-            writer.WriteRawValue(R.ToRoundTripString());
-            writer.WriteRawValue(G.ToRoundTripString());
-            writer.WriteRawValue(B.ToRoundTripString());
-            writer.WriteRawValue(A.ToRoundTripString());
-
-            writer.WriteEndArray();
-        }
     }
 }
