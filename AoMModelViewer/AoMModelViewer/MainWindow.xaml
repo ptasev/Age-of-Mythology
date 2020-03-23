@@ -3,13 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:HelixToolkit="clr-namespace:HelixToolkit.Wpf;assembly=HelixToolkit.Wpf"
+        xmlns:HelixToolkit="http://helix-toolkit.org/wpf"
         xmlns:local="clr-namespace:AoMModelViewer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="800" Width="800" KeyDown="fimg_KeyDown" Closing="Window_Closing">
     <Grid>
-        <HelixToolkit:HelixViewport3D Name="viewport3d" ZoomExtentsWhenLoaded="True">
-            <!-- Remember to add light to the scene -->
+        <Label x:Name="fpsLabel"/>
+        <Image x:Name="fimg" Stretch="None" MouseMove="Window_MouseMove" />
+        <!--<HelixToolkit:HelixViewport3D Name="viewport3d" ZoomExtentsWhenLoaded="True">
             <HelixToolkit:SunLight/>
             <ModelVisual3D>
                 <ModelVisual3D.Content>
@@ -31,6 +32,6 @@
                 </ModelVisual3D.Content>
             </ModelVisual3D>
             <HelixToolkit:GridLinesVisual3D Width="8" Length="8" MinorDistance="1" MajorDistance="1" Thickness="0.01"/>
-        </HelixToolkit:HelixViewport3D>
+        </HelixToolkit:HelixViewport3D>-->
     </Grid>
 </Window>

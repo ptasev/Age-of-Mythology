@@ -46,6 +46,36 @@ namespace AoMModelViewer
             nodes = new List<Node>();
         }
 
+        public BrgFile ToBrg(Stream gltfStream)
+        {
+            BrgFile brg = new BrgFile();
+
+            var model = SharpGLTF.Schema2.ModelRoot.Read(gltfStream, new SharpGLTF.Schema2.ReadSettings());
+
+            var modelTemplate = SharpGLTF.Runtime.SceneTemplate.Create(model.DefaultScene, true);
+
+            var inst = modelTemplate.CreateInstance();
+
+            foreach (var drawable in inst.DrawableReferences)
+            {
+                var gpuMesh = model.LogicalMeshes[drawable.Item1];
+
+                // What to do here? How would I go about using the transforms
+                // to get the proper location of each vertex and normal in the mesh?
+                if (drawable.Item2 is SharpGLTF.Transforms.StaticTransform statXform)
+                {
+                    //AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, statXform.WorldMatrix);
+                }
+
+                if (drawable.Item2 is SharpGLTF.Transforms.SkinTransform skinXform)
+                {
+                    //AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, skinXform.SkinMatrices);
+                }
+            }
+
+            return brg;
+        }
+
         public Gltf FromBrg(BrgFile brg, Stream bufferStream)
         {
             // TODO clear class fields
@@ -493,7 +523,7 @@ namespace AoMModelViewer
             public List<Face> Faces { get; }
             public List<short> Indices { get; }
 
-            private BrgMesh baseMesh;
+            private BrgMesh? baseMesh;
 
             public BrgMeshPrimitive(List<Face> faces, int materialIndex)
             {
@@ -909,7 +939,7 @@ namespace AoMModelViewer
                 }
             }
 
-            public void CommitStructure(GltfFormatter formatter, glTFLoader.Schema.Animation animation, AnimationSampler.InterpolationEnum samplerInterpolation, int animKeyAccessorIndex)
+            public void CommitStructure(GltfFormatter formatter, glTFLoader.Schema.Animation? animation, AnimationSampler.InterpolationEnum samplerInterpolation, int animKeyAccessorIndex)
             {
                 int nodeIndex = formatter.nodes.Count;
                 formatter.nodes.Add(Node);
