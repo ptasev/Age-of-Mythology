@@ -1,7 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Model
 {
     using AoMEngineLibrary.Graphics.Brg;
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.IO;

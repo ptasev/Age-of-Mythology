@@ -1,7 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -159,7 +158,7 @@
 
         public void Read(Stream stream)
         {
-            using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), stream))
+            using (BrgBinaryReader reader = new BrgBinaryReader(stream))
             {
                 uint magic = reader.ReadUInt32();
                 if (magic != 1280463949)
@@ -233,7 +232,7 @@
 
         public void Write(Stream stream)
         {
-            using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), stream))
+            using (BrgBinaryWriter writer = new BrgBinaryWriter(stream))
             {
                 writer.Write(1280463949); // MTRL
                 UInt32 nameLength = (UInt32)Encoding.UTF8.GetByteCount(this.Texture);

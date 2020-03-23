@@ -43,7 +43,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.ParentIndex = reader.ReadInt32();
             this.Position = reader.ReadVector3D();
             this.Rotation = reader.ReadQuaternion();

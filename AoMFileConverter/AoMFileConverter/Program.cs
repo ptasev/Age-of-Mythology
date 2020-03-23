@@ -1,7 +1,6 @@
 ﻿using AoMEngineLibrary.Anim;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Prt;
-using MiscUtil.Conversion;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,7 +57,7 @@ namespace AoMFileConverter
             string magic;
             using (FileStream fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                BrgBinaryReader reader = new BrgBinaryReader(EndianBitConverter.Little, fs);
+                BrgBinaryReader reader = new BrgBinaryReader(fs);
                 magic = reader.ReadString(4);
             }
 

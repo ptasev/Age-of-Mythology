@@ -1,15 +1,14 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Text;
 
-    public class PrtBinaryReader : EndianBinaryReader
+    public class PrtBinaryReader : BinaryReader
     {
-        public PrtBinaryReader(EndianBitConverter bitConvertor, System.IO.Stream stream)
-            : base(bitConvertor, stream)
+        public PrtBinaryReader(System.IO.Stream stream)
+            : base(stream)
         {
         }
 

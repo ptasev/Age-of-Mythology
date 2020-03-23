@@ -38,7 +38,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.TransformChannelIndex = reader.ReadInt32();
             if (this.PreviousSibling != null && 
                 ((GrnAnimationTransformTrackKeysNode)this.PreviousSibling).TransformChannelIndex == this.TransformChannelIndex)

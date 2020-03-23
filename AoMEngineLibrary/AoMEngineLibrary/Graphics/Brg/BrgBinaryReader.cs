@@ -1,17 +1,16 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Numerics;
     using System.Text;
 
-    public class BrgBinaryReader : EndianBinaryReader
+    public class BrgBinaryReader : BinaryReader
     {
-        public BrgBinaryReader(EndianBitConverter bitConvertor, System.IO.Stream stream)
-            : base(bitConvertor, stream)
+        public BrgBinaryReader(System.IO.Stream stream)
+            : base(stream)
         {
         }
 
@@ -139,7 +138,7 @@
             byte[] h = this.ReadBytes(2);
             f[2] = h[0];
             f[3] = h[1];
-            return EndianBitConverter.Little.ToSingle(f, 0);
+            return BitConverter.ToSingle(f, 0);
         }
         public string ReadString(byte terminator = 0x0)
         {

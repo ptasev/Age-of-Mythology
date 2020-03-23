@@ -1,6 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using MiscUtil.Conversion;
     using System;
     using System.IO;
     using System.Xml.Serialization;
@@ -76,7 +75,7 @@
         }
         public PrtFile(Stream stream)
         {
-            using (PrtBinaryReader reader = new PrtBinaryReader(new LittleEndianBitConverter(), stream))
+            using (PrtBinaryReader reader = new PrtBinaryReader(stream))
             {
                 this.Version = reader.ReadInt32();
 
@@ -156,7 +155,7 @@
 
         public void Write(Stream stream)
         {
-            using (PrtBinaryWriter writer = new PrtBinaryWriter(new LittleEndianBitConverter(), stream))
+            using (PrtBinaryWriter writer = new PrtBinaryWriter(stream))
             {
                 writer.Write(this.Version);
 

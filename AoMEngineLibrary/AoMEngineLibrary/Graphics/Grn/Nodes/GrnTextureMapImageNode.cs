@@ -36,7 +36,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.Width = reader.ReadInt32();
             this.Height = reader.ReadInt32();
             this.Unknown = reader.ReadInt32();

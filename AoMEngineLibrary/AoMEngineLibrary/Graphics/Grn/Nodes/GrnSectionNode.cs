@@ -23,7 +23,7 @@
             reader.ReadBytes(8);
 
             int currentPosition = (Int32)reader.BaseStream.Position;
-            reader.Seek((int)this.Offset, System.IO.SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)this.Offset, System.IO.SeekOrigin.Begin);
             this.NumTotalChildNodes = reader.ReadInt32();
             reader.ReadBytes(12);
 
@@ -41,7 +41,7 @@
                 }
             }
 
-            reader.Seek(currentPosition, System.IO.SeekOrigin.Begin);
+            reader.BaseStream.Seek(currentPosition, System.IO.SeekOrigin.Begin);
         }
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {

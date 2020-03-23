@@ -43,7 +43,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.BoneIndex = reader.ReadInt32();
             this.Unknown = reader.ReadSingle();
             this.OBBMin = reader.ReadVector3D();

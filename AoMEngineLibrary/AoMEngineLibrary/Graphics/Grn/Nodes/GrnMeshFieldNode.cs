@@ -28,7 +28,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.Unknown = reader.ReadInt32(); // maybe count for whether its UV or UVW
             for (int i = 0; i < this.GetReadDataLength() / 12; ++i)
             {

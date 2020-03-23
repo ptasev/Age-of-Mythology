@@ -203,7 +203,7 @@
             Int32 outputLength = this.GetReadDataLength();
             if (outputLength > 0)
             {
-                reader.Seek((int)this.Offset + directoryOffset, System.IO.SeekOrigin.Begin);
+                reader.BaseStream.Seek((int)this.Offset + directoryOffset, System.IO.SeekOrigin.Begin);
                 Data = reader.ReadBytes(outputLength);
             }
 

@@ -1,7 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
-    using MiscUtil.Conversion;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using System;
@@ -25,7 +24,7 @@
         public BrgFile(System.IO.FileStream fileStream)
             : base()
         {
-            using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), fileStream))
+            using (BrgBinaryReader reader = new BrgBinaryReader(fileStream))
             {
                 this.FileName = fileStream.Name;
                 this.Header = new BrgHeader(reader);
@@ -121,7 +120,7 @@
 
         public void Write(System.IO.FileStream fileStream)
         {
-            using (BrgBinaryWriter writer = new BrgBinaryWriter(new LittleEndianBitConverter(), fileStream))
+            using (BrgBinaryWriter writer = new BrgBinaryWriter(fileStream))
             {
                 this.FileName = fileStream.Name;
 

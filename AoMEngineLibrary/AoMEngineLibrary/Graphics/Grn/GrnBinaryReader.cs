@@ -1,17 +1,16 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn
 {
     using AoMEngineLibrary.Graphics.Model;
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Numerics;
     using System.Text;
 
-    public class GrnBinaryReader : EndianBinaryReader
+    public class GrnBinaryReader : BinaryReader
     {
         public GrnBinaryReader(System.IO.Stream stream)
-            : base(new LittleEndianBitConverter(), stream)
+            : base(stream)
         {
         }
 

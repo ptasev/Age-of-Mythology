@@ -1,13 +1,12 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
+    using System.IO;
 
-    public class PrtBinaryWriter : EndianBinaryWriter
+    public class PrtBinaryWriter : BinaryWriter
     {
-        public PrtBinaryWriter(EndianBitConverter bitConvertor, System.IO.Stream stream)
-            : base(bitConvertor, stream)
+        public PrtBinaryWriter(System.IO.Stream stream)
+            : base(stream)
         {
         }
 

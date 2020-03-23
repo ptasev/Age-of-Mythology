@@ -23,7 +23,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.StringTableIndex = reader.ReadInt32();
 
             for (int i = 0; i < this.ChildNodes.Count; i++)

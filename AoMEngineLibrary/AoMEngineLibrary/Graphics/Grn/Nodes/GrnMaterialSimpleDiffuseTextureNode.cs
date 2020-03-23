@@ -37,7 +37,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.Unknown = reader.ReadInt32();
             this.TextureMapIndex = reader.ReadInt32();
             this.Unknown2 = reader.ReadInt32();

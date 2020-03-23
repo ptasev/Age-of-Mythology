@@ -1,16 +1,15 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using AoMEngineLibrary.Graphics.Model;
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
+    using System.IO;
     using System.Numerics;
     using System.Text;
 
-    public class BrgBinaryWriter : EndianBinaryWriter
+    public class BrgBinaryWriter : BinaryWriter
     {
-        public BrgBinaryWriter(EndianBitConverter bitConvertor, System.IO.Stream stream)
-            : base(bitConvertor, stream)
+        public BrgBinaryWriter(System.IO.Stream stream)
+            : base(stream)
         {
         }
 
@@ -98,7 +97,7 @@
 
         public void WriteHalf(float half)
         {
-            byte[] f = EndianBitConverter.Little.GetBytes(half);
+            byte[] f = BitConverter.GetBytes(half);
             this.Write(f[2]);
             this.Write(f[3]);
         }

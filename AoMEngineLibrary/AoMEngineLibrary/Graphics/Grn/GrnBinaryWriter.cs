@@ -1,16 +1,15 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn
 {
     using AoMEngineLibrary.Graphics.Model;
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
+    using System.IO;
     using System.Numerics;
     using System.Text;
 
-    public class GrnBinaryWriter : EndianBinaryWriter
+    public class GrnBinaryWriter : BinaryWriter
     {
         public GrnBinaryWriter(System.IO.Stream stream)
-            : base(new LittleEndianBitConverter(), stream)
+            : base(stream)
         {
         }
 

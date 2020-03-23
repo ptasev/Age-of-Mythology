@@ -29,7 +29,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             int weightsCount = reader.ReadInt32();
             this.HighestBoneIndex = reader.ReadInt32(); // unknown (12 Jormund.grn)
             this.HighestVertexWeightCount = reader.ReadInt32(); // unknown (2 Jormund.grn)

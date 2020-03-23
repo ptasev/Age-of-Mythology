@@ -25,7 +25,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             for (int i = 0; i < this.GetReadDataLength() / 24; ++i)
             {
                 this.Faces.Add(new Face());

@@ -30,7 +30,7 @@
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
         {
-            reader.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             this.FormMeshIndex = reader.ReadInt32();
             this.MaterialIndex = reader.ReadInt32();
 
