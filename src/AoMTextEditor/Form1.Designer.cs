@@ -34,14 +34,16 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.formatDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.formatDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.documentMap1 = new FastColoredTextBoxNS.DocumentMap();
+            this.exportAsXMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAsXMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.fastColoredTextBox1)).BeginInit();
             this.mainMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -52,6 +54,17 @@
             // 
             // fastColoredTextBox1
             // 
+            this.fastColoredTextBox1.AutoCompleteBracketsList = new char[] {
+        '(',
+        ')',
+        '{',
+        '}',
+        '[',
+        ']',
+        '\"',
+        '\"',
+        '\'',
+        '\''};
             this.fastColoredTextBox1.AutoScrollMinSize = new System.Drawing.Size(179, 14);
             this.fastColoredTextBox1.BackBrush = null;
             this.fastColoredTextBox1.CharHeight = 14;
@@ -59,7 +72,6 @@
             this.fastColoredTextBox1.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.fastColoredTextBox1.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.fastColoredTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fastColoredTextBox1.Font = new System.Drawing.Font("Courier New", 9.75F);
             this.fastColoredTextBox1.IsReplaceMode = false;
             this.fastColoredTextBox1.Location = new System.Drawing.Point(0, 0);
             this.fastColoredTextBox1.Name = "fastColoredTextBox1";
@@ -85,7 +97,9 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
-            this.saveToolStripMenuItem});
+            this.saveToolStripMenuItem,
+            this.exportAsXMLToolStripMenuItem,
+            this.importAsXMLToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -104,10 +118,6 @@
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
-            // openFileDialog
-            // 
-            this.openFileDialog.FileName = "openFileDialog";
-            // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -125,6 +135,13 @@
             this.collapseAllToolStripMenuItem.Text = "Collapse All";
             this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
             // 
+            // expandAllToolStripMenuItem
+            // 
+            this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
+            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.expandAllToolStripMenuItem.Text = "Expand All";
+            this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
+            // 
             // formatDocumentToolStripMenuItem
             // 
             this.formatDocumentToolStripMenuItem.Name = "formatDocumentToolStripMenuItem";
@@ -132,12 +149,9 @@
             this.formatDocumentToolStripMenuItem.Text = "Format Selected Text";
             this.formatDocumentToolStripMenuItem.Click += new System.EventHandler(this.formatDocumentToolStripMenuItem_Click);
             // 
-            // expandAllToolStripMenuItem
+            // openFileDialog
             // 
-            this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
-            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.expandAllToolStripMenuItem.Text = "Expand All";
-            this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
+            this.openFileDialog.FileName = "openFileDialog";
             // 
             // splitContainer1
             // 
@@ -166,6 +180,20 @@
             this.documentMap1.TabIndex = 0;
             this.documentMap1.Target = null;
             this.documentMap1.Text = "documentMap1";
+            // 
+            // exportAsXMLToolStripMenuItem
+            // 
+            this.exportAsXMLToolStripMenuItem.Name = "exportAsXMLToolStripMenuItem";
+            this.exportAsXMLToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exportAsXMLToolStripMenuItem.Text = "Export as XML";
+            this.exportAsXMLToolStripMenuItem.Click += new System.EventHandler(this.exportAsXMLToolStripMenuItem_Click);
+            // 
+            // importAsXMLToolStripMenuItem
+            // 
+            this.importAsXMLToolStripMenuItem.Name = "importAsXMLToolStripMenuItem";
+            this.importAsXMLToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.importAsXMLToolStripMenuItem.Text = "Import as XML";
+            this.importAsXMLToolStripMenuItem.Click += new System.EventHandler(this.importAsXMLToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -204,6 +232,8 @@
         private System.Windows.Forms.ToolStripMenuItem expandAllToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private FastColoredTextBoxNS.DocumentMap documentMap1;
+        private System.Windows.Forms.ToolStripMenuItem exportAsXMLToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importAsXMLToolStripMenuItem;
     }
 }
 

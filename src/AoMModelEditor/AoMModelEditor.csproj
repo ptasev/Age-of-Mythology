@@ -53,7 +53,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="ThemeColorPicker">
-      <HintPath>..\References\ThemeColorPicker.dll</HintPath>
+      <HintPath>..\..\References\ThemeColorPicker.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -439,7 +439,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AoMEngineLibrary\AoMEngineLibrary\AoMEngineLibrary.csproj">
+    <ProjectReference Include="..\AoMEngineLibrary\AoMEngineLibrary.csproj">
       <Project>{6dbc106c-7292-4872-a41a-eb7ceeef0092}</Project>
       <Name>AoMEngineLibrary</Name>
     </ProjectReference>

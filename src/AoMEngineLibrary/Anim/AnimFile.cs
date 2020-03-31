@@ -13,7 +13,7 @@ namespace AoMEngineLibrary.Anim
     {
         public static readonly string IndentString = "    ";
 
-        public static void ConvertToXml(FileStream animFile, FileStream xmlFile)
+        public static void ConvertToXml(Stream animFile, Stream xmlFile)
         {
             using (TextReader reader = new StreamReader(animFile))
             {
@@ -112,7 +112,7 @@ namespace AoMEngineLibrary.Anim
             }
         }
 
-        public static void ConvertToAnim(FileStream xmlFile, FileStream animFile)
+        public static void ConvertToAnim(Stream xmlFile, Stream animFile)
         {
             using (TextWriter writer = new StreamWriter(animFile))
             {
@@ -121,7 +121,7 @@ namespace AoMEngineLibrary.Anim
             }
         }
 
-        public static void Write(TextWriter writer, XNode node, string tabs)
+        private static void Write(TextWriter writer, XNode node, string tabs)
         {
             if (node == null)
             {

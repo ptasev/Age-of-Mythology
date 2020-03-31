@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AoMEngineLibrary\AoMEngineLibrary\AoMEngineLibrary.csproj" />
+    <ProjectReference Include="..\AoMEngineLibrary\AoMEngineLibrary.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <Reference Include="XmlCommentSerialization">
-      <HintPath>..\..\XmlCommentSerialization.dll</HintPath>
+      <HintPath>..\..\References\XmlCommentSerialization.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using FastColoredTextBoxNS;
+﻿using AoMEngineLibrary.Anim;
+using FastColoredTextBoxNS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace AoMTextEditor
 {
@@ -30,7 +32,10 @@ namespace AoMTextEditor
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    using (StreamReader sr = new StreamReader(openFileDialog.FileName))
+                    //TextReader reader = new StreamReader(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    //AnimFile file = new AnimFile(reader);
+                    //fastColoredTextBox1.Text = file.XDoc.ToString();
+                    using (StreamReader sr = new StreamReader(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
                     {
                         fastColoredTextBox1.Text = sr.ReadToEnd();
                     }
@@ -85,6 +90,57 @@ namespace AoMTextEditor
         private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             fastColoredTextBox1.ExpandAllFoldingBlocks();
+        }
+
+        private void exportAsXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(openFileDialog.FileName))
+                {
+                    saveFileDialog.FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                    saveFileDialog.InitialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                }
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (var ms = new MemoryStream())
+                    using (var sw = new StreamWriter(ms))
+                    {
+                        sw.Write(fastColoredTextBox1.Text);
+                        sw.Flush();
+                        ms.Seek(0, SeekOrigin.Begin);
+
+                        AnimFile.ConvertToXml(ms, File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Failed to export the xml file!");
+            }
+        }
+
+        private void importAsXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (var ms = new MemoryStream())
+                    using (var sr = new StreamReader(ms))
+                    {
+                        AnimFile.ConvertToAnim(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read), ms);
+
+                        ms.Seek(0, SeekOrigin.Begin);
+                        fastColoredTextBox1.Text = sr.ReadToEnd();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to import the xml file!");
+                //MessageBox.Show(ex.Message);
+            }
         }
     }
 }
