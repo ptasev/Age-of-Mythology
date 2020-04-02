@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
-using MiscUtil.Conversion;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +37,7 @@ namespace AoMBrgEditor
 
         public DdtFile(System.IO.Stream fileStream)
         {
-            using (BrgBinaryReader reader = new BrgBinaryReader(new LittleEndianBitConverter(), fileStream))
+            using (BrgBinaryReader reader = new BrgBinaryReader(fileStream))
             {
                 reader.ReadInt32();
                 type = (DdtType)reader.ReadByte();

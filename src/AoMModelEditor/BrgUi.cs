@@ -10,6 +10,7 @@
     using System.Drawing;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -150,8 +151,8 @@
                 {
                     System.Windows.Forms.MessageBox.Show("The mesh hash only face normals instead of vertex normals. Be sure to export only smooth shaded models.", "Model Import Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
                 }
-                List<Vector3D> unsortedNormals = FloatToVectorArray(normalsArray);
-                mesh.Normals = new List<Vector3D>(mesh.Header.NumVertices);
+                List<Vector3> unsortedNormals = FloatToVectorArray(normalsArray);
+                mesh.Normals = new List<Vector3>(mesh.Header.NumVertices);
                 for (int i = 0; i < mesh.Header.NumVertices; i++)
                 {
                     mesh.Normals.Add(unsortedNormals[vertNormalBindings[i]]);
@@ -182,15 +183,15 @@
         /// <summary>
         /// Convert a list of Grendgine_Collada_Float_Array to an array of Vectors
         /// </summary>
-        private List<Vector3D> FloatToVectorArray(Grendgine_Collada_Float_Array colArray)
+        private List<Vector3> FloatToVectorArray(Grendgine_Collada_Float_Array colArray)
         {
-            List<Vector3D> vecArray = new List<Vector3D>(colArray.Count / 3);
+            List<Vector3> vecArray = new List<Vector3>(colArray.Count / 3);
 
             float[] array = colArray.Value();
 
             for (int i = 0; i < colArray.Count / 3; i++)
             {
-                vecArray.Add(new Vector3D(
+                vecArray.Add(new Vector3(
                         array[i * 3],
                         array[i * 3 + 2],
                         array[i * 3 + 1]));

@@ -157,8 +157,8 @@
             this.brgObjectListView.CellEditUseWholeCell = false;
             this.brgObjectListView.Cursor = System.Windows.Forms.Cursors.Default;
             this.brgObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.brgObjectListView.HighlightBackgroundColor = System.Drawing.Color.Empty;
-            this.brgObjectListView.HighlightForegroundColor = System.Drawing.Color.Empty;
+            this.brgObjectListView.SelectedBackColor = System.Drawing.Color.Empty;
+            this.brgObjectListView.SelectedForeColor = System.Drawing.Color.Empty;
             this.brgObjectListView.Location = new System.Drawing.Point(3, 16);
             this.brgObjectListView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.brgObjectListView.Name = "brgObjectListView";
@@ -192,8 +192,8 @@
             // 
             this.brgObjectsTreeListView.CellEditUseWholeCell = false;
             this.brgObjectsTreeListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.brgObjectsTreeListView.HighlightBackgroundColor = System.Drawing.Color.Empty;
-            this.brgObjectsTreeListView.HighlightForegroundColor = System.Drawing.Color.Empty;
+            this.brgObjectsTreeListView.SelectedBackColor = System.Drawing.Color.Empty;
+            this.brgObjectsTreeListView.SelectedForeColor = System.Drawing.Color.Empty;
             this.brgObjectsTreeListView.Location = new System.Drawing.Point(3, 16);
             this.brgObjectsTreeListView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.brgObjectsTreeListView.Name = "brgObjectsTreeListView";
@@ -290,8 +290,8 @@
             this.grnObjectListView.CellEditUseWholeCell = false;
             this.grnObjectListView.Cursor = System.Windows.Forms.Cursors.Default;
             this.grnObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnObjectListView.HighlightBackgroundColor = System.Drawing.Color.Empty;
-            this.grnObjectListView.HighlightForegroundColor = System.Drawing.Color.Empty;
+            this.grnObjectListView.SelectedBackColor = System.Drawing.Color.Empty;
+            this.grnObjectListView.SelectedForeColor = System.Drawing.Color.Empty;
             this.grnObjectListView.Location = new System.Drawing.Point(2, 15);
             this.grnObjectListView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.grnObjectListView.Name = "grnObjectListView";
@@ -328,8 +328,8 @@
             // 
             this.grnObjectsTreeListView.CellEditUseWholeCell = false;
             this.grnObjectsTreeListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grnObjectsTreeListView.HighlightBackgroundColor = System.Drawing.Color.Empty;
-            this.grnObjectsTreeListView.HighlightForegroundColor = System.Drawing.Color.Empty;
+            this.grnObjectsTreeListView.SelectedBackColor = System.Drawing.Color.Empty;
+            this.grnObjectsTreeListView.SelectedForeColor = System.Drawing.Color.Empty;
             this.grnObjectsTreeListView.Location = new System.Drawing.Point(2, 15);
             this.grnObjectsTreeListView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.grnObjectsTreeListView.Name = "grnObjectsTreeListView";

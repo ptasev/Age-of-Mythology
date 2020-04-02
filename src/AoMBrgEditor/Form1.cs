@@ -357,20 +357,5 @@ namespace AoMBrgEditor
                 //file.WriteBr3(File.Open(dlg2.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
             }
         }
-
-        private bool AreEqual(AoMEngineLibrary.Graphics.Model.Matrix3x3 m1, AoMEngineLibrary.Graphics.Model.Matrix3x3 m2)
-        {
-            float epsilon = 10e-6f;
-
-            return (Math.Abs(m1.A1 - m2.A1) < epsilon) &&
-                (Math.Abs(m1.A2 - m2.A2) < epsilon) &&
-                (Math.Abs(m1.A3 - m2.A3) < epsilon) &&
-                (Math.Abs(m1.B1 - m2.B1) < epsilon) &&
-                (Math.Abs(m1.B2 - m2.B2) < epsilon) &&
-                (Math.Abs(m1.B3 - m2.B3) < epsilon) &&
-                (Math.Abs(m1.C1 - m2.C1) < epsilon) &&
-                (Math.Abs(m1.C2 - m2.C2) < epsilon) &&
-                (Math.Abs(m1.C3 - m2.C3) < epsilon);
-        }
     }
 }

@@ -236,19 +236,6 @@ namespace AoMModelEditor
             }
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void debug()
-        {
-            using (TextWriter writer = File.CreateText(@"C:\Users\Petar\Desktop\Nieuwe map (3)\AoM Grn\lp skult.grn.txt.ms"))//Path.GetFileName(file.FileName) + ".txt"))
-            {
-                for (int i = 0; i < Maxscript.Output.Count; i++)
-                {
-                    writer.Write(Maxscript.Output[i]);
-                    writer.Write(writer.NewLine);
-                }
-            }
-        }
-
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(Settings.SaveFileDialogFileName))
@@ -295,7 +282,6 @@ namespace AoMModelEditor
                 model.SaveUI();
                 model.Import(openFileDialog.FileName);
                 model.LoadUI();
-                debug();
                 try
                 {
                 }
