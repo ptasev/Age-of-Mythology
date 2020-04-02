@@ -32,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ObjectListView">
-      <HintPath>..\..\..\References\ObjectListView.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BiDictionary.cs" />
     <Compile Include="PropertyBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -55,7 +51,6 @@
       <DependentUpon>PropertyBox.cs</DependentUpon>
     </Compile>
     <Compile Include="ProtoEditor.cs" />
-    <Compile Include="StringTable.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
@@ -130,6 +125,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\nattrib.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ObjectListView.Official">
+      <Version>2.9.1</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
