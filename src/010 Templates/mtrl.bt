@@ -8,6 +8,138 @@
 //--------------------------------------
 LittleEndian();
 
+typedef enum <int> {
+    MaterialAlphaOff                        = 0x0000,
+    MaterialAlphaOneBit                     = 0x0001,
+    MaterialAlphaOn                         = 0x0002,
+    MaterialAlphaLightmap                   = 0x0004,
+    MaterialAlphaLightmapInAlpha            = 0x0008,
+    MaterialAlphaInvertedLightmapInAlpha    = 0x0010,
+    MaterialAlphaAdditive                   = 0x0020,
+    MaterialAlphaAdditiveSquared            = 0x0040,
+    MaterialAlphaAdditiveModulateSrcAlpha   = 0x0080,
+    MaterialAlphaSubtractive                = 0x0100
+} AlphaModeFlags <read=readAlphaModeFlags>;
+string readAlphaModeFlags (local AlphaModeFlags &flags)
+{
+	local string s = "";
+	local int commaNeeded = 0;
+	local AlphaModeFlags i = 1;
+
+	SPrintf (s, "%X: ", flags);
+	while (i < MaterialAlphaSubtractive) 
+	{
+        //Printf("'%u'?", i);
+		if (flags & i)
+		{
+			if (commaNeeded) 
+			{ s += ", "; }
+			s +=  EnumToString(i);
+			commaNeeded = 1;
+		}
+		i = i << 1;
+	}
+	return s;
+}
+
+typedef enum <int> {
+    ColorTransformNone      = 0x0000,
+    ColorTransform1         = 0x0001,
+    ColorTransform2         = 0x0002,
+    ColorTransform3         = 0x0004,
+    ColorTransformPixel1    = 0x0008,
+    ColorTransformPixel2    = 0x0010,
+    ColorTransformPixel3    = 0x0020,
+} ColorTransformFlags <read=readColorTransformFlags>;
+string readColorTransformFlags (local ColorTransformFlags &flags)
+{
+	local string s = "";
+	local int commaNeeded = 0;
+	local ColorTransformFlags i = 1;
+
+	SPrintf (s, "%X: ", flags);
+	while (i < ColorTransformPixel3) 
+	{
+		if (flags & i)
+		{
+			if (commaNeeded) 
+			{ s += ", "; }
+			s +=  EnumToString(i);
+			commaNeeded = 1;
+		}
+		i = i << 1;
+	}
+	return s;
+}
+
+typedef enum <int> {
+    TextureTransformNone    = 0x0000,
+    TextureTransform1       = 0x0001,
+    TextureTransform2       = 0x0002
+} TextureTransformFlags <read=readTextureTransformFlags>;
+string readTextureTransformFlags (local TextureTransformFlags &flags)
+{
+	local string s = "";
+	local int commaNeeded = 0;
+	local TextureTransformFlags i = 1;
+
+	SPrintf (s, "%X: ", flags);
+	while (i < ColorTransformPixel3) 
+	{
+		if (flags & i)
+		{
+			if (commaNeeded) 
+			{ s += ", "; }
+			s +=  EnumToString(i);
+			commaNeeded = 1;
+		}
+		i = i << 1;
+	}
+	return s;
+}
+
+typedef enum <int> {
+    MultitextureOff                                     = 0x00000,
+    MultitextureOffNoVtxAlpha                           = 0x00001,
+    MultitextureOffNoTx                                 = 0x00002,
+    MultitextureOffOnlyAlpha                            = 0x00004,
+    MultitextureLinearBlend                             = 0x00008,
+    MultitextureEmissiveSpecularFactor                  = 0x00010,
+    MultitextureEmissiveSpecularFactorNoTx              = 0x00020,
+    MultitextureSpecularBump                            = 0x00040,
+    MultitextureLinearBlendAlpha                        = 0x00080,
+    MultitextureLinearBlendInverseAlpha                 = 0x00100,
+    MultitextureLinearBlendAlphaEmissiveSpecularFactor  = 0x00200,
+    MultitextureLinearBlendEmissiveSpecularFactor       = 0x00400,
+    MultitextureAddFactor                               = 0x00800,
+    MultitextureAddAlpha                                = 0x01000,
+    MultitextureAddInverseAlpha                         = 0x02000,
+    MultitextureSeparateAlpha                           = 0x04000,
+    MultitextureLightmap                                = 0x08000,
+    MultitextureFogMask                                 = 0x10000,
+    MultitextureFadeLightmapByAlpha                     = 0x20000
+} MultitextureModeFlags <read=readMultitextureModeFlags>;
+string readMultitextureModeFlags (local MultitextureModeFlags &flags)
+{
+	local string s = "";
+	local int commaNeeded = 0;
+	local MultitextureModeFlags i = 1;
+
+	SPrintf (s, "%X: ", flags);
+	while (i < MaterialAlphaSubtractive) 
+	{
+		if (flags & i)
+		{
+			if (commaNeeded) 
+			{ s += ", "; }
+			s +=  EnumToString(i);
+			commaNeeded = 1;
+		}
+		i = i << 1;
+	}
+	return s;
+}
+
 struct
 {
     uint magic;
@@ -18,11 +150,10 @@ struct
     float ambient[3];
     float specular[3];
     float emissive[3];
-    float specularLevel;
+    float specularPower;
     float alpha;
 
     int id;
-
     byte selfIlluminating;
     byte clampU;
     byte clampV;
@@ -32,15 +163,15 @@ struct
     byte affectsSpecular;
     byte updateable;
 
-    int alphaMode; // Seems to be very often 10, wave has a 2 here, phoenix has 6
-    int ambientIntensity;
-    int diffuseIntensity;
-    int specularIntensity;
-    int emissiveIntensity;
-    int colorTransform; // Val of 4 seems to be PC
-    int textureTransform;
-    int textureFactor; // Has something to do with Cube Map
-    int multiTextureMode; // Has something to do with Cube Map
+    AlphaModeFlags alphaMode; // Seems to be very often 10, wave has a 2 here, phoenix has 6
+    float ambientIntensity;
+    float diffuseIntensity;
+    float specularIntensity;
+    float emissiveIntensity;
+    ColorTransformFlags colorTransform; // Val of 4 seems to be PC
+    TextureTransformFlags textureTransform;
+    DWORD textureFactor; // Has something to do with Cube Map
+    MultitextureModeFlags multiTextureMode; // Has something to do with Cube Map
     int texGenMode0;
     int texGenMode1; // Has something to do with Cube Map
     int texCoordSet0;
@@ -52,8 +183,14 @@ struct
     int texCoordSet6;
     int texCoordSet7;
 
-    float unk2[3];
-    float unk3[3];
-    float unk4[4];
+    int textureIndex;
+    int secondaryTextureIndex;
+    int bumpMapIndex;
+
+    int specMapIndex;
+    int glossMapIndex;
+    int emissiveMapIndex;
+
+    int reserved[4];
     string name;
 } file;

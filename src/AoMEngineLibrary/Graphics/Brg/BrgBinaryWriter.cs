@@ -8,8 +8,13 @@
 
     public class BrgBinaryWriter : BinaryWriter
     {
-        public BrgBinaryWriter(System.IO.Stream stream)
+        public BrgBinaryWriter(Stream stream)
             : base(stream)
+        {
+        }
+
+        public BrgBinaryWriter(Stream stream, bool leaveOpen)
+            : base(stream, new UTF8Encoding(false, true), leaveOpen)
         {
         }
 

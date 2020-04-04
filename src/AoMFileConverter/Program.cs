@@ -91,7 +91,11 @@ namespace AoMFileConverter
                 for (int i = 0; i < file.Materials.Count; ++i)
                 {
                     MtrlFile mtrl = new MtrlFile(file.Materials[i]);
-                    mtrl.Write(File.Open(Path.Combine(brgMtrlOutputPath, Path.GetFileNameWithoutExtension(f) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
+                    using (var fs = File.Open(Path.Combine(brgMtrlOutputPath, Path.GetFileNameWithoutExtension(f) + "_" + i + ".mtrl"),
+                        FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        mtrl.Write(fs);
+                    }
                 }
                 Console.WriteLine("Success! Mtrl files created.");
             }
@@ -114,7 +118,10 @@ namespace AoMFileConverter
                 else
                 {
                     MtrlFile file = MtrlFile.DeserializeAsXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    file.Write(File.Open(f + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read));
+                    using (var fs = File.Open(f + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        file.Write(fs);
+                    }
                     Console.WriteLine("Success! Mtrl converted.");
                 }
             }

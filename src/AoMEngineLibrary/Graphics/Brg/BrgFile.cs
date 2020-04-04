@@ -118,12 +118,19 @@
             }
         }
 
-        public void Write(System.IO.FileStream fileStream)
+
+        public void Write(FileStream fileStream)
         {
-            using (BrgBinaryWriter writer = new BrgBinaryWriter(fileStream))
+            using (fileStream)
             {
                 this.FileName = fileStream.Name;
-
+                Write(fileStream);
+            }
+        }
+        public void Write(Stream fileStream)
+        {
+            using (BrgBinaryWriter writer = new BrgBinaryWriter(fileStream, true))
+            {
                 this.Header.Write(writer);
 
                 if (this.Header.NumMeshes > 1)

@@ -50,19 +50,19 @@
         [XmlElement(ElementName = "alpha_mode")]
         public int AlphaMode { get; set; } // Seems to be very often 10, wave has a 2 here, phoenix has 6
         [XmlElement(ElementName = "ambient_intensity")]
-        public int AmbientIntensity { get; set; }
+        public float AmbientIntensity { get; set; }
         [XmlElement(ElementName = "diffuse_intensity")]
-        public int DiffuseIntensity { get; set; }
+        public float DiffuseIntensity { get; set; }
         [XmlElement(ElementName = "specular_intensity")]
-        public int SpecularIntensity { get; set; }
+        public float SpecularIntensity { get; set; }
         [XmlElement(ElementName = "emissive_intensity")]
-        public int EmissiveIntensity { get; set; }
+        public float EmissiveIntensity { get; set; }
         [XmlElement(ElementName = "color_transform")]
         public int ColorTransform { get; set; } // Val of 4 seems to be PC
         [XmlElement(ElementName = "texture_transform")]
         public int TextureTransform { get; set; }
         [XmlElement(ElementName = "texture_factor")]
-        public int TextureFactor { get; set; } // Has something to do with Cube Map
+        public uint TextureFactor { get; set; } // Has something to do with Cube Map
         [XmlElement(ElementName = "multitexture_mode")]
         public int MultiTextureMode { get; set; } // Has something to do with Cube Map
         [XmlElement(ElementName = "texgen_mode_0")]
@@ -85,10 +85,16 @@
         public int TexCoordSet6 { get; set; }
         [XmlElement(ElementName = "texcoord_set_7")]
         public int TexCoordSet7 { get; set; }
+        
+        public int TextureIndex { get; set; }
+        public int SecondaryTextureIndex { get; set; }
+        public int BumpMapIndex { get; set; }
 
-        public Texel[] unk2 { get; set; }
-        public Texel[] unk3 { get; set; }
-        public int[] unk4 { get; set; }
+        public int SpecularMapIndex { get; set; }
+        public int GlossMapIndex { get; set; }
+        public int EmissiveMapIndex { get; set; }
+
+        public int[] Reserved { get; set; }
 
         [XmlElement(ElementName = "texture")]
         public string Texture { get; set; }
@@ -110,9 +116,15 @@
 
             this.AlphaMode = 10;
 
-            unk2 = new Texel[3] { new Color4D(1f), new Color4D(1f), new Color4D(1f) };
-            unk3 = new Texel[3] { new Color4D(1f), new Color4D(1f), new Color4D(1f) };
-            unk4 = new int[4];
+            this.TextureIndex = -1;
+            this.SecondaryTextureIndex = -1;
+            this.BumpMapIndex = -1;
+
+            this.SpecularMapIndex = -1;
+            this.GlossMapIndex = -1;
+            this.EmissiveMapIndex = -1;
+
+            Reserved = new int[4];
 
             Texture = string.Empty;
         }
@@ -191,13 +203,13 @@
                 this.Updateable = reader.ReadByte();
 
                 this.AlphaMode = reader.ReadInt32(); // Seems to be very often 10, wave has a 2 here, phoenix has 6
-                this.AmbientIntensity = reader.ReadInt32();
-                this.DiffuseIntensity = reader.ReadInt32();
-                this.SpecularIntensity = reader.ReadInt32();
-                this.EmissiveIntensity = reader.ReadInt32();
+                this.AmbientIntensity = reader.ReadSingle();
+                this.DiffuseIntensity = reader.ReadSingle();
+                this.SpecularIntensity = reader.ReadSingle();
+                this.EmissiveIntensity = reader.ReadSingle();
                 this.ColorTransform = reader.ReadInt32(); // Val of 4 seems to be PC
                 this.TextureTransform = reader.ReadInt32();
-                this.TextureFactor = reader.ReadInt32(); // Has something to do with Cube Map
+                this.TextureFactor = reader.ReadUInt32(); // Has something to do with Cube Map
                 this.MultiTextureMode = reader.ReadInt32(); // Has something to do with Cube Map
                 this.TexGenMode0 = reader.ReadInt32();
                 this.TexGenMode1 = reader.ReadInt32(); // Has something to do with Cube Map
@@ -210,17 +222,17 @@
                 this.TexCoordSet6 = reader.ReadInt32();
                 this.TexCoordSet7 = reader.ReadInt32();
 
-                for (int i = 0; i < 3; ++i)
-                {
-                    this.unk2[i] = reader.ReadTexel();
-                }
-                for (int i = 0; i < 3; ++i)
-                {
-                    this.unk3[i] = reader.ReadTexel();
-                }
+                this.TextureIndex = reader.ReadInt32();
+                this.SecondaryTextureIndex = reader.ReadInt32();
+                this.BumpMapIndex = reader.ReadInt32();
+
+                this.SpecularMapIndex = reader.ReadInt32();
+                this.GlossMapIndex = reader.ReadInt32();
+                this.EmissiveMapIndex = reader.ReadInt32();
+
                 for (int i = 0; i < 4; ++i)
                 {
-                    this.unk4[i] = reader.ReadInt32();
+                    this.Reserved[i] = reader.ReadInt32();
                 }
 
                 if (nameLength > 0)
@@ -232,7 +244,7 @@
 
         public void Write(Stream stream)
         {
-            using (BrgBinaryWriter writer = new BrgBinaryWriter(stream))
+            using (BrgBinaryWriter writer = new BrgBinaryWriter(stream, true))
             {
                 writer.Write(1280463949); // MTRL
                 UInt32 nameLength = (UInt32)Encoding.UTF8.GetByteCount(this.Texture);
@@ -280,17 +292,17 @@
                 writer.Write(this.TexCoordSet6);
                 writer.Write(this.TexCoordSet7);
 
-                for (int i = 0; i < 3; ++i)
-                {
-                    writer.WriteTexel(this.unk2[i]);
-                }
-                for (int i = 0; i < 3; ++i)
-                {
-                    writer.WriteTexel(this.unk3[i]);
-                }
+                writer.Write(this.TextureIndex);
+                writer.Write(this.SecondaryTextureIndex);
+                writer.Write(this.BumpMapIndex);
+
+                writer.Write(this.SpecularMapIndex);
+                writer.Write(this.GlossMapIndex);
+                writer.Write(this.EmissiveMapIndex);
+
                 for (int i = 0; i < 4; ++i)
                 {
-                    writer.Write(this.unk4[i]);
+                    writer.Write(this.Reserved[i]);
                 }
 
                 if (nameLength > 0)

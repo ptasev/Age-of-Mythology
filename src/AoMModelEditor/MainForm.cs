@@ -359,7 +359,11 @@ namespace AoMModelEditor
                 for (int i = 0; i < brg.File.Materials.Count; i++)
                 {
                     MtrlFile mtrl = new MtrlFile(brg.File.Materials[i]);
-                    mtrl.Write(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
+                    using (var fs = File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"),
+                        FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        mtrl.Write(fs);
+                    }
                     //brg.File.Materials[i].WriteExternal(File.Open(Path.Combine(folderBrowserDialog.SelectedPath, Path.GetFileNameWithoutExtension(brg.FileName) + "_" + i + ".mtrl"), FileMode.Create, FileAccess.Write, FileShare.Read));
                 }
                 brg.LoadUI();
