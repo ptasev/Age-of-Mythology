@@ -230,7 +230,7 @@
                 this.NonUniformKeys = new List<float>(this.ExtendedHeader.NumNonUniformKeys);
                 for (int i = 0; i < this.ExtendedHeader.NumNonUniformKeys; i++)
                 {
-                    this.NonUniformKeys[i] = reader.ReadSingle();
+                    this.NonUniformKeys.Add(reader.ReadSingle());
                 }
             }
 
