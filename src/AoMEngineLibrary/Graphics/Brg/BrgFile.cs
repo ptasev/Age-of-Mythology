@@ -7,22 +7,31 @@
     using System.Collections.Generic;
     using System.IO;
 
-    public class BrgFile : ModelFile<BrgMesh, BrgMaterial, Animation>
+    public class BrgFile
     {
         public string FileName { get; set; }
 
         public BrgHeader Header { get; set; }
         public BrgAsetHeader AsetHeader { get; private set; }
 
+        public List<BrgMesh> Meshes { get; set; }
+        public List<BrgMaterial> Materials { get; set; }
+
+        public Animation Animation { get; set; }
+
         public BrgFile()
-            : base()
         {
             this.FileName = string.Empty;
             this.Header = new BrgHeader();
             this.AsetHeader = new BrgAsetHeader();
+
+            this.Meshes = new List<BrgMesh>();
+            this.Materials = new List<BrgMaterial>();
+
+            this.Animation = new Animation();
         }
         public BrgFile(System.IO.FileStream fileStream)
-            : base()
+            : this()
         {
             using (BrgBinaryReader reader = new BrgBinaryReader(fileStream))
             {
@@ -124,7 +133,7 @@
             using (fileStream)
             {
                 this.FileName = fileStream.Name;
-                Write(fileStream);
+                Write((Stream)fileStream);
             }
         }
         public void Write(Stream fileStream)

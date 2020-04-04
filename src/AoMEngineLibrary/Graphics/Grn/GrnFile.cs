@@ -11,19 +11,28 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GrnFile : ModelFile<GrnMesh, GrnMaterial, GrnAnimation>
+    public class GrnFile
     {
+        public List<GrnMesh> Meshes { get; set; }
+        public List<GrnMaterial> Materials { get; set; }
+
+        public GrnAnimation Animation { get; set; }
+
         public List<Dictionary<string, string>> DataExtensions { get; set; }
         public List<GrnBone> Bones { get; set; }
 
         public List<GrnTexture> Textures { get; set; }
 
         public GrnFile()
-            : base()
         {
             this.DataExtensions = new List<Dictionary<string, string>>();
             this.Bones = new List<GrnBone>();
             this.Textures = new List<GrnTexture>();
+
+            this.Meshes = new List<GrnMesh>();
+            this.Materials = new List<GrnMaterial>();
+
+            this.Animation = new GrnAnimation();
         }
 
         public void DumpData(System.IO.Stream stream, string folderPath)
