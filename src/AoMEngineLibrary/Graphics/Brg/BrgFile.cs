@@ -56,14 +56,7 @@
                     }
                     else if (magic == "MESI")
                     {
-                        if (this.Meshes.Count > 0)
-                        {
-                            this.Meshes[0].MeshAnimations.Add(new BrgMesh(reader, this));
-                        }
-                        else
-                        {
-                            this.Meshes.Add(new BrgMesh(reader, this));
-                        }
+                        this.Meshes.Add(new BrgMesh(reader, this));
                     }
                     else if (magic == "MTRL")
                     {
@@ -105,19 +98,20 @@
                 }
 
                 this.Animation.Duration = this.Meshes[0].ExtendedHeader.AnimationLength;
-                this.Animation.TimeStep = this.Meshes[0].ExtendedHeader.AnimationLength / (float)(this.Meshes[0].MeshAnimations.Count + 1);
+                this.Animation.TimeStep = this.Meshes[0].ExtendedHeader.AnimationLength / (float)(this.Meshes.Count);
                 if (this.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
                 {
-                    for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; ++i)
+                    for (int i = 0; i < this.Meshes.Count; ++i)
                     {
                         this.Animation.MeshKeys.Add(this.Meshes[0].NonUniformKeys[i] * this.Animation.Duration);
                     }
                 }
-                else if (this.Meshes[0].MeshAnimations.Count > 0)
+                else if (this.Meshes.Count > 1)
                 {
-                    for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; ++i)
+                    float divisor = this.Meshes.Count - 1;
+                    for (int i = 0; i < this.Meshes.Count; ++i)
                     {
-                        this.Animation.MeshKeys.Add((float)i / ((float)this.Meshes[0].MeshAnimations.Count) * this.Animation.Duration);
+                        this.Animation.MeshKeys.Add((float)i / divisor * this.Animation.Duration);
                     }
                 }
                 else
@@ -149,17 +143,10 @@
                     this.AsetHeader.Write(writer);
                 }
 
-                for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; i++)
+                for (int i = 0; i < this.Meshes.Count; i++)
                 {
                     writer.Write(1230193997); // magic "MESI"
-                    if (i > 0)
-                    {
-                        ((BrgMesh)this.Meshes[0].MeshAnimations[i - 1]).Write(writer);
-                    }
-                    else
-                    {
-                        this.Meshes[i].Write(writer);
-                    }
+                    this.Meshes[i].Write(writer);
                 }
 
                 for (int i = 0; i < this.Materials.Count; i++)
@@ -199,7 +186,7 @@
                 return;
             }
 
-            for (int i = 0; i <= this.Meshes[0].MeshAnimations.Count; i++)
+            for (int i = 0; i < this.Meshes.Count; i++)
             {
                 UpdateMeshSettings(i, flags, format, animType, interpolationType);
             }
@@ -208,12 +195,12 @@
         {
             if (meshIndex > 0)
             {
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.Flags = flags;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.Format = format;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType = animType;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.InterpolationType = interpolationType;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.Flags |= BrgMeshFlag.SECONDARYMESH;
-                ((BrgMesh)this.Meshes[0].MeshAnimations[meshIndex - 1]).Header.AnimationType &= ~BrgMeshAnimType.NonUniform;
+                this.Meshes[meshIndex].Header.Flags = flags;
+                this.Meshes[meshIndex].Header.Format = format;
+                this.Meshes[meshIndex].Header.AnimationType = animType;
+                this.Meshes[meshIndex].Header.InterpolationType = interpolationType;
+                this.Meshes[meshIndex].Header.Flags |= BrgMeshFlag.SECONDARYMESH;
+                this.Meshes[meshIndex].Header.AnimationType &= ~BrgMeshAnimType.NonUniform;
             }
             else
             {

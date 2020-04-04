@@ -64,17 +64,10 @@
             if (this.File.Meshes.Count > 0)
             {
                 string mainObject = "mainObj";
-                for (int i = 0; i <= this.File.Meshes[0].MeshAnimations.Count; i++)
+                for (int i = 0; i < this.File.Meshes.Count; i++)
                 {
                     Maxscript.CommentTitle("ANIMATE FRAME " + i);
-                    if (i > 0)
-                    {
-                        ImportBrgMesh(mainObject, ((BrgMesh)brg.Meshes[0].MeshAnimations[i - 1]), brg.Animation.MeshKeys[i]);
-                    }
-                    else
-                    {
-                        ImportBrgMesh(mainObject, brg.Meshes[0], brg.Animation.MeshKeys[0]);
-                    }
+                    ImportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[0]);
                 }
 
                 Maxscript.Command("update {0}", mainObject);
@@ -472,34 +465,17 @@
                 // Mesh Animations
                 for (int i = 0; i < brg.Header.NumMeshes; i++)
                 {
-                    if (i > 0)
+                    if (m == 0)
                     {
-                        if (m == 0)
-                        {
-                            BrgMesh mesh = new BrgMesh(brg);
-                            mesh.Vertices = new List<Vector3>(totalNumVerts);
-                            mesh.Normals = new List<Vector3>(totalNumVerts);
-                            mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
-                            mesh.Faces = new List<Face>(totalNumFaces);
-                            brg.Meshes[0].MeshAnimations.Add(mesh);
-                        }
-                        brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
-                        this.ExportBrgMesh(mainObject, (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1], brg.Animation.MeshKeys[i], matIdMapping);
+                        BrgMesh mesh = new BrgMesh(brg);
+                        mesh.Vertices = new List<Vector3>(totalNumVerts);
+                        mesh.Normals = new List<Vector3>(totalNumVerts);
+                        mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
+                        mesh.Faces = new List<Face>(totalNumFaces);
+                        brg.Meshes.Add(mesh);
                     }
-                    else
-                    {
-                        if (m == 0)
-                        {
-                            BrgMesh mesh = new BrgMesh(brg);
-                            mesh.Vertices = new List<Vector3>(totalNumVerts);
-                            mesh.Normals = new List<Vector3>(totalNumVerts);
-                            mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
-                            mesh.Faces = new List<Face>(totalNumFaces);
-                            brg.Meshes.Add(mesh);
-                        }
-                        brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
-                        this.ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i], matIdMapping);
-                    }
+                    brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
+                    this.ExportBrgMesh(mainObject, brg.Meshes[i], brg.Animation.MeshKeys[i], matIdMapping);
                 }
             }
 
@@ -509,15 +485,7 @@
             Maxscript.Command("{0} = for helpObj in ($helpers/Dummy_*) where classof helpObj == Dummy collect helpObj", attachDummy);//"$helpers/Dummy_* as array");
             for (int i = 0; i < brg.Header.NumMeshes; i++)
             {
-                BrgMesh mesh;
-                if (i > 0)
-                {
-                    mesh = (BrgMesh)brg.Meshes[0].MeshAnimations[i - 1];
-                }
-                else
-                {
-                    mesh = brg.Meshes[i];
-                }
+                BrgMesh mesh = brg.Meshes[i];
 
                 this.ExportAttachpoints(attachDummy, mesh, brg.Animation.MeshKeys[i]);
                 HashSet<int> diffFaceMats = new HashSet<int>();
@@ -877,7 +845,7 @@
 
             this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
             this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
-            this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes[0].MeshAnimations.Count + 1).ToString();
+            this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes.Count).ToString();
             this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Meshes[0].ExtendedHeader.AnimationLength.ToString();
             this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
         }

@@ -8,11 +8,17 @@
     using System.Collections.Generic;
     using System.Numerics;
 
-    public class BrgMesh : Mesh
+    public class BrgMesh
     {
         public BrgFile ParentFile { get; set; }
         public BrgMeshHeader Header { get; set; }
 
+        public List<Vector3> Vertices { get; set; }
+        public List<Vector3> Normals { get; set; }
+        public List<Face> Faces { get; set; }
+
+        public List<Vector3> TextureCoordinates { get; set; }
+        public List<Color4D> Colors { get; set; }
         public List<Int16> VertexMaterials { get; set; }
 
         public BrgMeshExtendedHeader ExtendedHeader { get; set; }
@@ -23,13 +29,18 @@
         public List<float> NonUniformKeys { get; set; }
 
         public BrgMesh(BrgFile file)
-            : base()
         {
             this.ParentFile = file;
             this.Header = new BrgMeshHeader();
             this.Header.Version = 22;
             this.Header.ExtendedHeaderSize = 40;
 
+            this.Vertices = new List<Vector3>();
+            this.Normals = new List<Vector3>();
+            this.Faces = new List<Face>();
+
+            this.TextureCoordinates = new List<Vector3>();
+            this.Colors = new List<Color4D>();
             this.VertexMaterials = new List<Int16>();
 
             this.ExtendedHeader = new BrgMeshExtendedHeader();

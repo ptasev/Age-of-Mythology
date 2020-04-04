@@ -178,48 +178,41 @@ namespace AoMModelViewer
             {
                 mesh.Primitives[i] = new MeshPrimitive();
             }
-            for (int j = 0; j < primitives.Count; ++j)
-            {
-                primitives[j].Serialize(mesh.Primitives[j], brg.Meshes[0], this, bufferStream);
-            }
-            for (int i = 0; i < brg.Meshes[0].MeshAnimations.Count; ++i)
+            for (int i = 0; i < brg.Meshes.Count; ++i)
             {
                 for (int j = 0; j < primitives.Count; ++j)
                 {
-                    primitives[j].Serialize(mesh.Primitives[j], (BrgMesh)brg.Meshes[0].MeshAnimations[i], this, bufferStream);
+                    primitives[j].Serialize(mesh.Primitives[j], brg.Meshes[i], this, bufferStream);
                 }
             }
             gltf.Meshes = new[] { mesh, attachpointMesh };
 
             // Create Animation
-            if (brg.Meshes[0].MeshAnimations.Count > 0)
+            if (brg.Meshes.Count > 1)
             {
                 for (int i = 0; i < mesh.Primitives.Length; ++i)
                 {
                     mesh.Primitives[i].Targets = primitives[i].Targets.ToArray();
                 }
 
-                mesh.Weights = new float[brg.Meshes[0].MeshAnimations.Count];
+                mesh.Weights = new float[brg.Meshes.Count - 1];
 
                 gltf.Animations = new[] { CreateAnimation(brg.Animation, mesh.Weights.Length, bufferStream) };
             }
 
             // Create Attachpoints
-            foreach (BrgMesh bm in brg.Meshes)
+            for (int i = 0; i < brg.Meshes[0].Attachpoints.Count; ++i)
             {
-                for (int i = 0; i < bm.Attachpoints.Count; ++i)
-                {
-                    var attNode = new BrgAttachpointNode(i, 1);
-                    attNode.CommitData(bm, bufferStream);
+                var attNode = new BrgAttachpointNode(i, 1);
+                attNode.CommitData(brg.Meshes, bufferStream);
 
-                    if (gltf.Animations.Length == 0)
-                    {
-                        attNode.CommitStructure(this, null, AnimationSampler.InterpolationEnum.LINEAR, -1);
-                    }
-                    else
-                    {
-                        attNode.CommitStructure(this, gltf.Animations[0], AnimationSampler.InterpolationEnum.LINEAR, gltf.Animations[0].Samplers[0].Input);
-                    }
+                if (gltf.Animations.Length == 0)
+                {
+                    attNode.CommitStructure(this, null, AnimationSampler.InterpolationEnum.LINEAR, -1);
+                }
+                else
+                {
+                    attNode.CommitStructure(this, gltf.Animations[0], AnimationSampler.InterpolationEnum.LINEAR, gltf.Animations[0].Samplers[0].Input);
                 }
             }
 
@@ -861,9 +854,10 @@ namespace AoMModelViewer
                 ScaleAccessor = new Accessor();
             }
 
-            public void CommitData(BrgMesh mesh, Stream bufferStream)
+            public void CommitData(List<BrgMesh> meshes, Stream bufferStream)
             {
-                bool exportAnim = mesh.MeshAnimations.Count > 0;
+                bool exportAnim = meshes.Count > 1;
+                BrgMesh mesh = meshes[0];
 
                 long bufferViewOffset;
                 using (BinaryWriter writer = new BinaryWriter(bufferStream, Encoding.UTF8, true))
@@ -893,8 +887,9 @@ namespace AoMModelViewer
                         writer.Write(sca.Y);
                         writer.Write(sca.Z);
 
-                        foreach (BrgMesh meshAnim in mesh.MeshAnimations)
+                        for (int i = 1; i < meshes.Count; ++i)
                         {
+                            BrgMesh meshAnim = meshes[i];
                             attp = meshAnim.Attachpoints[BrgIndex];
                             GetAttachpointPosRotScale(attp, out pos, out rot, out sca);
                             writer.Write(pos.X);
@@ -914,26 +909,26 @@ namespace AoMModelViewer
                 if (exportAnim)
                 {
                     PositionBufferView.Buffer = 0;
-                    PositionBufferView.ByteLength = 10 * 4 * (mesh.MeshAnimations.Count + 1);
+                    PositionBufferView.ByteLength = 10 * 4 * (meshes.Count);
                     PositionBufferView.ByteOffset = (int)bufferViewOffset;
                     PositionBufferView.ByteStride = 10 * 4;
                     PositionBufferView.Name = mesh.Attachpoints[BrgIndex].Name + "_attBuffView";
 
                     PositionAccessor.ByteOffset = 0;
                     PositionAccessor.ComponentType = Accessor.ComponentTypeEnum.FLOAT;
-                    PositionAccessor.Count = mesh.MeshAnimations.Count + 1;
+                    PositionAccessor.Count = meshes.Count;
                     PositionAccessor.Name = mesh.Attachpoints[BrgIndex].Name + "_attPosAccessor";
                     PositionAccessor.Type = Accessor.TypeEnum.VEC3;
 
                     RotationAccessor.ByteOffset = 3 * 4;
                     RotationAccessor.ComponentType = Accessor.ComponentTypeEnum.FLOAT;
-                    RotationAccessor.Count = mesh.MeshAnimations.Count + 1;
+                    RotationAccessor.Count = meshes.Count;
                     RotationAccessor.Name = mesh.Attachpoints[BrgIndex].Name + "_attRotAccessor";
                     RotationAccessor.Type = Accessor.TypeEnum.VEC4;
 
                     ScaleAccessor.ByteOffset = 7 * 4;
                     ScaleAccessor.ComponentType = Accessor.ComponentTypeEnum.FLOAT;
-                    ScaleAccessor.Count = mesh.MeshAnimations.Count + 1;
+                    ScaleAccessor.Count = meshes.Count;
                     ScaleAccessor.Name = mesh.Attachpoints[BrgIndex].Name + "_attScaAccessor";
                     ScaleAccessor.Type = Accessor.TypeEnum.VEC3;
                 }
