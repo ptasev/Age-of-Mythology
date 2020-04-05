@@ -177,15 +177,15 @@
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].XVector = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].Up = reader.ReadVector3D(true, this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].YVector = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].Forward = reader.ReadVector3D(true, this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].ZVector = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].Right = reader.ReadVector3D(true, this.Header.Version == 22);
                 }
                 if (this.Header.Version == 19 || this.Header.Version == 22)
                 {
@@ -372,15 +372,15 @@
 
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.XVector, true, true);
+                    writer.WriteVector3D(att.Up, true, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.YVector, true, true);
+                    writer.WriteVector3D(att.Forward, true, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.ZVector, true, true);
+                    writer.WriteVector3D(att.Right, true, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {

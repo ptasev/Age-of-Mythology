@@ -678,17 +678,17 @@
                     Vector3 bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
-                    att.XVector.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
-                    att.XVector.Y = Maxscript.QueryFloat("{0}Transform[3].z", attachDummy);
-                    att.XVector.Z = -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy);
+                    att.Up.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
+                    att.Up.Y = Maxscript.QueryFloat("{0}Transform[3].z", attachDummy);
+                    att.Up.Z = -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy);
 
-                    att.YVector.X = -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy);
-                    att.YVector.Y = Maxscript.QueryFloat("{0}Transform[3].y", attachDummy);
-                    att.YVector.Z = -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy);
+                    att.Forward.X = -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy);
+                    att.Forward.Y = Maxscript.QueryFloat("{0}Transform[3].y", attachDummy);
+                    att.Forward.Z = -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy);
 
-                    att.ZVector.X = -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy);
-                    att.ZVector.Y = Maxscript.QueryFloat("{0}Transform[3].x", attachDummy);
-                    att.ZVector.Z = -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy);
+                    att.Right.X = -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy);
+                    att.Right.Y = Maxscript.QueryFloat("{0}Transform[3].x", attachDummy);
+                    att.Right.Z = -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy);
 
                     att.Position.X = -Maxscript.QueryFloat("{0}Position.x", attachDummy);
                     att.Position.Z = -Maxscript.QueryFloat("{0}Position.y", attachDummy);

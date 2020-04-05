@@ -16,9 +16,9 @@ namespace AoMMaxPlugin
             //string yVector = Maxscript.NewPoint3<float>("yVector", this.z.Z, this.y.Z, this.x.Z);
             //string zVector = Maxscript.NewPoint3<float>("zVector", this.z.Y, this.y.Y, this.x.Y);
 
-            string xVector = Maxscript.NewPoint3<float>("xVector", -att.ZVector.X, -att.YVector.X, -att.XVector.X);
-            string yVector = Maxscript.NewPoint3<float>("yVector", -att.ZVector.Z, -att.YVector.Z, -att.XVector.Z);
-            string zVector = Maxscript.NewPoint3<float>("zVector", att.ZVector.Y, att.YVector.Y, att.XVector.Y);
+            string xVector = Maxscript.NewPoint3<float>("xVector", -att.Right.X, -att.Forward.X, -att.Up.X);
+            string yVector = Maxscript.NewPoint3<float>("yVector", -att.Right.Z, -att.Forward.Z, -att.Up.Z);
+            string zVector = Maxscript.NewPoint3<float>("zVector", att.Right.Y, att.Forward.Y, att.Up.Y);
             string posVector = Maxscript.NewPoint3<float>("rotPosVect", 0f, 0f, 0f);
             return Maxscript.NewMatrix3("transformMatrix", xVector, yVector, zVector, posVector);
         }

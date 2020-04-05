@@ -50,28 +50,28 @@ namespace AoMModelViewer
         {
             BrgFile brg = new BrgFile();
 
-            var model = SharpGLTF.Schema2.ModelRoot.Read(gltfStream, new SharpGLTF.Schema2.ReadSettings());
+            //var model = SharpGLTF.Schema2.ModelRoot.Read(gltfStream, new SharpGLTF.Schema2.ReadSettings());
 
-            var modelTemplate = SharpGLTF.Runtime.SceneTemplate.Create(model.DefaultScene, true);
+            //var modelTemplate = SharpGLTF.Runtime.SceneTemplate.Create(model.DefaultScene, true);
 
-            var inst = modelTemplate.CreateInstance();
+            //var inst = modelTemplate.CreateInstance();
 
-            foreach (var drawable in inst.DrawableReferences)
-            {
-                var gpuMesh = model.LogicalMeshes[drawable.Item1];
+            //foreach (var drawable in inst.DrawableReferences)
+            //{
+            //    var gpuMesh = model.LogicalMeshes[drawable.Item1];
 
-                // What to do here? How would I go about using the transforms
-                // to get the proper location of each vertex and normal in the mesh?
-                if (drawable.Item2 is SharpGLTF.Transforms.StaticTransform statXform)
-                {
-                    //AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, statXform.WorldMatrix);
-                }
+            //    // What to do here? How would I go about using the transforms
+            //    // to get the proper location of each vertex and normal in the mesh?
+            //    if (drawable.Item2 is SharpGLTF.Transforms.StaticTransform statXform)
+            //    {
+            //        //AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, statXform.WorldMatrix);
+            //    }
 
-                if (drawable.Item2 is SharpGLTF.Transforms.SkinTransform skinXform)
-                {
-                    //AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, skinXform.SkinMatrices);
-                }
-            }
+            //    if (drawable.Item2 is SharpGLTF.Transforms.SkinTransform skinXform)
+            //    {
+            //        //AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, skinXform.SkinMatrices);
+            //    }
+            //}
 
             return brg;
         }
@@ -94,13 +94,15 @@ namespace AoMModelViewer
             
             nodes.Add(node);
 
-            // Attachpoint Mesh
+            // Attachpoint Mesh (X Axis Points towards the model's right side, Y Axis points up, Z Axis points forward
+            // Note: the coord system has x pointing to the left, but to match how the axes of a dummy are drawn in AoM
+            // We set it's coordinate negative so that it is drawn to the right of a model.
             var xAxisPrimitive = new MeshPrimitive();
-            new AxisPrimitive(0.5f, 0.05f, 0.05f, new Vector3(0, 0, 1.0f)).Serialize(xAxisPrimitive, this, bufferStream);
+            new AxisPrimitive(-0.5f, 0.05f, 0.05f, new Vector3(0, 0, 1.0f)).Serialize(xAxisPrimitive, this, bufferStream);
             var yAxisPrimitive = new MeshPrimitive();
-            new AxisPrimitive(0.05f, 0.5f, 0.05f, new Vector3(1.0f, 0, 0)).Serialize(yAxisPrimitive, this, bufferStream);
+            new AxisPrimitive(0.05f, 0.5f, 0.05f, new Vector3(0, 1.0f, 0)).Serialize(yAxisPrimitive, this, bufferStream);
             var zAxisPrimitive = new MeshPrimitive();
-            new AxisPrimitive(0.05f, 0.05f, 0.5f, new Vector3(0, 1.0f, 0)).Serialize(zAxisPrimitive, this, bufferStream);
+            new AxisPrimitive(0.05f, 0.05f, 0.5f, new Vector3(1.0f, 0, 0)).Serialize(zAxisPrimitive, this, bufferStream);
             //var axisPrimitives = new MeshPrimitive[] { xAxisPrimitive, yAxisPrimitive, zAxisPrimitive };
             glTFLoader.Schema.Mesh attachpointMesh = new glTFLoader.Schema.Mesh();
             attachpointMesh.Name = "attachpointMesh";
@@ -228,49 +230,6 @@ namespace AoMModelViewer
             buffer.Uri = "dataBuffer.bin";
 
             return gltf;
-        }
-
-        private void GetAttachpointPosRotScale(BrgAttachpoint attp, out Vector3 position, out Quaternion rotation, out Vector3 scale)
-        {
-            Matrix4x4 mat = new Matrix4x4();
-            //mat.M11 = -attp.ZVector.X; mat.M12 = attp.YVector.X; mat.M13 = attp.XVector.X; mat.M14 = 0;
-            //mat.M21 = -attp.ZVector.Y; mat.M22 = attp.YVector.Y; mat.M23 = attp.XVector.Y; mat.M24 = 0;
-            //mat.M31 = -attp.ZVector.Z; mat.M32 = attp.YVector.Z; mat.M33 = attp.XVector.Z; mat.M34 = 0;
-            mat.M11 = -attp.ZVector.X; mat.M12 = attp.ZVector.Y; mat.M13 = attp.ZVector.Z; mat.M14 = 0;
-            mat.M21 = -attp.YVector.X; mat.M22 = attp.YVector.Y; mat.M23 = attp.YVector.Z; mat.M34 = 0;
-            mat.M31 = -attp.XVector.X; mat.M32 = attp.XVector.Y; mat.M33 = attp.XVector.Z; mat.M24 = 0;
-
-            bool suc = Matrix4x4.Decompose(mat, out scale, out Quaternion rot, out _);
-            rot = Quaternion.Normalize(rot);
-
-            if (!suc || scale.X < 0 || scale.Y < 0 || scale.Z < 0)
-                throw new Exception();
-
-            //Vector3 temp1 = new Vector3(attp.ZVector.X, attp.YVector.X, -attp.XVector.X);
-            //Vector3 temp2 = new Vector3(attp.ZVector.Y, attp.YVector.Y, -attp.XVector.Y);
-            //Vector3 temp3 = new Vector3(attp.ZVector.Z, attp.YVector.Z, -attp.XVector.Z);
-            //scale = new Vector3(temp1.Length(), temp2.Length(), temp3.Length());
-            //temp1 = temp1 / scale.X;
-            //temp2 = temp2 / scale.Y;
-            //temp3 = temp3 / scale.Z;
-            //mat = Matrix4x4.Identity;
-            //mat.M11 = temp1.X; mat.M12 = temp1.Y; mat.M13 = temp1.Z; mat.M14 = 0;
-            //mat.M21 = temp2.X; mat.M22 = temp2.Y; mat.M23 = temp2.Z; mat.M24 = 0;
-            //mat.M31 = temp3.X; mat.M32 = temp3.Y; mat.M33 = temp3.Z; mat.M34 = 0;
-            float det = mat.GetDeterminant();
-            //var rot2 = Quaternion.CreateFromRotationMatrix(mat);
-            //rot = Quaternion.Normalize(rot2);
-            //suc = Matrix4x4.Decompose(mat, out Vector3 scale2, out rot, out _);
-
-            Matrix4x4 finmat = Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rot);
-            //rot = new Quaternion(-rot.X, -rot.Y, -rot.Z, rot.W);
-            //Matrix4x4 mat1 = Matrix4x4.CreateFromQuaternion(new Quaternion(0.7071f, 0, 0, 0.7071f));
-            //Matrix4x4 mat2 = Matrix4x4.CreateScale(1, 2, 3);
-            //var mat3 = mat2 * mat1;
-            //suc = Matrix4x4.Decompose(mat3, out scale, out rot, out _);
-
-            position = new Vector3(-attp.Position.X, attp.Position.Y, attp.Position.Z);
-            rotation = rot;
         }
 
         private glTFLoader.Schema.Animation CreateAnimation(AoMEngineLibrary.Graphics.Model.Animation animation, int weightCount, Stream bufferStream)
@@ -999,41 +958,16 @@ namespace AoMModelViewer
             private void GetAttachpointPosRotScale(BrgAttachpoint attp, out Vector3 position, out Quaternion rotation, out Vector3 scale)
             {
                 Matrix4x4 mat = new Matrix4x4();
-                //mat.M11 = -attp.ZVector.X; mat.M12 = attp.YVector.X; mat.M13 = attp.XVector.X; mat.M14 = 0;
-                //mat.M21 = -attp.ZVector.Y; mat.M22 = attp.YVector.Y; mat.M23 = attp.XVector.Y; mat.M24 = 0;
-                //mat.M31 = -attp.ZVector.Z; mat.M32 = attp.YVector.Z; mat.M33 = attp.XVector.Z; mat.M34 = 0;
-                mat.M11 = -attp.ZVector.X; mat.M12 = attp.ZVector.Y; mat.M13 = attp.ZVector.Z; mat.M14 = 0;
-                mat.M21 = -attp.YVector.X; mat.M22 = attp.YVector.Y; mat.M23 = attp.YVector.Z; mat.M34 = 0;
-                mat.M31 = -attp.XVector.X; mat.M32 = attp.XVector.Y; mat.M33 = attp.XVector.Z; mat.M24 = 0;
+                mat.M11 = attp.Right.X; mat.M12 = attp.Right.Y; mat.M13 = attp.Right.Z;
+                mat.M21 = attp.Up.X; mat.M22 = attp.Up.Y; mat.M23 = attp.Up.Z;
+                mat.M31 = attp.Forward.X; mat.M32 = attp.Forward.Y; mat.M33 = attp.Forward.Z;
+                mat.M44 = 1;
 
                 bool suc = Matrix4x4.Decompose(mat, out scale, out Quaternion rot, out _);
                 rot = Quaternion.Normalize(rot);
 
                 if (!suc || scale.X < 0 || scale.Y < 0 || scale.Z < 0)
                     throw new Exception();
-
-                //Vector3 temp1 = new Vector3(attp.ZVector.X, attp.YVector.X, -attp.XVector.X);
-                //Vector3 temp2 = new Vector3(attp.ZVector.Y, attp.YVector.Y, -attp.XVector.Y);
-                //Vector3 temp3 = new Vector3(attp.ZVector.Z, attp.YVector.Z, -attp.XVector.Z);
-                //scale = new Vector3(temp1.Length(), temp2.Length(), temp3.Length());
-                //temp1 = temp1 / scale.X;
-                //temp2 = temp2 / scale.Y;
-                //temp3 = temp3 / scale.Z;
-                //mat = Matrix4x4.Identity;
-                //mat.M11 = temp1.X; mat.M12 = temp1.Y; mat.M13 = temp1.Z; mat.M14 = 0;
-                //mat.M21 = temp2.X; mat.M22 = temp2.Y; mat.M23 = temp2.Z; mat.M24 = 0;
-                //mat.M31 = temp3.X; mat.M32 = temp3.Y; mat.M33 = temp3.Z; mat.M34 = 0;
-                float det = mat.GetDeterminant();
-                //var rot2 = Quaternion.CreateFromRotationMatrix(mat);
-                //rot = Quaternion.Normalize(rot2);
-                //suc = Matrix4x4.Decompose(mat, out Vector3 scale2, out rot, out _);
-
-                Matrix4x4 finmat = Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rot);
-                //rot = new Quaternion(-rot.X, -rot.Y, -rot.Z, rot.W);
-                //Matrix4x4 mat1 = Matrix4x4.CreateFromQuaternion(new Quaternion(0.7071f, 0, 0, 0.7071f));
-                //Matrix4x4 mat2 = Matrix4x4.CreateScale(1, 2, 3);
-                //var mat3 = mat2 * mat1;
-                //suc = Matrix4x4.Decompose(mat3, out scale, out rot, out _);
 
                 position = new Vector3(-attp.Position.X, attp.Position.Y, attp.Position.Z);
                 rotation = rot;

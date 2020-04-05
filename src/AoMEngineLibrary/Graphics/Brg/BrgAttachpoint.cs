@@ -21,9 +21,18 @@
 
         public int Index;
         public int NameId;
-        public Vector3 XVector;
-        public Vector3 YVector;
-        public Vector3 ZVector;
+        /// <summary>
+        /// The Y Axis pointing up in a LH coordinate system. (Green axis in AoM editor)
+        /// </summary>
+        public Vector3 Up;
+        /// <summary>
+        /// The Z axis pointing forward in a LH coordinate system. (Red axis in AoM editor)
+        /// </summary>
+        public Vector3 Forward;
+        /// <summary>
+        /// The X axis pointing to the right in a LH coordinate system. (Blue axis in AoM editor)
+        /// </summary>
+        public Vector3 Right;
         public Vector3 Position;
         public Vector3 BoundingBoxMin;
         public Vector3 BoundingBoxMax;
@@ -48,9 +57,9 @@
         {
             Index = -1;
             NameId = -1;
-            XVector = new Vector3(0, 1, 0);
-            YVector = new Vector3(0, 0, -1);
-            ZVector = new Vector3(-1, 0, 0);
+            Up = new Vector3(0, 1, 0);
+            Forward = new Vector3(0, 0, -1);
+            Right = new Vector3(-1, 0, 0);
             Position = new Vector3(0f);
             BoundingBoxMin = new Vector3(-0.25f);
             BoundingBoxMax = new Vector3(0.25f);
@@ -59,9 +68,9 @@
         {
             Index = prev.Index;
             NameId = prev.NameId;
-            XVector = prev.XVector;
-            YVector = prev.YVector;
-            ZVector = prev.ZVector;
+            Up = prev.Up;
+            Forward = prev.Forward;
+            Right = prev.Right;
             Position = prev.Position;
             BoundingBoxMin = prev.BoundingBoxMin;
             BoundingBoxMax = prev.BoundingBoxMax;
