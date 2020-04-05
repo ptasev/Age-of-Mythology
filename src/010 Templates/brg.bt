@@ -240,9 +240,9 @@ struct {
             int16 numIndex;
             int16 unknown10 <comment="Always 1">;
 
-            Vector xVector(3)[numMatrix];
-            Vector yVector(3)[numMatrix];
-            Vector zVector(3)[numMatrix];
+            Vector upVector(3)[numMatrix];
+            Vector fwdVector(3)[numMatrix];
+            Vector rightVector(3)[numMatrix];
             Vector position(3)[numMatrix];
             Vector boundingBoxMina(3)[numMatrix];
             Vector boundingBoxMaxa(3)[numMatrix];
