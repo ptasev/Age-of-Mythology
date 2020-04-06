@@ -59,7 +59,6 @@ namespace AoMModelViewer
             {
                 brg.Animation.Duration = anim.Duration;
                 brg.Header.NumMeshes = (int)(anim.Duration * fps);
-                brg.Animation.TimeStep = anim.Duration / brg.Header.NumMeshes;
             }
 
             for (int i = 0; i < brg.Header.NumMeshes; ++i)

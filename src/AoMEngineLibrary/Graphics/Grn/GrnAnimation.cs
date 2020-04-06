@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace AoMEngineLibrary.Graphics.Grn
 {
-    public class GrnAnimation : Animation
+    public class GrnAnimation
     {
+        public float Duration { get; set; }
         public List<GrnBoneTrack> BoneTracks { get; set; }
 
         public GrnAnimation()

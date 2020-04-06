@@ -17,7 +17,7 @@
         public List<BrgMesh> Meshes { get; set; }
         public List<BrgMaterial> Materials { get; set; }
 
-        public Animation Animation { get; set; }
+        public BrgAnimation Animation { get; set; }
 
         public BrgFile()
         {
@@ -28,7 +28,7 @@
             this.Meshes = new List<BrgMesh>();
             this.Materials = new List<BrgMaterial>();
 
-            this.Animation = new Animation();
+            this.Animation = new BrgAnimation();
         }
         public BrgFile(System.IO.FileStream fileStream)
             : this()
@@ -98,7 +98,6 @@
                 }
 
                 this.Animation.Duration = this.Meshes[0].ExtendedHeader.AnimationLength;
-                this.Animation.TimeStep = this.Meshes[0].ExtendedHeader.AnimationLength / (float)(this.Meshes.Count);
                 if (this.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
                 {
                     for (int i = 0; i < this.Meshes.Count; ++i)

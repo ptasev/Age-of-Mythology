@@ -58,7 +58,7 @@
             BrgFile brg = this.File as BrgFile;
             Maxscript.Output.Clear();
             Maxscript.Command("importStartTime = timeStamp()");
-            Maxscript.Command("frameRate = 30 --{0}", Math.Round(1 / this.File.Animation.TimeStep));
+            Maxscript.Command("frameRate = 30");
             Maxscript.Interval(0, this.File.Animation.Duration);
 
             if (this.File.Meshes.Count > 0)
@@ -379,7 +379,7 @@
             }
 
             brg.Header.NumMeshes = Maxscript.QueryInteger("keys.Count");
-            brg.Animation = new Animation();
+            brg.Animation = new BrgAnimation();
             for (int i = 1; i <= brg.Header.NumMeshes; ++i)
             {
                 brg.Animation.MeshKeys.Add(Maxscript.QueryFloat("keys[{0}]", i));
@@ -392,7 +392,6 @@
             {
                 brg.Animation.Duration = Maxscript.QueryFloat("(animationRange.end.ticks - animationRange.start.ticks) / 4800.0");
             }
-            brg.Animation.TimeStep = brg.Animation.Duration / (float)brg.Header.NumMeshes;
 
             string mainObject = "mainObject";
             brg.Materials = new List<BrgMaterial>();

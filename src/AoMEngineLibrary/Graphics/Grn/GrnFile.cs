@@ -205,7 +205,6 @@
         private void CalculateAnimationDuration()
         {
             this.Animation.Duration = 0;
-            this.Animation.TimeStep = 1f/30f;
             for (int i = 0; i < this.Animation.BoneTracks.Count; ++i)
             {
                 //this.Animation.Duration = Math.Max(this.Animation.Duration, this.Animation.BoneTracks[i].PositionKeys.Last());

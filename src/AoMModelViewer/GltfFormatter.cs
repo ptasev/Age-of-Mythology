@@ -232,7 +232,7 @@ namespace AoMModelViewer
             return gltf;
         }
 
-        private glTFLoader.Schema.Animation CreateAnimation(AoMEngineLibrary.Graphics.Model.Animation animation, int weightCount, Stream bufferStream)
+        private glTFLoader.Schema.Animation CreateAnimation(BrgAnimation animation, int weightCount, Stream bufferStream)
         {
             var sampler = new AnimationSampler();
             sampler.Interpolation = AnimationSampler.InterpolationEnum.LINEAR;
@@ -259,7 +259,7 @@ namespace AoMModelViewer
         }
 
 
-        private void CreateKeysBuffer(AoMEngineLibrary.Graphics.Model.Animation animation, Stream bufferStream)
+        private void CreateKeysBuffer(BrgAnimation animation, Stream bufferStream)
         {
             long bufferViewOffset;
             float min = float.MaxValue;
@@ -298,7 +298,7 @@ namespace AoMModelViewer
             bufferViews.Add(posBufferView);
             accessors.Add(posAccessor);
         }
-        private void CreateWeightsBuffer(AoMEngineLibrary.Graphics.Model.Animation animation, int weightCount, Stream bufferStream)
+        private void CreateWeightsBuffer(BrgAnimation animation, int weightCount, Stream bufferStream)
         {
             long bufferViewOffset;
             using (BinaryWriter writer = new BinaryWriter(bufferStream, Encoding.UTF8, true))

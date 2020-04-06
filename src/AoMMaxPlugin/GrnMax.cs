@@ -427,12 +427,10 @@
                 {
                     this.File.Animation.Duration = 1f;
                 }
-                this.File.Animation.TimeStep = 1f / 60f;
             }
             else
             {
                 this.File.Animation.Duration = 0f;
-                this.File.Animation.TimeStep = 1f;
             }
 
             Maxscript.Command("exportEndTime = timeStamp()");

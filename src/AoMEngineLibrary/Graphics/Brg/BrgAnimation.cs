@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.Graphics.Model
+﻿namespace AoMEngineLibrary.Graphics.Brg
 {
     using Extensions;
     using Newtonsoft.Json;
@@ -8,16 +8,14 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class Animation
+    public class BrgAnimation
     {
         public float Duration { get; set; }
-        public float TimeStep { get; set; }
         public List<float> MeshKeys { get; set; }
 
-        public Animation()
+        public BrgAnimation()
         {
             this.Duration = 0f;
-            this.TimeStep = 1f;
             this.MeshKeys = new List<float>();
         }
     }
