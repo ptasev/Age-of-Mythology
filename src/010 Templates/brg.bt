@@ -226,7 +226,7 @@ struct {
             int uniqueMaterialCount; // how many materials are used in a mesh, could be byte, with 3 padding afterwards
         } extendedHeader;
 
-        if ((((properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (properties & COLORCHANNEL) == COLORCHANNEL) && !((properties & NOTFIRSTMESH) == NOTFIRSTMESH)) || (properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
+        if ((((properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (properties & COLORCHANNEL) == COLORCHANNEL) && !((properties & SECONDARYMESH) == SECONDARYMESH)) || (properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
             struct VertColor {
                 ubyte R;
                 ubyte G;
