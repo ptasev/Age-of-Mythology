@@ -113,17 +113,17 @@
                     materialID = geo.Mesh.Polylist[0].Material;
                     vertLinkPerPoly = geo.Mesh.Polylist[0].P.Value();
 
-                    mesh.Faces = new List<Face>(mesh.Header.NumFaces);
+                    mesh.Faces = new List<BrgFace>(mesh.Header.NumFaces);
 
                     vertNormalBindings = new int[mesh.Header.NumVertices];
 
                     int polyindex = 0;
-                    Face ff;
+                    BrgFace ff;
                     foreach (int count in vertCountPerPoly)
                     {
                         if (count == 3) //If triangle
                         {
-                            ff = new Face();
+                            ff = new BrgFace();
                             ff.Indices = new List<short>(3);
                             ff.Indices.Add((short)vertLinkPerPoly[polyindex]);
                             ff.Indices.Add((short)vertLinkPerPoly[polyindex + 4]);
@@ -218,7 +218,7 @@
 
             this.Plugin.vertsValueToolStripStatusLabel.Text = this.File.Meshes[0].Vertices.Count.ToString();
             this.Plugin.facesValueToolStripStatusLabel.Text = this.File.Meshes[0].Faces.Count.ToString();
-            this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes[0].MeshAnimations.Count + 1).ToString();
+            this.Plugin.meshesValueToolStripStatusLabel.Text = (this.File.Meshes.Count).ToString();
             this.Plugin.matsValueToolStripStatusLabel.Text = this.File.Materials.Count.ToString();
             this.Plugin.animLengthValueToolStripStatusLabel.Text = this.File.Meshes[0].ExtendedHeader.AnimationLength.ToString();
         }

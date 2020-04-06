@@ -11,7 +11,7 @@
 
     public class GrnMeshTrianglesNode : GrnNode
     {
-        public List<Face> Faces
+        public List<GrnFace> Faces
         {
             get;
             set;
@@ -20,7 +20,7 @@
         public GrnMeshTrianglesNode(GrnNode parentNode)
             : base(parentNode, GrnNodeType.MeshTriangles)
         {
-            this.Faces = new List<Face>();
+            this.Faces = new List<GrnFace>();
         }
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
@@ -28,7 +28,7 @@
             reader.BaseStream.Seek((int)(this.Offset + directoryOffset), SeekOrigin.Begin);
             for (int i = 0; i < this.GetReadDataLength() / 24; ++i)
             {
-                this.Faces.Add(new Face());
+                this.Faces.Add(new GrnFace());
                 this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
                 this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
                 this.Faces[i].Indices.Add((Int16)reader.ReadInt32());

@@ -1,4 +1,5 @@
-﻿using AoMEngineLibrary.Graphics.Model;
+﻿using AoMEngineLibrary.Graphics.Brg;
+using AoMEngineLibrary.Graphics.Model;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
@@ -14,7 +15,7 @@ namespace AoMModelViewer.Graphics
         IReadOnlyList<Vector3> vertices;
         IReadOnlyList<Vector3> normals;
         IReadOnlyList<Vector3> texCoords;
-        IReadOnlyList<Face> faces;
+        IReadOnlyList<BrgFace> faces;
         Vector3 lightDir;
         Matrix4x4 modelView;
         Matrix4x4 projection;
@@ -24,7 +25,7 @@ namespace AoMModelViewer.Graphics
         Matrix4x4 uvMat;
         Image<Rgb24> image;
 
-        public Shader(IReadOnlyList<Vector3> vertices, IReadOnlyList<Vector3> normals, IReadOnlyList<Vector3> texCoords, IReadOnlyList<Face> faces, Vector3 lightDirection,
+        public Shader(IReadOnlyList<Vector3> vertices, IReadOnlyList<Vector3> normals, IReadOnlyList<Vector3> texCoords, IReadOnlyList<BrgFace> faces, Vector3 lightDirection,
             Matrix4x4 modelView, Matrix4x4 projection, Matrix4x4 viewport)
         {
             this.vertices = vertices;

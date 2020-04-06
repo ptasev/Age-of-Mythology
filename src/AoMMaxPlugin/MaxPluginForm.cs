@@ -161,20 +161,10 @@ namespace AoMMaxPlugin
             this.brgObjectsTreeListView.HideSelection = false;
             this.brgObjectsTreeListView.CanExpandGetter = delegate(object rowObject)
             {
-                if (rowObject is BrgMesh)
-                {
-                    return ((BrgMesh)rowObject).MeshAnimations.Count > 0;
-                }
-
                 return false;
             };
             this.brgObjectsTreeListView.ChildrenGetter = delegate(object rowObject)
             {
-                if (rowObject is BrgMesh)
-                {
-                    return ((BrgMesh)rowObject).MeshAnimations;
-                }
-
                 return null;
             };
             OLVColumn nameCol = new OLVColumn("Name", "Name");

@@ -551,7 +551,7 @@
             Maxscript.Command("meshGetNormalIdFunc = {0}.modifiers[#edit_normals].GetNormalID", tempObject);
             for (int i = 0; i < numFaces; ++i)
             {
-                Face f = new Face();
+                GrnFace f = new GrnFace();
                 Int32 matIndex = Maxscript.QueryInteger("getFaceMatID {0} {1}", mainMesh, i + 1);
                 if (matIdMapping.ContainsKey(matIndex))
                 {

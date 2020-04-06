@@ -471,7 +471,7 @@
                         mesh.Vertices = new List<Vector3>(totalNumVerts);
                         mesh.Normals = new List<Vector3>(totalNumVerts);
                         mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
-                        mesh.Faces = new List<Face>(totalNumFaces);
+                        mesh.Faces = new List<BrgFace>(totalNumFaces);
                         brg.Meshes.Add(mesh);
                     }
                     brg.UpdateMeshSettings(i, flags, format, animationType, interpolationType);
@@ -614,7 +614,7 @@
                 }
                 for (int i = 0; i < numFaces; ++i)
                 {
-                    Face f = new Face();
+                    BrgFace f = new BrgFace();
                     mesh.Faces.Add(f);
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))

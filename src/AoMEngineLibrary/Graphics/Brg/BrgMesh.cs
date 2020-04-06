@@ -15,7 +15,7 @@
 
         public List<Vector3> Vertices { get; set; }
         public List<Vector3> Normals { get; set; }
-        public List<Face> Faces { get; set; }
+        public List<BrgFace> Faces { get; set; }
 
         public List<Vector3> TextureCoordinates { get; set; }
         public List<Color4D> Colors { get; set; }
@@ -37,7 +37,7 @@
 
             this.Vertices = new List<Vector3>();
             this.Normals = new List<Vector3>();
-            this.Faces = new List<Face>();
+            this.Faces = new List<BrgFace>();
 
             this.TextureCoordinates = new List<Vector3>();
             this.Colors = new List<Color4D>();
@@ -94,10 +94,10 @@
                 if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
                     this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
                 {
-                    this.Faces = new List<Face>(this.Header.NumFaces);
+                    this.Faces = new List<BrgFace>(this.Header.NumFaces);
                     for (int i = 0; i < this.Header.NumFaces; ++i)
                     {
-                        this.Faces.Add(new Face());
+                        this.Faces.Add(new BrgFace());
                     }
 
                     if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))

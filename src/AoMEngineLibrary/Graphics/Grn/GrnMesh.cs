@@ -24,7 +24,7 @@
 
         public List<Vector3> Vertices { get; set; }
         public List<Vector3> Normals { get; set; }
-        public List<Face> Faces { get; set; }
+        public List<GrnFace> Faces { get; set; }
 
         public List<Vector3> TextureCoordinates { get; set; }
 
@@ -36,7 +36,7 @@
             this.ParentFile = parentFile;
             this.Vertices = new List<Vector3>();
             this.Normals = new List<Vector3>();
-            this.Faces = new List<Face>();
+            this.Faces = new List<GrnFace>();
             this.TextureCoordinates = new List<Vector3>();
             this.VertexWeights = new List<VertexWeight>();
             this.BoneBindings = new List<GrnBoneBinding>();
@@ -164,7 +164,7 @@
             HashSet<Tuple<int, int>> unique = new HashSet<Tuple<int, int>>();
             HashSet<Tuple<int, int>> unique2 = new HashSet<Tuple<int, int>>();
 
-            foreach (Face f in this.Faces)
+            foreach (GrnFace f in this.Faces)
             {
                 unique.Add(new Tuple<int, int>(f.Indices[0], f.NormalIndices[0]));
                 unique.Add(new Tuple<int, int>(f.Indices[1], f.NormalIndices[1]));

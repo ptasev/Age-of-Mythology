@@ -472,12 +472,12 @@ namespace AoMModelViewer
         {
             public int MaterialIndex { get; }
             public List<Dictionary<string, int>> Targets { get; }
-            public List<Face> Faces { get; }
+            public List<BrgFace> Faces { get; }
             public List<short> Indices { get; }
 
             private BrgMesh? baseMesh;
 
-            public BrgMeshPrimitive(List<Face> faces, int materialIndex)
+            public BrgMeshPrimitive(List<BrgFace> faces, int materialIndex)
             {
                 Faces = faces;
                 if (faces.Count > 0) MaterialIndex = materialIndex;
@@ -485,7 +485,7 @@ namespace AoMModelViewer
 
                 Dictionary<short, short>  mapNewIndices = new Dictionary<short, short>();
                 Indices = new List<short>();
-                foreach (Face face in Faces)
+                foreach (BrgFace face in Faces)
                 {
                     for (int i = 0; i < face.Indices.Count; ++i)
                     {
@@ -977,7 +977,7 @@ namespace AoMModelViewer
 
         private class AxisPrimitive
         {
-            public List<Face> Faces { get; }
+            public List<BrgFace> Faces { get; }
             public List<Vector3> Vertices { get; }
             public Vector3 Color { get; }
 
@@ -997,20 +997,20 @@ namespace AoMModelViewer
                     new Vector3(0, 0, zLength)
                 };
 
-                Faces = new List<Face>()
+                Faces = new List<BrgFace>()
                 {
-                    new Face() { Indices = new List<short>() { 0, 2, 1 } },
-                    new Face() { Indices = new List<short>() { 0, 3, 2 } },
-                    new Face() { Indices = new List<short>() { 2, 3, 4 } },
-                    new Face() { Indices = new List<short>() { 2, 4, 5 } },
-                    new Face() { Indices = new List<short>() { 1, 2, 5 } },
-                    new Face() { Indices = new List<short>() { 1, 5, 6 } },
-                    new Face() { Indices = new List<short>() { 0, 7, 4 } },
-                    new Face() { Indices = new List<short>() { 0, 4, 3 } },
-                    new Face() { Indices = new List<short>() { 5, 4, 7 } },
-                    new Face() { Indices = new List<short>() { 5, 7, 6 } },
-                    new Face() { Indices = new List<short>() { 0, 6, 7 } },
-                    new Face() { Indices = new List<short>() { 0, 1, 6 } }
+                    new BrgFace() { Indices = new List<short>() { 0, 2, 1 } },
+                    new BrgFace() { Indices = new List<short>() { 0, 3, 2 } },
+                    new BrgFace() { Indices = new List<short>() { 2, 3, 4 } },
+                    new BrgFace() { Indices = new List<short>() { 2, 4, 5 } },
+                    new BrgFace() { Indices = new List<short>() { 1, 2, 5 } },
+                    new BrgFace() { Indices = new List<short>() { 1, 5, 6 } },
+                    new BrgFace() { Indices = new List<short>() { 0, 7, 4 } },
+                    new BrgFace() { Indices = new List<short>() { 0, 4, 3 } },
+                    new BrgFace() { Indices = new List<short>() { 5, 4, 7 } },
+                    new BrgFace() { Indices = new List<short>() { 5, 7, 6 } },
+                    new BrgFace() { Indices = new List<short>() { 0, 6, 7 } },
+                    new BrgFace() { Indices = new List<short>() { 0, 1, 6 } }
                 };
             }
 

@@ -233,7 +233,7 @@ namespace AoMModelViewer
                 int baseVertexIndex = 0;
                 foreach (var p in primitives)
                 {
-                    Face f = new Face();
+                    BrgFace f = new BrgFace();
                     mesh.Faces.Add(f);
 
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
@@ -488,7 +488,7 @@ namespace AoMModelViewer
 
             foreach (var tri in prim.GetTriangleIndices())
             {
-                Face f = new Face();
+                BrgFace f = new BrgFace();
                 f.Indices.Add((short)(tri.A + currVertCount));
                 f.Indices.Add((short)(tri.B + currVertCount));
                 f.Indices.Add((short)(tri.C + currVertCount));
