@@ -50,7 +50,6 @@ namespace AoMModelViewer
 
             // Figure out animation duration and keys
             const int fps = 15;
-            const int fpsm1 = fps - 1;
             if (anim == null)
             {
                 brg.Header.NumMeshes = 1;
@@ -60,10 +59,11 @@ namespace AoMModelViewer
                 brg.Animation.Duration = anim.Duration;
                 brg.Header.NumMeshes = (int)(anim.Duration * fps);
             }
-
+            
+            float spf = 0.7f / (brg.Header.NumMeshes - 1);
             for (int i = 0; i < brg.Header.NumMeshes; ++i)
             {
-                brg.Animation.MeshKeys.Add(i / fpsm1);
+                brg.Animation.MeshKeys.Add(i * spf);
             }
 
             // Convert meshes, materials and attachpoints
@@ -91,7 +91,7 @@ namespace AoMModelViewer
             var sceneTemplate = SceneTemplate.Create(gltfScene, false);
             var instance = sceneTemplate.CreateInstance();
 
-            Predicate<Node> noDummy = n => !n.Name.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase);
+            Predicate<string> noDummySelector = nodeName => !nodeName.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase);
 
             // Mesh Animations
             for (int i = 0; i < brg.Header.NumMeshes; i++)
@@ -103,11 +103,11 @@ namespace AoMModelViewer
                 }
                 else
                 {
-                    instance.SetAnimationFrame(gltfAnimation.Name, brg.Animation.MeshKeys[i]);
+                    instance.SetAnimationFrame(gltfAnimation.LogicalIndex, brg.Animation.MeshKeys[i]);
                 }
 
                 // Evaluate the entire gltf scene
-                var gltfMeshData = GetMeshBuilder(gltfScene, instance, noDummy);
+                var gltfMeshData = GetMeshBuilder(gltfScene, instance, noDummySelector);
 
                 // We only care about primitves with a material
                 var prims = gltfMeshData.MeshBuilder.Primitives.Where(p => p.Material.m != null);
@@ -135,14 +135,14 @@ namespace AoMModelViewer
             }
         }
 
-        private (GltfMeshBuilder MeshBuilder, bool HasTexCoords) GetMeshBuilder(Scene scene, SceneInstance instance, Predicate<Node> nodeSelector)
+        private (GltfMeshBuilder MeshBuilder, bool HasTexCoords) GetMeshBuilder(Scene scene, SceneInstance instance, Predicate<string> nodeNameSelector)
         {
             var meshes = scene.LogicalParent.LogicalMeshes;
 
-            // TODO: Implement nodeSelector
             var tris = instance
-                .DrawableReferences
-                .SelectMany(item => meshes[item.MeshIndex].EvaluateTriangles(item.Transform));
+                .DrawableInstances
+                .Where(d => nodeNameSelector(d.Template.NodeName))
+                .SelectMany(item => meshes[item.Template.LogicalMeshIndex].EvaluateTriangles(item.Transform));
 
             var mb = new GltfMeshBuilder();
             bool hasTexCoords = false;
@@ -232,15 +232,14 @@ namespace AoMModelViewer
                 int baseVertexIndex = 0;
                 foreach (var p in primitives)
                 {
-                    BrgFace f = new BrgFace();
-                    mesh.Faces.Add(f);
 
+                    short faceMatIndex = 0;
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
                         int faceMatId = p.Material.m.LogicalIndex;
                         if (matIdMapping.ContainsKey(faceMatId))
                         {
-                            f.MaterialIndex = (Int16)matIdMapping[faceMatId];
+                            faceMatIndex = (Int16)matIdMapping[faceMatId];
                         }
                         else
                         {
@@ -254,9 +253,12 @@ namespace AoMModelViewer
                         var b = t.B + baseVertexIndex;
                         var c = t.C + baseVertexIndex;
 
+                        BrgFace f = new BrgFace();
+                        mesh.Faces.Add(f);
                         f.Indices.Add((Int16)a);
                         f.Indices.Add((Int16)c);
                         f.Indices.Add((Int16)b);
+                        f.MaterialIndex = faceMatIndex;
 
                         if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                         {
@@ -307,13 +309,13 @@ namespace AoMModelViewer
                     att.Forward.Y = transform.M32;
                     att.Forward.Z = transform.M33;
 
-                    att.Right.X = transform.M13;
-                    att.Right.Y = transform.M13;
+                    att.Right.X = transform.M11;
+                    att.Right.Y = transform.M12;
                     att.Right.Z = transform.M13;
 
                     att.Position.X = -transform.M41;
-                    att.Position.Z = transform.M42;
-                    att.Position.Y = transform.M43;
+                    att.Position.Y = transform.M42;
+                    att.Position.Z = transform.M43;
 
                     // TODO: Calculate dummy bounding box
                     var bBox = new Vector3(0.5f, 0.5f, 0.5f);
@@ -683,13 +685,7 @@ namespace AoMModelViewer
                 wrapFlags |= tex.Sampler.WrapT == TextureWrapMode.CLAMP_TO_EDGE ? 0 : BrgMatFlag.WrapVTx1;
             }
 
-            string name = tex.PrimaryImage.Name ?? tex.PrimaryImage.LogicalIndex.ToString();
-            int parenthIndex = name.IndexOf('(');
-            if (parenthIndex > 0)
-            {
-                name = name.Remove(parenthIndex);
-            }
-
+            string name = tex.Name ?? srcMaterial.Name ?? string.Empty;
             return name;
         }
         private void GetMaterialFlagsFromName(GltfMaterial glMat, BrgMaterial mat)

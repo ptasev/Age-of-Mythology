@@ -122,17 +122,18 @@ namespace AoMModelViewer
             Dictionary<int, int> brgMatGltfMatIndexMap = new Dictionary<int, int>();
             var uniqueTextures = from mat in brg.Materials
                                  group mat by mat.DiffuseMap into matGroup
-                                 select matGroup;
+                                 select (TexName: matGroup.Key, Materials: matGroup.ToList());
             foreach (var matGroup in uniqueTextures)
             {
                 int texIndex = textures.Count;
                 bool hasTex = false;
-                if (!string.IsNullOrWhiteSpace(matGroup.Key))
+                if (!string.IsNullOrWhiteSpace(matGroup.TexName))
                 {
                     Image im = new Image();
-                    im.Uri = matGroup.Key + ".png";
+                    im.Uri = matGroup.TexName + ".png";
 
                     glTFLoader.Schema.Texture tex = new glTFLoader.Schema.Texture();
+                    tex.Name = matGroup.TexName;
                     tex.Source = images.Count;
                     tex.Sampler = 0;
 
@@ -141,9 +142,10 @@ namespace AoMModelViewer
                     hasTex = true;
                 }
 
-                foreach (var brgMat in brg.Materials)
+                foreach (var brgMat in matGroup.Materials)
                 {
                     glTFLoader.Schema.Material mat = new glTFLoader.Schema.Material();
+                    mat.Name = GetMaterialNameWithFlags(brgMat);
                     mat.PbrMetallicRoughness = new MaterialPbrMetallicRoughness();
                     mat.PbrMetallicRoughness.MetallicFactor = 0.2f;
                     mat.PbrMetallicRoughness.RoughnessFactor = 0.5f;
@@ -230,6 +232,28 @@ namespace AoMModelViewer
             buffer.Uri = "dataBuffer.bin";
 
             return gltf;
+        }
+
+        private string GetMaterialNameWithFlags(BrgMaterial mat)
+        {
+            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMap) ?? string.Empty;
+
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1))
+            {
+                name += " colorxform1";
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
+            {
+                name += " pixelxform1";
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.TwoSided))
+            {
+                name += " 2-sided";
+            }
+
+            return name;
         }
 
         private glTFLoader.Schema.Animation CreateAnimation(BrgAnimation animation, int weightCount, Stream bufferStream)
@@ -828,7 +852,7 @@ namespace AoMModelViewer
                     var attp = mesh.Attachpoints[BrgIndex];
                     GetAttachpointPosRotScale(attp, out Vector3 pos, out Quaternion rot, out Vector3 sca);
 
-                    Node.Name = attp.Name;
+                    Node.Name = "Dummy_" + attp.Name;
                     Node.Translation = new float[] { pos.X, pos.Y, pos.Z };
                     Node.Rotation = new float[] { rot.X, rot.Y, rot.Z, rot.W };
                     Node.Scale = new float[] { sca.X, sca.Y, sca.Z };
