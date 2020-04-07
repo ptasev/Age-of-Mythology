@@ -34,6 +34,18 @@ namespace AoMModelViewer
 
     public class GltfBrgConverter
     {
+        private struct GltfMeshData
+        {
+            public bool HasTexCoords;
+            public GltfMeshBuilder MeshBuilder;
+
+            public GltfMeshData(bool hasTexCoords, GltfMeshBuilder mb)
+            {
+                this.HasTexCoords = hasTexCoords;
+                this.MeshBuilder = mb;
+            }
+        }
+
         public GltfBrgConverter()
         {
 
@@ -135,7 +147,7 @@ namespace AoMModelViewer
             }
         }
 
-        private (GltfMeshBuilder MeshBuilder, bool HasTexCoords) GetMeshBuilder(Scene scene, SceneInstance instance, Predicate<string> nodeNameSelector)
+        private GltfMeshData GetMeshBuilder(Scene scene, SceneInstance instance, Predicate<string> nodeNameSelector)
         {
             var meshes = scene.LogicalParent.LogicalMeshes;
 
@@ -157,7 +169,7 @@ namespace AoMModelViewer
                 mb.UsePrimitive(mat).AddTriangle(tri.A, tri.B, tri.C);
             }
 
-            return (mb, hasTexCoords);
+            return new GltfMeshData(hasTexCoords, mb);
         }
 
         private void ConvertMesh(IEnumerable<GltfPrimitiveBuilder> primitives, bool hasTexCoords, BrgMesh mesh, Dictionary<int, int> matIdMapping)
@@ -364,179 +376,6 @@ namespace AoMModelViewer
                 }
             }
         }
-
-        #region Old
-        private void Convert(ModelRoot model, BrgFile brg)
-        {
-            var modelTemplate = SharpGLTF.Runtime.SceneTemplate.Create(model.DefaultScene, true);
-            var inst = modelTemplate.CreateInstance();
-
-            ConvertMaterials(model, modelTemplate, brg, out Dictionary<int, int> matIdMapping);
-
-            inst.GetAnimationDuration(0);
-            int frames = (int)Math.Round(30 * inst.GetAnimationDuration(0));
-            for (int i = 0; i < frames; ++i)
-            {
-                float time = i / 30.0f;
-
-                BrgMesh mesh = new BrgMesh(brg);
-                inst.SetAnimationFrame(0, time);
-                foreach (var drawable in inst.DrawableReferences)
-                {
-                    var glMesh = model.LogicalMeshes[drawable.MeshIndex];
-
-                    if (glMesh.Name.Contains("dummy", StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    ConvertMesh(glMesh, mesh, drawable.Transform, matIdMapping);
-                }
-            }
-        }
-
-        private void ConvertMesh(GltfMesh glMesh, BrgMesh mesh, IGeometryTransform xform, Dictionary<int, int> matIdMapping)
-        {
-            foreach (var prim in glMesh.Primitives)
-            {
-                ConvertPrimitive(prim, mesh, xform, matIdMapping);
-            }
-        }
-
-        private void ConvertPrimitive(MeshPrimitive prim, BrgMesh mesh, IGeometryTransform xform, Dictionary<int, int> matIdMapping)
-        {
-            if (prim.DrawPrimitiveType == SharpGLTF.Schema2.PrimitiveType.POINTS) return;
-            if (prim.DrawPrimitiveType == SharpGLTF.Schema2.PrimitiveType.LINES) return;
-            if (prim.DrawPrimitiveType == SharpGLTF.Schema2.PrimitiveType.LINE_LOOP) return;
-            if (prim.DrawPrimitiveType == SharpGLTF.Schema2.PrimitiveType.LINE_STRIP) return;
-
-            var verts = prim.GetVertexAccessor("POSITION")?.AsVector3Array();
-            var normals = prim.GetVertexAccessor("NORMAL")?.AsVector3Array();
-
-            if (verts == null || normals == null) return;
-            if (verts.Count < 3) return;
-
-            var tc = prim.GetVertexAccessor("TEXCOORD_0")?.AsVector2Array();
-
-            int numTargets = prim.MorphTargetsCount;
-            Vector3[][] posTargets = Enumerable.Range(0, verts.Count).Select(_ => new Vector3[numTargets]).ToArray();
-            Vector3[][] normTargets = Enumerable.Range(0, verts.Count).Select(_ => new Vector3[numTargets]).ToArray();
-            for (int i = 0; i < numTargets; ++i)
-            {
-                var targetAccessors = prim.GetMorphTargetAccessors(i);
-                Vector3[] targets = new Vector3[numTargets];
-
-                if (targetAccessors.ContainsKey("POSITION"))
-                {
-                    var acc = targetAccessors["POSITION"];
-                    var accData = acc.AsVector3Array();
-
-                    for (int j = 0; j < accData.Count; ++j)
-                    {
-                        posTargets[j][i] = accData[j];
-                    }
-                }
-
-                if (targetAccessors.ContainsKey("NORMAL"))
-                {
-                    var acc = targetAccessors["NORMAL"];
-                    var accData = acc.AsVector3Array();
-
-                    for (int j = 0; j < accData.Count; ++j)
-                    {
-                        normTargets[j][i] = accData[j];
-                    }
-                }
-            }
-
-            var joints0 = prim.GetVertexAccessor("JOINTS_0")?.AsVector4Array();
-            var joints1 = prim.GetVertexAccessor("JOINTS_1")?.AsVector4Array();
-            var weights0 = prim.GetVertexAccessor("WEIGHTS_0")?.AsVector4Array();
-            var weights1 = prim.GetVertexAccessor("WEIGHTS_1")?.AsVector4Array();
-
-            if (xform is SharpGLTF.Transforms.RigidTransform statXform)
-            {
-                SparseWeight8 weight = new SparseWeight8();
-                for (int i = 0; i < verts.Count; ++i)
-                {
-                    verts[i] = statXform.TransformPosition(verts[i], posTargets[i], in weight);
-                    normals[i] = statXform.TransformNormal(normals[i], normTargets[i], in weight);
-                }
-            }
-
-            if (xform is SharpGLTF.Transforms.SkinnedTransform skinXform)
-            {
-                if (joints0 == null || weights0 == null)
-                    throw new InvalidOperationException("Cannot apply a skin transform to a primitive withough joint and weight data.");
-
-                for (int i = 0; i < verts.Count; ++i)
-                {
-                    var jt = joints0[i]; var jt1 = joints1?[i] ?? Vector4.Zero;
-                    var wt = weights0[i]; var wt1 = weights1?[i] ?? Vector4.Zero;
-                    var skinWeights = new SparseWeight8(in jt, in jt1, in wt, in wt1);
-                    verts[i] = skinXform.TransformPosition(verts[i], posTargets[i], in skinWeights);
-                    normals[i] = skinXform.TransformNormal(normals[i], normTargets[i], in skinWeights);
-                }
-            }
-
-            int currVertCount = mesh.Vertices.Count;
-            mesh.Vertices.AddRange(verts);
-            mesh.Normals.AddRange(normals);
-            if (tc != null)
-            {
-                mesh.TextureCoordinates.AddRange(tc.Select(t => new Vector3(t.X, t.Y, 0.0f)));
-            }
-
-            foreach (var tri in prim.GetTriangleIndices())
-            {
-                BrgFace f = new BrgFace();
-                f.Indices.Add((short)(tri.A + currVertCount));
-                f.Indices.Add((short)(tri.B + currVertCount));
-                f.Indices.Add((short)(tri.C + currVertCount));
-                mesh.Faces.Add(f);
-            }
-        }
-
-        private void ConvertMaterials(ModelRoot model, SceneTemplate modelTemplate, BrgFile brg, out Dictionary<int, int> matIdMapping)
-        {
-            matIdMapping = new Dictionary<int, int>();
-            foreach (var id in modelTemplate.LogicalMeshIds)
-            {
-                var mesh = model.LogicalMeshes[id];
-                foreach (var prim in mesh.Primitives)
-                {
-                    var gltfMat = prim.Material;
-                    if (gltfMat == null) continue;
-
-                    BrgMaterial mat = new BrgMaterial(brg);
-                    mat.Id = brg.Materials.Count + 1;
-                    ConvertMaterial(gltfMat, mat);
-
-                    int matListIndex = brg.Materials.IndexOf(mat);
-                    int actualMatId = gltfMat.LogicalIndex;
-                    if (matListIndex >= 0)
-                    {
-                        if (!matIdMapping.ContainsKey(actualMatId))
-                        {
-                            matIdMapping.Add(actualMatId, brg.Materials[matListIndex].Id);
-                        }
-                    }
-                    else
-                    {
-                        brg.Materials.Add(mat);
-                        if (matIdMapping.ContainsKey(actualMatId))
-                        {
-                            matIdMapping[actualMatId] = mat.Id;
-                        }
-                        else
-                        {
-                            matIdMapping.Add(actualMatId, mat.Id);
-                        }
-                    }
-                }
-            }
-        }
-        #endregion
 
         private void ConvertMaterial(GltfMaterial glMat, BrgMaterial mat)
         {
