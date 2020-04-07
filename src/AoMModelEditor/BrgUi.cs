@@ -4,7 +4,6 @@
     using AoMEngineLibrary.Graphics.Brg;
     using AoMEngineLibrary.Graphics.Model;
     using BrightIdeasSoftware;
-    using grendgine_collada;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
@@ -57,147 +56,10 @@
         #region Import/Export
         public void Import(string fileName)
         {
-            // Only need to Update the HEADER, and Animation.Duration, ASETHEADER is auto handled
-            this.File = new BrgFile();
-            BrgFile model = this.File; // just ref here so I don't have to rename model to this.File
-            Grendgine_Collada cModel = Grendgine_Collada.Grendgine_Load_File(fileName);
-
-            //Materials
-            BrgMaterial mat = new BrgMaterial(model);
-            model.Materials.Add(mat);
-            mat.AmbientColor = new Color3D();
-            mat.DiffuseColor = new Color3D();
-            mat.SpecularColor = new Color3D(0.5f);
-            mat.SpecularExponent = 5;
-            mat.Id = 100;
-            mat.Opacity = 1f;
-            mat.Flags |= BrgMatFlag.HasTexture | BrgMatFlag.SpecularExponent;
-
-            model.Header.NumMaterials = model.Materials.Count();
-
-            //Meshes
-            foreach (Grendgine_Collada_Geometry geo in cModel.Library_Geometries.Geometry)
-            {
-                BrgMesh mesh = new BrgMesh(model);
-                model.Meshes.Add(mesh);
-
-                mesh.Header.Flags |= BrgMeshFlag.MATERIAL;
-                mesh.Header.Flags |= model.Meshes.Count == 1 ? 0 : BrgMeshFlag.SECONDARYMESH;
-                mesh.Header.AnimationType |= BrgMeshAnimType.KeyFrame;
-                mesh.Header.Format |= 0;
-                mesh.ExtendedHeader.NumMaterials = (byte)model.Header.NumMaterials;
-                mesh.ExtendedHeader.AnimationLength = 30;
-                mesh.ExtendedHeader.NumUniqueMaterials = 0;
-
-                string polyVertSourceID;
-                string polyNormalsSourceID;
-                string materialID;
-                int[] vertCountPerPoly;
-                int[] vertLinkPerPoly;
-                int[] vertNormalBindings;
-
-                //Locate the vertices and convert them
-                string vertexPosSourceID = geo.Mesh.Vertices.Input.First<Grendgine_Collada_Input_Unshared>(x => x.Semantic == Grendgine_Collada_Input_Semantic.POSITION).source;
-                Grendgine_Collada_Float_Array vertsArray = FindSourceByID(geo.Mesh, vertexPosSourceID).Float_Array;
-
-                mesh.Vertices = FloatToVectorArray(vertsArray);
-                mesh.Header.NumVertices = (short)mesh.Vertices.Count;
-
-                //Check for polygons otherwise skip mesh
-                if (geo.Mesh.Polylist != null || geo.Mesh.Polylist.Length > 0)
-                {
-                    mesh.Header.NumFaces = (short)geo.Mesh.Polylist[0].Count;
-                    polyVertSourceID = geo.Mesh.Polylist[0].Input.First<Grendgine_Collada_Input_Unshared>(x => x.Semantic == Grendgine_Collada_Input_Semantic.VERTEX).source;
-                    polyNormalsSourceID = geo.Mesh.Polylist[0].Input.First<Grendgine_Collada_Input_Unshared>(x => x.Semantic == Grendgine_Collada_Input_Semantic.NORMAL).source;
-                    vertCountPerPoly = geo.Mesh.Polylist[0].VCount.Value();
-                    materialID = geo.Mesh.Polylist[0].Material;
-                    vertLinkPerPoly = geo.Mesh.Polylist[0].P.Value();
-
-                    mesh.Faces = new List<BrgFace>(mesh.Header.NumFaces);
-
-                    vertNormalBindings = new int[mesh.Header.NumVertices];
-
-                    int polyindex = 0;
-                    BrgFace ff;
-                    foreach (int count in vertCountPerPoly)
-                    {
-                        if (count == 3) //If triangle
-                        {
-                            ff = new BrgFace();
-                            ff.Indices = new List<short>(3);
-                            ff.Indices.Add((short)vertLinkPerPoly[polyindex]);
-                            ff.Indices.Add((short)vertLinkPerPoly[polyindex + 4]);
-                            ff.Indices.Add((short)vertLinkPerPoly[polyindex + 2]);
-                            //List correct normal bindings
-                            vertNormalBindings[ff.Indices[0]] = vertLinkPerPoly[polyindex + 1];
-                            vertNormalBindings[ff.Indices[1]] = vertLinkPerPoly[polyindex + 5];
-                            vertNormalBindings[ff.Indices[2]] = vertLinkPerPoly[polyindex + 3];
-                            //Bind materials
-                            if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                                ff.MaterialIndex = (short)mat.Id;
-                            mesh.Faces.Add(ff);
-                        }
-                        polyindex += count * 2; //Including face normal bindings
-                    }
-                }
-                else
-                {
-                    break;
-                }
-
-                //Locate the vertex normals
-                Grendgine_Collada_Float_Array normalsArray = FindSourceByID(geo.Mesh, polyNormalsSourceID).Float_Array;
-                if (normalsArray.Count != vertsArray.Count)
-                {
-                    System.Windows.Forms.MessageBox.Show("The mesh hash only face normals instead of vertex normals. Be sure to export only smooth shaded models.", "Model Import Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
-                }
-                List<Vector3> unsortedNormals = FloatToVectorArray(normalsArray);
-                mesh.Normals = new List<Vector3>(mesh.Header.NumVertices);
-                for (int i = 0; i < mesh.Header.NumVertices; i++)
-                {
-                    mesh.Normals.Add(unsortedNormals[vertNormalBindings[i]]);
-                }
-
-                mesh.VertexMaterials = new List<short>(mesh.Header.NumVertices);
-                for (int i = 0; i < mesh.Header.NumVertices; i++)
-                {
-                    mesh.VertexMaterials.Add((short)mat.Id);
-                }
-            }
-
-            model.Header.NumMeshes = model.Meshes.Count();
         }
 
         public void Export(string fileName)
         {
-        }
-
-        /// <summary>
-        /// Search a Grendgine_Collada_Mesh for a source by a given ID
-        /// </summary>
-        /// <param name="id">Source id including #</param>
-        private Grendgine_Collada_Source FindSourceByID(Grendgine_Collada_Mesh mesh, string id)
-        {
-            return mesh.Source.First<Grendgine_Collada_Source>(x => x.ID == id.TrimStart('#'));
-        }
-        /// <summary>
-        /// Convert a list of Grendgine_Collada_Float_Array to an array of Vectors
-        /// </summary>
-        private List<Vector3> FloatToVectorArray(Grendgine_Collada_Float_Array colArray)
-        {
-            List<Vector3> vecArray = new List<Vector3>(colArray.Count / 3);
-
-            float[] array = colArray.Value();
-
-            for (int i = 0; i < colArray.Count / 3; i++)
-            {
-                vecArray.Add(new Vector3(
-                        array[i * 3],
-                        array[i * 3 + 2],
-                        array[i * 3 + 1]));
-            }
-
-            return vecArray;
         }
         #endregion
 
