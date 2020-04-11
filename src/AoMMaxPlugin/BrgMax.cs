@@ -469,7 +469,7 @@
                         BrgMesh mesh = new BrgMesh(brg);
                         mesh.Vertices = new List<Vector3>(totalNumVerts);
                         mesh.Normals = new List<Vector3>(totalNumVerts);
-                        mesh.TextureCoordinates = new List<Vector3>(totalNumVerts);
+                        mesh.TextureCoordinates = new List<Vector2>(totalNumVerts);
                         mesh.Faces = new List<BrgFace>(totalNumFaces);
                         brg.Meshes.Add(mesh);
                     }
@@ -599,7 +599,7 @@
                     for (int i = 0; i < numVertices; i++)
                     {
                         Maxscript.Command("tVert = getTVert {0} brgVertTVIndices[{1}]", mainMesh, i + 1);
-                        mesh.TextureCoordinates.Add(new Vector3(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y"), 0f));
+                        mesh.TextureCoordinates.Add(new Vector2(Maxscript.QueryFloat("tVert.x"), Maxscript.QueryFloat("tVert.y")));
                     }
                 }
             }

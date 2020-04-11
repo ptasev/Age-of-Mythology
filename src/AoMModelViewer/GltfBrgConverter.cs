@@ -223,7 +223,7 @@ namespace AoMModelViewer
                     foreach (var v in p.Vertices)
                     {
                         var tc = v.Material.TexCoord;
-                        mesh.TextureCoordinates.Add(new Vector3(tc.X, 1 - tc.Y, 0f));
+                        mesh.TextureCoordinates.Add(new Vector2(tc.X, 1 - tc.Y));
                     }
                 }
             }

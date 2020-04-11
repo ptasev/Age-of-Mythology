@@ -14,7 +14,7 @@ namespace AoMModelViewer.Graphics
     {
         IReadOnlyList<Vector3> vertices;
         IReadOnlyList<Vector3> normals;
-        IReadOnlyList<Vector3> texCoords;
+        IReadOnlyList<Vector2> texCoords;
         IReadOnlyList<BrgFace> faces;
         Vector3 lightDir;
         Matrix4x4 modelView;
@@ -25,7 +25,7 @@ namespace AoMModelViewer.Graphics
         Matrix4x4 uvMat;
         Image<Rgb24> image;
 
-        public Shader(IReadOnlyList<Vector3> vertices, IReadOnlyList<Vector3> normals, IReadOnlyList<Vector3> texCoords, IReadOnlyList<BrgFace> faces, Vector3 lightDirection,
+        public Shader(IReadOnlyList<Vector3> vertices, IReadOnlyList<Vector3> normals, IReadOnlyList<Vector2> texCoords, IReadOnlyList<BrgFace> faces, Vector3 lightDirection,
             Matrix4x4 modelView, Matrix4x4 projection, Matrix4x4 viewport)
         {
             this.vertices = vertices;
@@ -62,7 +62,7 @@ namespace AoMModelViewer.Graphics
 
                     uvMat.M11 = texCoord.X;
                     uvMat.M12 = (1 - texCoord.Y);
-                    uvMat.M13 = texCoord.Z;
+                    uvMat.M13 = 0;
                     break;
                 case 1:
                     normalMat.M21 = normal.X;
@@ -71,7 +71,7 @@ namespace AoMModelViewer.Graphics
 
                     uvMat.M21 = texCoord.X;
                     uvMat.M22 = (1 - texCoord.Y);
-                    uvMat.M23 = texCoord.Z;
+                    uvMat.M23 = 0;
                     break;
                 case 2:
                     normalMat.M31 = normal.X;
@@ -80,7 +80,7 @@ namespace AoMModelViewer.Graphics
 
                     uvMat.M31 = texCoord.X;
                     uvMat.M32 = (1 - texCoord.Y);
-                    uvMat.M33 = texCoord.Z;
+                    uvMat.M33 = 0;
                     break;
                 default:
                     throw new IndexOutOfRangeException();

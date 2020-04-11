@@ -17,7 +17,7 @@
         public List<Vector3> Normals { get; set; }
         public List<BrgFace> Faces { get; set; }
 
-        public List<Vector3> TextureCoordinates { get; set; }
+        public List<Vector2> TextureCoordinates { get; set; }
         public List<Color4D> Colors { get; set; }
         public List<Int16> VertexMaterials { get; set; }
 
@@ -39,7 +39,7 @@
             this.Normals = new List<Vector3>();
             this.Faces = new List<BrgFace>();
 
-            this.TextureCoordinates = new List<Vector3>();
+            this.TextureCoordinates = new List<Vector2>();
             this.Colors = new List<Color4D>();
             this.VertexMaterials = new List<Int16>();
 
@@ -84,10 +84,10 @@
                     this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
                     this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    this.TextureCoordinates = new List<Vector3>(this.Header.NumVertices);
+                    this.TextureCoordinates = new List<Vector2>(this.Header.NumVertices);
                     for (int i = 0; i < this.Header.NumVertices; i++)
                     {
-                        this.TextureCoordinates.Add(new Vector3(reader.ReadVector2D(this.Header.Version == 22), 0f));
+                        this.TextureCoordinates.Add(reader.ReadVector2D(this.Header.Version == 22));
                     }
                 }
 
