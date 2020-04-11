@@ -451,19 +451,13 @@ namespace AoMModelViewer
         }
         private static Color3D GetDiffuseColor(GltfMaterial srcMaterial)
         {
-            var diffuse = srcMaterial.FindChannel("Diffuse");
-
-            if (diffuse == null) diffuse = srcMaterial.FindChannel("BaseColor");
-
-            if (diffuse == null) return new Color3D(1.0f);
-
-            return new Color3D(diffuse.Value.Parameter.X, diffuse.Value.Parameter.Y, diffuse.Value.Parameter.Z);
+            var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
+            return new Color3D(diffuse.X, diffuse.Y, diffuse.Z);
         }
         private static Color3D GetSpecularColor(GltfMaterial srcMaterial)
         {
             var mr = srcMaterial.FindChannel("MetallicRoughness");
-
-            if (mr == null) return new Color3D(1.0f); // default value 16
+            if (!mr.HasValue) return new Color3D(0.0f);
 
             var diff = GetDiffuseColor(srcMaterial);
             var diffuse = new Vector3(diff.R, diff.G, diff.B);
@@ -480,21 +474,19 @@ namespace AoMModelViewer
         private static Color3D GetEmissiveColor(GltfMaterial srcMaterial)
         {
             var emissive = srcMaterial.FindChannel("Emissive");
-
-            if (emissive == null) return new Color3D(1.0f);
-
+            if (!emissive.HasValue) return new Color3D(0.0f);
             return new Color3D(emissive.Value.Parameter.X, emissive.Value.Parameter.Y, emissive.Value.Parameter.Z);
         }
         private static float GetSpecularPower(GltfMaterial srcMaterial)
         {
             var mr = srcMaterial.FindChannel("MetallicRoughness");
-
-            if (mr == null) return 0; // default value = 16
+            if (!mr.HasValue) return 0;
 
             var metallic = mr.Value.Parameter.X;
             var roughness = mr.Value.Parameter.Y;
+            var mult = metallic - roughness;
 
-            return 4 + 16 * metallic;
+            return mult <= 0 ? 0 : 25 * mult;
         }
         private static float GetAlphaLevel(GltfMaterial srcMaterial)
         {
@@ -508,15 +500,12 @@ namespace AoMModelViewer
         }
         private string GetDiffuseTexture(GltfMaterial srcMaterial, out BrgMatFlag wrapFlags)
         {
-            var diffuse = srcMaterial.FindChannel("Diffuse");
             wrapFlags = BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1;
 
-            if (diffuse == null) diffuse = srcMaterial.FindChannel("BaseColor");
-            if (diffuse == null) return string.Empty;
-            if (diffuse.Value.Texture == null) return string.Empty;
-            if (diffuse.Value.Texture.PrimaryImage == null) return string.Empty;
+            var tex = srcMaterial.GetDiffuseTexture();
+            if (tex == null) return string.Empty;
+            if (tex.PrimaryImage == null) return string.Empty;
 
-            var tex = diffuse.Value.Texture;
             if (tex.Sampler != null)
             {
                 wrapFlags = 0;
@@ -524,7 +513,7 @@ namespace AoMModelViewer
                 wrapFlags |= tex.Sampler.WrapT == TextureWrapMode.CLAMP_TO_EDGE ? 0 : BrgMatFlag.WrapVTx1;
             }
 
-            string name = tex.Name ?? srcMaterial.Name ?? string.Empty;
+            string name = tex.PrimaryImage.Name ?? tex.Name ?? srcMaterial.Name ?? string.Empty;
             return name;
         }
         private void GetMaterialFlagsFromName(GltfMaterial glMat, BrgMaterial mat)
