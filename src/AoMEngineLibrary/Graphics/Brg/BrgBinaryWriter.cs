@@ -44,37 +44,19 @@
         }
 
         #region Vector3
-        public void WriteVector3D(Vector3 v, bool isAom = true, bool isHalf = false)
+        public void WriteVector3D(Vector3 v, bool isHalf)
         {
-            if (isAom)
+            if (!isHalf)
             {
-                if (!isHalf)
-                {
-                    this.Write(v.X);
-                    this.Write(v.Y);
-                    this.Write(v.Z);
-                }
-                else
-                {
-                    this.WriteHalf(v.X);
-                    this.WriteHalf(v.Y);
-                    this.WriteHalf(v.Z);
-                }
+                this.Write(v.X);
+                this.Write(v.Y);
+                this.Write(v.Z);
             }
             else
             {
-                if (!isHalf)
-                {
-                    this.Write(-v.X);
-                    this.Write(-v.Z);
-                    this.Write(v.Y);
-                }
-                else
-                {
-                    this.WriteHalf(-v.X);
-                    this.WriteHalf(-v.Z);
-                    this.WriteHalf(v.Y);
-                }
+                this.WriteHalf(v.X);
+                this.WriteHalf(v.Y);
+                this.WriteHalf(v.Z);
             }
         }
         #endregion

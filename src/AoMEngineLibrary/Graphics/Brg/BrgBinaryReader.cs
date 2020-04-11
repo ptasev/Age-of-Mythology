@@ -53,39 +53,21 @@
         }
 
         #region ReadVector3
-        public Vector3 ReadVector3D(bool isAom = true, bool isHalf = false)
+        public Vector3 ReadVector3D(bool isHalf)
         {
             Vector3 v = new Vector3();
 
-            if (isAom)
+            if (!isHalf)
             {
-                if (!isHalf)
-                {
-                    v.X = this.ReadSingle();
-                    v.Y = this.ReadSingle();
-                    v.Z = this.ReadSingle();
-                }
-                else
-                {
-                    v.X = this.ReadHalf();
-                    v.Y = this.ReadHalf();
-                    v.Z = this.ReadHalf();
-                }
+                v.X = this.ReadSingle();
+                v.Y = this.ReadSingle();
+                v.Z = this.ReadSingle();
             }
             else
             {
-                if (!isHalf)
-                {
-                    v.X = -this.ReadSingle();
-                    v.Z = -this.ReadSingle();
-                    v.Y = this.ReadSingle();
-                }
-                else
-                {
-                    v.X = -this.ReadHalf();
-                    v.Z = -this.ReadHalf();
-                    v.Y = this.ReadHalf();
-                }
+                v.X = this.ReadHalf();
+                v.Y = this.ReadHalf();
+                v.Z = this.ReadHalf();
             }
 
             return v;

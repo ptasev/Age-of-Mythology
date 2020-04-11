@@ -64,7 +64,7 @@
                 this.Vertices = new List<Vector3>(this.Header.NumVertices);
                 for (int i = 0; i < this.Header.NumVertices; i++)
                 {
-                    this.Vertices.Add(reader.ReadVector3D(true, this.Header.Version == 22));
+                    this.Vertices.Add(reader.ReadVector3D(this.Header.Version == 22));
                 }
                 this.Normals = new List<Vector3>(this.Header.NumVertices);
                 for (int i = 0; i < this.Header.NumVertices; i++)
@@ -75,7 +75,7 @@
                     }
                     else // v == 18, 19 or 22
                     {
-                        this.Normals.Add(reader.ReadVector3D(true, this.Header.Version == 22));
+                        this.Normals.Add(reader.ReadVector3D(this.Header.Version == 22));
                     }
                 }
 
@@ -177,30 +177,30 @@
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].Up = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].Up = reader.ReadVector3D(this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].Forward = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].Forward = reader.ReadVector3D(this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].Right = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].Right = reader.ReadVector3D(this.Header.Version == 22);
                 }
                 if (this.Header.Version == 19 || this.Header.Version == 22)
                 {
                     for (int i = 0; i < numMatrix; i++)
                     {
-                        attpts[i].Position = reader.ReadVector3D(true, this.Header.Version == 22);
+                        attpts[i].Position = reader.ReadVector3D(this.Header.Version == 22);
                     }
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].BoundingBoxMin = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].BoundingBoxMin = reader.ReadVector3D(this.Header.Version == 22);
                 }
                 for (int i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].BoundingBoxMax = reader.ReadVector3D(true, this.Header.Version == 22);
+                    attpts[i].BoundingBoxMax = reader.ReadVector3D(this.Header.Version == 22);
                 }
 
                 List<int> nameId = new List<int>();
@@ -251,7 +251,7 @@
                 Vector3[] legacy = new Vector3[this.Header.NumFaces];
                 for (int i = 0; i < this.Header.NumFaces; i++)
                 {
-                    legacy[i] = reader.ReadVector3D();
+                    legacy[i] = reader.ReadVector3D(false);
                 }
             }
 
@@ -282,11 +282,11 @@
             {
                 for (int i = 0; i < this.Vertices.Count; i++)
                 {
-                    writer.WriteVector3D(this.Vertices[i], true, true);
+                    writer.WriteVector3D(this.Vertices[i], true);
                 }
                 for (int i = 0; i < this.Vertices.Count; i++)
                 {
-                    writer.WriteVector3D(this.Normals[i], true, true);
+                    writer.WriteVector3D(this.Normals[i], true);
                 }
 
                 if ((!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
@@ -372,27 +372,27 @@
 
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.Up, true, true);
+                    writer.WriteVector3D(att.Up, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.Forward, true, true);
+                    writer.WriteVector3D(att.Forward, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.Right, true, true);
+                    writer.WriteVector3D(att.Right, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.Position, true, true);
+                    writer.WriteVector3D(att.Position, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.BoundingBoxMin, true, true);
+                    writer.WriteVector3D(att.BoundingBoxMin, true);
                 }
                 foreach (BrgAttachpoint att in this.Attachpoints)
                 {
-                    writer.WriteVector3D(att.BoundingBoxMax, true, true);
+                    writer.WriteVector3D(att.BoundingBoxMax, true);
                 }
 
                 int[] dup = new int[numIndex];

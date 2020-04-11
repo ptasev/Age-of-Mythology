@@ -37,14 +37,14 @@
             this.InterpolationType = (BrgMeshInterpolationType)reader.ReadByte();
             this.AnimationType = (BrgMeshAnimType)reader.ReadByte();
             this.UserDataEntryCount = reader.ReadInt16();
-            this.CenterPosition = reader.ReadVector3D(true, false);
+            this.CenterPosition = reader.ReadVector3D(false);
             this.CenterRadius = reader.ReadSingle();
-            this.MassPosition = reader.ReadVector3D(true, false);
-            this.HotspotPosition = reader.ReadVector3D(true, false);
+            this.MassPosition = reader.ReadVector3D(false);
+            this.HotspotPosition = reader.ReadVector3D(false);
             this.ExtendedHeaderSize = reader.ReadInt16();
             this.Flags = (BrgMeshFlag)reader.ReadInt16();
-            this.MinimumExtent = reader.ReadVector3D(true, false);
-            this.MaximumExtent = reader.ReadVector3D(true, false);
+            this.MinimumExtent = reader.ReadVector3D(false);
+            this.MaximumExtent = reader.ReadVector3D(false);
         }
 
         public void Write(BrgBinaryWriter writer)
@@ -56,14 +56,14 @@
             writer.Write((Byte)this.InterpolationType);
             writer.Write((Byte)this.AnimationType);
             writer.Write(this.UserDataEntryCount);
-            writer.WriteVector3D(this.CenterPosition, true);
+            writer.WriteVector3D(this.CenterPosition, false);
             writer.Write(this.CenterRadius);//unknown03
-            writer.WriteVector3D(this.MassPosition, true);
-            writer.WriteVector3D(this.HotspotPosition, true);
+            writer.WriteVector3D(this.MassPosition, false);
+            writer.WriteVector3D(this.HotspotPosition, false);
             writer.Write(this.ExtendedHeaderSize);
             writer.Write((UInt16)this.Flags);
-            writer.WriteVector3D(this.MinimumExtent, true);
-            writer.WriteVector3D(this.MaximumExtent, true);
+            writer.WriteVector3D(this.MinimumExtent, false);
+            writer.WriteVector3D(this.MaximumExtent, false);
         }
     }
 }
