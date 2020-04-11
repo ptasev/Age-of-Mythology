@@ -8,7 +8,7 @@
     using System.IO;
     using System.Text;
 
-    public class BrgMaterial : Material, IEquatable<BrgMaterial>
+    public class BrgMaterial : IEquatable<BrgMaterial>
     {
         public BrgFile ParentFile;
         public string EditorName
@@ -22,6 +22,14 @@
         public int Id { get; set; }
         public BrgMatFlag Flags { get; set; }
         public int unknown01b;
+
+        public Color3D DiffuseColor { get; set; }
+        public Color3D AmbientColor { get; set; }
+        public Color3D SpecularColor { get; set; }
+        public Color3D EmissiveColor { get; set; }
+        public float Opacity { get; set; }
+        public float SpecularExponent { get; set; }
+
         public string DiffuseMap { get; set; }
         public string BumpMap { get; set; }
         public List<BrgMatSFX> sfx;
@@ -67,12 +75,19 @@
             }
         }
         public BrgMaterial(BrgFile file)
-            : base()
         {
             this.ParentFile = file;
             this.Id = 0;
             this.Flags = 0;
             this.unknown01b = 0;
+
+            this.DiffuseColor = new Color3D(1f);
+            this.AmbientColor = new Color3D(1f);
+            this.SpecularColor = new Color3D(0f);
+            this.EmissiveColor = new Color3D(0f);
+
+            this.Opacity = 1f;
+            this.SpecularExponent = 0f;
 
             this.DiffuseMap = string.Empty;
             this.BumpMap = string.Empty;

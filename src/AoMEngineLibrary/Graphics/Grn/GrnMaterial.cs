@@ -10,13 +10,13 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GrnMaterial : Material, IGrnObject, IEquatable<GrnMaterial>
+    public class GrnMaterial : IGrnObject, IEquatable<GrnMaterial>
     {
         public GrnFile ParentFile { get; set; }
         public Int32 DataExtensionIndex { get; set; }
         public Int32 DiffuseTextureIndex { get; set; }
 
-        public override string Name
+        public string Name
         {
             get
             {
@@ -40,7 +40,6 @@
         }
 
         public GrnMaterial(GrnFile parentFile)
-            : base()
         {
             this.ParentFile = parentFile;
             this.DataExtensionIndex = 0;

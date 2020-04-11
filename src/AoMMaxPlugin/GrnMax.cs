@@ -296,12 +296,12 @@
             Maxscript.Command("mat.name = \"{0}\"", mat.Name);
             Maxscript.Command("mat.adLock = false");
             Maxscript.Command("mat.useSelfIllumColor = true");
-            Maxscript.Command("mat.diffuse = color {0} {1} {2}", mat.DiffuseColor.R * 255f, mat.DiffuseColor.G * 255f, mat.DiffuseColor.B * 255f);
-            Maxscript.Command("mat.ambient = color {0} {1} {2}", mat.AmbientColor.R * 255f, mat.AmbientColor.G * 255f, mat.AmbientColor.B * 255f);
-            Maxscript.Command("mat.specular = color {0} {1} {2}", mat.SpecularColor.R * 255f, mat.SpecularColor.G * 255f, mat.SpecularColor.B * 255f);
-            Maxscript.Command("mat.selfIllumColor = color {0} {1} {2}", mat.EmissiveColor.R * 255f, mat.EmissiveColor.G * 255f, mat.EmissiveColor.B * 255f);
-            Maxscript.Command("mat.opacity = {0}", mat.Opacity * 100f);
-            Maxscript.Command("mat.specularLevel = {0}", mat.SpecularExponent);
+            Maxscript.Command("mat.diffuse = color {0} {1} {2}", 255, 255, 255);
+            Maxscript.Command("mat.ambient = color {0} {1} {2}", 255, 255, 255);
+            Maxscript.Command("mat.specular = color {0} {1} {2}", 0, 0, 0);
+            Maxscript.Command("mat.selfIllumColor = color {0} {1} {2}", 0, 0, 0);
+            Maxscript.Command("mat.opacity = {0}", 100);
+            Maxscript.Command("mat.specularLevel = {0}", 0);
 
             Maxscript.Command("tex = BitmapTexture()");
             Maxscript.Command("tex.name = \"{0}\"", mat.DiffuseTexture.Name);
@@ -687,20 +687,21 @@
         {
             mat.DataExtensionIndex = this.File.AddDataExtension(Maxscript.QueryString("mat.name"));
 
-            mat.DiffuseColor = new Color3D(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
-                Maxscript.QueryFloat("mat.diffuse.g") / 255f,
-                Maxscript.QueryFloat("mat.diffuse.b") / 255f);
-            mat.AmbientColor = new Color3D(Maxscript.QueryFloat("mat.ambient.r") / 255f,
-                Maxscript.QueryFloat("mat.ambient.g") / 255f,
-                Maxscript.QueryFloat("mat.ambient.b") / 255f);
-            mat.SpecularColor = new Color3D(Maxscript.QueryFloat("mat.specular.r") / 255f,
-                Maxscript.QueryFloat("mat.specular.g") / 255f,
-                Maxscript.QueryFloat("mat.specular.b") / 255f);
-            mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
-                Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
-                Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
-            mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
-            mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
+            // GRN doesn't seem to store these values
+            //mat.DiffuseColor = new Color3D(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
+            //    Maxscript.QueryFloat("mat.diffuse.g") / 255f,
+            //    Maxscript.QueryFloat("mat.diffuse.b") / 255f);
+            //mat.AmbientColor = new Color3D(Maxscript.QueryFloat("mat.ambient.r") / 255f,
+            //    Maxscript.QueryFloat("mat.ambient.g") / 255f,
+            //    Maxscript.QueryFloat("mat.ambient.b") / 255f);
+            //mat.SpecularColor = new Color3D(Maxscript.QueryFloat("mat.specular.r") / 255f,
+            //    Maxscript.QueryFloat("mat.specular.g") / 255f,
+            //    Maxscript.QueryFloat("mat.specular.b") / 255f);
+            //mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
+            //    Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
+            //    Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
+            //mat.Opacity = Maxscript.QueryFloat("mat.opacity") / 100f;
+            //mat.SpecularExponent = Maxscript.QueryFloat("mat.specularLevel");
 
             GrnTexture tex = null;
             if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
