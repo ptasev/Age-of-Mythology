@@ -9,12 +9,12 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GrnTexture : Texture, IGrnObject, IEquatable<GrnTexture>
+    public class GrnTexture : IGrnObject, IEquatable<GrnTexture>
     {
         public Int32 DataExtensionIndex { get; set; }
 
         public GrnFile ParentFile { get; set; }
-        public override string Name
+        public string Name
         {
             get
             {
@@ -29,8 +29,10 @@
             }
         }
 
+        public int Width { get; set; }
+        public int Height { get; set; }
+
         public GrnTexture(GrnFile parentFile)
-            : base()
         {
             this.ParentFile = parentFile;
             this.DataExtensionIndex = 0;
