@@ -1,8 +1,6 @@
 ﻿namespace AoMModelEditor
 {
-    using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Grn;
-    using AoMEngineLibrary.Graphics.Model;
     using BrightIdeasSoftware;
     using System;
     using System.Collections.Generic;

@@ -1,6 +1,5 @@
 ﻿namespace AoMMaxPlugin
 {
-    using AoMEngineLibrary.Graphics.Model;
     using ManagedServices;
     using System;
     using System.Collections.Generic;

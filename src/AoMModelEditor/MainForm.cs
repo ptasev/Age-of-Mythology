@@ -2,10 +2,8 @@
 
 namespace AoMModelEditor
 {
-    using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
     using AoMEngineLibrary.Graphics.Grn;
-    using AoMEngineLibrary.Graphics.Model;
     using BrightIdeasSoftware;
     using MiscUtil;
     using System;
