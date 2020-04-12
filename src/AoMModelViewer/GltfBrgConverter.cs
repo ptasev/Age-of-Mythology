@@ -449,18 +449,17 @@ namespace AoMModelViewer
 
             this.GetMaterialFlagsFromName(glMat, mat);
         }
-        private static Color3D GetDiffuseColor(GltfMaterial srcMaterial)
+        private static Vector3 GetDiffuseColor(GltfMaterial srcMaterial)
         {
             var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
-            return new Color3D(diffuse.X, diffuse.Y, diffuse.Z);
+            return new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
         }
-        private static Color3D GetSpecularColor(GltfMaterial srcMaterial)
+        private static Vector3 GetSpecularColor(GltfMaterial srcMaterial)
         {
             var mr = srcMaterial.FindChannel("MetallicRoughness");
-            if (!mr.HasValue) return new Color3D(0.0f);
+            if (!mr.HasValue) return Vector3.Zero;
 
-            var diff = GetDiffuseColor(srcMaterial);
-            var diffuse = new Vector3(diff.R, diff.G, diff.B);
+            var diffuse = GetDiffuseColor(srcMaterial);
             var metallic = mr.Value.Parameter.X;
             var roughness = mr.Value.Parameter.Y;
 
@@ -468,14 +467,13 @@ namespace AoMModelViewer
             k += Vector3.Lerp(diffuse, Vector3.Zero, roughness);
             k += Vector3.Lerp(diffuse, Vector3.One, metallic);
             k *= 0.5f;
-
-            return new Color3D(k.X, k.Y, k.Z);
+            return k;
         }
-        private static Color3D GetEmissiveColor(GltfMaterial srcMaterial)
+        private static Vector3 GetEmissiveColor(GltfMaterial srcMaterial)
         {
             var emissive = srcMaterial.FindChannel("Emissive");
-            if (!emissive.HasValue) return new Color3D(0.0f);
-            return new Color3D(emissive.Value.Parameter.X, emissive.Value.Parameter.Y, emissive.Value.Parameter.Z);
+            if (!emissive.HasValue) return Vector3.Zero;
+            return new Vector3(emissive.Value.Parameter.X, emissive.Value.Parameter.Y, emissive.Value.Parameter.Z);
         }
         private static float GetSpecularPower(GltfMaterial srcMaterial)
         {

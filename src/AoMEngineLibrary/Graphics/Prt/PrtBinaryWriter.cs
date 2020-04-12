@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Numerics;
 
     public class PrtBinaryWriter : BinaryWriter
     {
@@ -10,12 +11,14 @@
         {
         }
 
-        public void WriteTexel(Texel t)
+        public void WriteTexel(Vector4 t)
         {
-            this.Write(t.B);
-            this.Write(t.G);
-            this.Write(t.R);
-            this.Write(t.A);
+            var res = Vector4.Clamp(t * 255, Vector4.Zero, Vector4.One);
+
+            this.Write((byte)res.X);
+            this.Write((byte)res.Y);
+            this.Write((byte)res.Z);
+            this.Write((byte)res.W);
         }
 
         public new void Write(string str)

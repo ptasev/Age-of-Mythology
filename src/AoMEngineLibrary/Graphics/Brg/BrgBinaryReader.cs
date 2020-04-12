@@ -94,24 +94,10 @@
         }
         #endregion
 
-        public Color3D ReadColor3D()
+        public Vector4 ReadTexel()
         {
-            Color3D color = new Color3D();
-
-            color.R = this.ReadSingle();
-            color.G = this.ReadSingle();
-            color.B = this.ReadSingle();
-
-            return color;
-        }
-        public Texel ReadTexel()
-        {
-            Texel t = new Texel();
-            t.B = this.ReadByte();
-            t.G = this.ReadByte();
-            t.R = this.ReadByte();
-            t.A = this.ReadByte();
-            return t;
+            return Vector4.Clamp(new Vector4(this.ReadByte() / 255.0f, this.ReadByte() / 255.0f, this.ReadByte() / 255.0f, this.ReadByte() / 255.0f),
+                Vector4.Zero, Vector4.One);
         }
 
         public float ReadHalf()

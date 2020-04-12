@@ -308,7 +308,7 @@ namespace AoMModelViewer
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
                     mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
                 {
-                    vb.Material.Color = new Vector4(mesh.Colors[index].R, mesh.Colors[index].G, mesh.Colors[index].B, mesh.Colors[index].A);
+                    vb.Material.Color = mesh.Colors[index];
                 }
             }
 
@@ -348,7 +348,7 @@ namespace AoMModelViewer
                     var cb = mb.UseChannel(KnownChannel.MetallicRoughness);
                     cb.Parameter = new Vector4(0.2f, 0.5f, 0, 0);
                     cb = mb.UseChannel(KnownChannel.BaseColor);
-                    cb.Parameter = new Vector4(brgMat.DiffuseColor.R, brgMat.DiffuseColor.G, brgMat.DiffuseColor.B, brgMat.Opacity);
+                    cb.Parameter = new Vector4(brgMat.DiffuseColor, brgMat.Opacity);
 
                     if (!string.IsNullOrWhiteSpace(matGroup.TexName))
                     {
@@ -359,7 +359,7 @@ namespace AoMModelViewer
                     }
 
                     cb = mb.UseChannel(KnownChannel.Emissive);
-                    cb.Parameter = new Vector4(brgMat.EmissiveColor.R, brgMat.EmissiveColor.G, brgMat.EmissiveColor.B, 0);
+                    cb.Parameter = new Vector4(brgMat.EmissiveColor, 0);
 
                     if (brgMat.Flags.HasFlag(BrgMatFlag.TwoSided))
                     {

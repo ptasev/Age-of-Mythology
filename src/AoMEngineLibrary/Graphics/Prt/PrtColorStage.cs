@@ -1,6 +1,7 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
     using System;
+    using System.Numerics;
 
     public class PrtColorStage
     {
@@ -8,7 +9,7 @@
         public byte Unk1 { get; set; }
         public byte Unk2 { get; set; }
         public byte Unk3 { get; set; }
-        public Texel Color { get; set; }
+        public Vector4 Color { get; set; }
         public float Hold { get; set; }
         public float Fade { get; set; }
 

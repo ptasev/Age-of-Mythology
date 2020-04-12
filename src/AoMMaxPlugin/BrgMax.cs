@@ -135,12 +135,12 @@
                         if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
                         {
                             Maxscript.AnimateAtTime(time, "meshop.setVertAlpha {0} -2 {1} {2}",
-                                mainObject, i + 1, mesh.Colors[i].A);
+                                mainObject, i + 1, mesh.Colors[i].W);
                         }
                         else if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
                         {
                             Maxscript.AnimateAtTime(time, "meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
-                                mesh.Colors[i].R, mesh.Colors[i].G, mesh.Colors[i].B);
+                                mesh.Colors[i].X, mesh.Colors[i].Y, mesh.Colors[i].Z);
                         }
                     }
                 }
@@ -157,12 +157,12 @@
                     {
                         //Maxscript.Command("meshop.supportVAlphas {0}", mainObject);
                         Maxscript.Command("meshop.setVertAlpha {0} -2 {1} {2}",
-                            mainObject, i + 1, mesh.Colors[i].A);
+                            mainObject, i + 1, mesh.Colors[i].W);
                     }
                     else if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
                     {
                         Maxscript.Command("meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
-                            mesh.Colors[i].R, mesh.Colors[i].G, mesh.Colors[i].B);
+                            mesh.Colors[i].X, mesh.Colors[i].Y, mesh.Colors[i].Z);
                     }
                 }
             }
@@ -278,10 +278,10 @@
             this.ImportMaterialNameFromFlags(mat);
             Maxscript.Command("mat.adLock = false");
             Maxscript.Command("mat.useSelfIllumColor = true");
-            Maxscript.Command("mat.diffuse = color {0} {1} {2}", mat.DiffuseColor.R * 255f, mat.DiffuseColor.G * 255f, mat.DiffuseColor.B * 255f);
-            Maxscript.Command("mat.ambient = color {0} {1} {2}", mat.AmbientColor.R * 255f, mat.AmbientColor.G * 255f, mat.AmbientColor.B * 255f);
-            Maxscript.Command("mat.specular = color {0} {1} {2}", mat.SpecularColor.R * 255f, mat.SpecularColor.G * 255f, mat.SpecularColor.B * 255f);
-            Maxscript.Command("mat.selfIllumColor = color {0} {1} {2}", mat.EmissiveColor.R * 255f, mat.EmissiveColor.G * 255f, mat.EmissiveColor.B * 255f);
+            Maxscript.Command("mat.diffuse = color {0} {1} {2}", mat.DiffuseColor.X * 255f, mat.DiffuseColor.Y * 255f, mat.DiffuseColor.Z * 255f);
+            Maxscript.Command("mat.ambient = color {0} {1} {2}", mat.AmbientColor.X * 255f, mat.AmbientColor.Y * 255f, mat.AmbientColor.Z * 255f);
+            Maxscript.Command("mat.specular = color {0} {1} {2}", mat.SpecularColor.X * 255f, mat.SpecularColor.Y * 255f, mat.SpecularColor.Z * 255f);
+            Maxscript.Command("mat.selfIllumColor = color {0} {1} {2}", mat.EmissiveColor.X * 255f, mat.EmissiveColor.Y * 255f, mat.EmissiveColor.Z * 255f);
             Maxscript.Command("mat.opacity = {0}", mat.Opacity * 100f);
             Maxscript.Command("mat.specularLevel = {0}", mat.SpecularExponent);
             
@@ -711,16 +711,16 @@
             //mat.id = Maxscript.QueryInteger("{0}.material.materialIDList[{1}]", mainObject, materialIndex + 1);
             //Maxscript.Command("mat = {0}.material[{1}]", mainObject, mat.id);
 
-            mat.DiffuseColor = new Color3D(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
+            mat.DiffuseColor = new Vector3(Maxscript.QueryFloat("mat.diffuse.r") / 255f,
                 Maxscript.QueryFloat("mat.diffuse.g") / 255f,
                 Maxscript.QueryFloat("mat.diffuse.b") / 255f);
-            mat.AmbientColor = new Color3D(Maxscript.QueryFloat("mat.ambient.r") / 255f,
+            mat.AmbientColor = new Vector3(Maxscript.QueryFloat("mat.ambient.r") / 255f,
                 Maxscript.QueryFloat("mat.ambient.g") / 255f,
                 Maxscript.QueryFloat("mat.ambient.b") / 255f);
-            mat.SpecularColor = new Color3D(Maxscript.QueryFloat("mat.specular.r") / 255f,
+            mat.SpecularColor = new Vector3(Maxscript.QueryFloat("mat.specular.r") / 255f,
                 Maxscript.QueryFloat("mat.specular.g") / 255f,
                 Maxscript.QueryFloat("mat.specular.b") / 255f);
-            mat.EmissiveColor = new Color3D(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
+            mat.EmissiveColor = new Vector3(Maxscript.QueryFloat("mat.selfIllumColor.r") / 255f,
                 Maxscript.QueryFloat("mat.selfIllumColor.g") / 255f,
                 Maxscript.QueryFloat("mat.selfIllumColor.b") / 255f);
 
@@ -874,21 +874,21 @@
             BrgMaterial mat = (BrgMaterial)this.Plugin.brgObjectsTreeListView.SelectedObject;
 
             // Update Info
-            this.Plugin.diffuseMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.DiffuseColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.DiffuseColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.DiffuseColor.B * Byte.MaxValue));
+            this.Plugin.diffuseMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.DiffuseColor.X * Byte.MaxValue),
+                Convert.ToByte(mat.DiffuseColor.Y * Byte.MaxValue),
+                Convert.ToByte(mat.DiffuseColor.Z * Byte.MaxValue));
             this.Plugin.diffuseMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.diffuseMaxTextBox.BackColor);
-            this.Plugin.ambientMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.AmbientColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.AmbientColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.AmbientColor.B * Byte.MaxValue));
+            this.Plugin.ambientMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.AmbientColor.X * Byte.MaxValue),
+                Convert.ToByte(mat.AmbientColor.Y * Byte.MaxValue),
+                Convert.ToByte(mat.AmbientColor.Z * Byte.MaxValue));
             this.Plugin.ambientMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.ambientMaxTextBox.BackColor);
-            this.Plugin.specularMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.SpecularColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.SpecularColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.SpecularColor.B * Byte.MaxValue));
+            this.Plugin.specularMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.SpecularColor.X * Byte.MaxValue),
+                Convert.ToByte(mat.SpecularColor.Y * Byte.MaxValue),
+                Convert.ToByte(mat.SpecularColor.Z * Byte.MaxValue));
             this.Plugin.specularMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.specularMaxTextBox.BackColor);
-            this.Plugin.selfIllumMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.EmissiveColor.R * Byte.MaxValue),
-                Convert.ToByte(mat.EmissiveColor.G * Byte.MaxValue),
-                Convert.ToByte(mat.EmissiveColor.B * Byte.MaxValue));
+            this.Plugin.selfIllumMaxTextBox.BackColor = System.Drawing.Color.FromArgb(Convert.ToByte(mat.EmissiveColor.X * Byte.MaxValue),
+                Convert.ToByte(mat.EmissiveColor.Y * Byte.MaxValue),
+                Convert.ToByte(mat.EmissiveColor.Z * Byte.MaxValue));
             this.Plugin.selfIllumMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.selfIllumMaxTextBox.BackColor);
             this.Plugin.specularLevelMaxTextBox.Text = mat.SpecularExponent.ToString();
             this.Plugin.opacityMaxTextBox.Text = mat.Opacity.ToString();

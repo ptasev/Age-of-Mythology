@@ -1,89 +1,59 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Numerics;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Xml;
+    using System.Xml.Linq;
     using System.Xml.Serialization;
 
-    [XmlRootAttribute("Material", IsNullable = false)]
     public class MtrlFile
     {
+        private const string Zero = "0";
+        private const string IndentString = "    ";
+
         public uint[] unk; //5   
 
-        [XmlElement(ElementName = "diffuse")]
-        public Color3D Diffuse { get; set; }
-        [XmlElement(ElementName = "ambient")]
-        public Color3D Ambient { get; set; }
-        [XmlElement(ElementName = "specular")]
-        public Color3D Specular { get; set; }
-        [XmlElement(ElementName = "emissive")]
-        public Color3D Emissive { get; set; }
-        [XmlElement(ElementName = "specular_power")]
+        public Vector3 Diffuse { get; set; }
+        public Vector3 Ambient { get; set; }
+        public Vector3 Specular { get; set; }
+        public Vector3 Emissive { get; set; }
         public float SpecularLevel { get; set; }
-        [XmlElement(ElementName = "alpha")]
         public float Alpha { get; set; }
 
-        [XmlElement(ElementName = "id")]
         public int Id { get; set; }
 
-        [XmlElement(ElementName = "self_illuminating")]
         public byte SelfIlluminating { get; set; }
-        [XmlElement(ElementName = "clamp_u")]
         public byte ClampU { get; set; }
-        [XmlElement(ElementName = "clamp_v")]
         public byte ClampV { get; set; }
-        [XmlElement(ElementName = "light_specular")]
         public byte LightSpecular { get; set; }
-        [XmlElement(ElementName = "affects_ambient")]
         public byte AffectsAmbient { get; set; }
-        [XmlElement(ElementName = "affects_diffuse")]
         public byte AffectsDiffuse { get; set; }
-        [XmlElement(ElementName = "affects_specular")]
         public byte AffectsSpecular { get; set; }
-        [XmlElement(ElementName = "updateable")]
         public byte Updateable { get; set; }
 
-        [XmlElement(ElementName = "alpha_mode")]
         public int AlphaMode { get; set; } // Seems to be very often 10, wave has a 2 here, phoenix has 6
-        [XmlElement(ElementName = "ambient_intensity")]
         public float AmbientIntensity { get; set; }
-        [XmlElement(ElementName = "diffuse_intensity")]
         public float DiffuseIntensity { get; set; }
-        [XmlElement(ElementName = "specular_intensity")]
         public float SpecularIntensity { get; set; }
-        [XmlElement(ElementName = "emissive_intensity")]
         public float EmissiveIntensity { get; set; }
-        [XmlElement(ElementName = "color_transform")]
         public int ColorTransform { get; set; } // Val of 4 seems to be PC
-        [XmlElement(ElementName = "texture_transform")]
         public int TextureTransform { get; set; }
-        [XmlElement(ElementName = "texture_factor")]
         public uint TextureFactor { get; set; } // Has something to do with Cube Map
-        [XmlElement(ElementName = "multitexture_mode")]
         public int MultiTextureMode { get; set; } // Has something to do with Cube Map
-        [XmlElement(ElementName = "texgen_mode_0")]
         public int TexGenMode0 { get; set; }
-        [XmlElement(ElementName = "texgen_mode_1")]
         public int TexGenMode1 { get; set; } // Has something to do with Cube Map
-        [XmlElement(ElementName = "texcoord_set_0")]
         public int TexCoordSet0 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_1")]
         public int TexCoordSet1 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_2")]
         public int TexCoordSet2 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_3")]
         public int TexCoordSet3 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_4")]
         public int TexCoordSet4 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_5")]
         public int TexCoordSet5 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_6")]
         public int TexCoordSet6 { get; set; }
-        [XmlElement(ElementName = "texcoord_set_7")]
         public int TexCoordSet7 { get; set; }
         
         public int TextureIndex { get; set; }
@@ -96,7 +66,6 @@
 
         public int[] Reserved { get; set; }
 
-        [XmlElement(ElementName = "texture")]
         public string Texture { get; set; }
 
         public MtrlFile()
@@ -184,10 +153,10 @@
                     this.unk[i] = reader.ReadUInt32();
                 }
 
-                this.Diffuse = reader.ReadColor3D();
-                this.Ambient = reader.ReadColor3D();
-                this.Specular = reader.ReadColor3D();
-                this.Emissive = reader.ReadColor3D();
+                this.Diffuse = reader.ReadVector3D(false);
+                this.Ambient = reader.ReadVector3D(false);
+                this.Specular = reader.ReadVector3D(false);
+                this.Emissive = reader.ReadVector3D(false);
                 this.SpecularLevel = reader.ReadSingle();
                 this.Alpha = reader.ReadSingle();
 
@@ -254,10 +223,10 @@
                     writer.Write(this.unk[i]);
                 }
 
-                writer.WriteColor3D(this.Diffuse);
-                writer.WriteColor3D(this.Ambient);
-                writer.WriteColor3D(this.Specular);
-                writer.WriteColor3D(this.Emissive);
+                writer.WriteVector3D(this.Diffuse, false);
+                writer.WriteVector3D(this.Ambient, false);
+                writer.WriteVector3D(this.Specular, false);
+                writer.WriteVector3D(this.Emissive, false);
                 writer.Write(this.SpecularLevel);
                 writer.Write(this.Alpha);
 
@@ -314,20 +283,181 @@
 
         public void SerializeAsXml(Stream stream)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(MtrlFile));
-            using (TextWriter writer = new StreamWriter(stream))
+            XDocument xdoc = new XDocument(new XElement("Material"));
+            var elem = (XElement)xdoc.FirstNode;
+            elem.Add(new XElement("diffuse", new XAttribute("R", Diffuse.X), new XAttribute("G", Diffuse.Y), new XAttribute("B", Diffuse.Z)));
+            elem.Add(new XElement("ambient", new XAttribute("R", Ambient.X), new XAttribute("G", Ambient.Y), new XAttribute("B", Ambient.Z)));
+            elem.Add(new XElement("specular", new XAttribute("R", Specular.X), new XAttribute("G", Specular.Y), new XAttribute("B", Specular.Z)));
+            elem.Add(new XElement("emissive", new XAttribute("R", Emissive.X), new XAttribute("G", Emissive.Y), new XAttribute("B", Emissive.Z)));
+
+            elem.Add(new XElement("specular_power", SpecularLevel));
+            elem.Add(new XElement("alpha", Alpha));
+            elem.Add(new XElement("id", Id));
+            elem.Add(new XElement("self_illuminating", SelfIlluminating));
+            elem.Add(new XElement("clamp_u", ClampU));
+            elem.Add(new XElement("clamp_v", ClampV));
+
+            elem.Add(new XElement("light_specular", LightSpecular));
+            elem.Add(new XElement("affects_ambient", AffectsAmbient));
+            elem.Add(new XElement("affects_diffuse", AffectsDiffuse));
+            elem.Add(new XElement("affects_specular", AffectsSpecular));
+            elem.Add(new XElement("updateable", Updateable));
+            elem.Add(new XElement("alpha_mode", AlphaMode));
+
+            elem.Add(new XElement("ambient_intensity", AmbientIntensity));
+            elem.Add(new XElement("diffuse_intensity", DiffuseIntensity));
+            elem.Add(new XElement("specular_intensity", SpecularIntensity));
+            elem.Add(new XElement("emissive_intensity", EmissiveIntensity));
+
+            elem.Add(new XElement("color_transform", ColorTransform));
+            elem.Add(new XElement("texture_transform", TextureTransform));
+            elem.Add(new XElement("texture_factor", TextureFactor));
+            elem.Add(new XElement("multitexture_mode", MultiTextureMode));
+
+            elem.Add(new XElement("texgen_mode_0", TexGenMode0));
+            elem.Add(new XElement("texgen_mode_1", TexGenMode1));
+            elem.Add(new XElement("texcoord_set_0", TexCoordSet0));
+            elem.Add(new XElement("texcoord_set_1", TexCoordSet1));
+            elem.Add(new XElement("texcoord_set_2", TexCoordSet2));
+            elem.Add(new XElement("texcoord_set_3", TexCoordSet3));
+            elem.Add(new XElement("texcoord_set_4", TexCoordSet4));
+            elem.Add(new XElement("texcoord_set_5", TexCoordSet5));
+            elem.Add(new XElement("texcoord_set_6", TexCoordSet6));
+            elem.Add(new XElement("texcoord_set_7", TexCoordSet7));
+
+            elem.Add(new XElement("texture", Texture));
+
+            XmlWriterSettings settings = new XmlWriterSettings
             {
-                serializer.Serialize(writer, this);
+                Indent = true,
+                IndentChars = IndentString,
+                CloseOutput = false
+            };
+            using (XmlWriter writer = XmlWriter.Create(stream, settings))
+            {
+                xdoc.Save(writer);
             }
         }
 
         public static MtrlFile DeserializeAsXml(Stream stream)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(MtrlFile));
-            using (TextReader reader = new StreamReader(stream))
+            MtrlFile file = new MtrlFile();
+            XDocument xdoc = XDocument.Load(stream);
+            XElement elem = xdoc.Root;
+
+            foreach (var e in elem.Elements())
             {
-                return (MtrlFile)deserializer.Deserialize(reader);
+                switch (e.Name.LocalName)
+                {
+                    case "diffuse":
+                        file.Diffuse = new Vector3(float.Parse(e.Attribute("R")?.Value ?? Zero), float.Parse(e.Attribute("G")?.Value ?? Zero), float.Parse(e.Attribute("B")?.Value ?? Zero));
+                        break;
+                    case "ambient":
+                        file.Ambient = new Vector3(float.Parse(e.Attribute("R")?.Value ?? Zero), float.Parse(e.Attribute("G")?.Value ?? Zero), float.Parse(e.Attribute("B")?.Value ?? Zero));
+                        break;
+                    case "specular":
+                        file.Specular = new Vector3(float.Parse(e.Attribute("R")?.Value ?? Zero), float.Parse(e.Attribute("G")?.Value ?? Zero), float.Parse(e.Attribute("B")?.Value ?? Zero));
+                        break;
+                    case "emissive":
+                        file.Emissive = new Vector3(float.Parse(e.Attribute("R")?.Value ?? Zero), float.Parse(e.Attribute("G")?.Value ?? Zero), float.Parse(e.Attribute("B")?.Value ?? Zero));
+                        break;
+                    case "specular_power":
+                        file.SpecularLevel = float.Parse(e.Value);
+                        break;
+                    case "alpha":
+                        file.Alpha = float.Parse(e.Value);
+                        break;
+                    case "id":
+                        file.Id = int.Parse(e.Value);
+                        break;
+                    case "self_illuminating":
+                        file.SelfIlluminating = byte.Parse(e.Value);
+                        break;
+                    case "clamp_u":
+                        file.ClampU = byte.Parse(e.Value);
+                        break;
+                    case "clamp_v":
+                        file.ClampV = byte.Parse(e.Value);
+                        break;
+                    case "light_specular":
+                        file.LightSpecular = byte.Parse(e.Value);
+                        break;
+                    case "affects_ambient":
+                        file.AffectsAmbient = byte.Parse(e.Value);
+                        break;
+                    case "affects_diffuse":
+                        file.AffectsDiffuse = byte.Parse(e.Value);
+                        break;
+                    case "affects_specular":
+                        file.AffectsSpecular = byte.Parse(e.Value);
+                        break;
+                    case "updateable":
+                        file.Updateable = byte.Parse(e.Value);
+                        break;
+                    case "alpha_mode":
+                        file.AlphaMode = int.Parse(e.Value);
+                        break;
+                    case "ambient_intensity":
+                        file.AmbientIntensity = float.Parse(e.Value);
+                        break;
+                    case "diffuse_intensity":
+                        file.DiffuseIntensity = float.Parse(e.Value);
+                        break;
+                    case "specular_intensity":
+                        file.SpecularIntensity = float.Parse(e.Value);
+                        break;
+                    case "emissive_intensity":
+                        file.EmissiveIntensity = float.Parse(e.Value);
+                        break;
+                    case "color_transform":
+                        file.ColorTransform = int.Parse(e.Value);
+                        break;
+                    case "texture_transform":
+                        file.TextureTransform = int.Parse(e.Value);
+                        break;
+                    case "texture_factor":
+                        file.TextureFactor = uint.Parse(e.Value);
+                        break;
+                    case "multitexture_mode":
+                        file.MultiTextureMode = int.Parse(e.Value);
+                        break;
+                    case "texgen_mode_0":
+                        file.TexGenMode0 = int.Parse(e.Value);
+                        break;
+                    case "texgen_mode_1":
+                        file.TexGenMode1 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_0":
+                        file.TexCoordSet0 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_1":
+                        file.TexCoordSet1 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_2":
+                        file.TexCoordSet2 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_3":
+                        file.TexCoordSet3 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_4":
+                        file.TexCoordSet4 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_5":
+                        file.TexCoordSet5 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_6":
+                        file.TexCoordSet6 = int.Parse(e.Value);
+                        break;
+                    case "texcoord_set_7":
+                        file.TexCoordSet7 = int.Parse(e.Value);
+                        break;
+                    case "texture":
+                        file.Texture = e.Value;
+                        break;
+                }
             }
+
+            return file;
         }
     }
 }

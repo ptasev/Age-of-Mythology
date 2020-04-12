@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Numerics;
     using System.Xml.Serialization;
     using XmlCommentSerialization;
 
@@ -14,8 +15,8 @@
         public Int32 FrameHeight { get; set; }
         [XmlComment]
         public PrtMaterialType MaterialType { get; set; }
-        public Texel Emissive { get; set; }
-        public Texel Specular { get; set; }
+        public Vector4 Emissive { get; set; }
+        public Vector4 Specular { get; set; }
         public float SpecularExponent { get; set; }
         public float FramesPerSecond { get; set; }
         public float AnimationRate { get; set; }

@@ -61,25 +61,14 @@
         }
         #endregion
 
-        public void WriteColor3D(Color3D color)
+        public void WriteTexel(Vector4 t)
         {
-            this.Write(color.R);
-            this.Write(color.G);
-            this.Write(color.B);
-        }
-        public void WriteColor4D(Color4D color)
-        {
-            this.Write(color.R);
-            this.Write(color.G);
-            this.Write(color.B);
-            this.Write(color.A);
-        }
-        public void WriteTexel(Texel t)
-        {
-            this.Write(t.B);
-            this.Write(t.G);
-            this.Write(t.R);
-            this.Write(t.A);
+            var res = Vector4.Clamp(t * 255, Vector4.Zero, Vector4.One);
+
+            this.Write((byte)res.X);
+            this.Write((byte)res.Y);
+            this.Write((byte)res.Z);
+            this.Write((byte)res.W);
         }
 
         public void WriteHalf(float half)

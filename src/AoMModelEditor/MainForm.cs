@@ -12,6 +12,7 @@ namespace AoMModelEditor
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Numerics;
     using System.Windows.Forms;
     using System.Xml;
 
@@ -510,15 +511,15 @@ namespace AoMModelEditor
                 this.SetCheckedListBoxSelectedEnums<BrgMeshFormat>(clb, (UInt16)e.Value);
                 e.Control = clb;
             }
-            else if (e.Value is Color3D)
+            else if (e.Value is Vector3)
             {
                 ThemeColorPicker tcp = new ThemeColorPicker();
                 tcp.Location = new Point(e.CellBounds.Left, e.CellBounds.Bottom);
 
-                Color3D col = (Color3D)e.Value;
-                tcp.Color = Color.FromArgb(Convert.ToByte(col.R * Byte.MaxValue),
-                    Convert.ToByte(col.G * Byte.MaxValue),
-                    Convert.ToByte(col.B * Byte.MaxValue));
+                Vector3 col = (Vector3)e.Value;
+                tcp.Color = Color.FromArgb(Convert.ToByte(col.X * Byte.MaxValue),
+                    Convert.ToByte(col.Y * Byte.MaxValue),
+                    Convert.ToByte(col.Z * Byte.MaxValue));
                 e.Control = tcp;
             }
         }
@@ -553,21 +554,21 @@ namespace AoMModelEditor
                 e.NewValue = this.GetCheckedListBoxSelectedEnums<BrgMeshFormat>((CheckedListBox)e.Control);
                 //e.Cancel = true;
             }
-            else if (e.Value is Color3D)
+            else if (e.Value is Vector3)
             {
                 Color c = ((ThemeColorPicker)e.Control).Color;
-                e.NewValue = new Color3D((float)c.R / byte.MaxValue, (float)c.G / byte.MaxValue, (float)c.B / byte.MaxValue);
+                e.NewValue = new Vector3((float)c.R / byte.MaxValue, (float)c.G / byte.MaxValue, (float)c.B / byte.MaxValue);
             }
         }
 
         private void objectListView1_FormatCell(object sender, FormatCellEventArgs e)
         {
-            if (e.CellValue is Color3D)
+            if (e.CellValue is Vector3)
             {
-                Color3D col = (Color3D)e.CellValue;
-                e.SubItem.BackColor = Color.FromArgb(Convert.ToByte(col.R * Byte.MaxValue),
-                    Convert.ToByte(col.G * Byte.MaxValue),
-                    Convert.ToByte(col.B * Byte.MaxValue));
+                Vector3 col = (Vector3)e.CellValue;
+                e.SubItem.BackColor = Color.FromArgb(Convert.ToByte(col.X * Byte.MaxValue),
+                    Convert.ToByte(col.Y * Byte.MaxValue),
+                    Convert.ToByte(col.Z * Byte.MaxValue));
                 //e.SubItem.ForeColor = this.ContrastColor(e.SubItem.BackColor);
                 e.SubItem.Text = string.Empty;
             }

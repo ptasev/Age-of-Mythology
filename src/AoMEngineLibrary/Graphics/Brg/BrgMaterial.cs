@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Numerics;
     using System.Text;
 
     public class BrgMaterial : IEquatable<BrgMaterial>
@@ -23,10 +24,10 @@
         public BrgMatFlag Flags { get; set; }
         public int unknown01b;
 
-        public Color3D DiffuseColor { get; set; }
-        public Color3D AmbientColor { get; set; }
-        public Color3D SpecularColor { get; set; }
-        public Color3D EmissiveColor { get; set; }
+        public Vector3 DiffuseColor { get; set; }
+        public Vector3 AmbientColor { get; set; }
+        public Vector3 SpecularColor { get; set; }
+        public Vector3 EmissiveColor { get; set; }
         public float Opacity { get; set; }
         public float SpecularExponent { get; set; }
 
@@ -41,10 +42,10 @@
             Flags = (BrgMatFlag)reader.ReadInt32();
             unknown01b = reader.ReadInt32();
             int nameLength = reader.ReadInt32();
-            this.DiffuseColor = reader.ReadColor3D();
-            this.AmbientColor = reader.ReadColor3D();
-            this.SpecularColor = reader.ReadColor3D();
-            this.EmissiveColor = reader.ReadColor3D();
+            this.DiffuseColor = reader.ReadVector3D(false);
+            this.AmbientColor = reader.ReadVector3D(false);
+            this.SpecularColor = reader.ReadVector3D(false);
+            this.EmissiveColor = reader.ReadVector3D(false);
 
             this.DiffuseMap = reader.ReadString(nameLength);
             if (Flags.HasFlag(BrgMatFlag.SpecularExponent))
@@ -81,10 +82,10 @@
             this.Flags = 0;
             this.unknown01b = 0;
 
-            this.DiffuseColor = new Color3D(1f);
-            this.AmbientColor = new Color3D(1f);
-            this.SpecularColor = new Color3D(0f);
-            this.EmissiveColor = new Color3D(0f);
+            this.DiffuseColor = Vector3.One;
+            this.AmbientColor = Vector3.One;
+            this.SpecularColor = Vector3.Zero;
+            this.EmissiveColor = Vector3.Zero;
 
             this.Opacity = 1f;
             this.SpecularExponent = 0f;
@@ -103,10 +104,10 @@
             writer.Write(this.unknown01b);
             writer.Write(Encoding.UTF8.GetByteCount(this.DiffuseMap));
 
-            writer.WriteColor3D(this.DiffuseColor);
-            writer.WriteColor3D(this.AmbientColor);
-            writer.WriteColor3D(this.SpecularColor);
-            writer.WriteColor3D(this.EmissiveColor);
+            writer.WriteVector3D(this.DiffuseColor, false);
+            writer.WriteVector3D(this.AmbientColor, false);
+            writer.WriteVector3D(this.SpecularColor, false);
+            writer.WriteVector3D(this.EmissiveColor, false);
 
             writer.WriteString(this.DiffuseMap, 0);
 

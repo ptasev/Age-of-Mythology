@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Numerics;
     using System.Text;
 
     public class PrtBinaryReader : BinaryReader
@@ -12,14 +13,10 @@
         {
         }
 
-        public Texel ReadTexel()
+        public Vector4 ReadTexel()
         {
-            Texel t = new Texel();
-            t.B = this.ReadByte();
-            t.G = this.ReadByte();
-            t.R = this.ReadByte();
-            t.A = this.ReadByte();
-            return t;
+            return Vector4.Clamp(new Vector4(this.ReadByte() / 255.0f, this.ReadByte() / 255.0f, this.ReadByte() / 255.0f, this.ReadByte() / 255.0f),
+                Vector4.Zero, Vector4.One);
         }
 
         public new string ReadString()

@@ -158,7 +158,7 @@ namespace AoMModelViewer
                     else
                     {
                         mat.PbrMetallicRoughness.BaseColorFactor =
-                            new float[] { brgMat.DiffuseColor.R, brgMat.DiffuseColor.G, brgMat.DiffuseColor.B, brgMat.Opacity };
+                            new float[] { brgMat.DiffuseColor.X, brgMat.DiffuseColor.Y, brgMat.DiffuseColor.Z, brgMat.Opacity };
                     }
 
                     brgMatGltfMatIndexMap.Add(brgMat.Id, materials.Count);
@@ -740,7 +740,7 @@ namespace AoMModelViewer
 
                     foreach (int index in Indices)
                     {
-                        Vector3 vec = mesh.TextureCoordinates[index];
+                        Vector2 vec = mesh.TextureCoordinates[index];
 
                         writer.Write(vec.X);
                         writer.Write(1.0f - vec.Y);

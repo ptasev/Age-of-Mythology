@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Numerics;
     using System.Xml.Serialization;
 
     public class PrtColor
@@ -13,10 +14,10 @@
         public float CycleTime { get; set; }
         public float CycleTimeVar { get; set; }
         public float WorldLightingInfluence { get; set; }
-        public Texel Color { get; set; }
+        public Vector4 Color { get; set; }
 
         [XmlArrayItem("Color")]
-        public List<Texel> PaletteColors
+        public List<Vector4> PaletteColors
         {
             get;
             set;
@@ -30,7 +31,7 @@
 
         public PrtColor()
         {
-            PaletteColors = new List<Texel>();
+            PaletteColors = new List<Vector4>();
             ColorStages = new List<PrtColorStage>();
         }
         public PrtColor(PrtBinaryReader reader)
@@ -46,7 +47,7 @@
             this.WorldLightingInfluence = reader.ReadSingle();
             this.Color = reader.ReadTexel();
 
-            this.PaletteColors = new List<Texel>(this.NumPaletteColors);
+            this.PaletteColors = new List<Vector4>(this.NumPaletteColors);
             this.ColorStages = new List<PrtColorStage>(this.NumStages);
         }
 

@@ -18,7 +18,7 @@
         public List<BrgFace> Faces { get; set; }
 
         public List<Vector2> TextureCoordinates { get; set; }
-        public List<Color4D> Colors { get; set; }
+        public List<Vector4> Colors { get; set; }
         public List<Int16> VertexMaterials { get; set; }
 
         public BrgMeshExtendedHeader ExtendedHeader { get; set; }
@@ -40,7 +40,7 @@
             this.Faces = new List<BrgFace>();
 
             this.TextureCoordinates = new List<Vector2>();
-            this.Colors = new List<Color4D>();
+            this.Colors = new List<Vector4>();
             this.VertexMaterials = new List<Int16>();
 
             this.ExtendedHeader = new BrgMeshExtendedHeader();
@@ -228,7 +228,7 @@
                 !this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
                 this.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
             {
-                this.Colors = new List<Color4D>(this.Header.NumVertices);
+                this.Colors = new List<Vector4>(this.Header.NumVertices);
                 for (int i = 0; i < this.Header.NumVertices; i++)
                 {
                     this.Colors.Add(reader.ReadTexel());
