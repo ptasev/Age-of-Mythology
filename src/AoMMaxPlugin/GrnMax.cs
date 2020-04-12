@@ -587,7 +587,7 @@
                 int numBVerts = Maxscript.QueryInteger("grnSkinWeights.count");
                 for (int i = 0; i < numBVerts; ++i)
                 {
-                    mesh.VertexWeights.Add(new VertexWeight());
+                    mesh.VertexWeights.Add(new GrnVertexWeight());
                     Maxscript.Command("skinWeightArray = grnSkinWeights[{0}]", i + 1);
                     int numVWs = Maxscript.QueryInteger("skinWeightArray.count");
                     for (int j = 0; j < numVWs; ++j)

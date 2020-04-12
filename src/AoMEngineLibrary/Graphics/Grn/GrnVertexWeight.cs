@@ -1,4 +1,4 @@
-﻿namespace AoMEngineLibrary.Graphics.Model
+﻿namespace AoMEngineLibrary.Graphics.Grn
 {
     using System;
     using System.Collections.Generic;
@@ -6,12 +6,12 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class VertexWeight
+    public class GrnVertexWeight
     {
         public List<int> BoneIndices { get; set; }
         public List<float> Weights { get; set; }
 
-        public VertexWeight()
+        public GrnVertexWeight()
         {
             this.BoneIndices = new List<int>();
             this.Weights = new List<float>();

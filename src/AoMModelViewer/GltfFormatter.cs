@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Model;
 using glTFLoader.Schema;
 using System;
 using System.Collections.Generic;

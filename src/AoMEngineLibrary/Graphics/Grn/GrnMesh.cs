@@ -1,7 +1,6 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn
 {
     using AoMEngineLibrary.Graphics.Grn.Nodes;
-    using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -28,7 +27,7 @@
 
         public List<Vector3> TextureCoordinates { get; set; }
 
-        public List<VertexWeight> VertexWeights { get; set; }
+        public List<GrnVertexWeight> VertexWeights { get; set; }
         public List<GrnBoneBinding> BoneBindings { get; set; }
 
         public GrnMesh(GrnFile parentFile)
@@ -38,7 +37,7 @@
             this.Normals = new List<Vector3>();
             this.Faces = new List<GrnFace>();
             this.TextureCoordinates = new List<Vector3>();
-            this.VertexWeights = new List<VertexWeight>();
+            this.VertexWeights = new List<GrnVertexWeight>();
             this.BoneBindings = new List<GrnBoneBinding>();
         }
 

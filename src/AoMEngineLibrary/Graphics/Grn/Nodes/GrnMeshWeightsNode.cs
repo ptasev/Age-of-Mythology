@@ -1,6 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn.Nodes
 {
-    using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -13,7 +12,7 @@
     {
         public Int32 HighestBoneIndex { get; set; }
         public Int32 HighestVertexWeightCount { get; set; }
-        public List<VertexWeight> VertexWeights
+        public List<GrnVertexWeight> VertexWeights
         {
             get;
             set;
@@ -24,7 +23,7 @@
         {
             this.HighestBoneIndex = 0;
             this.HighestVertexWeightCount = 0;
-            this.VertexWeights = new List<VertexWeight>();
+            this.VertexWeights = new List<GrnVertexWeight>();
         }
 
         public override void ReadData(GrnBinaryReader reader, int directoryOffset)
@@ -35,7 +34,7 @@
             this.HighestVertexWeightCount = reader.ReadInt32(); // unknown (2 Jormund.grn)
             for (int i = 0; i < weightsCount; ++i)
             {
-                this.VertexWeights.Add(new VertexWeight());
+                this.VertexWeights.Add(new GrnVertexWeight());
                 int boneCount = reader.ReadInt32();
                 for (int j = 0; j < boneCount; ++j)
                 {

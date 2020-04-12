@@ -1,6 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Grn
 {
-    using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.IO;
     using System.Numerics;

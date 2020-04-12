@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Model;
 using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;

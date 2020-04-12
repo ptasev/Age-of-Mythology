@@ -1,6 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using AoMEngineLibrary.Graphics.Model;
     using Extensions;
     using Newtonsoft.Json;
     using System;

@@ -3,7 +3,6 @@
     using AoMEngineLibrary.Extensions;
     using AoMEngineLibrary.Graphics;
     using AoMEngineLibrary.Graphics.Brg;
-    using AoMEngineLibrary.Graphics.Model;
     using System;
     using System.Collections.Generic;
     using System.IO;
