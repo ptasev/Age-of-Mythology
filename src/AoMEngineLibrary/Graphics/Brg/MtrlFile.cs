@@ -67,6 +67,11 @@
         public int[] Reserved { get; set; }
 
         public string Texture { get; set; }
+        public string SecondaryTexture { get; set; }
+        public string BumpMap { get; set; }
+        public string SpecMap { get; set; }
+        public string GlossMap { get; set; }
+        public string EmissiveMap { get; set; }
 
         public MtrlFile()
         {
@@ -96,6 +101,11 @@
             Reserved = new int[4];
 
             Texture = string.Empty;
+            SecondaryTexture = string.Empty;
+            BumpMap = string.Empty;
+            SpecMap = string.Empty;
+            GlossMap = string.Empty;
+            EmissiveMap = string.Empty;
         }
         public MtrlFile(BrgMaterial mat)
             : this()
@@ -148,10 +158,11 @@
                 }
 
                 uint nameLength = reader.ReadUInt32();
-                for (int i = 0; i < 5; ++i)
-                {
-                    this.unk[i] = reader.ReadUInt32();
-                }
+                uint secondaryTextureLength = reader.ReadUInt32();
+                uint bumpmapLength = reader.ReadUInt32();
+                uint specmapLength = reader.ReadUInt32();
+                uint glossmapLength = reader.ReadUInt32();
+                uint emissivemapLength = reader.ReadUInt32();
 
                 this.Diffuse = reader.ReadVector3D(false);
                 this.Ambient = reader.ReadVector3D(false);
@@ -208,6 +219,31 @@
                 {
                     this.Texture = reader.ReadString();
                 }
+
+                if (secondaryTextureLength > 0)
+                {
+                    this.SecondaryTexture = reader.ReadString();
+                }
+
+                if (bumpmapLength > 0)
+                {
+                    this.BumpMap = reader.ReadString();
+                }
+
+                if (specmapLength > 0)
+                {
+                    this.SpecMap = reader.ReadString();
+                }
+
+                if (glossmapLength > 0)
+                {
+                    this.GlossMap = reader.ReadString();
+                }
+
+                if (emissivemapLength > 0)
+                {
+                    this.EmissiveMap = reader.ReadString();
+                }
             }
         }
 
@@ -216,12 +252,19 @@
             using (BrgBinaryWriter writer = new BrgBinaryWriter(stream, true))
             {
                 writer.Write(1280463949); // MTRL
-                UInt32 nameLength = (UInt32)Encoding.UTF8.GetByteCount(this.Texture);
+
+                var nameLength = (UInt32)Encoding.UTF8.GetByteCount(this.Texture);
+                var sectexLength = (UInt32)Encoding.UTF8.GetByteCount(this.SecondaryTexture);
+                var bumpmapLength = (UInt32)Encoding.UTF8.GetByteCount(this.BumpMap);
+                var specmapLength = (UInt32)Encoding.UTF8.GetByteCount(this.SpecMap);
+                var glossmapLength = (UInt32)Encoding.UTF8.GetByteCount(this.GlossMap);
+                var emissivemapLength = (UInt32)Encoding.UTF8.GetByteCount(this.EmissiveMap);
                 writer.Write(nameLength);
-                for (int i = 0; i < 5; ++i)
-                {
-                    writer.Write(this.unk[i]);
-                }
+                writer.Write(sectexLength);
+                writer.Write(bumpmapLength);
+                writer.Write(specmapLength);
+                writer.Write(glossmapLength);
+                writer.Write(emissivemapLength);
 
                 writer.WriteVector3D(this.Diffuse, false);
                 writer.WriteVector3D(this.Ambient, false);
@@ -278,6 +321,31 @@
                 {
                     writer.WriteString(this.Texture);
                 }
+
+                if (sectexLength > 0)
+                {
+                    writer.WriteString(this.SecondaryTexture);
+                }
+
+                if (bumpmapLength > 0)
+                {
+                    writer.WriteString(this.BumpMap);
+                }
+
+                if (specmapLength > 0)
+                {
+                    writer.WriteString(this.SpecMap);
+                }
+
+                if (glossmapLength > 0)
+                {
+                    writer.WriteString(this.GlossMap);
+                }
+
+                if (emissivemapLength > 0)
+                {
+                    writer.WriteString(this.EmissiveMap);
+                }
             }
         }
 
@@ -326,6 +394,11 @@
             elem.Add(new XElement("texcoord_set_7", TexCoordSet7));
 
             elem.Add(new XElement("texture", Texture));
+            elem.Add(new XElement("secondary_texture", SecondaryTexture));
+            elem.Add(new XElement("bumpmap", BumpMap));
+            elem.Add(new XElement("specmap", SpecMap));
+            elem.Add(new XElement("glossmap", GlossMap));
+            elem.Add(new XElement("emissivemap", EmissiveMap));
 
             XmlWriterSettings settings = new XmlWriterSettings
             {
@@ -453,6 +526,21 @@
                         break;
                     case "texture":
                         file.Texture = e.Value;
+                        break;
+                    case "secondary_texture":
+                        file.SecondaryTexture = e.Value;
+                        break;
+                    case "bumpmap":
+                        file.BumpMap = e.Value;
+                        break;
+                    case "specmap":
+                        file.SpecMap = e.Value;
+                        break;
+                    case "glossmap":
+                        file.GlossMap = e.Value;
+                        break;
+                    case "emissivemap":
+                        file.EmissiveMap = e.Value;
                         break;
                 }
             }

@@ -144,7 +144,11 @@ struct
 {
     uint magic;
     uint nameLength;
-    uint unk[5];    
+    uint secTexLength;
+    uint bumpMapLength;
+    uint specMapLength;
+    uint glossMapLength;
+    uint emissiveMapLength;
 
     float diffuse[3];
     float ambient[3];
@@ -192,5 +196,22 @@ struct
     int emissiveMapIndex;
 
     int reserved[4];
-    string name;
+
+    if (nameLength > 0)
+        string texture;
+    
+    if (secTexLength > 0)
+        string secondaryTexture;
+
+    if (bumpMapLength > 0)
+        string bumpMap;
+
+    if (specMapLength > 0)
+        string specMap;
+
+    if (glossMapLength > 0)
+        string glossMap;
+
+    if (emissiveMapLength > 0)
+        string emissiveMap;
 } file;
