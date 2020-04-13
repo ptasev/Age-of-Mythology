@@ -77,7 +77,7 @@
 
         public static GrnNode ReadByNodeType(GrnBinaryReader reader, GrnNode? parentNode, GrnNodeType nodeType)
         {
-            GrnNode node;
+            GrnNode? node = null;
             if (nodeType == GrnNodeType.FileDirectory)
             {
                 node = new GrnMainNode();
@@ -96,6 +96,178 @@
             {
                 node = new GrnStringTableNode(parentNode);
             }
+            else if (nodeType == GrnNodeType.NullTerminator)
+            {
+                // Null-terminator has no data
+                node = new GrnNode(parentNode, nodeType);
+            }
+            else if (nodeType == GrnNodeType.DataExtensionReference)
+            {
+                node = new GrnDataExtensionReferenceNode(parentNode);
+            }
+            else if (parentNode.NodeType == GrnNodeType.VersionFrameDirectory)
+            {
+                if (nodeType == GrnNodeType.VersionSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.StandardFrameDirectory)
+            {
+                if (nodeType == GrnNodeType.DataExtensionSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.VectorChannelSection)
+                {
+                    // I haven't seen this node have data yet
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.TransformChannelSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.SkeletonSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.MeshSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.TextureSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.MaterialSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.FormSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.ModelSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.AnimationSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.VersionSection)
+            {
+                if (nodeType == GrnNodeType.ExporterVersion)
+                {
+                    // Has data (3 ints) and a child
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.RuntimeVersion)
+                {
+                    // Has data (4 ints)
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.ExporterVersion)
+            {
+                if (nodeType == GrnNodeType.ModelerAxisSystem)
+                {
+                    // Has data (3 floats for origin, 3 for right vec, 3 for up vec, 3 for back vec)
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.DataExtensionSection)
+            {
+                if (nodeType == GrnNodeType.DataExtension)
+                {
+                    // Has data (2 ints), has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.DataExtension)
+            {
+                if (nodeType == GrnNodeType.DataExtensionPropertySection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.DataExtensionPropertySection)
+            {
+                if (nodeType == GrnNodeType.DataExtensionProperty)
+                {
+                    node = new GrnDataExtensionPropertyNode(parentNode);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.DataExtensionProperty)
+            {
+                if (nodeType == GrnNodeType.DataExtensionValueSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.DataExtensionValueSection)
+            {
+                if (nodeType == GrnNodeType.DataExtensionPropertyValue)
+                {
+                    node = new GrnDataExtensionPropertyValueNode(parentNode);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.TransformChannelSection)
+            {
+                if (nodeType == GrnNodeType.TransformChannel)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.TransformChannel)
+            {
+            }
+            else if (parentNode.NodeType == GrnNodeType.MeshSection)
+            {
+                if (nodeType == GrnNodeType.Mesh)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.Mesh)
+            {
+                if (nodeType == GrnNodeType.MeshVertexSetSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.MeshWeights)
+                {
+                    node = new GrnMeshWeightsNode(parentNode);
+                }
+                else if (nodeType == GrnNodeType.MeshTriangles)
+                {
+                    node = new GrnMeshTrianglesNode(parentNode);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.MeshVertexSetSection)
+            {
+                if (nodeType == GrnNodeType.MeshVertexSet)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
             else if (parentNode.NodeType == GrnNodeType.MeshVertexSet)
             {
                 if (nodeType == GrnNodeType.MeshVertices)
@@ -106,75 +278,227 @@
                 {
                     node = new GrnMeshNormalsNode(parentNode);
                 }
-                else
+                else if (nodeType == GrnNodeType.MeshFieldSection)
                 {
+                    // No data, has children
                     node = new GrnNode(parentNode, nodeType);
                 }
             }
-            else if (nodeType == GrnNodeType.MeshField)
+            else if (parentNode.NodeType == GrnNodeType.MeshFieldSection)
             {
-                node = new GrnMeshFieldNode(parentNode);
+                if (nodeType == GrnNodeType.MeshField)
+                {
+                    node = new GrnMeshFieldNode(parentNode);
+                }
             }
-            else if (nodeType == GrnNodeType.MeshWeights)
+            else if (parentNode.NodeType == GrnNodeType.SkeletonSection)
             {
-                node = new GrnMeshWeightsNode(parentNode);
+                if (nodeType == GrnNodeType.Skeleton)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.MeshTriangles)
+            else if (parentNode.NodeType == GrnNodeType.Skeleton)
             {
-                node = new GrnMeshTrianglesNode(parentNode);
+                if (nodeType == GrnNodeType.BoneSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.DataExtensionProperty)
+            else if (parentNode.NodeType == GrnNodeType.BoneSection)
             {
-                node = new GrnDataExtensionPropertyNode(parentNode);
+                if (nodeType == GrnNodeType.Bone)
+                {
+                    node = new GrnBoneNode(parentNode);
+                }
             }
-            else if (nodeType == GrnNodeType.DataExtensionPropertyValue)
+            else if (parentNode.NodeType == GrnNodeType.TextureSection)
             {
-                node = new GrnDataExtensionPropertyValueNode(parentNode);
+                if (nodeType == GrnNodeType.TextureMap)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.DataExtensionReference)
+            else if (parentNode.NodeType == GrnNodeType.TextureMap)
             {
-                node = new GrnDataExtensionReferenceNode(parentNode);
+                if (nodeType == GrnNodeType.TextureImageSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.Bone)
+            else if (parentNode.NodeType == GrnNodeType.TextureImageSection)
             {
-                node = new GrnBoneNode(parentNode);
+                if (nodeType == GrnNodeType.TextureMapImage)
+                {
+                    node = new GrnTextureMapImageNode(parentNode);
+                }
             }
-            else if (nodeType == GrnNodeType.MaterialSimpleDiffuseTexture)
+            else if (parentNode.NodeType == GrnNodeType.MaterialSection)
             {
-                node = new GrnMaterialSimpleDiffuseTextureNode(parentNode);
+                if (nodeType == GrnNodeType.Material)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.FormBoneChannels)
+            else if (parentNode.NodeType == GrnNodeType.Material)
             {
-                node = new GrnFormBoneChannelsNode(parentNode);
+                if (nodeType == GrnNodeType.MaterialSimpleDiffuseTexture)
+                {
+                    node = new GrnMaterialSimpleDiffuseTextureNode(parentNode);
+                }
             }
-            else if (nodeType == GrnNodeType.FormMesh)
+            else if (parentNode.NodeType == GrnNodeType.FormSection)
             {
-                node = new GrnFormMeshNode(parentNode);
+                if (nodeType == GrnNodeType.Form)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.FormMeshBone)
+            else if (parentNode.NodeType == GrnNodeType.Form)
             {
-                node = new GrnFormMeshBoneNode(parentNode);
+                if (nodeType == GrnNodeType.FormSkeletonSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.FormMeshSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.RenderPass)
+            else if (parentNode.NodeType == GrnNodeType.FormSkeletonSection)
             {
-                node = new GrnRenderPassNode(parentNode);
+                if (nodeType == GrnNodeType.FormSkeleton)
+                {
+                    // Has data (1 int), has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.RenderPassTriangles)
+            else if (parentNode.NodeType == GrnNodeType.FormSkeleton)
             {
-                node = new GrnRenderPassTrianglesNode(parentNode);
+                if (nodeType == GrnNodeType.FormBoneChannels)
+                {
+                    node = new GrnFormBoneChannelsNode(parentNode);
+                }
+                else if (nodeType == GrnNodeType.FormPoseWeights)
+                {
+                    // I haven't seen this node have data yet
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else if (nodeType == GrnNodeType.AnimationTransformTrackKeys)
+            else if (parentNode.NodeType == GrnNodeType.FormMeshSection)
             {
-                node = new GrnAnimationTransformTrackKeysNode(parentNode);
+                if (nodeType == GrnNodeType.FormMesh)
+                {
+                    node = new GrnFormMeshNode(parentNode);
+                }
             }
-            else if (nodeType == GrnNodeType.TextureMapImage)
+            else if (parentNode.NodeType == GrnNodeType.FormMesh)
             {
-                node = new GrnTextureMapImageNode(parentNode);
+                if (nodeType == GrnNodeType.FormVertexSetWeights)
+                {
+                    // I haven't seen this node have data yet
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.FormMeshBoneSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
             }
-            else
+            else if (parentNode.NodeType == GrnNodeType.FormMeshBoneSection)
             {
-                node = new GrnNode(parentNode, nodeType);
+                if (nodeType == GrnNodeType.FormMeshBone)
+                {
+                    node = new GrnFormMeshBoneNode(parentNode);
+                }
             }
+            else if (parentNode.NodeType == GrnNodeType.ModelSection)
+            {
+                if (nodeType == GrnNodeType.Model)
+                {
+                    // Has data (1 int), has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.Model)
+            {
+                if (nodeType == GrnNodeType.RenderPassSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.RenderPassSection)
+            {
+                if (nodeType == GrnNodeType.RenderPass)
+                {
+                    node = new GrnRenderPassNode(parentNode);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.RenderPass)
+            {
+                if (nodeType == GrnNodeType.RenderPassFieldSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.RenderPassTriangles)
+                {
+                    node = new GrnRenderPassTrianglesNode(parentNode);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.RenderPassFieldSection)
+            {
+                if (nodeType == GrnNodeType.RenderPassFieldConstant)
+                {
+                    // Has data (3 floats), no children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.RenderPassFieldAssignment)
+                {
+                    // Has data (1 int), no children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.AnimationSection)
+            {
+                if (nodeType == GrnNodeType.Animation)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.Animation)
+            {
+                if (nodeType == GrnNodeType.AnimationVectorTrackSection)
+                {
+                    // I haven't seen this node have data yet
+                    node = new GrnNode(parentNode, nodeType);
+                }
+                else if (nodeType == GrnNodeType.AnimationTransformTrackSection)
+                {
+                    // No data, has children
+                    node = new GrnNode(parentNode, nodeType);
+                }
+            }
+            else if (parentNode.NodeType == GrnNodeType.AnimationTransformTrackSection)
+            {
+                if (nodeType == GrnNodeType.AnimationTransformTrackKeys)
+                {
+                    node = new GrnAnimationTransformTrackKeysNode(parentNode);
+                }
+            }
+
+            if (node == null)
+                throw new NotImplementedException($"The library doesn't support grn with {nodeType} nodes.");
 
             node.Read(reader);
             return node;
