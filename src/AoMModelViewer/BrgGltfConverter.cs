@@ -108,9 +108,14 @@ namespace AoMModelViewer
             var mb = new MeshBuilder<VertexPosition, VertexColor1>("attachpointMesh");
             var pb = mb.UsePrimitive(MaterialBuilder.CreateDefault(), 3);
 
-            AddAxisToMesh(pb, new Vector3(-0.5f, 0.005f, 0.005f), new Vector4(0, 0, 1, 1));
-            AddAxisToMesh(pb, new Vector3(0.005f, 0.5f, 0.005f), new Vector4(0, 1, 0, 1));
-            AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, 0.5f), new Vector4(1, 0, 0, 1));
+            // AoM dummy axes and colors
+            //AddAxisToMesh(pb, new Vector3(-0.5f, 0.005f, 0.005f), new Vector4(0, 0, 1, 1));
+            //AddAxisToMesh(pb, new Vector3(0.005f, 0.5f, 0.005f), new Vector4(0, 1, 0, 1));
+            //AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, 0.5f), new Vector4(1, 0, 0, 1));
+            // Blender/3ds Max axes and colors
+            AddAxisToMesh(pb, new Vector3(0.25f, 0.005f, 0.005f), new Vector4(1, 0, 0, 1));
+            AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, -0.25f), new Vector4(0, 1, 0, 1));
+            AddAxisToMesh(pb, new Vector3(0.005f, 0.25f, 0.005f), new Vector4(0, 0, 1, 1));
 
             return mb;
 

@@ -129,7 +129,8 @@ namespace AoMModelViewer
                 if (!string.IsNullOrWhiteSpace(matGroup.TexName))
                 {
                     Image im = new Image();
-                    im.Uri = matGroup.TexName + ".png";
+                    im.Name = matGroup.TexName;
+                    im.Uri = Uri.EscapeUriString(matGroup.TexName + ".png");
 
                     glTFLoader.Schema.Texture tex = new glTFLoader.Schema.Texture();
                     tex.Name = matGroup.TexName;

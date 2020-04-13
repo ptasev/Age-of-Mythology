@@ -61,6 +61,7 @@
             m.M31 = this.ReadSingle();
             m.M32 = this.ReadSingle();
             m.M33 = this.ReadSingle();
+            m.M41 = 1;
 
             return m;
         }
