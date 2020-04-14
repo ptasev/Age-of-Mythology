@@ -154,7 +154,7 @@
                         --i;
                         continue;
                     }
-                    this.Animation.BoneTracks.Add(new GrnBoneTrack());
+                    this.Animation.BoneTracks.Add(new GrnBoneTrack(this));
                     this.Animation.BoneTracks[i].Read(transformChannels, animTransTrackKeys[i]);
                 }
                 this.CalculateAnimationDuration();
@@ -551,6 +551,66 @@
             {
                 this.DataExtensions[dataExtensionIndex].Add(property, value);
             }
+        }
+
+        public void SetAnimation(GrnFile animationFile)
+        {
+            if (animationFile.Animation.Duration <= 0) throw new InvalidOperationException("Can't set the animation from grn with no animaton.");
+
+            this.Animation.Duration = animationFile.Animation.Duration;
+            var boneTracks = new GrnBoneTrack?[this.Bones.Count];
+            for (int i = 0; i < animationFile.Animation.BoneTracks.Count; ++i)
+            {
+                var animBone = animationFile.Bones[i];
+                var baseBoneIndex = this.Bones.FindIndex(x => x.Name == animBone.Name);
+
+                if (baseBoneIndex != -1)
+                {
+                    var animBoneTrack = animationFile.Animation.BoneTracks[i];
+                    var baseBoneTrack = new GrnBoneTrack(this);
+
+                    // Data extension is shared with bone
+                    baseBoneTrack.DataExtensionIndex = this.Bones[baseBoneIndex].DataExtensionIndex;
+                    baseBoneTrack.PositionKeys.AddRange(animBoneTrack.PositionKeys);
+                    baseBoneTrack.Positions.AddRange(animBoneTrack.Positions);
+                    baseBoneTrack.RotationKeys.AddRange(animBoneTrack.RotationKeys);
+                    baseBoneTrack.Rotations.AddRange(animBoneTrack.Rotations);
+                    baseBoneTrack.ScaleKeys.AddRange(animBoneTrack.ScaleKeys);
+                    baseBoneTrack.Scales.AddRange(animBoneTrack.Scales);
+
+                    boneTracks[baseBoneIndex] = baseBoneTrack;
+                }
+                else
+                {
+                    // TODO: add bones that aren't already part of the file
+                }
+            }
+
+            // Add all the null nodes with a first and last key
+            for (int i = 0; i < boneTracks.Length; ++i)
+            {
+                if (boneTracks[i] != null) continue;
+
+                var bone = this.Bones[i];
+                var boneTrack = new GrnBoneTrack(this);
+
+                boneTrack.PositionKeys.Add(0);
+                boneTrack.PositionKeys.Add(this.Animation.Duration);
+                boneTrack.Positions.Add(bone.Position);
+                boneTrack.Positions.Add(bone.Position);
+                boneTrack.RotationKeys.Add(0);
+                boneTrack.RotationKeys.Add(this.Animation.Duration);
+                boneTrack.Rotations.Add(bone.Rotation);
+                boneTrack.Rotations.Add(bone.Rotation);
+                boneTrack.ScaleKeys.Add(0);
+                boneTrack.ScaleKeys.Add(this.Animation.Duration);
+                boneTrack.Scales.Add(bone.Scale);
+                boneTrack.Scales.Add(bone.Scale);
+
+                boneTracks[i] = boneTrack;
+            }
+
+            this.Animation.BoneTracks = boneTracks.ToList()!;
         }
     }
 }

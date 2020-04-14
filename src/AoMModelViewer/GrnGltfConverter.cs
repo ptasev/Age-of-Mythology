@@ -29,9 +29,12 @@ namespace AoMModelViewer
     {
         private const string TrackName = "Default";
         private static readonly byte[] blankImageData;
+        private static readonly Matrix4x4 RotX90N;
 
         static GrnGltfConverter()
         {
+            RotX90N = Matrix4x4.CreateRotationX(MathF.PI * -0.5f);
+
             // Create 4x4 white texture;
             var ddsBlank = new DdsFile();
             ddsBlank.header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT | DdsHeader.Flags.DDSD_LINEARSIZE;
@@ -62,7 +65,7 @@ namespace AoMModelViewer
 
             // Grn uses the Blender/3ds Max right handed coord system where X+ left, Y+ back, Z+ up
             // this is different from gltf so let's adjust
-            rootNodeBuilder.UseRotation().Value = Quaternion.CreateFromRotationMatrix(Matrix4x4.CreateRotationX(MathF.PI * -0.5f));
+            rootNodeBuilder.UseRotation().Value = Quaternion.CreateFromRotationMatrix(RotX90N);
 
             var nodeBuilders = ConvertSkeleton(grn, sceneBuilder, rootNodeBuilder);
 
@@ -92,12 +95,14 @@ namespace AoMModelViewer
                 if (bone.Name == "__Root")
                     continue;
 
+                // Skip bones with the same name as the mesh since the mesh will create its own node
                 if (!grn.Meshes.Exists(m => m.Name == bone.Name))
                 {
                     var parent = nodeBuilders[bone.ParentIndex] ?? throw new InvalidDataException($"The parent of bone {bone.Name} cannot be null.");
                     var node = ConvertBone(bone, parent);
                     nodeBuilders[i] = node;
-                    sceneBuilder.AddRigidMesh(mb, node);
+                    // No longer add mesh to bone nodes since Blender will replace them with its bone mesh
+                    //sceneBuilder.AddRigidMesh(mb, node);
                 }
             }
 
@@ -166,9 +171,11 @@ namespace AoMModelViewer
         private NodeBuilder ConvertBone(GrnBone bone, NodeBuilder nodeBuilder)
         {
             var nb = nodeBuilder.CreateNode(bone.Name);
-
-            var localMatrix = GetBoneLocalMatrix(bone);
-            nb.LocalMatrix = localMatrix;
+            nb.UseTranslation().Value = bone.Position;
+            nb.UseRotation().Value = bone.Rotation;
+            nb.UseScale().Value = new Vector3(bone.Scale.M11, bone.Scale.M22, bone.Scale.M33);
+            //var localMatrix = GetBoneLocalMatrix(bone);
+            //nb.LocalMatrix = localMatrix;
 
             return nb;
         }
@@ -192,9 +199,18 @@ namespace AoMModelViewer
                 var mb = ConvertMesh(mesh, matIdMatBuilderMap);
                 //var nb = nodeBuilders.First(nb => nb.Name == mesh.Name) ?? throw new InvalidDataException($"Could not find node for mesh {mesh.Name}.");
 
-                var joints = mesh.BoneBindings.Select(bb => nodeBuilders[bb.BoneIndex]).ToArray();
-                if (joints.Any(j => j == null)) throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
-                var inst = sceneBuilder.AddSkinnedMesh(mb, Matrix4x4.Identity, joints);
+                // Create the joint array with inverse bind matrix, and add mesh to scene
+                var joints = mesh.BoneBindings.Select(bb =>
+                {
+                    var nb = nodeBuilders[bb.BoneIndex];
+                    if (nb == null) return (nb, Matrix4x4.Identity);
+                    var wm = nb.WorldMatrix;
+                    Matrix4x4.Invert(wm, out Matrix4x4 wmi);
+                    wmi.M44 = 1; // force to be one
+                    return (nb, wmi);
+                }).ToArray();
+                if (joints.Any(j => j.nb == null)) throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
+                var inst = sceneBuilder.AddSkinnedMesh(mb, joints);
             }
         }
         private GltfMeshBuilder ConvertMesh(GrnMesh mesh, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
@@ -224,7 +240,7 @@ namespace AoMModelViewer
             var vert = mesh.Vertices[face.Indices[index]];
             var norm = mesh.Normals[face.NormalIndices[index]];
 
-            vb.Geometry = new VertexPositionNormal(vert, norm);
+            vb.Geometry = new VertexPositionNormal(Vector3.Transform(vert, RotX90N), Vector3.TransformNormal(norm, RotX90N));
             vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[face.TextureIndices[index]].X, 1 - mesh.TextureCoordinates[face.TextureIndices[index]].Y);
 
             var vertWeight = mesh.VertexWeights[face.Indices[index]];

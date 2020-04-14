@@ -11,6 +11,14 @@ namespace AoMEngineLibrary.Graphics.Grn
 {
     public class GrnBoneTrack : IGrnObject
     {
+        public GrnFile ParentFile { get; set; }
+        public string Name
+        {
+            get
+            {
+                return this.ParentFile.GetDataExtensionObjectName(this.DataExtensionIndex);
+            }
+        }
         public Int32 DataExtensionIndex { get; set; }
         public List<float> PositionKeys { get; set; }
         public List<float> RotationKeys { get; set; }
@@ -20,8 +28,9 @@ namespace AoMEngineLibrary.Graphics.Grn
         public List<Quaternion> Rotations { get; set; }
         public List<Matrix4x4> Scales { get; set; }
 
-        public GrnBoneTrack()
+        public GrnBoneTrack(GrnFile parentFile)
         {
+            this.ParentFile = parentFile;
             this.PositionKeys = new List<float>();
             this.RotationKeys = new List<float>();
             this.ScaleKeys = new List<float>();
