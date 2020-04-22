@@ -85,18 +85,6 @@ string hfloatRead( const hfloat &v )
         SKINBONE    = 0x0004 // Skinned Animation
     } MeshAnimType; // BRG Animation Type
 
-    typedef enum <uint> {
-        SFX          = 0x1C000000,
-        REFLECTTEX   = 0x04000000, // use reflective texture
-        MATNONE3     = 0x02000000, // ulfsark death
-        MATNONE4     = 0x01000000, // low poly ulfsark death
-        MATNONE1     = 0x00800000,
-        GLOW         = 0x00200000,
-        PLAYERCOLOR  = 0x00040000,
-        SOLIDCOLOR   = 0x00020000,
-        MATNONE2     = 0x00008300,
-        MATTEXTURE   = 0x00000030
-    } BrgMatFlag <format=hex>;
 string readMeshFlags (local MeshFlags &flags)
 {
 	local string s = "";
@@ -119,10 +107,6 @@ string readMeshFlags (local MeshFlags &flags)
 	return s;
 }
 int meHasFlag(MeshFlags &flags, MeshFlags flag)
-{
-    return (flags & flag) == flag;
-}
-int maHasFlag(BrgMatFlag &flags, BrgMatFlag flag)
 {
     return (flags & flag) == flag;
 }
@@ -272,34 +256,69 @@ struct {
         struct Material { // STILL HAVEN'T THOROUGHLY LOOKED AT MATERIALS
             char mtrlHead[4];
             int id;
-            BrgMatFlag properties;
+            struct BrgMatFlagField {
+                uint HasTexture : 1;
+                uint Updateable : 1;
+                uint UseColors : 1;
+                uint Specular : 1;
+                uint WrapUTx1 : 1;
+                uint WrapVTx1 : 1;
+                uint WrapUTx2 : 1;
+                uint WrapVTx2 : 1;
+                uint WrapUTx3 : 1;
+                uint WrapVTx3 : 1;
+                uint TwoSided : 1;
+                uint PlayerXFormColor1 : 1;
+                uint PlayerXFormColor2 : 1;
+                uint PlayerXFormTx1 : 1;
+                uint PlayerXFormTx2 : 1;
+                uint BumpMap : 1;
+                uint Reserved : 1;
+                uint SpecularExponent : 1;
+                uint PixelXForm1 : 1;
+                uint PixelXForm2 : 1;
+                uint FaceMap : 1;
+                uint AdditiveBlend : 1;
+                uint SubtractiveBlend : 1;
+                uint Alpha : 1;
+                uint PlayerXFormColor3 : 1;
+                uint PixelXForm3 : 1;
+                uint CubeMapInfo : 1;
+                uint InverseAlpha : 1;
+                uint AdditiveCubeBlend : 1;
+            } flags;
             int unknown01b <comment="Always 0">; // always 0
             int nameLength;
-            VectorFloat color(3); //unknown02 [36 bytes]
-            VectorFloat ambient(3);
+            VectorFloat ambient(3); //unknown02 [36 bytes]
+            VectorFloat diffuse(3);
             VectorFloat specular(3);
-            VectorFloat selfIllumination(3); //unknown03 [12 bytes]
+            VectorFloat emissive(3); //unknown03 [12 bytes]
     
             char name[nameLength];
-
-            if ((properties & SOLIDCOLOR) == SOLIDCOLOR) {
-                float specularLevel;
-            }
-            if (maHasFlag(properties, MATNONE2))
+            if (flags.BumpMap == 1)
             {
                 int nameLength2;
                 char name2[nameLength2];
             }
 
-            float alpha; //unknown04
+            if (flags.SpecularExponent == 1) {
+                float specularLevel;
+            }
 
-            if ((properties & REFLECTTEX) == REFLECTTEX) {
-                byte numSFX <comment="Always 0">; // always 1
-                struct MatSFX {
-                    byte sfxId <comment="Always 30, 40 for TT">; // always 30/40 for tt
-                    int16 sfxNameLength;
-                    char sfxName[sfxNameLength];
-                } sfx[numSFX] <optimize=false>;
+            if (flags.Alpha == 1)
+            {
+                float alpha; //unknown04
+            }
+
+            if (flags.CubeMapInfo == 1) {
+                struct CubeMapInfo {
+                    byte mode <comment="Always 0">; // always 1
+                    byte txFactor <comment="Always 30, 40 for TT">; // always 30/40 for tt
+                    byte cubeMapNameLength;
+                    byte textureMapNameLength;
+                    if (cubeMapNameLength > 0) char cubeMapName[cubeMapNameLength];
+                    if (textureMapNameLength > 0) char textureMapName[textureMapNameLength];
+                } cubeMapInfo;
             }
         } material[header.numMaterials] <optimize=false>;
     }
