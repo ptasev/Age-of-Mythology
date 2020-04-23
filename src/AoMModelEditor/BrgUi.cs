@@ -158,21 +158,15 @@
             reflMapCol.AspectGetter = delegate(object rowObject)
             {
                 BrgMaterial mat = (BrgMaterial)rowObject;
-                if (mat.sfx.Count > 0)
-                {
-                    return mat.sfx[0].Name;
-                }
-                else { return string.Empty; }
+                return mat.CubeMapInfo.CubeMapName;
             };
             reflMapCol.AspectPutter = delegate(object rowObject, object newValue)
             {
                 BrgMaterial mat = (BrgMaterial)rowObject;
-                BrgMatSFX sfxMap = new BrgMatSFX();
-                sfxMap.Id = 30;
-                sfxMap.Name = (string)newValue;
-
-                if (mat.sfx.Count > 0) { mat.sfx[0] = sfxMap; }
-                else { mat.sfx.Add(sfxMap); }
+                BrgCubeMapInfo sfxMap = new BrgCubeMapInfo();
+                sfxMap.TextureFactor = 30;
+                sfxMap.CubeMapName = (string)newValue;
+                mat.CubeMapInfo = sfxMap;
             };
             this.Plugin.brgObjectListView.Columns.Add(reflMapCol);
         }

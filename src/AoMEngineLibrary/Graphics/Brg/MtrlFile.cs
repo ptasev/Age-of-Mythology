@@ -22,7 +22,7 @@
         public Vector3 Ambient { get; set; }
         public Vector3 Specular { get; set; }
         public Vector3 Emissive { get; set; }
-        public float SpecularLevel { get; set; }
+        public float SpecularPower { get; set; }
         public float Alpha { get; set; }
 
         public int Id { get; set; }
@@ -114,8 +114,25 @@
             this.Ambient = mat.AmbientColor;
             this.Specular = mat.SpecularColor;
             this.Emissive = mat.EmissiveColor;
-            this.SpecularLevel = mat.SpecularExponent;
+            this.SpecularPower = mat.SpecularExponent;
             this.Alpha = mat.Opacity;
+
+            this.DiffuseIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
+            this.AmbientIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
+            this.SpecularIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
+            this.EmissiveIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
+
+            if ((Diffuse.X > 0.000001f) || (Diffuse.Y > 0.000001f) || (Diffuse.Z > 0.000001f))
+                this.AffectsDiffuse = 1;
+            if ((Ambient.X > 0.000001f) || (Ambient.Y > 0.000001f) || (Ambient.Z > 0.000001f))
+                this.AffectsAmbient = 1;
+            if ((Specular.X > 0.000001f) || (Specular.Y > 0.000001f) || (Specular.Z > 0.000001f))
+                this.AffectsSpecular = 1;
+            if ((Emissive.X > 0.000001f) || (Emissive.Y > 0.000001f) || (Emissive.Z > 0.000001f))
+                this.SelfIlluminating = 1;
+
+            if (mat.SpecularColor.X > 0.000001f || mat.SpecularColor.Y > 0.000001f || mat.SpecularColor.Z > 0.000001f)
+                this.LightSpecular = 1;
 
             if (!mat.Flags.HasFlag(BrgMatFlag.WrapUTx1))
             {
@@ -127,24 +144,59 @@
                 this.ClampV = 1;
             }
 
-            if (mat.Flags.HasFlag(BrgMatFlag.AdditiveBlend))
-            {
-                this.AlphaMode = 6;
-            }
-
+            // TODO: implement color transform, and tex transform
             if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
             {
                 this.ColorTransform = 4;
             }
 
-            if (mat.Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
+            this.Texture = mat.DiffuseMapName;
+
+            if (mat.Flags.HasFlag(BrgMatFlag.CubeMapInfo))
             {
-                this.TextureFactor = 1275068416;
-                this.MultiTextureMode = 12;
-                this.TexGenMode1 = 1;
+                this.SecondaryTexture = mat.CubeMapInfo.CubeMapName;
+
+                switch (mat.CubeMapInfo.Mode)
+                {
+                    case 0:
+                        this.TexGenMode1 = 1; // Cubic environment
+
+                        if (mat.Flags.HasFlag(BrgMatFlag.AdditiveCubeBlend))
+                        {
+                            if (mat.Flags.HasFlag(BrgMatFlag.InverseAlpha))
+                                this.MultiTextureMode = 14; // MultitextureAddInverseAlpha
+                            else
+                                this.MultiTextureMode = 13; // MultitextureAddAlpha
+                        }
+                        else
+                        {
+                            if (mat.Flags.HasFlag(BrgMatFlag.InverseAlpha))
+                                this.MultiTextureMode = 9; // MultitextureLinearBlendInverseAlpha
+                            else
+                                this.MultiTextureMode = 8; // MultitextureLinearBlendAlpha
+                        }
+                        break;
+                    case 1:
+                        this.TexGenMode1 = 1; // Cubic environment
+
+                        if (mat.Flags.HasFlag(BrgMatFlag.AdditiveCubeBlend))
+                            this.MultiTextureMode = 12; // MultitextureAddFactor
+                        else
+                            this.MultiTextureMode = 4; // MultitextureLinearBlend
+
+                        uint txFactor = (byte)(255.0f * (mat.CubeMapInfo.TextureFactor / 100.0f));
+                        this.TextureFactor = txFactor << 24;
+                        break;
+                    default:
+                        throw new NotImplementedException($"Unsupported cube map mode {mat.CubeMapInfo.Mode}.");
+                }
             }
 
-            this.Texture = mat.DiffuseMap;
+            // TODO: Set alpha mode
+            if (mat.Flags.HasFlag(BrgMatFlag.AdditiveBlend))
+            {
+                this.AlphaMode = 6;
+            }
         }
 
         public void Read(Stream stream)
@@ -168,7 +220,7 @@
                 this.Ambient = reader.ReadVector3D(false);
                 this.Specular = reader.ReadVector3D(false);
                 this.Emissive = reader.ReadVector3D(false);
-                this.SpecularLevel = reader.ReadSingle();
+                this.SpecularPower = reader.ReadSingle();
                 this.Alpha = reader.ReadSingle();
 
                 this.Id = reader.ReadInt32();
@@ -270,7 +322,7 @@
                 writer.WriteVector3D(this.Ambient, false);
                 writer.WriteVector3D(this.Specular, false);
                 writer.WriteVector3D(this.Emissive, false);
-                writer.Write(this.SpecularLevel);
+                writer.Write(this.SpecularPower);
                 writer.Write(this.Alpha);
 
                 writer.Write(this.Id);
@@ -358,7 +410,7 @@
             elem.Add(new XElement("specular", new XAttribute("R", Specular.X), new XAttribute("G", Specular.Y), new XAttribute("B", Specular.Z)));
             elem.Add(new XElement("emissive", new XAttribute("R", Emissive.X), new XAttribute("G", Emissive.Y), new XAttribute("B", Emissive.Z)));
 
-            elem.Add(new XElement("specular_power", SpecularLevel));
+            elem.Add(new XElement("specular_power", SpecularPower));
             elem.Add(new XElement("alpha", Alpha));
             elem.Add(new XElement("id", Id));
             elem.Add(new XElement("self_illuminating", SelfIlluminating));
@@ -435,7 +487,7 @@
                         file.Emissive = new Vector3(float.Parse(e.Attribute("R")?.Value ?? Zero), float.Parse(e.Attribute("G")?.Value ?? Zero), float.Parse(e.Attribute("B")?.Value ?? Zero));
                         break;
                     case "specular_power":
-                        file.SpecularLevel = float.Parse(e.Value);
+                        file.SpecularPower = float.Parse(e.Value);
                         break;
                     case "alpha":
                         file.Alpha = float.Parse(e.Value);

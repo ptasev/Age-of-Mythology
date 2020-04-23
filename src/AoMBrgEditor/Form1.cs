@@ -287,8 +287,8 @@ namespace AoMBrgEditor
                                 output += "id = " + file.Materials[j].Id;
                                 output += "\tflags = " + file.Materials[j].Flags;
                                 output += "\tflags78 = " + ((int)file.Materials[j].Flags & 0x000000FF);
-                                output += "\tu01b = " + file.Materials[j].unknown01b;
-                                output += "\tname = " + file.Materials[j].DiffuseMap;
+                                output += "\tu01b = " + file.Materials[j].Reserved;
+                                output += "\tname = " + file.Materials[j].DiffuseMapName;
                                 output += Environment.NewLine;
                             }
                         }

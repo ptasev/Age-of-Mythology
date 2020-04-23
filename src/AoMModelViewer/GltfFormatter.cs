@@ -120,7 +120,7 @@ namespace AoMModelViewer
             List<glTFLoader.Schema.Material> materials = new List<glTFLoader.Schema.Material>();
             Dictionary<int, int> brgMatGltfMatIndexMap = new Dictionary<int, int>();
             var uniqueTextures = from mat in brg.Materials
-                                 group mat by mat.DiffuseMap into matGroup
+                                 group mat by mat.DiffuseMapName into matGroup
                                  select (TexName: matGroup.Key, Materials: matGroup.ToList());
             foreach (var matGroup in uniqueTextures)
             {
@@ -236,7 +236,7 @@ namespace AoMModelViewer
 
         private string GetMaterialNameWithFlags(BrgMaterial mat)
         {
-            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMap) ?? string.Empty;
+            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMapName) ?? string.Empty;
 
             if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1))
             {

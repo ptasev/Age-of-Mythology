@@ -41,15 +41,6 @@
 
             return dataEntry;
         }
-        public BrgMatSFX ReadMaterialSFX()
-        {
-            BrgMatSFX sfx;
-
-            sfx.Id = this.ReadByte();
-            sfx.Name = this.ReadString(this.ReadInt16());
-
-            return sfx;
-        }
 
         #region ReadVector3
         public Vector3 ReadVector3D(bool isHalf)

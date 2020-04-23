@@ -431,13 +431,13 @@ namespace AoMModelViewer
             //        mat.Flags |= BrgMatFlag.WrapUTx3 | BrgMatFlag.WrapVTx3 | BrgMatFlag.BumpMap;
             //    }
             //}
-            mat.DiffuseMap = GetDiffuseTexture(glMat, out BrgMatFlag wrapFlags);
-            int parenthIndex = mat.DiffuseMap.IndexOf('(');
+            mat.DiffuseMapName = GetDiffuseTexture(glMat, out BrgMatFlag wrapFlags);
+            int parenthIndex = mat.DiffuseMapName.IndexOf('(');
             if (parenthIndex > 0)
             {
-                mat.DiffuseMap = mat.DiffuseMap.Remove(parenthIndex);
+                mat.DiffuseMapName = mat.DiffuseMapName.Remove(parenthIndex);
             }
-            if (mat.DiffuseMap.Length > 0)
+            if (mat.DiffuseMapName.Length > 0)
             {
                 mat.Flags |= wrapFlags;
                 if (glMat.Alpha == AlphaMode.MASK)

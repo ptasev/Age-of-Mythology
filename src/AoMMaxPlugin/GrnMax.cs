@@ -739,7 +739,7 @@
         {
             int numBones = Maxscript.QueryInteger("grnBones.count");
             this.File.Animation.Duration = 0f;
-            GrnBoneTrack rootBoneTrack = new GrnBoneTrack();
+            GrnBoneTrack rootBoneTrack = new GrnBoneTrack(this.File);
             HashSet<float> rootTrackKeys = new HashSet<float>();
             rootBoneTrack.DataExtensionIndex = this.File.Bones[0].DataExtensionIndex;
             this.File.Animation.BoneTracks.Add(rootBoneTrack);
@@ -747,7 +747,7 @@
 
             for (int i = 1; i <= numBones; ++i)
             {
-                GrnBoneTrack bone = new GrnBoneTrack();
+                GrnBoneTrack bone = new GrnBoneTrack(this.File);
                 bone.DataExtensionIndex = this.File.Bones[i].DataExtensionIndex;
 
                 Maxscript.Command("GetBoneAnimKeys grnBones[{0}]", i);

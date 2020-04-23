@@ -303,25 +303,25 @@
                 Maxscript.Command("mat.faceMap = true");
             }
 
-            if (mat.Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
+            if (mat.Flags.HasFlag(BrgMatFlag.CubeMapInfo))
             {
                 Maxscript.Command("rTex = BitmapTexture()");
-                Maxscript.Command("rTex.name = \"{0}\"", Path.GetFileNameWithoutExtension(mat.sfx[0].Name));
-                Maxscript.Command("rTex.filename = \"{0}\"", Path.GetFileNameWithoutExtension(mat.sfx[0].Name) + ".tga");
+                Maxscript.Command("rTex.name = \"{0}\"", Path.GetFileNameWithoutExtension(mat.CubeMapInfo.CubeMapName));
+                Maxscript.Command("rTex.filename = \"{0}\"", Path.GetFileNameWithoutExtension(mat.CubeMapInfo.CubeMapName) + ".tga");
                 Maxscript.Command("mat.reflectionMap = rTex");
             }
             if (mat.Flags.HasFlag(BrgMatFlag.BumpMap))
             {
                 Maxscript.Command("aTex = BitmapTexture()");
-                Maxscript.Command("aTex.name = \"{0}\"", mat.BumpMap);
-                Maxscript.Command("aTex.filename = \"{0}\"", mat.BumpMap + ".tga");
+                Maxscript.Command("aTex.name = \"{0}\"", mat.BumpMapName);
+                Maxscript.Command("aTex.filename = \"{0}\"", mat.BumpMapName + ".tga");
                 Maxscript.Command("mat.bumpMap = aTex");
             }
             if (mat.Flags.HasFlag(BrgMatFlag.WrapUTx1) && mat.Flags.HasFlag(BrgMatFlag.WrapVTx1))
             {
                 Maxscript.Command("tex = BitmapTexture()");
-                Maxscript.Command("tex.name = \"{0}\"", mat.DiffuseMap);
-                Maxscript.Command("tex.filename = \"{0}\"", mat.DiffuseMap + ".tga");
+                Maxscript.Command("tex.name = \"{0}\"", mat.DiffuseMapName);
+                Maxscript.Command("tex.filename = \"{0}\"", mat.DiffuseMapName + ".tga");
                 Maxscript.Command("mat.diffusemap = tex");
                 if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
                 {
@@ -334,7 +334,7 @@
         private void ImportMaterialNameFromFlags(BrgMaterial mat)
         {
             //Maxscript.Command("mat.name = \"{0}\"", mat.DiffuseMap);
-            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMap);
+            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMapName);
 
             if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1))
             {
@@ -757,30 +757,29 @@
 
             if (Maxscript.QueryBoolean("(classof mat.reflectionMap) == BitmapTexture"))
             {
-                mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1 | BrgMatFlag.REFLECTIONTEXTURE;
-                BrgMatSFX sfxMap = new BrgMatSFX();
-                sfxMap.Id = 30;
-                sfxMap.Name = Maxscript.QueryString("getFilenameFile(mat.reflectionMap.filename)") + ".cub";
-                mat.sfx.Add(sfxMap);
+                mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1 | BrgMatFlag.CubeMapInfo;
+                BrgCubeMapInfo sfxMap = new BrgCubeMapInfo();
+                sfxMap.TextureFactor = 30;
+                sfxMap.CubeMapName = Maxscript.QueryString("getFilenameFile(mat.reflectionMap.filename)") + ".cub";
             }
             if (Maxscript.QueryBoolean("(classof mat.bumpMap) == BitmapTexture"))
             {
-                mat.BumpMap = Maxscript.QueryString("getFilenameFile(mat.bumpMap.filename)");
-                if (mat.BumpMap.Length > 0)
+                mat.BumpMapName = Maxscript.QueryString("getFilenameFile(mat.bumpMap.filename)");
+                if (mat.BumpMapName.Length > 0)
                 {
                     mat.Flags |= BrgMatFlag.WrapUTx3 | BrgMatFlag.WrapVTx3 | BrgMatFlag.BumpMap;
                 }
             }
             if (Maxscript.QueryBoolean("(classof mat.diffusemap) == BitmapTexture"))
             {
-                mat.DiffuseMap = Maxscript.QueryString("getFilenameFile(mat.diffusemap.filename)");
-                int parenthIndex = mat.DiffuseMap.IndexOf('(');
+                mat.DiffuseMapName = Maxscript.QueryString("getFilenameFile(mat.diffusemap.filename)");
+                int parenthIndex = mat.DiffuseMapName.IndexOf('(');
                 if (parenthIndex > 0)
                 {
-                    mat.DiffuseMap = mat.DiffuseMap.Remove(parenthIndex);
+                    mat.DiffuseMapName = mat.DiffuseMapName.Remove(parenthIndex);
                 }
 
-                if (mat.DiffuseMap.Length > 0)
+                if (mat.DiffuseMapName.Length > 0)
                 {
                     mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1;
                     if (Maxscript.QueryBoolean("mat.diffusemap.filename == mat.filtermap.filename"))
@@ -792,11 +791,11 @@
             else if (Maxscript.QueryBoolean("(classof mat.diffusemap) == CompositeTextureMap") && Maxscript.QueryBoolean("(classof mat.diffusemap.mapList[1]) == BitmapTexture"))
             {
                 mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1 | BrgMatFlag.PixelXForm1;
-                mat.DiffuseMap = Maxscript.QueryString("getFilenameFile(mat.diffusemap.mapList[1].filename)");
-                int parenthIndex = mat.DiffuseMap.IndexOf('(');
+                mat.DiffuseMapName = Maxscript.QueryString("getFilenameFile(mat.diffusemap.mapList[1].filename)");
+                int parenthIndex = mat.DiffuseMapName.IndexOf('(');
                 if (parenthIndex > 0)
                 {
-                    mat.DiffuseMap = mat.DiffuseMap.Remove(parenthIndex);
+                    mat.DiffuseMapName = mat.DiffuseMapName.Remove(parenthIndex);
                 }
             }
 
@@ -891,13 +890,9 @@
             this.Plugin.selfIllumMaxTextBox.ForeColor = this.Plugin.ContrastColor(this.Plugin.selfIllumMaxTextBox.BackColor);
             this.Plugin.specularLevelMaxTextBox.Text = mat.SpecularExponent.ToString();
             this.Plugin.opacityMaxTextBox.Text = mat.Opacity.ToString();
-            this.Plugin.textureMaxTextBox.Text = mat.DiffuseMap;
-            if (mat.sfx.Count > 0)
-            {
-                this.Plugin.reflectionMaxTextBox.Text = mat.sfx[0].Name;
-            }
-            else { this.Plugin.reflectionMaxTextBox.Text = string.Empty; }
-            this.Plugin.bumpMapMaxTextBox.Text = mat.BumpMap;
+            this.Plugin.textureMaxTextBox.Text = mat.DiffuseMapName;
+            this.Plugin.reflectionMaxTextBox.Text = mat.CubeMapInfo.CubeMapName;
+            this.Plugin.bumpMapMaxTextBox.Text = mat.BumpMapName;
 
             // Update Flags box
             this.Plugin.materialFlagsCheckedListBox.SetEnum<BrgMatFlag>(mat.Flags);

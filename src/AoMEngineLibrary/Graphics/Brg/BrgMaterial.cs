@@ -21,57 +21,85 @@
 
         public int Id { get; set; }
         public BrgMatFlag Flags { get; set; }
-        public int unknown01b;
+        public float Reserved { get; set; }
+        public byte DiffuseMapNameLength { get; private set; }
 
         public Vector3 DiffuseColor { get; set; }
         public Vector3 AmbientColor { get; set; }
         public Vector3 SpecularColor { get; set; }
         public Vector3 EmissiveColor { get; set; }
+        public int BumpMapNameLength { get; private set; }
         public float Opacity { get; set; }
         public float SpecularExponent { get; set; }
 
-        public string DiffuseMap { get; set; }
-        public string BumpMap { get; set; }
-        public List<BrgMatSFX> sfx;
+        private string _diffuseMap;
+        public string DiffuseMapName 
+        {
+            get => _diffuseMap;
+            set
+            {
+                _diffuseMap = value;
+                DiffuseMapNameLength = (byte)Encoding.ASCII.GetByteCount(value);
+            }
+        }
+
+        private string _bumpMap;
+        public string BumpMapName
+        {
+            get => _bumpMap;
+            set
+            {
+                _bumpMap = value;
+                DiffuseMapNameLength = (byte)Encoding.ASCII.GetByteCount(value);
+            }
+        }
+
+        public BrgCubeMapInfo CubeMapInfo { get; set; }
 
         public BrgMaterial(BrgBinaryReader reader, BrgFile file)
             : this(file)
         {
             Id = reader.ReadInt32();
             Flags = (BrgMatFlag)reader.ReadInt32();
-            unknown01b = reader.ReadInt32();
-            int nameLength = reader.ReadInt32();
-            this.DiffuseColor = reader.ReadVector3D(false);
+            Reserved = reader.ReadSingle();
+            DiffuseMapNameLength = reader.ReadByte();
+            reader.ReadBytes(3); // padding
             this.AmbientColor = reader.ReadVector3D(false);
+            this.DiffuseColor = reader.ReadVector3D(false);
             this.SpecularColor = reader.ReadVector3D(false);
             this.EmissiveColor = reader.ReadVector3D(false);
 
-            this.DiffuseMap = reader.ReadString(nameLength);
+            this.DiffuseMapName = reader.ReadString((int)DiffuseMapNameLength);
+            if (Flags.HasFlag(BrgMatFlag.BumpMap))
+            {
+                BumpMapNameLength = reader.ReadInt32();
+                this.BumpMapName = reader.ReadString(BumpMapNameLength);
+            }
+
             if (Flags.HasFlag(BrgMatFlag.SpecularExponent))
             {
                 this.SpecularExponent = reader.ReadSingle();
-            }
-            if (Flags.HasFlag(BrgMatFlag.BumpMap))
-            {
-                this.BumpMap = reader.ReadString(reader.ReadInt32());
             }
             if (Flags.HasFlag(BrgMatFlag.Alpha))
             {
                 this.Opacity = reader.ReadSingle();
             }
 
-            if (Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
+            if (Flags.HasFlag(BrgMatFlag.CubeMapInfo))
             {
-                byte numSFX = reader.ReadByte();
-                sfx = new List<BrgMatSFX>(numSFX);
-                for (int i = 0; i < numSFX; i++)
+                CubeMapInfo.Mode = reader.ReadByte();
+                CubeMapInfo.TextureFactor = reader.ReadByte();
+                var cubeMapNameLength = reader.ReadByte();
+                var textureMapNameLength = reader.ReadByte();
+
+                if (cubeMapNameLength > 0)
                 {
-                    sfx.Add(reader.ReadMaterialSFX());
+                    CubeMapInfo.CubeMapName = reader.ReadString((int)cubeMapNameLength);
                 }
-            }
-            else
-            {
-                sfx = new List<BrgMatSFX>();
+                if (textureMapNameLength > 0)
+                {
+                    CubeMapInfo.TextureMapName = reader.ReadString((int)textureMapNameLength);
+                }
             }
         }
         public BrgMaterial(BrgFile file)
@@ -79,20 +107,20 @@
             this.ParentFile = file;
             this.Id = 0;
             this.Flags = 0;
-            this.unknown01b = 0;
+            this.Reserved = 0;
 
-            this.DiffuseColor = Vector3.One;
             this.AmbientColor = Vector3.One;
+            this.DiffuseColor = Vector3.One;
             this.SpecularColor = Vector3.Zero;
             this.EmissiveColor = Vector3.Zero;
 
             this.Opacity = 1f;
             this.SpecularExponent = 0f;
 
-            this.DiffuseMap = string.Empty;
-            this.BumpMap = string.Empty;
+            this._diffuseMap = string.Empty;
+            this._bumpMap = string.Empty;
 
-            this.sfx = new List<BrgMatSFX>();
+            this.CubeMapInfo = new BrgCubeMapInfo();
         }
 
         public void Write(BrgBinaryWriter writer)
@@ -100,36 +128,44 @@
             writer.Write(this.Id);
             writer.Write((int)this.Flags);
 
-            writer.Write(this.unknown01b);
-            writer.Write(Encoding.UTF8.GetByteCount(this.DiffuseMap));
+            writer.Write(this.Reserved);
+            writer.Write((int)DiffuseMapNameLength);
 
-            writer.WriteVector3D(this.DiffuseColor, false);
             writer.WriteVector3D(this.AmbientColor, false);
+            writer.WriteVector3D(this.DiffuseColor, false);
             writer.WriteVector3D(this.SpecularColor, false);
             writer.WriteVector3D(this.EmissiveColor, false);
 
-            writer.WriteString(this.DiffuseMap, 0);
+            writer.WriteString(this.DiffuseMapName, 0);
+            if (this.Flags.HasFlag(BrgMatFlag.BumpMap))
+            {
+                writer.Write(this.BumpMapNameLength);
+                writer.WriteString(this.BumpMapName, 0);
+            }
 
             if (this.Flags.HasFlag(BrgMatFlag.SpecularExponent))
             {
                 writer.Write(this.SpecularExponent);
-            }
-            if (this.Flags.HasFlag(BrgMatFlag.BumpMap))
-            {
-                writer.WriteString(this.BumpMap, 4);
             }
             if (this.Flags.HasFlag(BrgMatFlag.Alpha))
             {
                 writer.Write(this.Opacity);
             }
 
-            if (this.Flags.HasFlag(BrgMatFlag.REFLECTIONTEXTURE))
+            if (this.Flags.HasFlag(BrgMatFlag.CubeMapInfo))
             {
-                writer.Write((byte)this.sfx.Count);
-                for (int i = 0; i < this.sfx.Count; i++)
+                writer.Write(CubeMapInfo.Mode);
+                writer.Write(CubeMapInfo.TextureFactor);
+                writer.Write(CubeMapInfo.CubeMapNameLength);
+                writer.Write(CubeMapInfo.TextureMapNameLength);
+
+                if (CubeMapInfo.CubeMapNameLength > 0)
                 {
-                    writer.Write(this.sfx[i].Id);
-                    writer.WriteString(this.sfx[i].Name, 2);
+                    writer.WriteString(CubeMapInfo.CubeMapName, 0);
+                }
+                if (CubeMapInfo.TextureMapNameLength > 0)
+                {
+                    writer.WriteString(CubeMapInfo.TextureMapName, 0);
                 }
             }
         }
@@ -137,7 +173,7 @@
         public bool Equals(BrgMaterial m)
         {
             // If parameter is null return false:
-            if ((object)m == null)
+            if (m == null)
             {
                 return false;
             }
@@ -145,26 +181,18 @@
             //ret = ret && this.ParentFile == m.ParentFile;
             //ret = ret && this.id == m.id;
             bool ret = this.Flags == m.Flags &&
-                this.unknown01b == m.unknown01b &&
-                this.DiffuseColor == m.DiffuseColor &&
+                this.Reserved == m.Reserved &&
                 this.AmbientColor == m.AmbientColor &&
+                this.DiffuseColor == m.DiffuseColor &&
                 this.SpecularColor == m.SpecularColor &&
                 this.EmissiveColor == m.EmissiveColor &&
-                this.DiffuseMap == m.DiffuseMap &&
-                this.BumpMap == m.BumpMap &&
+                this.DiffuseMapNameLength == m.DiffuseMapNameLength &&
+                this.BumpMapNameLength == m.BumpMapNameLength &&
+                this.DiffuseMapName == m.DiffuseMapName &&
+                this.BumpMapName == m.BumpMapName &&
                 this.SpecularExponent == m.SpecularExponent &&
                 this.Opacity == m.Opacity &&
-                this.sfx.Count == m.sfx.Count;
-
-            if (ret)
-            {
-                for (int i = 0; i < this.sfx.Count; ++i)
-                {
-                    ret = ret && 
-                        this.sfx[i].Id == m.sfx[i].Id &&
-                        this.sfx[i].Name == m.sfx[i].Name;
-                }
-            }
+                this.CubeMapInfo.Equals(m.CubeMapInfo);
 
             // Return true if the fields match:
             return ret;

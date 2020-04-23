@@ -5,14 +5,11 @@
     [Flags]
     public enum BrgMatFlag : uint
     {
-        MATNONE1 = 0x80000000,
-        MATNONE2 = 0x40000000,
-        MATNONE3 = 0x20000000,
-        ILLUMREFLECTION = 0x10000000, // Don't use the VectorFloat specular?
-        MATNONE10 = 0x08000000, // no idea
-        REFLECTIONTEXTURE = 0x04000000, // use a reflection texture
-        PLAYERCOLOR2 = 0x02000000, // darker player color?
-        LOWPLAYERCOLOR2 = 0x01000000, // low player color overlay for faces
+        AdditiveCubeBlend = 0x10000000,
+        InverseAlpha = 0x08000000,
+        CubeMapInfo = 0x04000000, // use a cube map/reflection texture
+        PixelXForm3 = 0x02000000, // darker player color?
+        PlayerXFormColor3 = 0x01000000, // low player color overlay for faces
         Alpha = 0x00800000, // This, and Below are from Executable, except for MatNone
         SubtractiveBlend = 0x00400000, // stay with highlight
         AdditiveBlend = 0x00200000, // stay with highlight
@@ -20,7 +17,7 @@
         PixelXForm2 = 0x00080000, // fuller player color
         PixelXForm1 = 0x00040000, // default player color
         SpecularExponent = 0x00020000,
-        MATNONE16 = 0x00010000, // no idea
+        Reserved = 0x00010000, // no idea
         BumpMap = 0x00008000,
         PlayerXFormTx2 = 0x00004000, // ground texture?
         PlayerXFormTx1 = 0x00002000, // smooth/ambient?
