@@ -13,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Windows.Controls;
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
     SharpGLTF.Geometry.VertexTypes.VertexTexture1,
@@ -203,14 +202,10 @@ namespace AoMModelViewer
                 var joints = mesh.BoneBindings.Select(bb =>
                 {
                     var nb = nodeBuilders[bb.BoneIndex];
-                    if (nb == null) return (nb, Matrix4x4.Identity);
-                    var wm = nb.WorldMatrix;
-                    Matrix4x4.Invert(wm, out Matrix4x4 wmi);
-                    wmi.M44 = 1; // force to be one
-                    return (nb, wmi);
+                    if (nb == null) throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
+                    return (nb, nb.GetInverseBindMatrix(Matrix4x4.Identity));
                 }).ToArray();
-                if (joints.Any(j => j.nb == null)) throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
-                var inst = sceneBuilder.AddSkinnedMesh(mb, joints);
+                var inst = sceneBuilder.AddSkinnedMesh(mb, mb.Name, joints);
             }
         }
         private GltfMeshBuilder ConvertMesh(GrnMesh mesh, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
