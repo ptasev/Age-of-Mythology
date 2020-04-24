@@ -42,7 +42,6 @@
 
         public bool Equals(BrgCubeMapInfo other)
         {
-            // If parameter is null return false:
             if (other == null)
             {
                 return false;
@@ -55,7 +54,6 @@
                 this.CubeMapName == other.CubeMapName &&
                 this.TextureMapName == other.TextureMapName;
 
-            // Return true if the fields match:
             return ret;
         }
     }

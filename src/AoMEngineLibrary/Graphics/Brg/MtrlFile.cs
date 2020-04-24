@@ -16,8 +16,6 @@
         private const string Zero = "0";
         private const string IndentString = "    ";
 
-        public uint[] unk; //5   
-
         public Vector3 Diffuse { get; set; }
         public Vector3 Ambient { get; set; }
         public Vector3 Specular { get; set; }
@@ -75,7 +73,6 @@
 
         public MtrlFile()
         {
-            this.unk = new uint[5];
             this.Alpha = 1f;
 
             this.Id = -1;
