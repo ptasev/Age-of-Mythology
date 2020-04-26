@@ -42,7 +42,6 @@
             }
         }
 
-        #region Vector3
         public void WriteVector3D(Vector3 v, bool isHalf)
         {
             if (!isHalf)
@@ -58,16 +57,15 @@
                 this.WriteHalf(v.Z);
             }
         }
-        #endregion
 
         public void WriteTexel(Vector4 t)
         {
             var res = Vector4.Clamp(t * 255, Vector4.Zero, Vector4.One);
 
-            this.Write((byte)res.X);
-            this.Write((byte)res.Y);
-            this.Write((byte)res.Z);
-            this.Write((byte)res.W);
+            this.Write((byte)res.Z); // B
+            this.Write((byte)res.Y); // G
+            this.Write((byte)res.X); // R
+            this.Write((byte)res.W); // A
         }
 
         public void WriteHalf(float half)

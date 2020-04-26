@@ -17,7 +17,7 @@
             set
             {
                 _cubeMapName = value;
-                CubeMapNameLength = (byte)Encoding.ASCII.GetByteCount(value);
+                CubeMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
             }
         }
 
@@ -28,7 +28,7 @@
             set
             {
                 _textureMapName = value;
-                TextureMapNameLength = (byte)Encoding.ASCII.GetByteCount(value);
+                TextureMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
             }
         }
 

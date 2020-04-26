@@ -11,13 +11,6 @@
     public class BrgMaterial : IEquatable<BrgMaterial>
     {
         public BrgFile ParentFile;
-        public string EditorName
-        {
-            get
-            {
-                return "Mat ID: " + Id;
-            }
-        }
 
         public int Id { get; set; }
         public BrgMatFlag Flags { get; set; }
@@ -39,7 +32,7 @@
             set
             {
                 _diffuseMap = value;
-                DiffuseMapNameLength = (byte)Encoding.ASCII.GetByteCount(value);
+                DiffuseMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
             }
         }
 
@@ -50,7 +43,7 @@
             set
             {
                 _bumpMap = value;
-                DiffuseMapNameLength = (byte)Encoding.ASCII.GetByteCount(value);
+                BumpMapNameLength = Encoding.UTF8.GetByteCount(value);
             }
         }
 

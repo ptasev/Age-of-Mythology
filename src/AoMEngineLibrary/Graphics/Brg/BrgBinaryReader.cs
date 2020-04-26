@@ -42,7 +42,6 @@
             return dataEntry;
         }
 
-        #region ReadVector3
         public Vector3 ReadVector3D(bool isHalf)
         {
             Vector3 v = new Vector3();
@@ -62,9 +61,7 @@
 
             return v;
         }
-        #endregion
 
-        #region ReadVector2
         public Vector2 ReadVector2D(bool isHalf = false)
         {
             Vector2 v = new Vector2();
@@ -82,11 +79,14 @@
 
             return v;
         }
-        #endregion
 
         public Vector4 ReadTexel()
         {
-            return Vector4.Clamp(new Vector4(this.ReadByte() / 255.0f, this.ReadByte() / 255.0f, this.ReadByte() / 255.0f, this.ReadByte() / 255.0f),
+            var b = this.ReadByte() / 255.0f;
+            var g = this.ReadByte() / 255.0f;
+            var r = this.ReadByte() / 255.0f;
+            var a = this.ReadByte() / 255.0f;
+            return Vector4.Clamp(new Vector4(r, g, b, a),
                 Vector4.Zero, Vector4.One);
         }
 

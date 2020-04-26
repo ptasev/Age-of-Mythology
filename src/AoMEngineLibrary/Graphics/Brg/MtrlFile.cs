@@ -11,10 +11,81 @@
     using System.Xml.Linq;
     using System.Xml.Serialization;
 
+    public enum MtrlAlphaMode
+    {
+        Off,
+        OneBit,
+        On,
+        Lightmap,
+        LightmapInAlpha,
+        InvertedLightmapInAlpha,
+        Additive,
+        AdditiveSquared,
+        AdditiveModulateSrcAlpha,
+        Subtractive,
+        Texture
+    }
+
+    public enum MtrlColorTransformMode
+    {
+        TransformNone,
+        Transform1,
+        Transform2,
+        Transform3,
+        TransformPixel1,
+        TransformPixel2,
+        TransformPixel3,
+    }
+
+    public enum MtrlTextureTransformMode
+    {
+        TransformNone,
+        Transform1,
+        Transform2
+    }
+
+    public enum MtrlMultitextureMode
+    {
+        Off,
+        OffNoVtxAlpha,
+        OffNoTx,
+        OffOnlyAlpha,
+        LinearBlend,
+        EmissiveSpecularFactor,
+        EmissiveSpecularFactorNoTx,
+        SpecularBump,
+        LinearBlendAlpha,
+        LinearBlendInverseAlpha,
+        LinearBlendAlphaEmissiveSpecularFactor,
+        LinearBlendEmissiveSpecularFactor,
+        AddFactor,
+        AddAlpha,
+        AddInverseAlpha,
+        SeparateAlpha,
+        Lightmap,
+        FogMask,
+        FadeLightmapByAlpha
+    }
+    public enum MtrlTexGenMode
+    {
+        Disable,
+        CubicEnvironment,
+        FakeReflection,
+        XZPosition
+    }
+
     public class MtrlFile
     {
         private const string Zero = "0";
         private const string IndentString = "    ";
+        private const float Epsilon = 0.000001f;
+
+        public uint TextureNameLength { get; private set; }
+        public uint SecondaryTextureNameLength { get; private set; }
+        public uint BumpMapNameLength { get; private set; }
+        public uint SpecMapNameLength { get; private set; }
+        public uint GlossMapNameLength { get; private set; }
+        public uint EmissiveMapNameLength { get; private set; }
 
         public Vector3 Diffuse { get; set; }
         public Vector3 Ambient { get; set; }
@@ -34,17 +105,17 @@
         public byte AffectsSpecular { get; set; }
         public byte Updateable { get; set; }
 
-        public int AlphaMode { get; set; } // Seems to be very often 10, wave has a 2 here, phoenix has 6
+        public MtrlAlphaMode AlphaMode { get; set; } // Seems to be very often 10, wave has a 2 here, phoenix has 6
         public float AmbientIntensity { get; set; }
         public float DiffuseIntensity { get; set; }
         public float SpecularIntensity { get; set; }
         public float EmissiveIntensity { get; set; }
-        public int ColorTransform { get; set; } // Val of 4 seems to be PC
-        public int TextureTransform { get; set; }
+        public MtrlColorTransformMode ColorTransform { get; set; } // Val of 4 seems to be PC
+        public MtrlTextureTransformMode TextureTransform { get; set; }
         public uint TextureFactor { get; set; } // Has something to do with Cube Map
-        public int MultiTextureMode { get; set; } // Has something to do with Cube Map
-        public int TexGenMode0 { get; set; }
-        public int TexGenMode1 { get; set; } // Has something to do with Cube Map
+        public MtrlMultitextureMode MultiTextureMode { get; set; } // Has something to do with Cube Map
+        public MtrlTexGenMode TexGenMode0 { get; set; }
+        public MtrlTexGenMode TexGenMode1 { get; set; } // Has something to do with Cube Map
         public int TexCoordSet0 { get; set; }
         public int TexCoordSet1 { get; set; }
         public int TexCoordSet2 { get; set; }
@@ -64,12 +135,71 @@
 
         public int[] Reserved { get; set; }
 
-        public string Texture { get; set; }
-        public string SecondaryTexture { get; set; }
-        public string BumpMap { get; set; }
-        public string SpecMap { get; set; }
-        public string GlossMap { get; set; }
-        public string EmissiveMap { get; set; }
+        private string _texture;
+        public string Texture
+        {
+            get => _texture;
+            set
+            {
+                _texture = value;
+                TextureNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+            }
+        }
+
+        private string _secondaryTexture;
+        public string SecondaryTexture
+        {
+            get => _secondaryTexture;
+            set
+            {
+                _secondaryTexture = value;
+                SecondaryTextureNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+            }
+        }
+
+        private string _bumpMap;
+        public string BumpMap
+        {
+            get => _bumpMap;
+            set
+            {
+                _bumpMap = value;
+                BumpMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+            }
+        }
+
+        private string _specMap;
+        public string SpecMap
+        {
+            get => _specMap;
+            set
+            {
+                _specMap = value;
+                SpecMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+            }
+        }
+
+        private string _glossMap;
+        public string GlossMap
+        {
+            get => _glossMap;
+            set
+            {
+                _glossMap = value;
+                GlossMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+            }
+        }
+
+        private string _emissiveMap;
+        public string EmissiveMap
+        {
+            get => _emissiveMap;
+            set
+            {
+                _emissiveMap = value;
+                EmissiveMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+            }
+        }
 
         public MtrlFile()
         {
@@ -85,7 +215,7 @@
             this.AffectsDiffuse = 1;
             this.AffectsSpecular = 1;
 
-            this.AlphaMode = 10;
+            this.AlphaMode = MtrlAlphaMode.Texture;
 
             this.TextureIndex = -1;
             this.SecondaryTextureIndex = -1;
@@ -97,12 +227,12 @@
 
             Reserved = new int[4];
 
-            Texture = string.Empty;
-            SecondaryTexture = string.Empty;
-            BumpMap = string.Empty;
-            SpecMap = string.Empty;
-            GlossMap = string.Empty;
-            EmissiveMap = string.Empty;
+            _texture = string.Empty;
+            _secondaryTexture = string.Empty;
+            _bumpMap = string.Empty;
+            _specMap = string.Empty;
+            _glossMap = string.Empty;
+            _emissiveMap = string.Empty;
         }
         public MtrlFile(BrgMaterial mat)
             : this()
@@ -112,23 +242,23 @@
             this.Specular = mat.SpecularColor;
             this.Emissive = mat.EmissiveColor;
             this.SpecularPower = mat.SpecularExponent;
-            this.Alpha = mat.Opacity;
+            this.Alpha =  mat.Opacity > 1 ? 1 : (mat.Opacity < 0 ? 0 : mat.Opacity);
 
             this.DiffuseIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
             this.AmbientIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
             this.SpecularIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
             this.EmissiveIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
 
-            if ((Diffuse.X > 0.000001f) || (Diffuse.Y > 0.000001f) || (Diffuse.Z > 0.000001f))
+            if ((Math.Abs(Diffuse.X - 1) >= Epsilon) || (Math.Abs(Diffuse.Y - 1) >= Epsilon) || (Math.Abs(Diffuse.Z - 1) >= Epsilon))
                 this.AffectsDiffuse = 1;
-            if ((Ambient.X > 0.000001f) || (Ambient.Y > 0.000001f) || (Ambient.Z > 0.000001f))
+            if ((Math.Abs(Ambient.X - 1) >= Epsilon) || (Math.Abs(Ambient.Y - 1) >= Epsilon) || (Math.Abs(Ambient.Z - 1) >= Epsilon))
                 this.AffectsAmbient = 1;
-            if ((Specular.X > 0.000001f) || (Specular.Y > 0.000001f) || (Specular.Z > 0.000001f))
+            if ((Math.Abs(Specular.X - 1) >= Epsilon) || (Math.Abs(Specular.Y - 1) >= Epsilon) || (Math.Abs(Specular.Z - 1) >= Epsilon))
                 this.AffectsSpecular = 1;
-            if ((Emissive.X > 0.000001f) || (Emissive.Y > 0.000001f) || (Emissive.Z > 0.000001f))
+            if ((Emissive.X > Epsilon) || (Emissive.Y > Epsilon) || (Emissive.Z > Epsilon))
                 this.SelfIlluminating = 1;
 
-            if (mat.SpecularColor.X > 0.000001f || mat.SpecularColor.Y > 0.000001f || mat.SpecularColor.Z > 0.000001f)
+            if (mat.SpecularColor.X >= Epsilon || mat.SpecularColor.Y >= Epsilon || mat.SpecularColor.Z >= Epsilon)
                 this.LightSpecular = 1;
 
             if (!mat.Flags.HasFlag(BrgMatFlag.WrapUTx1))
@@ -141,13 +271,42 @@
                 this.ClampV = 1;
             }
 
-            // TODO: implement color transform, and tex transform
-            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1))
             {
-                this.ColorTransform = 4;
+                this.ColorTransform = MtrlColorTransformMode.Transform1;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2))
+            {
+                this.ColorTransform = MtrlColorTransformMode.Transform2;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor3))
+            {
+                this.ColorTransform = MtrlColorTransformMode.Transform3;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
+            {
+                this.ColorTransform = MtrlColorTransformMode.TransformPixel1;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm2))
+            {
+                this.ColorTransform = MtrlColorTransformMode.TransformPixel2;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm3))
+            {
+                this.ColorTransform = MtrlColorTransformMode.TransformPixel3;
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx1))
+            {
+                this.TextureTransform = MtrlTextureTransformMode.Transform1;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2))
+            {
+                this.TextureTransform = MtrlTextureTransformMode.Transform2;
             }
 
             this.Texture = mat.DiffuseMapName;
+            this.BumpMap = mat.BumpMapName;
 
             if (mat.Flags.HasFlag(BrgMatFlag.CubeMapInfo))
             {
@@ -156,30 +315,30 @@
                 switch (mat.CubeMapInfo.Mode)
                 {
                     case 0:
-                        this.TexGenMode1 = 1; // Cubic environment
+                        this.TexGenMode1 = MtrlTexGenMode.CubicEnvironment;
 
                         if (mat.Flags.HasFlag(BrgMatFlag.AdditiveCubeBlend))
                         {
                             if (mat.Flags.HasFlag(BrgMatFlag.InverseAlpha))
-                                this.MultiTextureMode = 14; // MultitextureAddInverseAlpha
+                                this.MultiTextureMode = MtrlMultitextureMode.AddInverseAlpha;
                             else
-                                this.MultiTextureMode = 13; // MultitextureAddAlpha
+                                this.MultiTextureMode = MtrlMultitextureMode.AddAlpha;
                         }
                         else
                         {
                             if (mat.Flags.HasFlag(BrgMatFlag.InverseAlpha))
-                                this.MultiTextureMode = 9; // MultitextureLinearBlendInverseAlpha
+                                this.MultiTextureMode = MtrlMultitextureMode.LinearBlendInverseAlpha;
                             else
-                                this.MultiTextureMode = 8; // MultitextureLinearBlendAlpha
+                                this.MultiTextureMode = MtrlMultitextureMode.LinearBlendAlpha;
                         }
                         break;
                     case 1:
-                        this.TexGenMode1 = 1; // Cubic environment
+                        this.TexGenMode1 = MtrlTexGenMode.CubicEnvironment;
 
                         if (mat.Flags.HasFlag(BrgMatFlag.AdditiveCubeBlend))
-                            this.MultiTextureMode = 12; // MultitextureAddFactor
+                            this.MultiTextureMode = MtrlMultitextureMode.AddFactor;
                         else
-                            this.MultiTextureMode = 4; // MultitextureLinearBlend
+                            this.MultiTextureMode = MtrlMultitextureMode.LinearBlend;
 
                         uint txFactor = (byte)(255.0f * (mat.CubeMapInfo.TextureFactor / 100.0f));
                         this.TextureFactor = txFactor << 24;
@@ -189,10 +348,27 @@
                 }
             }
 
-            // TODO: Set alpha mode
+            if (mat.Flags.HasFlag(BrgMatFlag.Alpha))
+            {
+                if ((1 - this.Alpha) > Epsilon)
+                    this.AlphaMode = MtrlAlphaMode.On;
+                else
+                    this.AlphaMode = MtrlAlphaMode.Texture;
+            }
+
+            if ((ColorTransform == MtrlColorTransformMode.TransformPixel1 ||
+                ColorTransform == MtrlColorTransformMode.TransformPixel2 ||
+                ColorTransform == MtrlColorTransformMode.TransformPixel3) &&
+                (AlphaMode == MtrlAlphaMode.On))
+                AlphaMode = MtrlAlphaMode.Off;
+
             if (mat.Flags.HasFlag(BrgMatFlag.AdditiveBlend))
             {
-                this.AlphaMode = 6;
+                this.AlphaMode = MtrlAlphaMode.Additive;
+            }
+            else if (mat.Flags.HasFlag(BrgMatFlag.SubtractiveBlend))
+            {
+                this.AlphaMode = MtrlAlphaMode.Subtractive;
             }
         }
 
@@ -206,12 +382,12 @@
                     throw new Exception("This is not a MTRL file!");
                 }
 
-                uint nameLength = reader.ReadUInt32();
-                uint secondaryTextureLength = reader.ReadUInt32();
-                uint bumpmapLength = reader.ReadUInt32();
-                uint specmapLength = reader.ReadUInt32();
-                uint glossmapLength = reader.ReadUInt32();
-                uint emissivemapLength = reader.ReadUInt32();
+                TextureNameLength = reader.ReadUInt32();
+                SecondaryTextureNameLength = reader.ReadUInt32();
+                BumpMapNameLength = reader.ReadUInt32();
+                SpecMapNameLength = reader.ReadUInt32();
+                GlossMapNameLength = reader.ReadUInt32();
+                EmissiveMapNameLength = reader.ReadUInt32();
 
                 this.Diffuse = reader.ReadVector3D(false);
                 this.Ambient = reader.ReadVector3D(false);
@@ -231,17 +407,17 @@
                 this.AffectsSpecular = reader.ReadByte();
                 this.Updateable = reader.ReadByte();
 
-                this.AlphaMode = reader.ReadInt32(); // Seems to be very often 10, wave has a 2 here, phoenix has 6
+                this.AlphaMode = (MtrlAlphaMode)reader.ReadInt32(); // wave has a 2 here, phoenix has 6
                 this.AmbientIntensity = reader.ReadSingle();
                 this.DiffuseIntensity = reader.ReadSingle();
                 this.SpecularIntensity = reader.ReadSingle();
                 this.EmissiveIntensity = reader.ReadSingle();
-                this.ColorTransform = reader.ReadInt32(); // Val of 4 seems to be PC
-                this.TextureTransform = reader.ReadInt32();
-                this.TextureFactor = reader.ReadUInt32(); // Has something to do with Cube Map
-                this.MultiTextureMode = reader.ReadInt32(); // Has something to do with Cube Map
-                this.TexGenMode0 = reader.ReadInt32();
-                this.TexGenMode1 = reader.ReadInt32(); // Has something to do with Cube Map
+                this.ColorTransform = (MtrlColorTransformMode)reader.ReadInt32();
+                this.TextureTransform = (MtrlTextureTransformMode)reader.ReadInt32();
+                this.TextureFactor = reader.ReadUInt32();
+                this.MultiTextureMode = (MtrlMultitextureMode)reader.ReadInt32();
+                this.TexGenMode0 = (MtrlTexGenMode)reader.ReadInt32();
+                this.TexGenMode1 = (MtrlTexGenMode)reader.ReadInt32();
                 this.TexCoordSet0 = reader.ReadInt32();
                 this.TexCoordSet1 = reader.ReadInt32();
                 this.TexCoordSet2 = reader.ReadInt32();
@@ -264,32 +440,32 @@
                     this.Reserved[i] = reader.ReadInt32();
                 }
 
-                if (nameLength > 0)
+                if (TextureNameLength > 0)
                 {
                     this.Texture = reader.ReadString();
                 }
 
-                if (secondaryTextureLength > 0)
+                if (SecondaryTextureNameLength > 0)
                 {
                     this.SecondaryTexture = reader.ReadString();
                 }
 
-                if (bumpmapLength > 0)
+                if (BumpMapNameLength > 0)
                 {
                     this.BumpMap = reader.ReadString();
                 }
 
-                if (specmapLength > 0)
+                if (SpecMapNameLength > 0)
                 {
                     this.SpecMap = reader.ReadString();
                 }
 
-                if (glossmapLength > 0)
+                if (GlossMapNameLength > 0)
                 {
                     this.GlossMap = reader.ReadString();
                 }
 
-                if (emissivemapLength > 0)
+                if (EmissiveMapNameLength > 0)
                 {
                     this.EmissiveMap = reader.ReadString();
                 }
@@ -302,18 +478,12 @@
             {
                 writer.Write(1280463949); // MTRL
 
-                var nameLength = (UInt32)Encoding.UTF8.GetByteCount(this.Texture);
-                var sectexLength = (UInt32)Encoding.UTF8.GetByteCount(this.SecondaryTexture);
-                var bumpmapLength = (UInt32)Encoding.UTF8.GetByteCount(this.BumpMap);
-                var specmapLength = (UInt32)Encoding.UTF8.GetByteCount(this.SpecMap);
-                var glossmapLength = (UInt32)Encoding.UTF8.GetByteCount(this.GlossMap);
-                var emissivemapLength = (UInt32)Encoding.UTF8.GetByteCount(this.EmissiveMap);
-                writer.Write(nameLength);
-                writer.Write(sectexLength);
-                writer.Write(bumpmapLength);
-                writer.Write(specmapLength);
-                writer.Write(glossmapLength);
-                writer.Write(emissivemapLength);
+                writer.Write(TextureNameLength);
+                writer.Write(SecondaryTextureNameLength);
+                writer.Write(BumpMapNameLength);
+                writer.Write(SpecMapNameLength);
+                writer.Write(GlossMapNameLength);
+                writer.Write(EmissiveMapNameLength);
 
                 writer.WriteVector3D(this.Diffuse, false);
                 writer.WriteVector3D(this.Ambient, false);
@@ -333,17 +503,17 @@
                 writer.Write(this.AffectsSpecular);
                 writer.Write(this.Updateable);
 
-                writer.Write(this.AlphaMode); // Seems to be very often 10, wave has a 2 here, phoenix has 6
+                writer.Write((int)this.AlphaMode); // Seems to be very often 10, wave has a 2 here, phoenix has 6
                 writer.Write(this.AmbientIntensity);
                 writer.Write(this.DiffuseIntensity);
                 writer.Write(this.SpecularIntensity);
                 writer.Write(this.EmissiveIntensity);
-                writer.Write(this.ColorTransform); // Val of 4 seems to be PC
-                writer.Write(this.TextureTransform);
+                writer.Write((int)this.ColorTransform); // Val of 4 seems to be PC
+                writer.Write((int)this.TextureTransform);
                 writer.Write(this.TextureFactor); // Has something to do with Cube Map
-                writer.Write(this.MultiTextureMode); // Has something to do with Cube Map
-                writer.Write(this.TexGenMode0);
-                writer.Write(this.TexGenMode1); // Has something to do with Cube Map
+                writer.Write((int)this.MultiTextureMode); // Has something to do with Cube Map
+                writer.Write((int)this.TexGenMode0);
+                writer.Write((int)this.TexGenMode1); // Has something to do with Cube Map
                 writer.Write(this.TexCoordSet0);
                 writer.Write(this.TexCoordSet1);
                 writer.Write(this.TexCoordSet2);
@@ -366,32 +536,32 @@
                     writer.Write(this.Reserved[i]);
                 }
 
-                if (nameLength > 0)
+                if (TextureNameLength > 0)
                 {
                     writer.WriteString(this.Texture);
                 }
 
-                if (sectexLength > 0)
+                if (SecondaryTextureNameLength > 0)
                 {
                     writer.WriteString(this.SecondaryTexture);
                 }
 
-                if (bumpmapLength > 0)
+                if (BumpMapNameLength > 0)
                 {
                     writer.WriteString(this.BumpMap);
                 }
 
-                if (specmapLength > 0)
+                if (SpecMapNameLength > 0)
                 {
                     writer.WriteString(this.SpecMap);
                 }
 
-                if (glossmapLength > 0)
+                if (GlossMapNameLength > 0)
                 {
                     writer.WriteString(this.GlossMap);
                 }
 
-                if (emissivemapLength > 0)
+                if (EmissiveMapNameLength > 0)
                 {
                     writer.WriteString(this.EmissiveMap);
                 }
@@ -517,7 +687,7 @@
                         file.Updateable = byte.Parse(e.Value);
                         break;
                     case "alpha_mode":
-                        file.AlphaMode = int.Parse(e.Value);
+                        file.AlphaMode = (MtrlAlphaMode)int.Parse(e.Value);
                         break;
                     case "ambient_intensity":
                         file.AmbientIntensity = float.Parse(e.Value);
@@ -532,22 +702,22 @@
                         file.EmissiveIntensity = float.Parse(e.Value);
                         break;
                     case "color_transform":
-                        file.ColorTransform = int.Parse(e.Value);
+                        file.ColorTransform = (MtrlColorTransformMode)int.Parse(e.Value);
                         break;
                     case "texture_transform":
-                        file.TextureTransform = int.Parse(e.Value);
+                        file.TextureTransform = (MtrlTextureTransformMode)int.Parse(e.Value);
                         break;
                     case "texture_factor":
                         file.TextureFactor = uint.Parse(e.Value);
                         break;
                     case "multitexture_mode":
-                        file.MultiTextureMode = int.Parse(e.Value);
+                        file.MultiTextureMode = (MtrlMultitextureMode)int.Parse(e.Value);
                         break;
                     case "texgen_mode_0":
-                        file.TexGenMode0 = int.Parse(e.Value);
+                        file.TexGenMode0 = (MtrlTexGenMode)int.Parse(e.Value);
                         break;
                     case "texgen_mode_1":
-                        file.TexGenMode1 = int.Parse(e.Value);
+                        file.TexGenMode1 = (MtrlTexGenMode)int.Parse(e.Value);
                         break;
                     case "texcoord_set_0":
                         file.TexCoordSet0 = int.Parse(e.Value);
