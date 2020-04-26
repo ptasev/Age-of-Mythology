@@ -510,7 +510,7 @@ namespace AoMModelViewer
                 wrapFlags |= tex.Sampler.WrapT == TextureWrapMode.CLAMP_TO_EDGE ? 0 : BrgMatFlag.WrapVTx1;
             }
 
-            string name = tex.PrimaryImage.Name ?? tex.Name ?? srcMaterial.Name ?? string.Empty;
+            string name = tex.PrimaryImage.Name ?? tex.Name ?? srcMaterial.Name ?? $"tex{tex.LogicalIndex}";
             return name;
         }
         private void GetMaterialFlagsFromName(GltfMaterial glMat, BrgMaterial mat)

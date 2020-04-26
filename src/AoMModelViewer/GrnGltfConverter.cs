@@ -29,10 +29,12 @@ namespace AoMModelViewer
         private const string TrackName = "Default";
         private static readonly byte[] blankImageData;
         private static readonly Matrix4x4 RotX90N;
+        private static readonly Quaternion RotX90NQuat;
 
         static GrnGltfConverter()
         {
             RotX90N = Matrix4x4.CreateRotationX(MathF.PI * -0.5f);
+            RotX90NQuat = Quaternion.CreateFromRotationMatrix(RotX90N);
 
             // Create 4x4 white texture;
             var ddsBlank = new DdsFile();
@@ -60,13 +62,8 @@ namespace AoMModelViewer
         public ModelRoot Convert(GrnFile grn)
         {
             var sceneBuilder = new SceneBuilder();
-            var rootNodeBuilder = new NodeBuilder("root");
 
-            // Grn uses the Blender/3ds Max right handed coord system where X+ left, Y+ back, Z+ up
-            // this is different from gltf so let's adjust
-            rootNodeBuilder.UseRotation().Value = Quaternion.CreateFromRotationMatrix(RotX90N);
-
-            var nodeBuilders = ConvertSkeleton(grn, sceneBuilder, rootNodeBuilder);
+            var nodeBuilders = ConvertSkeleton(grn);
 
             if (grn.Meshes.Count > 0)
             {
@@ -81,12 +78,13 @@ namespace AoMModelViewer
             return sceneBuilder.ToGltf2();
         }
 
-        private NodeBuilder?[] ConvertSkeleton(GrnFile grn, SceneBuilder sceneBuilder, NodeBuilder nodeBuilder)
+        private NodeBuilder?[] ConvertSkeleton(GrnFile grn)
         {
             var mb = CreateBoneMesh();
-
+            var rootNodeBuilder = new NodeBuilder("__GrnGltfContainer");
             var nodeBuilders = new NodeBuilder?[grn.Bones.Count];
-            nodeBuilders[0] = nodeBuilder;
+            nodeBuilders[0] = rootNodeBuilder;
+
             // The parent index will always be higher than the child index
             for (int i = 0; i < grn.Bones.Count; ++i)
             {
@@ -98,8 +96,10 @@ namespace AoMModelViewer
                 if (!grn.Meshes.Exists(m => m.Name == bone.Name))
                 {
                     var parent = nodeBuilders[bone.ParentIndex] ?? throw new InvalidDataException($"The parent of bone {bone.Name} cannot be null.");
-                    var node = ConvertBone(bone, parent);
+                    NodeBuilder node = parent.CreateNode(bone.Name);
+                    ConvertBone(bone, node);
                     nodeBuilders[i] = node;
+
                     // No longer add mesh to bone nodes since Blender will replace them with its bone mesh
                     //sceneBuilder.AddRigidMesh(mb, node);
                 }
@@ -167,25 +167,15 @@ namespace AoMModelViewer
                 }
             }
         }
-        private NodeBuilder ConvertBone(GrnBone bone, NodeBuilder nodeBuilder)
+        private void ConvertBone(GrnBone bone, NodeBuilder nodeBuilder)
         {
-            var nb = nodeBuilder.CreateNode(bone.Name);
-            nb.UseTranslation().Value = bone.Position;
-            nb.UseRotation().Value = bone.Rotation;
-            nb.UseScale().Value = new Vector3(bone.Scale.M11, bone.Scale.M22, bone.Scale.M33);
-            //var localMatrix = GetBoneLocalMatrix(bone);
-            //nb.LocalMatrix = localMatrix;
+            // Grn uses the Blender/3ds Max right handed coord system where X+ left, Y+ back, Z+ up
+            // this is different from gltf so let's adjust
+            bool adjustCoordSystem = bone.ParentIndex == 0;
 
-            return nb;
-        }
-        private Matrix4x4 GetBoneLocalMatrix(GrnBone bone)
-        {
-            var transMat = Matrix4x4.CreateTranslation(bone.Position);
-            var rotMat = Matrix4x4.CreateFromQuaternion(bone.Rotation);
-            var scaleMat = Matrix4x4.CreateScale(bone.Scale.M11, bone.Scale.M22, bone.Scale.M33);
-            var res = scaleMat * rotMat * transMat;
-
-            return res;
+            nodeBuilder.UseTranslation().Value = adjustCoordSystem ? Vector3.Transform(bone.Position, RotX90N) : bone.Position;
+            nodeBuilder.UseRotation().Value = adjustCoordSystem ? Quaternion.Concatenate(bone.Rotation, RotX90NQuat) : bone.Rotation;
+            nodeBuilder.UseScale().Value = new Vector3(bone.Scale.M11, bone.Scale.M22, bone.Scale.M33);
         }
 
         private void ConvertMeshes(GrnFile grn, SceneBuilder sceneBuilder, NodeBuilder?[] nodeBuilders)
@@ -289,7 +279,9 @@ namespace AoMModelViewer
         {
             for (int i = 0; i < grn.Animation.BoneTracks.Count; ++i)
             {
-                if (grn.Bones[i].Name == "__Root")
+                GrnBone gbone = grn.Bones[i];
+                bool adjustCoordSystem = gbone.ParentIndex == 0;
+                if (gbone.Name == "__Root")
                 {
                     continue;
                 }
@@ -303,7 +295,7 @@ namespace AoMModelViewer
                     var tb = node.UseTranslation(TrackName);
                     for (int j = 0; j < bone.PositionKeys.Count; ++j)
                     {
-                        tb.SetPoint(bone.PositionKeys[j], bone.Positions[j]);
+                        tb.SetPoint(bone.PositionKeys[j], adjustCoordSystem ? Vector3.Transform(bone.Positions[j], RotX90N) : bone.Positions[j]);
                     }
                 }
 
@@ -312,7 +304,7 @@ namespace AoMModelViewer
                     var tb = node.UseRotation(TrackName);
                     for (int j = 0; j < bone.RotationKeys.Count; ++j)
                     {
-                        tb.SetPoint(bone.RotationKeys[j], bone.Rotations[j]);
+                        tb.SetPoint(bone.RotationKeys[j], adjustCoordSystem ? Quaternion.Concatenate(bone.Rotations[j], RotX90NQuat) : bone.Rotations[j]);
                     }
                 }
 
