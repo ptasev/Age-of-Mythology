@@ -7,32 +7,41 @@ using System.Threading.Tasks;
 
 namespace AoMBrgEditor
 {
-    public enum DdtType : byte
+    [Flags]
+    public enum DdtProperty : byte
     {
-        Texture = 0,
-        Texture2 = 1,
-        Unk2 = 2,
-        Palette = 3,
-        BumpMap = 4,
+        Normal = 0,
+        NoAlphaTest = 1,
+        NoLowDetail = 2,
+        DisplacementMap = 4,
         CubeMap = 8
     };
-    public enum DdtTexelFormat : byte
+    public enum DdtFormat : byte
     {
-        Palette = 3,
-        DXT1 = 4,
-        DXT3 = 5,
-        DXT5 = 6,
-        Grayscale8 = 7
+        Raw32 = 1,
+        Raw24 = 2,
+        BT8 = 3,
+        Dxt1 = 4,
+        Dxt1Alpha = 5,
+        Dxt3Swizzled = 6,
+        AlphaData = 7,
+        //BC1 = Dxt1,
+        BC2 = 8,
+        BC3 = 9,
+        RgbaDeflated = 10,
+        RgbDeflated = 11,
+        AlphaDeflated = 12,
+        RgDeflated = 13
     };
 
     public class DdtFile
     {
-        public DdtType type;
-        public byte alphaBits; //6, 4, 1, 0
-        public DdtTexelFormat texelFormat;
-        public byte mipMap;
-        public int Height;
-        public int Width;
+        public DdtProperty Properties { get; set; }
+        public byte AlphaBits { get; set; } //6, 4, 1, 0
+        public DdtFormat Format { get; set; }
+        public byte NumMipLevels { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public byte[] imageData;
 
         public DdtFile(System.IO.Stream fileStream)
@@ -40,15 +49,17 @@ namespace AoMBrgEditor
             using (BrgBinaryReader reader = new BrgBinaryReader(fileStream))
             {
                 reader.ReadInt32();
-                type = (DdtType)reader.ReadByte();
-                alphaBits = reader.ReadByte();
-                texelFormat = (DdtTexelFormat)reader.ReadByte();
-                mipMap = reader.ReadByte();
+                Properties = (DdtProperty)reader.ReadByte();
+                AlphaBits = reader.ReadByte();
+                Format = (DdtFormat)reader.ReadByte();
+                NumMipLevels = reader.ReadByte();
                 Height = reader.ReadInt32();
                 Width = reader.ReadInt32();
 
+                // TODO: implement the rest
+                return;
                 int length = 0;
-                for (int i = 0; i < mipMap; i++)
+                for (int i = 0; i < NumMipLevels; i++)
                 {
                     reader.ReadInt32();
                     length += reader.ReadInt32();
@@ -60,13 +71,13 @@ namespace AoMBrgEditor
 
         public string GetTexelFormat()
         {
-            switch (texelFormat)
+            switch (Format)
             {
-                case DdtTexelFormat.DXT1:
+                case DdtFormat.Dxt1:
                     return "DXT1";
-                case DdtTexelFormat.DXT3:
+                case DdtFormat.Dxt1Alpha:
                     return "1555";
-                case DdtTexelFormat.DXT5:
+                case DdtFormat.Dxt3Swizzled:
                     return "4444";
                 default:
                     return "";
@@ -150,9 +161,9 @@ namespace AoMBrgEditor
         public byte[] Get32BitUncompressed()
         {
             byte[] pixels = new byte[Width * Height * 4];
-            switch (texelFormat)
+            switch (Format)
             {
-                case DdtTexelFormat.Grayscale8:
+                case DdtFormat.AlphaData:
                     {
                         for (int b = 0; b < imageData.Length; ++b)
                         {
@@ -163,9 +174,9 @@ namespace AoMBrgEditor
                             pixels[b * 4 + 3] = 255;
                         }
                     } break;
-                case DdtTexelFormat.DXT1:
-                case DdtTexelFormat.DXT3:
-                case DdtTexelFormat.DXT5:
+                case DdtFormat.Dxt1:
+                case DdtFormat.Dxt1Alpha:
+                case DdtFormat.Dxt3Swizzled:
                     {
                         Pixel[] blockPalette = new Pixel[2];
                         Pixel[] block4Palette = new Pixel[4];
@@ -176,11 +187,11 @@ namespace AoMBrgEditor
                         int alpBits = 0;
                         int alpStrideBits = 0;
                         Action<byte[], int, Pixel[]> extractor = null;
-                        switch (texelFormat)
+                        switch (Format)
                         {
-                            case DdtTexelFormat.DXT1: extractor = Convert565ToRGB; stride = 8; colOff = 4; colStride = 1; break;
-                            case DdtTexelFormat.DXT3: extractor = Convert555ToRGB; stride = 10; colOff = 6; colStride = 1; alpOff = 4; alpBits = 1; alpStrideBits = 4 * 1; break;
-                            case DdtTexelFormat.DXT5: extractor = Convert444ToRGB; stride = 16; colOff = 6; colStride = 3; alpOff = 4; alpBits = 4; alpStrideBits = 6 * 4; break;
+                            case DdtFormat.Dxt1: extractor = Convert565ToRGB; stride = 8; colOff = 4; colStride = 1; break;
+                            case DdtFormat.Dxt1Alpha: extractor = Convert555ToRGB; stride = 10; colOff = 6; colStride = 1; alpOff = 4; alpBits = 1; alpStrideBits = 4 * 1; break;
+                            case DdtFormat.Dxt3Swizzled: extractor = Convert444ToRGB; stride = 16; colOff = 6; colStride = 3; alpOff = 4; alpBits = 4; alpStrideBits = 6 * 4; break;
                         }
                         for (int x = 0; x < Width / 4; ++x)
                         {
