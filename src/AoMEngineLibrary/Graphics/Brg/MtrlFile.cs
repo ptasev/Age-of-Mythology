@@ -244,10 +244,11 @@
             this.SpecularPower = mat.SpecularExponent;
             this.Alpha =  mat.Opacity > 1 ? 1 : (mat.Opacity < 0 ? 0 : mat.Opacity);
 
-            this.DiffuseIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
-            this.AmbientIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
-            this.SpecularIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
-            this.EmissiveIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
+            // EE doesn't seem to care about setting these.
+            //this.DiffuseIntensity = 0.299f * Diffuse.X + 0.587f * Diffuse.Y + 0.114f * Diffuse.Z;
+            //this.AmbientIntensity = 0.299f * Ambient.X + 0.587f * Ambient.Y + 0.114f * Ambient.Z;
+            //this.SpecularIntensity = 0.299f * Specular.X + 0.587f * Specular.Y + 0.114f * Specular.Z;
+            //this.EmissiveIntensity = 0.299f * Emissive.X + 0.587f * Emissive.Y + 0.114f * Emissive.Z;
 
             if ((Math.Abs(Diffuse.X - 1) >= Epsilon) || (Math.Abs(Diffuse.Y - 1) >= Epsilon) || (Math.Abs(Diffuse.Z - 1) >= Epsilon))
                 this.AffectsDiffuse = 1;
