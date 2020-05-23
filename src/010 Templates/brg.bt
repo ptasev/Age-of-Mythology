@@ -212,36 +212,44 @@ struct {
 
         if ((((properties & COLORALPHACHANNEL) == COLORALPHACHANNEL || (properties & COLORCHANNEL) == COLORCHANNEL) && !((properties & SECONDARYMESH) == SECONDARYMESH)) || (properties & ANIMVERTCOLORALPHA) == ANIMVERTCOLORALPHA) {
             struct VertColor {
-                ubyte R;
-                ubyte G;
                 ubyte B;
+                ubyte G;
+                ubyte R;
                 ubyte A;
             } vertexColor[numVertices];
         }
 
         if ((properties & ATTACHPOINTS) == ATTACHPOINTS) {
-            int16 numMatrix <comment="This is number of bones">;
-            int16 numIndex;
-            int16 unknown10 <comment="Always 1">;
+            struct DummyObject
+            {
+                struct DummyObjectHeader {
+                    uint16 numDummyObjects <comment="This is number of dummies">;
+                    uint16 numDummyEntry;
+                    byte version <comment="Always 1">;
+                    byte unused;
+                } dummyObjectHeader;
+    
+                Vector upVector(3)[dummyObjectHeader.numDummyObjects];
+                Vector fwdVector(3)[dummyObjectHeader.numDummyObjects];
+                Vector rightVector(3)[dummyObjectHeader.numDummyObjects];
+                Vector position(3)[dummyObjectHeader.numDummyObjects];
+                Vector boundingBoxMina(3)[dummyObjectHeader.numDummyObjects];
+                Vector boundingBoxMaxa(3)[dummyObjectHeader.numDummyObjects];
+    
+                struct DummyLookupEntry {
+                    byte dummyCount;
+                    byte padding[3];
+                    int dummyIndicesArrayPtr;
+                } dummyList[dummyObjectHeader.numDummyEntry] <optimize=true>;
 
-            Vector upVector(3)[numMatrix];
-            Vector fwdVector(3)[numMatrix];
-            Vector rightVector(3)[numMatrix];
-            Vector position(3)[numMatrix];
-            Vector boundingBoxMina(3)[numMatrix];
-            Vector boundingBoxMaxa(3)[numMatrix];
-
-            local int32 numPoints = 0;
-            struct AttachNameIndex {
-                int numAttach;
-                int id;
-            } attachNameIndex[numIndex] <optimize=true>;
-            for (i = 0; i < numIndex; i++) {
-                numPoints += attachNameIndex[i].numAttach;
-            }
-            //unknown12
-
-            byte pointIndex[numPoints]; //unknown13
+                local int32 numPoints = 0;
+                for (i = 0; i < dummyObjectHeader.numDummyEntry; i++) {
+                    numPoints += dummyList[i].dummyCount;
+                }
+                //unknown12
+    
+                byte pointIndex[numPoints]; //unknown13
+            } dummyObject;
         }
 
         // checkSpace is always 0 anyway, this block happens only on first frames, with variable anim set in specialProps
