@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoMEngineLibrary.Tests", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelEditorOld", "src\AoMModelEditorOld\AoMModelEditorOld.csproj", "{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelEditor", "src\AoMModelEditor\AoMModelEditor.csproj", "{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,18 @@ Global
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|x64.ActiveCfg = Release|Any CPU
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE}.Release|x64.Build.0 = Release|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Debug|x64.Build.0 = Debug|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Release|x64.ActiveCfg = Release|Any CPU
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -166,6 +180,7 @@ Global
 		{A514F20B-E9B5-407E-B9AA-61A8FA089A1F} = {F57D2F83-5E0E-4CEB-939E-0226861A42A2}
 		{0528B295-76A6-4997-80EB-D742B118B597} = {025535BD-83A7-4D82-A672-570FEB96895D}
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE} = {F57D2F83-5E0E-4CEB-939E-0226861A42A2}
+		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21} = {F57D2F83-5E0E-4CEB-939E-0226861A42A2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {064AD83C-2634-41F5-BBD4-475F061C4CE8}
