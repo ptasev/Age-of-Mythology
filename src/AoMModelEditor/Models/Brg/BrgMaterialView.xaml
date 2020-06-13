@@ -12,40 +12,57 @@
     <GroupBox x:Name="mainGroupBox">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="DiffuseMap"/>
-                    <TextBox x:Name="diffuseMapTextBlock" MinWidth="200"/>
-                </StackPanel>
-                <WrapPanel Orientation="Horizontal">
-                    <Label Content="Diffuse" Margin="0 0 5 0"/>
-                    <ptools:ColorPicker x:Name="diffuseColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
-                    <Label Content="Ambient" Margin="0 0 5 0"/>
-                    <ptools:ColorPicker x:Name="ambientColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
-                    <Label Content="Specular" Margin="0 0 5 0"/>
-                    <ptools:ColorPicker x:Name="specularColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
-                    <Label Content="Emissive" Margin="0 0 5 0"/>
-                    <ptools:ColorPicker x:Name="emissiveColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
-                </WrapPanel>
-                <Label Content="Flags"/>
-                <ListBox x:Name="flagsListBox">
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="3" IsItemsHost="True"/>
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox Content="{Binding}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked">
-                                <CheckBox.IsChecked>
-                                    <MultiBinding Converter="{StaticResource eflagConverter}" Mode="OneWay">
-                                        <Binding />
-                                        <Binding Path="Tag" ElementName="flagsListBox" />
-                                    </MultiBinding>
-                                </CheckBox.IsChecked>
-                            </CheckBox>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <GroupBox Header="Base Data">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
+                            <Label Content="Texture" Margin="0 0 5 0"/>
+                            <TextBox x:Name="diffuseMapTextureTextBox" Width="200" Margin="0 0 5 0" VerticalContentAlignment="Center"/>
+                            <Label Content="Opacity" Margin="0 0 5 0"/>
+                            <TextBox x:Name="opacityTextBox" Width="40" Margin="0 0 5 0" VerticalContentAlignment="Center"/>
+                            <Label Content="Specular Exponent" Margin="0 0 5 0"/>
+                            <TextBox x:Name="specularExponentTextBox" Width="40" Margin="0 0 5 0" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                        <WrapPanel Orientation="Horizontal">
+                            <Label Content="Diffuse" Margin="0 0 5 0"/>
+                            <ptools:ColorPicker x:Name="diffuseColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
+                            <Label Content="Ambient" Margin="0 0 5 0"/>
+                            <ptools:ColorPicker x:Name="ambientColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
+                            <Label Content="Specular" Margin="0 0 5 0"/>
+                            <ptools:ColorPicker x:Name="specularColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
+                            <Label Content="Emissive" Margin="0 0 5 0"/>
+                            <ptools:ColorPicker x:Name="emissiveColorPicker" Text="Diffuse" Margin="0 0 5 0"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Cube Map">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Texture" Margin="0 0 5 0"></Label>
+                        <TextBox x:Name="cubeMapTextureTextBox" Width="200" Margin="0 0 5 0" VerticalContentAlignment="Center"/>
+                        <Label Content="Blend Percentage" Margin="0 0 5 0"></Label>
+                        <TextBox x:Name="cubeMapBlendPercentageTextBox" Width="40" Margin="0 0 5 0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Flags">
+                    <ListBox x:Name="flagsListBox">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3" IsItemsHost="True"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked">
+                                    <CheckBox.IsChecked>
+                                        <MultiBinding Converter="{StaticResource eflagConverter}" Mode="OneWay">
+                                            <Binding />
+                                            <Binding Path="Tag" ElementName="flagsListBox" />
+                                        </MultiBinding>
+                                    </CheckBox.IsChecked>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
             </StackPanel>
         </ScrollViewer>
     </GroupBox>

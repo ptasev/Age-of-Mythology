@@ -1,7 +1,10 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
+using AoMEngineLibrary.Graphics.Grn;
 using AoMModelViewer.Graphics;
 using HelixToolkit.Wpf;
 using Newtonsoft.Json;
+using SharpGLTF.Scenes;
+using SharpGLTF.Schema2;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,6 +42,20 @@ namespace AoMModelViewer
             InitializeComponent();
             cts = new CancellationTokenSource();
 
+            {
+                using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_walk.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    BrgFile f = new BrgFile(fs);
+                    new BrgGltfConverter().Convert(f).SaveGLTF("./brgLocustWalk.gltf");
+                }
+
+                using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_idle.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    BrgFile f = new BrgFile(fs);
+                    new BrgGltfConverter().Convert(f).SaveGLTF("./brgLocustIdle.gltf");
+                }
+            }
+
             string[] args = Environment.GetCommandLineArgs();
 
             if (args.Length > 1 && false)
@@ -58,6 +75,9 @@ namespace AoMModelViewer
                 var grnFile = new AoMEngineLibrary.Graphics.Grn.GrnFile();
                 grnFile.Read(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Write));
             }
+
+            // bla
+            //var ttt = ModelRoot.Load("grnGltf.gltf");
 
             //BrgFile t = new BrgFile();
             //t.ReadJson(File.Open("hi.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
@@ -103,16 +123,40 @@ namespace AoMModelViewer
             //viewport3d.Children.Add(meshVis);
             //viewport3d.Children.Add(modVis);
 
+            using (var fs = File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version1.0\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var fs2 = File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version1.0\ajax_walka.grn", FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                GrnFile grn = new GrnFile();
+                grn.Read(fs);
+                GrnFile grnAnim = new GrnFile();
+                grnAnim.Read(fs2);
+                grn.SetAnimation(grnAnim);
+                new GrnGltfConverter().Convert(grn).SaveGLTF("./grnGltf.gltf");
+                var newGrn = new GltfGrnConverter().Convert(ModelRoot.Load("./grnGltf.gltf"));
+                new GrnGltfConverter().Convert(newGrn).SaveGLTF("./grnGltf2.gltf");
+            }
+
             //file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\animal aurochs_attacka.brg", FileMode.Open, FileAccess.Read));
             //file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\infantry g hoplite head bronze.brg", FileMode.Open, FileAccess.Read));
             file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\infantry g hoplite_walka.brg", FileMode.Open, FileAccess.Read));
-            //glTFLoader.Schema.Gltf gltf;
+            glTFLoader.Schema.Gltf gltf;
             //using (var stream = File.Open("dataBuffer.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
             //{
             //    GltfFormatter frmt = new GltfFormatter();
             //    gltf = frmt.FromBrg(file, stream);
             //}
             //glTFLoader.Interface.SaveModel(gltf, "brgGltf.gltf");
+            new BrgGltfConverter().Convert(file).SaveGLTF("./brgGltfConv.gltf");
+
+            var gltfModel = ModelRoot.Load("blendergltf/blendergltf.gltf");
+            //var gltfModel = ModelRoot.Load("brgGltf.gltf");
+            BrgFile gltfBrg = new GltfBrgConverter().Convert(gltfModel);
+            using (var stream = File.Open("dataBuffer3Recreated.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                GltfFormatter frmt = new GltfFormatter();
+                gltf = frmt.FromBrg(gltfBrg, stream);
+            }
+            glTFLoader.Interface.SaveModel(gltf, "brgGltf3Recreated.gltf");
 
             this.Loaded += MainWindow_Loaded;
         }

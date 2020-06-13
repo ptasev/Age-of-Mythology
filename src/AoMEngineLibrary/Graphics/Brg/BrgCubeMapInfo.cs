@@ -35,7 +35,7 @@
         public BrgCubeMapInfo()
         {
             Mode = 1;
-            TextureFactor = 40;
+            TextureFactor = 30;
             _cubeMapName = string.Empty;
             _textureMapName = string.Empty;
         }

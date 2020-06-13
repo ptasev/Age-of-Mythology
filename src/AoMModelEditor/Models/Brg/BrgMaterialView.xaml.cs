@@ -44,35 +44,55 @@ namespace AoMModelEditor.Models.Brg
 
                 this.Bind(ViewModel,
                     v => v.DiffuseMap,
-                    view => view.diffuseMapTextBlock.Text)
+                    view => view.diffuseMapTextureTextBox.Text)
                     .DisposeWith(disposableRegistration);
 
-                this.Bind(this.ViewModel,
+                this.Bind(ViewModel,
+                    v => v.Opacity,
+                    view => view.opacityTextBox.Text)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.SpecularExponent,
+                    view => view.specularExponentTextBox.Text)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
                     v => v.DiffuseColor,
                     view => view.diffuseColorPicker.SelectedColor,
                     this.Vector3ToColorConverter,
                     this.ColorToVector3Converter)
                     .DisposeWith(disposableRegistration);
 
-                this.Bind(this.ViewModel,
+                this.Bind(ViewModel,
                     v => v.AmbientColor,
                     view => view.ambientColorPicker.SelectedColor,
                     this.Vector3ToColorConverter,
                     this.ColorToVector3Converter)
                     .DisposeWith(disposableRegistration);
 
-                this.Bind(this.ViewModel,
+                this.Bind(ViewModel,
                     v => v.SpecularColor,
                     view => view.specularColorPicker.SelectedColor,
                     this.Vector3ToColorConverter,
                     this.ColorToVector3Converter)
                     .DisposeWith(disposableRegistration);
 
-                this.Bind(this.ViewModel,
+                this.Bind(ViewModel,
                     v => v.EmissiveColor,
                     view => view.emissiveColorPicker.SelectedColor,
                     this.Vector3ToColorConverter,
                     this.ColorToVector3Converter)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.CubeMap,
+                    view => view.cubeMapTextureTextBox.Text)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.CubeMapBlendPercentage,
+                    view => view.cubeMapBlendPercentageTextBox.Text)
                     .DisposeWith(disposableRegistration);
             });
         }

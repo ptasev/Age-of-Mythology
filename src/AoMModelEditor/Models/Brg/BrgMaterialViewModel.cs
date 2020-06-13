@@ -13,7 +13,7 @@ namespace AoMModelEditor.Models.Brg
 
         public string Name
         {
-            get => string.IsNullOrEmpty(_mat.DiffuseMapName) ? "Material" : _mat.DiffuseMapName;
+            get => string.IsNullOrEmpty(_mat.DiffuseMapName) ? "Material" : $"Mat {_mat.DiffuseMapName}";
         }
 
         public BrgMatFlag Flags
@@ -33,6 +33,7 @@ namespace AoMModelEditor.Models.Brg
             {
                 _mat.DiffuseMapName = value;
                 this.RaisePropertyChanged(nameof(DiffuseMap));
+                this.RaisePropertyChanged(nameof(Name));
             }
         }
 
@@ -73,6 +74,54 @@ namespace AoMModelEditor.Models.Brg
             {
                 _mat.EmissiveColor = Vector3.Clamp(value, Vector3.Zero, Vector3.One);
                 this.RaisePropertyChanged(nameof(EmissiveColor));
+            }
+        }
+
+        public float Opacity
+        {
+            get => _mat.Opacity;
+            set
+            {
+                _mat.Opacity = Math.Clamp(value, 0.0f, 1.0f);
+                this.RaisePropertyChanged(nameof(Opacity));
+            }
+        }
+
+        public float SpecularExponent
+        {
+            get => _mat.SpecularExponent;
+            set
+            {
+                _mat.SpecularExponent = value;
+                this.RaisePropertyChanged(nameof(SpecularExponent));
+            }
+        }
+
+        public string CubeMap
+        {
+            get => _mat.CubeMapInfo.CubeMapName;
+            set
+            {
+                _mat.CubeMapInfo.CubeMapName = value;
+                if (string.IsNullOrEmpty(value))
+                {
+                    Flags &= ~(BrgMatFlag.CubeMapInfo | BrgMatFlag.AdditiveCubeBlend);
+                }
+                else
+                {
+                    Flags |= (BrgMatFlag.CubeMapInfo | BrgMatFlag.AdditiveCubeBlend);
+                }
+                this.RaisePropertyChanged(nameof(CubeMap));
+            }
+        }
+
+        public byte CubeMapBlendPercentage
+        {
+            get => _mat.CubeMapInfo.TextureFactor;
+            set
+            {
+                _mat.CubeMapInfo.TextureFactor = Math.Clamp(value, (byte)0, (byte)100);
+                this.RaisePropertyChanged(nameof(CubeMapBlendPercentage));
             }
         }
 

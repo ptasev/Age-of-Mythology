@@ -16,7 +16,7 @@ namespace AoMModelEditor.Models.Brg
         {
             _dummy = dummy;
 
-            Name = string.IsNullOrEmpty(dummy.Name) ? "Dummy" : dummy.Name;
+            Name = string.IsNullOrEmpty(dummy.Name) ? "Dummy" : $"Dummy {dummy.Name}";
         }
     }
 }

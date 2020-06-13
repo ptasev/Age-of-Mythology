@@ -24,6 +24,7 @@ namespace AoMModelEditor
         private void Open()
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Model files (*.brg, *.grn)|*.brg;*.grn|All files (*.*)|*.*";
 
             var dr = ofd.ShowDialog();
 
