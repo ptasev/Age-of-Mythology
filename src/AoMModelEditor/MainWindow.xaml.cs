@@ -20,6 +20,7 @@ namespace AoMModelEditor
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    #nullable disable
     public partial class MainWindow : ReactiveWindow<MainViewModel>
     {
         public MainWindow()
@@ -37,6 +38,11 @@ namespace AoMModelEditor
                 this.BindCommand(ViewModel,
                     v => v.OpenCommand,
                     view => view.openMenuItem)
+                    .DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                    v => v.SaveCommand,
+                    view => view.saveMenuItem)
                     .DisposeWith(disposableRegistration);
             });
         }

@@ -177,6 +177,19 @@
             AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
         }
 
+        public void UpdateMeshSettings()
+        {
+            if (this.Meshes.Count == 0)
+            {
+                return;
+            }
+
+            BrgMesh mesh = this.Meshes[0];
+            for (int i = 0; i < this.Meshes.Count; i++)
+            {
+                UpdateMeshSettings(i, mesh.Header.Flags, mesh.Header.Format, mesh.Header.AnimationType, mesh.Header.InterpolationType);
+            }
+        }
         public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, BrgMeshInterpolationType interpolationType)
         {
             if (this.Meshes.Count == 0)
@@ -212,7 +225,7 @@
                     this.Meshes[meshIndex].NonUniformKeys = new List<float>(this.Header.NumMeshes);
                     for (int i = 0; i < this.Header.NumMeshes; i++)
                     {
-                        this.Meshes[meshIndex].NonUniformKeys[i] = this.Animation.MeshKeys[i] / this.Animation.Duration;
+                        this.Meshes[meshIndex].NonUniformKeys.Add(this.Animation.MeshKeys[i] / this.Animation.Duration);
                     }
                 }
             }

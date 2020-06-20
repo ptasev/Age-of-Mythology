@@ -12,6 +12,7 @@ namespace AoMModelEditor.Converters
             var flagValue = values[0] as Enum;
             var propertyValue = values[1] as Enum;
 
+            if (flagValue == null) return false;
             if (propertyValue == null) return false;
 
             return propertyValue.HasFlag(flagValue);

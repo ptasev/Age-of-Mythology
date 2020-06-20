@@ -8,7 +8,7 @@
         xmlns:reactiveui="http://reactiveui.net"
         xmlns:models="clr-namespace:AoMModelEditor.Models"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="540" Width="960">
     <DockPanel>
         <Menu x:Name="mainMenu" DockPanel.Dock="Top" IsMainMenu="True">
             <MenuItem Header="_File">
@@ -17,15 +17,16 @@
                         <Image Source="pack://application:,,,/Resources/folder.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Save" Command="{Binding Path=SaveCommand}" InputGestureText="Ctrl+S">
+                <MenuItem x:Name="saveMenuItem" Header="_Save" InputGestureText="Ctrl+S">
                     <MenuItem.Icon>
                         <Image Source="pack://application:,,,/Resources/disk.png"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="_Models">
-                <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.Export}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Import" Command="{Binding Path=TexturesWorkspace.Import}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+            <MenuItem Header="_Model">
+                <MenuItem Header="_Export as GLTF"></MenuItem>
+                <MenuItem Header="_Import GLTF as BRG"></MenuItem>
+                <MenuItem Header="Import GLTF as _GRN"></MenuItem>
                 <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTextures}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
             </MenuItem>

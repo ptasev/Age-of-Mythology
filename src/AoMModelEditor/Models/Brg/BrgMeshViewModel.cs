@@ -8,6 +8,7 @@ namespace AoMModelEditor.Models.Brg
 {
     public class BrgMeshViewModel : ReactiveObject, IModelObject
     {
+        private readonly BrgFile _brg;
         private readonly BrgMesh _mesh;
 
         public string Name => "Mesh";
@@ -19,8 +20,70 @@ namespace AoMModelEditor.Models.Brg
             set => this.RaiseAndSetIfChanged(ref _isSelected, value);
         }
 
-        public BrgMeshViewModel(BrgMesh mesh)
+        public int VertexCount
         {
+            get => _mesh.Vertices.Count;
+        }
+
+        public int FaceCount
+        {
+            get => _mesh.Faces.Count;
+        }
+
+        public int FrameCount => _brg.Meshes.Count;
+
+        public float AnimLength
+        {
+            get => _mesh.ExtendedHeader.AnimationLength;
+        }
+
+        public BrgMeshFlag Flags
+        {
+            get => _mesh.Header.Flags;
+            set
+            {
+                _mesh.Header.Flags = value;
+                _brg.UpdateMeshSettings();
+                this.RaisePropertyChanged(nameof(Flags));
+            }
+        }
+
+        public BrgMeshFormat Flags2
+        {
+            get => _mesh.Header.Format;
+            set
+            {
+                _mesh.Header.Format = value;
+                _brg.UpdateMeshSettings();
+                this.RaisePropertyChanged(nameof(Flags2));
+            }
+        }
+
+        public BrgMeshAnimType AnimationType
+        {
+            get => _mesh.Header.AnimationType;
+            set
+            {
+                _mesh.Header.AnimationType = value;
+                _brg.UpdateMeshSettings();
+                this.RaisePropertyChanged(nameof(AnimationType));
+            }
+        }
+
+        public BrgMeshInterpolationType InterpolationType
+        {
+            get => _mesh.Header.InterpolationType;
+            set
+            {
+                _mesh.Header.InterpolationType = value;
+                _brg.UpdateMeshSettings();
+                this.RaisePropertyChanged(nameof(InterpolationType));
+            }
+        }
+
+        public BrgMeshViewModel(BrgFile brg, BrgMesh mesh)
+        {
+            _brg = brg;
             _mesh = mesh;
         }
     }

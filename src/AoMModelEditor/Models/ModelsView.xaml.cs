@@ -18,6 +18,7 @@ namespace AoMModelEditor.Models
     /// <summary>
     /// Interaction logic for ModelsView.xaml
     /// </summary>
+#nullable disable
     public partial class ModelsView : ReactiveUserControl<ModelsViewModel>
     {
         public ModelsView()

@@ -20,6 +20,7 @@ namespace AoMModelEditor.Models.Brg
     /// <summary>
     /// Interaction logic for BrgMaterialView.xaml
     /// </summary>
+#nullable disable
     public partial class BrgMaterialView : ReactiveUserControl<BrgMaterialViewModel>
     {
         public BrgMaterialView()
@@ -27,8 +28,6 @@ namespace AoMModelEditor.Models.Brg
             InitializeComponent();
 
             flagsListBox.ItemsSource = Enum.GetValues(typeof(BrgMatFlag));
-
-            var itm = flagsListBox.ItemContainerGenerator.ContainerFromItem(BrgMatFlag.Alpha);
 
             this.WhenActivated(disposableRegistration =>
             {

@@ -83,6 +83,10 @@ namespace AoMModelEditor.Models.Brg
             set
             {
                 _mat.Opacity = Math.Clamp(value, 0.0f, 1.0f);
+                if (value < (1.0f - 0.001f))
+                {
+                    Flags |= BrgMatFlag.Alpha;
+                }
                 this.RaisePropertyChanged(nameof(Opacity));
             }
         }
@@ -93,6 +97,10 @@ namespace AoMModelEditor.Models.Brg
             set
             {
                 _mat.SpecularExponent = value;
+                if (_mat.SpecularExponent > 0)
+                {
+                    Flags |= BrgMatFlag.SpecularExponent;
+                }
                 this.RaisePropertyChanged(nameof(SpecularExponent));
             }
         }
