@@ -8,7 +8,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace AoMModelViewer
+namespace AoMEngineLibrary.Graphics.Converters
 {
     public class GltfGrnConverter
     {

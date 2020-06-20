@@ -22,7 +22,7 @@ using GltfVertexBuilder = SharpGLTF.Geometry.VertexBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexTexture1,
     SharpGLTF.Geometry.VertexTypes.VertexJoints4>;
 
-namespace AoMModelViewer
+namespace AoMEngineLibrary.Graphics.Converters
 {
     public class GrnGltfConverter
     {
@@ -229,7 +229,7 @@ namespace AoMModelViewer
             vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[face.TextureIndices[index]].X, 1 - mesh.TextureCoordinates[face.TextureIndices[index]].Y);
 
             var vertWeight = mesh.VertexWeights[face.Indices[index]];
-            var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights).Where(vw => vw.Second > 0).ToArray();
+            var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights, (First, Second) => (First, Second)).Where(vw => vw.Second > 0).ToArray();
             if (vws.Length > 4) throw new NotSupportedException("A vertex cannot be bound to more than 4 bones.");
             vb.Skinning.SetWeights(SparseWeight8.Create(vws));
 

@@ -9,19 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AoMEngineLibrary\AoMEngineLibrary.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="glTF2Loader">
       <Version>1.1.1-alpha</Version>
     </PackageReference>
     <PackageReference Include="HelixToolkit.Core.Wpf" Version="2.11.0" />
-    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0017" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
     <PackageReference Include="System.Memory">
       <Version>4.5.3</Version>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AoMEngineLibrary.Graphics.Converters\AoMEngineLibrary.Graphics.Converters.csproj" />
   </ItemGroup>
 
 </Project>

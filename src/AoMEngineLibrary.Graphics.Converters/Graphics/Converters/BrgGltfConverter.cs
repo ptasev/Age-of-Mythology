@@ -1,6 +1,5 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Dds;
-using HelixToolkit.Wpf;
 using SharpGLTF.Animations;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
@@ -16,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Channels;
 
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
@@ -39,7 +37,7 @@ using GltfVertexBuilder = SharpGLTF.Geometry.VertexBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 
-namespace AoMModelViewer
+namespace AoMEngineLibrary.Graphics.Converters
 {
     public class BrgGltfConverter
     {
