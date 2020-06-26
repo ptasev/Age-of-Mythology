@@ -44,6 +44,21 @@ namespace AoMModelEditor
                     v => v.SaveCommand,
                     view => view.saveMenuItem)
                     .DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                    v => v.ModelsViewModel.ExportGltfCommand,
+                    view => view.exportGltfMenuItem)
+                    .DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                    v => v.ModelsViewModel.ImportGltfBrgCommand,
+                    view => view.importGltfBrgMenuItem)
+                    .DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                    v => v.ModelsViewModel.ImportGltfGrnCommand,
+                    view => view.importGltfGrnMenuItem)
+                    .DisposeWith(disposableRegistration);
             });
         }
     }

@@ -24,9 +24,9 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Model">
-                <MenuItem Header="_Export as GLTF"></MenuItem>
-                <MenuItem Header="_Import GLTF as BRG"></MenuItem>
-                <MenuItem Header="Import GLTF as _GRN"></MenuItem>
+                <MenuItem x:Name="exportGltfMenuItem" Header="_Export as GLTF"></MenuItem>
+                <MenuItem x:Name="importGltfBrgMenuItem" Header="_Import GLTF as BRG"></MenuItem>
+                <MenuItem x:Name="importGltfGrnMenuItem" Header="Import GLTF as _GRN"></MenuItem>
                 <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTextures}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
             </MenuItem>
