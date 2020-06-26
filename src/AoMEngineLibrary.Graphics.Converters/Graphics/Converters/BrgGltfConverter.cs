@@ -87,11 +87,14 @@ namespace AoMEngineLibrary.Graphics.Converters
             // Create hotspot
             var hnb = nodeBuilder.CreateNode("Dummy_hotspot");
             hnb.UseTranslation().Value = brg.Meshes[0].Header.HotspotPosition;
-            var ttb = hnb.UseTranslation().UseTrackBuilder(TrackName);
-            ttb.SetPoint(brg.Animation.MeshKeys[0], brg.Meshes[0].Header.HotspotPosition);
-            for (int i = 1; i < brg.Meshes.Count; ++i)
+            if (brg.Meshes.Count > 1)
             {
-                ttb.SetPoint(brg.Animation.MeshKeys[i], brg.Meshes[i].Header.HotspotPosition);
+                var ttb = hnb.UseTranslation().UseTrackBuilder(TrackName);
+                ttb.SetPoint(brg.Animation.MeshKeys[0], brg.Meshes[0].Header.HotspotPosition);
+                for (int i = 1; i < brg.Meshes.Count; ++i)
+                {
+                    ttb.SetPoint(brg.Animation.MeshKeys[i], brg.Meshes[i].Header.HotspotPosition);
+                }
             }
             sceneBuilder.AddRigidMesh(mb, hnb);
 
@@ -193,21 +196,26 @@ namespace AoMEngineLibrary.Graphics.Converters
             nb.UseTranslation().Value = trans;
             nb.UseRotation().Value = rot;
             nb.UseScale().Value = scale;
-            var ttb = nb.UseTranslation().UseTrackBuilder(TrackName);
-            var rtb = nb.UseRotation().UseTrackBuilder(TrackName);
-            var stb = nb.UseScale().UseTrackBuilder(TrackName);
-            ttb.SetPoint(brg.Animation.MeshKeys[0], trans);
-            rtb.SetPoint(brg.Animation.MeshKeys[0], rot);
-            stb.SetPoint(brg.Animation.MeshKeys[0], scale);
 
-            for (int i = 1; i < brg.Meshes.Count; ++i)
+            // Only do the rest if animated
+            if (brg.Meshes.Count > 1)
             {
-                attp = brg.Meshes[i].Attachpoints[attpIndex];
-                worldMatrix = GetAttachpointWorldMatrix(attp);
-                Matrix4x4.Decompose(worldMatrix, out scale, out rot, out trans);
-                ttb.SetPoint(brg.Animation.MeshKeys[i], trans);
-                rtb.SetPoint(brg.Animation.MeshKeys[i], rot);
-                stb.SetPoint(brg.Animation.MeshKeys[i], scale);
+                var ttb = nb.UseTranslation().UseTrackBuilder(TrackName);
+                var rtb = nb.UseRotation().UseTrackBuilder(TrackName);
+                var stb = nb.UseScale().UseTrackBuilder(TrackName);
+                ttb.SetPoint(brg.Animation.MeshKeys[0], trans);
+                rtb.SetPoint(brg.Animation.MeshKeys[0], rot);
+                stb.SetPoint(brg.Animation.MeshKeys[0], scale);
+
+                for (int i = 1; i < brg.Meshes.Count; ++i)
+                {
+                    attp = brg.Meshes[i].Attachpoints[attpIndex];
+                    worldMatrix = GetAttachpointWorldMatrix(attp);
+                    Matrix4x4.Decompose(worldMatrix, out scale, out rot, out trans);
+                    ttb.SetPoint(brg.Animation.MeshKeys[i], trans);
+                    rtb.SetPoint(brg.Animation.MeshKeys[i], rot);
+                    stb.SetPoint(brg.Animation.MeshKeys[i], scale);
+                }
             }
 
             return nb;
@@ -232,30 +240,39 @@ namespace AoMEngineLibrary.Graphics.Converters
             mb.Name = "brgMesh";
             ConvertMesh(brg.Meshes[0], primitives, mb);
 
-            // Each mesh is really a morph target after the first one
-            for (int i = 1; i < brg.Meshes.Count; ++i)
+            if (brg.Meshes.Count > 1)
             {
-                var mt = mb.UseMorphTarget(i - 1);
-                var mesh = brg.Meshes[i];
-                for (int v = 0; v < mesh.Vertices.Count; ++v)
+                // Each mesh is really a morph target after the first one
+                for (int i = 1; i < brg.Meshes.Count; ++i)
                 {
-                    var baseVal = GetVertexGeometry(brg.Meshes[0], v);
-                    var morphVal = GetVertexGeometry(mesh, v);
-                    mt.SetVertexDelta(baseVal.Position, morphVal.Subtract(baseVal));
+                    var mt = mb.UseMorphTarget(i - 1);
+                    var mesh = brg.Meshes[i];
+                    for (int v = 0; v < mesh.Vertices.Count; ++v)
+                    {
+                        var baseVal = GetVertexGeometry(brg.Meshes[0], v);
+                        var morphVal = GetVertexGeometry(mesh, v);
+                        mt.SetVertexDelta(baseVal.Position, morphVal.Subtract(baseVal));
+                    }
+                }
+
+                // Create the node with morphing
+                var nb = nodeBuilder.CreateNode("brgModel");
+                var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
+                instBuilder.Content.UseMorphing().Value = SparseWeight8.Create(0);
+
+                // Animate morph weights
+                var tb = instBuilder.Content.UseMorphing().UseTrackBuilder(TrackName);
+                tb.SetPoint(brg.Animation.MeshKeys[0], SparseWeight8.Create(0));
+                for (int i = 1; i < brg.Animation.MeshKeys.Count; ++i)
+                {
+                    tb.SetPoint(brg.Animation.MeshKeys[i], new SparseWeight8(new Vector4(i - 1, 0, 0, 0), new Vector4(1, 0, 0, 0)));
                 }
             }
-
-            // Create the node with morphing
-            var nb = nodeBuilder.CreateNode("brgModel");
-            var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
-            instBuilder.Content.UseMorphing().Value = SparseWeight8.Create(0);
-
-            // Animate morph weights
-            var tb  = instBuilder.Content.UseMorphing().UseTrackBuilder(TrackName);
-            tb.SetPoint(brg.Animation.MeshKeys[0], SparseWeight8.Create(0));
-            for (int i = 1; i < brg.Animation.MeshKeys.Count; ++i)
+            else
             {
-                tb.SetPoint(brg.Animation.MeshKeys[i], new SparseWeight8(new Vector4(i - 1, 0, 0, 0), new Vector4(1, 0, 0, 0)));
+                // Create the node
+                var nb = nodeBuilder.CreateNode("brgModel");
+                var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
             }
         }
         private IMeshBuilder<MaterialBuilder> CreateMeshBuilder(BrgMeshFlag flags)

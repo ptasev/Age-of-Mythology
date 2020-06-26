@@ -23,6 +23,7 @@ using GltfPrimitiveBuilder = SharpGLTF.Geometry.PrimitiveBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 using System.IO;
 using SharpGLTF.Geometry.VertexTypes;
+using SharpGLTF.Geometry;
 
 namespace AoMEngineLibrary.Graphics.Converters
 {
@@ -60,7 +61,7 @@ namespace AoMEngineLibrary.Graphics.Converters
             var anim = model.LogicalAnimations.Count > 0 ? model.LogicalAnimations[0] : null;
 
             // Figure out animation duration and keys
-            const int fps = 15;
+            const float fps = 15.0f;
             if (anim == null)
             {
                 brg.Header.NumMeshes = 1;
@@ -68,10 +69,10 @@ namespace AoMEngineLibrary.Graphics.Converters
             else
             {
                 brg.Animation.Duration = anim.Duration;
-                brg.Header.NumMeshes = (int)(anim.Duration * fps);
+                brg.Header.NumMeshes = (int)(anim.Duration * fps + 0.5f);
             }
-            
-            float spf = 0.7f / (brg.Header.NumMeshes - 1);
+
+            float spf = brg.Animation.Duration / (brg.Header.NumMeshes - 1);
             for (int i = 0; i < brg.Header.NumMeshes; ++i)
             {
                 brg.Animation.MeshKeys.Add(i * spf);
@@ -105,6 +106,7 @@ namespace AoMEngineLibrary.Graphics.Converters
             Predicate<string> noDummySelector = nodeName => !nodeName.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase);
 
             // Mesh Animations
+            var gltfMeshes = new List<GltfMeshData>();
             for (int i = 0; i < brg.Header.NumMeshes; i++)
             {
                 // Compute the data of the scene at time
@@ -119,13 +121,7 @@ namespace AoMEngineLibrary.Graphics.Converters
 
                 // Evaluate the entire gltf scene
                 var gltfMeshData = GetMeshBuilder(gltfScene, instance, noDummySelector);
-
-                // We only care about primitves with a material
-                var prims = gltfMeshData.MeshBuilder.Primitives.Where(p => p.Material.m != null);
-
-                // Create brg materials and a way to map their ids
-                var gltfMats = prims.Select(p => p.Material.m);
-                ConvertMaterials(gltfMats, brg, matIdMapping);
+                gltfMeshes.Add(gltfMeshData);
 
                 // Add a new mesh
                 var mesh = new BrgMesh(brg);
@@ -139,9 +135,25 @@ namespace AoMEngineLibrary.Graphics.Converters
 
                 // Convert all the attachpoints in the scene
                 ConvertAttachpoints(gltfScene, instance, mesh);
+            }
+
+            // Calculate face indices for each primitve
+            var primitveFaces = CalculateFaces(gltfMeshes);
+
+            // Convert
+            for (int i = 0; i < brg.Meshes.Count; ++i)
+            {
+                // We only care about primitves with a material
+                var gltfMeshData = gltfMeshes[i];
+                var prims = gltfMeshData.MeshBuilder.Primitives.Where(p => p.Material.m != null);
+
+                // Create brg materials and a way to map their ids
+                var gltfMats = prims.Select(p => p.Material.m);
+                ConvertMaterials(gltfMats, brg, matIdMapping);
 
                 // ConvertMesh will set proper flags to the brg mesh which we then want to validate
-                ConvertMesh(prims, gltfMeshData.HasTexCoords, mesh, matIdMapping);
+                var mesh = brg.Meshes[i];
+                ConvertMesh(prims.ToList(), gltfMeshData.HasTexCoords, mesh, matIdMapping, primitveFaces);
                 brg.UpdateMeshSettings(i, brg.Meshes[0].Header.Flags, brg.Meshes[0].Header.Format, brg.Meshes[0].Header.AnimationType, brg.Meshes[0].Header.InterpolationType);
             }
         }
@@ -171,32 +183,278 @@ namespace AoMEngineLibrary.Graphics.Converters
             return new GltfMeshData(hasTexCoords, mb);
         }
 
-        private void ConvertMesh(IEnumerable<GltfPrimitiveBuilder> primitives, bool hasTexCoords, BrgMesh mesh, Dictionary<int, int> matIdMapping)
+        private List<List<(int A, int B, int C)>> CalculateFaces(List<GltfMeshData> gltfMeshes)
+        {
+            var primFaces = new List<List<(int A, int B, int C)>>();
+
+            var primitiveCount = gltfMeshes.Count > 0 ? gltfMeshes[0].MeshBuilder.Primitives.Count : 0;
+            for (int p = 0; p < primitiveCount; ++p)
+            {
+                // Get a list of faces for each frame from primitive p
+                var faceLists = new List<List<(int A, int B, int C)>>();
+                foreach (var gltfMesh in gltfMeshes)
+                {
+                    var pf = gltfMesh.MeshBuilder.Primitives.ElementAt(p);
+                    if (pf.Material.m == null) break;
+                    faceLists.Add(pf.Triangles.ToList());
+                }
+
+                if (faceLists.Count <= 0) continue;
+                primFaces.Add(CalculatePrimitiveFaces(faceLists));
+            }
+
+            return primFaces;
+        }
+        private List<(int A, int B, int C)> CalculatePrimitiveFaces(List<List<(int A, int B, int C)>> faceLists)
+        {
+            // test data
+            //List<(int A, int B, int C)> one = new List<(int A, int B, int C)>();
+            //one.Add((0, 1, 2)); one.Add((2, 1, 3));
+            //List<(int A, int B, int C)> two = new List<(int A, int B, int C)>();
+            //two.Add((0, 1, 2)); two.Add((2, 1, 3)); //two.Add((4, 3, 5));
+
+            //List<List<(int A, int B, int C)>> faceLists = new List<List<(int A, int B, int C)>>();
+            //faceLists.Add(one); faceLists.Add(two);
+
+            // Create a new face list that can be used across all frames for primitive p
+            int uniqueVerts = 0;
+            int faceCount = faceLists[0].Count;
+            var frameVertexHistory = Enumerable.Range(0, faceLists.Count).Select(x => new Dictionary<int, (int, int)>()).ToList();
+            var newIndices = new List<(int A, int B, int C)>();
+            for (int i = 0; i < faceCount; ++i)
+            {
+                (int A, int B, int C) newFace = (0, 0, 0);
+
+                bool aUnique = false;
+                var aMatch = (-1, -1); // face, corner
+                bool bUnique = false;
+                var bMatch = (-1, -1); // face, corner
+                bool cUnique = false;
+                var cMatch = (-1, -1); // face, corner
+                for (int j = 0; j < faceLists.Count; ++j)
+                {
+                    // get face i from frame j
+                    var face = faceLists[j][i];
+                    var vertHistory = frameVertexHistory[j];
+
+                    // Ignore faces that are invalid
+                    if (face.A == -1) continue;
+
+                    // Peform actions for corner A/0
+                    if (vertHistory.ContainsKey(face.A))
+                    {
+                        // we've found a vertex appear in a previous face for this frame
+                        if (!aUnique)
+                        {
+                            // only do these checks if we haven't already determined to be unique
+                            if (aMatch.Item1 == -1)
+                            {
+                                // this is the first frame, store for other frames to compare
+                                aMatch = vertHistory[face.A];
+                            }
+                            else if (aMatch.CompareTo(vertHistory[face.A]) != 0)
+                            {
+                                // we didn't match the face and corner with another frame
+                                aUnique = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // this vert never appeared in a previous face for this frame
+                        vertHistory.Add(face.A, (i, 0));
+                        aUnique = true;
+                    }
+
+                    // Peform actions for corner B/1
+                    if (vertHistory.ContainsKey(face.B))
+                    {
+                        // we've found a vertex appear in a previous face for this frame
+                        if (!bUnique)
+                        {
+                            // only do these checks if we haven't already determined to be unique
+                            if (bMatch.Item1 == -1)
+                            {
+                                // this is the first frame, store for other frames to compare
+                                bMatch = vertHistory[face.B];
+                            }
+                            else if (bMatch.CompareTo(vertHistory[face.B]) != 0)
+                            {
+                                // we didn't match the face and corner with another frame
+                                bUnique = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // this vert never appeared in a previous face for this frame
+                        vertHistory.Add(face.B, (i, 1));
+                        bUnique = true;
+                    }
+
+                    // Peform actions for corner C/2
+                    if (vertHistory.ContainsKey(face.C))
+                    {
+                        // we've found a vertex appear in a previous face for this frame
+                        if (!cUnique)
+                        {
+                            // only do these checks if we haven't already determined to be unique
+                            if (cMatch.Item1 == -1)
+                            {
+                                // this is the first frame, store for other frames to compare
+                                cMatch = vertHistory[face.C];
+                            }
+                            else if (cMatch.CompareTo(vertHistory[face.C]) != 0)
+                            {
+                                // we didn't match the face and corner with another frame
+                                cUnique = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // this vert never appeared in a previous face for this frame
+                        vertHistory.Add(face.C, (i, 2));
+                        cUnique = true;
+                    }
+                }
+
+                // If none of the frames had a valid face ignore it completely
+                if (aUnique || aMatch.Item1 != -1)
+                {
+                    if (aUnique)
+                    {
+                        // Create a new vert
+                        newFace.A = uniqueVerts;
+                        ++uniqueVerts;
+                    }
+                    else
+                    {
+                        // Use vert from previous face
+                        var oldFace = newIndices[aMatch.Item1];
+                        newFace.A = aMatch.Item2 switch
+                        {
+                            0 => oldFace.A,
+                            1 => oldFace.B,
+                            2 => oldFace.C,
+                            _ => throw new Exception("Failed to optimize face list.")
+                        };
+                    }
+
+                    if (bUnique)
+                    {
+                        // Create a new vert
+                        newFace.B = uniqueVerts;
+                        ++uniqueVerts;
+                    }
+                    else
+                    {
+                        // Use vert from previous face
+                        var oldFace = newIndices[bMatch.Item1];
+                        newFace.B = bMatch.Item2 switch
+                        {
+                            0 => oldFace.A,
+                            1 => oldFace.B,
+                            2 => oldFace.C,
+                            _ => throw new Exception("Failed to optimize face list.")
+                        };
+                    }
+
+                    if (cUnique)
+                    {
+                        // Create a new vert
+                        newFace.C = uniqueVerts;
+                        ++uniqueVerts;
+                    }
+                    else
+                    {
+                        // Use vert from previous face
+                        var oldFace = newIndices[cMatch.Item1];
+                        newFace.C = cMatch.Item2 switch
+                        {
+                            0 => oldFace.A,
+                            1 => oldFace.B,
+                            2 => oldFace.C,
+                            _ => throw new Exception("Failed to optimize face list.")
+                        };
+                    }
+
+                    newIndices.Add(newFace);
+                }
+            }
+
+            return newIndices;
+        }
+
+        private void ConvertMesh(List<GltfPrimitiveBuilder> primitives, bool hasTexCoords, BrgMesh mesh, Dictionary<int, int> matIdMapping, List<List<(int A, int B, int C)>> primFaces)
         {
             mesh.Header.Version = 22;
             mesh.Header.ExtendedHeaderSize = 40;
+
+            // Create new vert list based on prim faces
+            var primVertCounts = primFaces.Select(p => p.Max(f => Math.Max(f.A, Math.Max(f.B, f.C))) + 1).ToList();
+            var totalVerts = primVertCounts.Sum();
+            var vertices = new VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>[totalVerts];
+            HashSet<int> traversedIndices = new HashSet<int>();
+            int vertOffset = 0;
+            for (int i = 0; i < primitives.Count; ++i)
+            {
+                var p = primitives[i];
+                var faces = primFaces[i];
+
+                for (int j = 0; j < faces.Count; ++j)
+                {
+                    var of = p.Triangles[j];
+                    var nf = faces[j];
+
+                    // if any is -1 all are -1
+                    if (of.A == -1) continue;
+                    var na = nf.A + vertOffset;
+                    if (!traversedIndices.Contains(na))
+                    {
+                        traversedIndices.Add(na);
+                        var vert = p.Vertices[of.A];
+                        vertices[na] = vert;
+                    }
+
+                    var nb = nf.B + vertOffset;
+                    if (!traversedIndices.Contains(nb))
+                    {
+                        traversedIndices.Add(nb);
+                        var vert = p.Vertices[of.B];
+                        vertices[nb] = vert;
+                    }
+
+                    var nc = nf.C + vertOffset;
+                    if (!traversedIndices.Contains(nc))
+                    {
+                        traversedIndices.Add(nc);
+                        var vert = p.Vertices[of.C];
+                        vertices[nc] = vert;
+                    }
+                }
+
+                vertOffset += primVertCounts[i];
+            }
 
             // Export Vertices and Normals
             Vector3 centerPos = new Vector3();
             Vector3 minExtent = new Vector3(float.MaxValue);
             Vector3 maxExtent = new Vector3(float.MinValue);
-            foreach (var p in primitives)
+            foreach (var v in vertices)
             {
-                foreach (var v in p.Vertices)
-                {
-                    var pos = v.Position;
-                    var norm = v.Geometry.Normal;
-                    mesh.Vertices.Add(new Vector3(-pos.X, pos.Y, pos.Z));
-                    mesh.Normals.Add(new Vector3(-norm.X, norm.Y, norm.Z));
+                var pos = v.Position;
+                var norm = v.Geometry.Normal;
+                mesh.Vertices.Add(new Vector3(-pos.X, pos.Y, pos.Z));
+                mesh.Normals.Add(new Vector3(-norm.X, norm.Y, norm.Z));
 
-                    centerPos += pos;
-                    minExtent.X = Math.Min(pos.X, minExtent.X);
-                    minExtent.Y = Math.Min(pos.Y, minExtent.Y);
-                    minExtent.Z = Math.Min(pos.Z, minExtent.Z);
-                    maxExtent.X = Math.Max(pos.X, maxExtent.X);
-                    maxExtent.Y = Math.Max(pos.Y, maxExtent.Y);
-                    maxExtent.Z = Math.Max(pos.Z, maxExtent.Z);
-                }
+                centerPos += pos;
+                minExtent.X = Math.Min(pos.X, minExtent.X);
+                minExtent.Y = Math.Min(pos.Y, minExtent.Y);
+                minExtent.Z = Math.Min(pos.Z, minExtent.Z);
+                maxExtent.X = Math.Max(pos.X, maxExtent.X);
+                maxExtent.Y = Math.Max(pos.Y, maxExtent.Y);
+                maxExtent.Z = Math.Max(pos.Z, maxExtent.Z);
             }
 
             // Update header values
@@ -217,13 +475,10 @@ namespace AoMEngineLibrary.Graphics.Converters
             if (hasTexCoords)
             {
                 mesh.Header.Flags |= BrgMeshFlag.TEXCOORDSA;
-                foreach (var p in primitives)
+                foreach (var v in vertices)
                 {
-                    foreach (var v in p.Vertices)
-                    {
-                        var tc = v.Material.TexCoord;
-                        mesh.TextureCoordinates.Add(new Vector2(tc.X, 1 - tc.Y));
-                    }
+                    var tc = v.Material.TexCoord;
+                    mesh.TextureCoordinates.Add(new Vector2(tc.X, 1 - tc.Y));
                 }
             }
 
@@ -241,8 +496,10 @@ namespace AoMEngineLibrary.Graphics.Converters
                 }
 
                 int baseVertexIndex = 0;
-                foreach (var p in primitives)
+                for (int i = 0; i < primitives.Count; ++i)
                 {
+                    var p = primitives[i];
+                    var faces = primFaces[i];
 
                     short faceMatIndex = 0;
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
@@ -258,7 +515,7 @@ namespace AoMEngineLibrary.Graphics.Converters
                         }
                     }
 
-                    foreach (var t in p.Triangles)
+                    foreach (var t in faces)
                     {
                         var a = t.A + baseVertexIndex;
                         var b = t.B + baseVertexIndex;
