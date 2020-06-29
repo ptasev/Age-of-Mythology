@@ -590,20 +590,20 @@
             elem.Add(new XElement("affects_diffuse", AffectsDiffuse));
             elem.Add(new XElement("affects_specular", AffectsSpecular));
             elem.Add(new XElement("updateable", Updateable));
-            elem.Add(new XElement("alpha_mode", AlphaMode));
+            elem.Add(new XElement("alpha_mode", (int)AlphaMode));
 
             elem.Add(new XElement("ambient_intensity", AmbientIntensity));
             elem.Add(new XElement("diffuse_intensity", DiffuseIntensity));
             elem.Add(new XElement("specular_intensity", SpecularIntensity));
             elem.Add(new XElement("emissive_intensity", EmissiveIntensity));
 
-            elem.Add(new XElement("color_transform", ColorTransform));
-            elem.Add(new XElement("texture_transform", TextureTransform));
+            elem.Add(new XElement("color_transform", (int)ColorTransform));
+            elem.Add(new XElement("texture_transform", (int)TextureTransform));
             elem.Add(new XElement("texture_factor", TextureFactor));
-            elem.Add(new XElement("multitexture_mode", MultiTextureMode));
+            elem.Add(new XElement("multitexture_mode", (int)MultiTextureMode));
 
-            elem.Add(new XElement("texgen_mode_0", TexGenMode0));
-            elem.Add(new XElement("texgen_mode_1", TexGenMode1));
+            elem.Add(new XElement("texgen_mode_0", (int)TexGenMode0));
+            elem.Add(new XElement("texgen_mode_1", (int)TexGenMode1));
             elem.Add(new XElement("texcoord_set_0", TexCoordSet0));
             elem.Add(new XElement("texcoord_set_1", TexCoordSet1));
             elem.Add(new XElement("texcoord_set_2", TexCoordSet2));

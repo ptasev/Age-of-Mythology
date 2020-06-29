@@ -7,9 +7,9 @@
     <AssemblyName>AoM File Converter</AssemblyName>
     <Authors>Petar Tasev</Authors>
     <Copyright>Copyright © Petar Tasev 2016</Copyright>
-    <Version>1.1.0+20190324</Version>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.2.0+20200629</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
