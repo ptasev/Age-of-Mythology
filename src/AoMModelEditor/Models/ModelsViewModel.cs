@@ -23,6 +23,8 @@ namespace AoMModelEditor.Models
         private BrgFile? _brg;
         private GrnFile? _grn;
 
+        private readonly BrgSettingsViewModel _brgSettingsViewModel;
+
         public bool IsBrg { get; private set; }
 
         private ObservableCollection<IModelObject> _modelObjects;
@@ -34,6 +36,7 @@ namespace AoMModelEditor.Models
 
         public ModelsViewModel()
         {
+            _brgSettingsViewModel = new BrgSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
 
             ExportGltfCommand = ReactiveCommand.Create(ExportGltf);
@@ -65,6 +68,8 @@ namespace AoMModelEditor.Models
             IsBrg = true;
             _brg = brg;
             _grn = null;
+
+            _modelObjects.Add(_brgSettingsViewModel);
 
             if (brg.Meshes.Count > 0)
             {
@@ -205,7 +210,7 @@ namespace AoMModelEditor.Models
                 {
                     var conv = new GltfBrgConverter();
                     var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Skip });
-                    LoadBrg(conv.Convert(gltf));
+                    LoadBrg(conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters()));
                 }
             }
             catch (Exception ex)

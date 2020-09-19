@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive;
 using System.Text;
 using System.Windows;
@@ -11,6 +12,8 @@ namespace AoMModelEditor
 {
     public class MainViewModel : ReactiveObject
     {
+        public string Title { get; private set; }
+
         public ModelsViewModel ModelsViewModel { get; }
 
         public ReactiveCommand<Unit, Unit> OpenCommand { get; }
@@ -18,6 +21,7 @@ namespace AoMModelEditor
 
         public MainViewModel()
         {
+            Title = Properties.Resources.AppTitleLong;
             ModelsViewModel = new ModelsViewModel();
 
             OpenCommand = ReactiveCommand.Create(Open);
@@ -36,12 +40,13 @@ namespace AoMModelEditor
                 if (dr.HasValue && dr == true)
                 {
                     ModelsViewModel.Load(ofd.FileName);
+                    Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(ofd.FileName);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to open file.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to open file.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
 
@@ -65,12 +70,13 @@ namespace AoMModelEditor
                 if (dr.HasValue && dr == true)
                 {
                     ModelsViewModel.Save(sfd.FileName);
+                    Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(sfd.FileName);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to save file.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to save file.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
     }

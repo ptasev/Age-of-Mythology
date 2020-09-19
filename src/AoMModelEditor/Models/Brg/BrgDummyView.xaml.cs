@@ -27,6 +27,11 @@ namespace AoMModelEditor.Models.Brg
 
             this.WhenActivated(disposableRegistration =>
             {
+                this.OneWayBind(ViewModel,
+                    v => v.Name,
+                    view => view.mainGroupBox.Header)
+                    .DisposeWith(disposableRegistration);
+
                 this.Bind(ViewModel,
                     v => v.Frame,
                     view => view.frameUpDown.Value)

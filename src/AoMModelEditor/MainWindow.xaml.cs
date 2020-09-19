@@ -31,6 +31,11 @@ namespace AoMModelEditor
             this.WhenActivated(disposableRegistration =>
             {
                 this.OneWayBind(ViewModel,
+                    v => v.Title,
+                    view => view.Title)
+                    .DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
                     v => v.ModelsViewModel,
                     view => view.modelsView.ViewModel)
                     .DisposeWith(disposableRegistration);

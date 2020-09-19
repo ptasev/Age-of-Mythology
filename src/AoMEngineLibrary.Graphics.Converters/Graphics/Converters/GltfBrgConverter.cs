@@ -51,7 +51,7 @@ namespace AoMEngineLibrary.Graphics.Converters
 
         }
 
-        public BrgFile Convert(ModelRoot gltfFile)
+        public BrgFile Convert(ModelRoot gltfFile, GltfBrgParameters parameters)
         {
             BrgFile brg = new BrgFile();
             var model = gltfFile;
@@ -61,7 +61,7 @@ namespace AoMEngineLibrary.Graphics.Converters
             var anim = model.LogicalAnimations.Count > 0 ? model.LogicalAnimations[0] : null;
 
             // Figure out animation duration and keys
-            const float fps = 15.0f;
+            float fps = parameters.SampleRateFps;
             if (anim == null)
             {
                 brg.Header.NumMeshes = 1;

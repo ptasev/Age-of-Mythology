@@ -15,14 +15,14 @@
         <TextBox x:Name="forwardXTextBox" Width="80" Margin="0 0 5 0" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"
                  Text="{Binding RelativeSource={RelativeSource FindAncestor, 
                                AncestorType={x:Type local:Vector3SingleControl}}, 
-                               Path=X}"/>
+                               Path=X, StringFormat=F9}"/>
         <TextBox x:Name="forwardYTextBox" Width="80" Margin="0 0 5 0" Grid.Column="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"
                  Text="{Binding RelativeSource={RelativeSource FindAncestor, 
                                AncestorType={x:Type local:Vector3SingleControl}}, 
-                               Path=Y}"/>
+                               Path=Y, StringFormat=F9}"/>
         <TextBox x:Name="forwardZTextBox" Width="80" Grid.Column="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"
                  Text="{Binding RelativeSource={RelativeSource FindAncestor, 
                                AncestorType={x:Type local:Vector3SingleControl}}, 
-                               Path=Z}"/>
+                               Path=Z, StringFormat=F9}"/>
     </Grid>
 </UserControl>
