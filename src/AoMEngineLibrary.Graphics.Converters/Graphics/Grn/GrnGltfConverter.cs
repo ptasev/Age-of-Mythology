@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Dds;
-using AoMEngineLibrary.Graphics.Grn;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
@@ -22,7 +21,7 @@ using GltfVertexBuilder = SharpGLTF.Geometry.VertexBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexTexture1,
     SharpGLTF.Geometry.VertexTypes.VertexJoints4>;
 
-namespace AoMEngineLibrary.Graphics.Converters
+namespace AoMEngineLibrary.Graphics.Grn
 {
     public class GrnGltfConverter
     {

@@ -1,5 +1,4 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
-using SharpGLTF.Runtime;
+﻿using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 using System;
@@ -12,12 +11,12 @@ using GltfMesh = SharpGLTF.Schema2.Mesh;
 using GltfMaterial = SharpGLTF.Schema2.Material;
 using GltfAnimation = SharpGLTF.Schema2.Animation;
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
-    AoMEngineLibrary.Graphics.Converters.NullableGltfMaterial,
+    AoMEngineLibrary.Graphics.Brg.NullableGltfMaterial,
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
     SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 using GltfPrimitiveBuilder = SharpGLTF.Geometry.PrimitiveBuilder<
-    AoMEngineLibrary.Graphics.Converters.NullableGltfMaterial,
+    AoMEngineLibrary.Graphics.Brg.NullableGltfMaterial,
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
     SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
@@ -25,7 +24,7 @@ using System.IO;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry;
 
-namespace AoMEngineLibrary.Graphics.Converters
+namespace AoMEngineLibrary.Graphics.Brg
 {
     internal struct NullableGltfMaterial
     {

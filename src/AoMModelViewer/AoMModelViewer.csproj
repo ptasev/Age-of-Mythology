@@ -13,10 +13,6 @@
       <Version>1.1.1-alpha</Version>
     </PackageReference>
     <PackageReference Include="HelixToolkit.Core.Wpf" Version="2.11.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
-    <PackageReference Include="System.Memory">
-      <Version>4.5.3</Version>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

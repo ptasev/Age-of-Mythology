@@ -1,5 +1,4 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Dds;
+﻿using AoMEngineLibrary.Graphics.Dds;
 using SharpGLTF.Animations;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
@@ -37,7 +36,7 @@ using GltfVertexBuilder = SharpGLTF.Geometry.VertexBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 
-namespace AoMEngineLibrary.Graphics.Converters
+namespace AoMEngineLibrary.Graphics.Brg
 {
     public class BrgGltfConverter
     {

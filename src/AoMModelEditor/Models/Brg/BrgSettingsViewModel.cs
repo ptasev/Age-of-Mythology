@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Converters;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Converters;
 using AoMEngineLibrary.Graphics.Grn;
 using AoMModelEditor.Models.Brg;
 using Microsoft.Win32;

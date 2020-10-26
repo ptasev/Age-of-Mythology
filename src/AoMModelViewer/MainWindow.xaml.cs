@@ -1,11 +1,12 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Converters;
+using AoMEngineLibrary.Graphics.Ddt;
 using AoMEngineLibrary.Graphics.Grn;
 using AoMModelViewer.Graphics;
 using HelixToolkit.Wpf;
 using Newtonsoft.Json;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,6 +43,21 @@ namespace AoMModelViewer
         {
             InitializeComponent();
             cts = new CancellationTokenSource();
+
+            // Image convert
+            {
+                var ddt = new DdtFile();
+                string fname = "animal bear map";
+                //using (var fs = File.Open(@$"C:\Games\Age of Mythology\textures\t1extracted\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fs = File.Open(@$"C:\Games\Steam\steamapps\common\Age of Mythology\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    ddt.Read(fs);
+                }
+                var imgConv = new DdtImageConverter();
+                var imgs = imgConv.Convert(ddt);
+                imgs[0][0].SaveAsPng($"{fname}.png");
+            }
+            return;
 
             {
                 using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_walk.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -151,7 +167,7 @@ namespace AoMModelViewer
 
             var gltfModel = ModelRoot.Load("blendergltf/blendergltf.gltf");
             //var gltfModel = ModelRoot.Load("brgGltf.gltf");
-            BrgFile gltfBrg = new GltfBrgConverter().Convert(gltfModel);
+            BrgFile gltfBrg = new GltfBrgConverter().Convert(gltfModel, new GltfBrgParameters());
             using (var stream = File.Open("dataBuffer3Recreated.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
             {
                 GltfFormatter frmt = new GltfFormatter();

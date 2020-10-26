@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AoMEngineLibrary.Graphics.Converters
+namespace AoMEngineLibrary.Graphics.Brg
 {
     public class GltfBrgParameters
     {
