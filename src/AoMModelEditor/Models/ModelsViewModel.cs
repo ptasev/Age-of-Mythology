@@ -1,6 +1,9 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
+﻿using AoMEngineLibrary.Graphics;
+using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
+using AoMModelEditor.Dialogs;
 using AoMModelEditor.Models.Brg;
+using AoMModelEditor.Settings;
 using Microsoft.Win32;
 using ReactiveUI;
 using SharpGLTF.Schema2;
@@ -22,6 +25,8 @@ namespace AoMModelEditor.Models
         private BrgFile? _brg;
         private GrnFile? _grn;
 
+        private readonly FileDialogService _fileDialogService;
+        private readonly TextureManager _textureManager;
         private readonly BrgSettingsViewModel _brgSettingsViewModel;
 
         public bool IsBrg { get; private set; }
@@ -33,8 +38,10 @@ namespace AoMModelEditor.Models
         public ReactiveCommand<Unit, Unit> ImportGltfBrgCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportGltfGrnCommand { get; }
 
-        public ModelsViewModel()
+        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService)
         {
+            _fileDialogService = fileDialogService;
+            _textureManager = new TextureManager(appSettings.TexturesDirectory);
             _brgSettingsViewModel = new BrgSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
 
@@ -156,7 +163,7 @@ namespace AoMModelEditor.Models
         {
             try
             {
-                SaveFileDialog sfd = new SaveFileDialog();
+                var sfd = _fileDialogService.GetModelSaveFileDialog();
                 sfd.Filter = "Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 var dr = sfd.ShowDialog();
@@ -184,7 +191,7 @@ namespace AoMModelEditor.Models
                 throw new InvalidOperationException("No file loaded.");
 
             BrgGltfConverter conv = new BrgGltfConverter();
-            var gltf = conv.Convert(_brg);
+            var gltf = conv.Convert(_brg, _textureManager);
             gltf.Save(filePath);
         }
         private void ExportGrnToGltf(string filePath)
@@ -201,7 +208,7 @@ namespace AoMModelEditor.Models
         {
             try
             {
-                var ofd = new OpenFileDialog();
+                var ofd = _fileDialogService.GetModelOpenFileDialog();
                 ofd.Filter = "Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 var dr = ofd.ShowDialog();
@@ -222,7 +229,7 @@ namespace AoMModelEditor.Models
         {
             try
             {
-                var ofd = new OpenFileDialog();
+                var ofd = _fileDialogService.GetModelOpenFileDialog();
                 ofd.Filter = "Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 var dr = ofd.ShowDialog();

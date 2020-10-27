@@ -17,6 +17,8 @@ namespace AoMModelEditor.Models.Brg
             get => _sampleRateFps;
             set
             {
+                value = Math.Clamp(value, 1, 100);
+
                 _sampleRateFps = value;
                 this.RaisePropertyChanged(nameof(SampleRateFps));
             }
@@ -25,6 +27,7 @@ namespace AoMModelEditor.Models.Brg
         public BrgSettingsViewModel()
         {
             Name = "Brg Settings";
+            _sampleRateFps = 10.0f;
         }
 
         public GltfBrgParameters CreateGltfBrgParameters()

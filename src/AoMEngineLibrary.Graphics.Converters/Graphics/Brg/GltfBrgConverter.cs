@@ -111,11 +111,11 @@ namespace AoMEngineLibrary.Graphics.Brg
                 // Compute the data of the scene at time
                 if (gltfAnimation == null)
                 {
-                    instance.SetPoseTransforms();
+                    instance.Armature.SetPoseTransforms();
                 }
                 else
                 {
-                    instance.SetAnimationFrame(gltfAnimation.LogicalIndex, brg.Animation.MeshKeys[i]);
+                    instance.Armature.SetAnimationFrame(gltfAnimation.LogicalIndex, brg.Animation.MeshKeys[i]);
                 }
 
                 // Evaluate the entire gltf scene
@@ -545,7 +545,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         private void ConvertAttachpoints(Scene scene, SceneInstance sceneInstance, BrgMesh mesh)
         {
             // Convert Attachpoints
-            var dummies = sceneInstance.LogicalNodes.Where(n => n.Name.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase));
+            var dummies = sceneInstance.Armature.LogicalNodes.Where(n => n.Name.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase));
 
             if (dummies.Any())
             {
@@ -558,7 +558,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                         // Check if it's hotspot
                         if (aName.Equals("Dummy_hotspot", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            var trans = dummy.WorldMatrix.Translation;
+                            var trans = dummy.ModelMatrix.Translation;
                             mesh.Header.HotspotPosition = new Vector3(-trans.X, trans.Y, trans.Z);
                         }
                         continue;
@@ -566,7 +566,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                     BrgAttachpoint att = new BrgAttachpoint();
                     att.NameId = nameId;
-                    var transform = dummy.WorldMatrix;
+                    var transform = dummy.ModelMatrix;
 
                     att.Up.X = transform.M21;
                     att.Up.Y = transform.M22;

@@ -14,12 +14,12 @@
             <MenuItem Header="_File">
                 <MenuItem x:Name="openMenuItem" Header="_Open" InputGestureText="Ctrl+O">
                     <MenuItem.Icon>
-                        <Image Source="pack://application:,,,/Resources/folder.png"></Image>
+                        <Image Source="pack://application:,,,/Resources/OpenFile_16x.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem x:Name="saveMenuItem" Header="_Save" InputGestureText="Ctrl+S">
                     <MenuItem.Icon>
-                        <Image Source="pack://application:,,,/Resources/disk.png"/>
+                        <Image Source="pack://application:,,,/Resources/SaveAs_16x.png"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>

@@ -1,10 +1,9 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
+﻿using AoMEngineLibrary.Graphics;
+using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Ddt;
 using AoMEngineLibrary.Graphics.Grn;
 using AoMModelViewer.Graphics;
 using HelixToolkit.Wpf;
-using Newtonsoft.Json;
-using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SixLabors.ImageSharp;
 using System;
@@ -63,13 +62,13 @@ namespace AoMModelViewer
                 using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_walk.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     BrgFile f = new BrgFile(fs);
-                    new BrgGltfConverter().Convert(f).SaveGLTF("./brgLocustWalk.gltf");
+                    new BrgGltfConverter().Convert(f, new TextureManager(string.Empty)).SaveGLTF("./brgLocustWalk.gltf");
                 }
 
                 using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_idle.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     BrgFile f = new BrgFile(fs);
-                    new BrgGltfConverter().Convert(f).SaveGLTF("./brgLocustIdle.gltf");
+                    new BrgGltfConverter().Convert(f, new TextureManager(string.Empty)).SaveGLTF("./brgLocustIdle.gltf");
                 }
             }
 
@@ -163,7 +162,7 @@ namespace AoMModelViewer
             //    gltf = frmt.FromBrg(file, stream);
             //}
             //glTFLoader.Interface.SaveModel(gltf, "brgGltf.gltf");
-            new BrgGltfConverter().Convert(file).SaveGLTF("./brgGltfConv.gltf");
+            new BrgGltfConverter().Convert(file, new TextureManager(string.Empty)).SaveGLTF("./brgGltfConv.gltf");
 
             var gltfModel = ModelRoot.Load("blendergltf/blendergltf.gltf");
             //var gltfModel = ModelRoot.Load("brgGltf.gltf");

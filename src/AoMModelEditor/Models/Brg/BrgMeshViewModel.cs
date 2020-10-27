@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace AoMModelEditor.Models.Brg
@@ -35,6 +36,26 @@ namespace AoMModelEditor.Models.Brg
         public float AnimLength
         {
             get => _mesh.ExtendedHeader.AnimationLength;
+        }
+
+        public Vector3 HotspotPosition
+        {
+            get => _mesh.Header.HotspotPosition;
+            set
+            {
+                _mesh.Header.HotspotPosition = value;
+                this.RaisePropertyChanged(nameof(HotspotPosition));
+            }
+        }
+
+        public Vector3 CenterPosition
+        {
+            get => _mesh.Header.CenterPosition;
+            set
+            {
+                _mesh.Header.CenterPosition = value;
+                this.RaisePropertyChanged(nameof(CenterPosition));
+            }
         }
 
         public BrgMeshFlag Flags

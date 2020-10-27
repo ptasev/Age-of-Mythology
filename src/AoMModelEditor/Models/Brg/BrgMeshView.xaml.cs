@@ -68,6 +68,16 @@ namespace AoMModelEditor.Models.Brg
                     view => view.interpTypeRadioList.Value)
                     .DisposeWith(disposableRegistration);
 
+                this.Bind(ViewModel,
+                    v => v.HotspotPosition,
+                    view => view.hotspotPositionVecControl.Value)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.CenterPosition,
+                    view => view.centerPositionVecControl.Value)
+                    .DisposeWith(disposableRegistration);
+
                 this.OneWayBind(ViewModel,
                     v => v.Flags,
                     view => view.flagsListBox.Tag)

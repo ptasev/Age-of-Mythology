@@ -7,13 +7,13 @@ using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
@@ -64,13 +64,13 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
-        public ModelRoot Convert(BrgFile brg)
+        public ModelRoot Convert(BrgFile brg, TextureManager textureManager)
         {
             var sceneBuilder = new SceneBuilder();
             var rootNodeBuilder = new NodeBuilder("root");
 
             Dictionary<int, MaterialBuilder> matIdMatBuilderMap = new Dictionary<int, MaterialBuilder>();
-            ConvertMaterials(brg, matIdMatBuilderMap);
+            ConvertMaterials(brg, textureManager, matIdMatBuilderMap);
 
             ConvertMeshes(brg, sceneBuilder, rootNodeBuilder, matIdMatBuilderMap);
 
@@ -341,23 +341,24 @@ namespace AoMEngineLibrary.Graphics.Brg
             return new VertexPositionNormal(-vert.X, vert.Y, vert.Z, -norm.X, norm.Y, norm.Z);
         }
 
-        private void ConvertMaterials(BrgFile brg, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
+        private void ConvertMaterials(BrgFile brg, TextureManager textureManager, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
         {
             var uniqueTextures = from mat in brg.Materials
                                  group mat by mat.DiffuseMapName into matGroup
                                  select (TexName: matGroup.Key, Materials: matGroup.ToList());
             foreach (var matGroup in uniqueTextures)
             {
-                string imageFile = matGroup.TexName + ".png";
+                string imageFile = matGroup.TexName;
+                var images = textureManager.GetTexture(imageFile);
                 MemoryImage memImage;
-                if (File.Exists(imageFile))
+                if (images != null)
                 {
-                    memImage = new MemoryImage(File.ReadAllBytes(imageFile));
+                    memImage = new MemoryImage(SaveImageAsPng(images[0][0]));
                 }
                 else
                 {
                     // Write minimal image
-                    memImage = new MemoryImage(blankImageData);
+                    memImage = new MemoryImage(CreateBlankPng());
                 }
 
                 foreach (var brgMat in matGroup.Materials)
@@ -372,8 +373,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                     if (!string.IsNullOrWhiteSpace(matGroup.TexName))
                     {
                         var tb = cb.UseTexture();
-                        tb.WrapS = brgMat.Flags.HasFlag(BrgMatFlag.WrapUTx1) ? TextureWrapMode.CLAMP_TO_EDGE : TextureWrapMode.REPEAT;
-                        tb.WrapT = brgMat.Flags.HasFlag(BrgMatFlag.WrapVTx1) ? TextureWrapMode.CLAMP_TO_EDGE : TextureWrapMode.REPEAT;
+                        tb.WrapS = brgMat.Flags.HasFlag(BrgMatFlag.WrapUTx1) ? TextureWrapMode.REPEAT : TextureWrapMode.CLAMP_TO_EDGE;
+                        tb.WrapT = brgMat.Flags.HasFlag(BrgMatFlag.WrapVTx1) ? TextureWrapMode.REPEAT : TextureWrapMode.CLAMP_TO_EDGE;
                         tb.WithPrimaryImage(memImage);
                     }
 
@@ -419,6 +420,25 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
 
             return name;
+        }
+
+        private static byte[] SaveImageAsPng(SixLabors.ImageSharp.Image image)
+        {
+            using (var ms = new MemoryStream())
+            {
+                image.SaveAsPng(ms);
+                return ms.ToArray();
+            }
+        }
+        private static byte[] CreateBlankPng()
+        {
+            var image = new SixLabors.ImageSharp.Image<L8>(1, 1);
+
+            using (var ms = new MemoryStream())
+            {
+                image.SaveAsPng(ms);
+                return ms.ToArray();
+            }
         }
     }
 }

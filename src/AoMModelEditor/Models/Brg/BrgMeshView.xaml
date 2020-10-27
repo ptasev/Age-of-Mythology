@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AoMModelEditor.Models.Brg"
+             xmlns:cont="clr-namespace:AoMModelEditor.Controls"
              xmlns:reactiveui="http://reactiveui.net"
              xmlns:ptools="http://propertytools.org/wpf"
              mc:Ignorable="d" 
@@ -40,6 +41,22 @@
                             <Label Margin="0 0 5 0" Content="Interpolation Type:"/>
                             <ptools:RadioButtonList Margin="0 0 5 0" x:Name="interpTypeRadioList" Orientation="Horizontal" VerticalAlignment="Center" VerticalContentAlignment="Center" ItemMargin="0 0 5 0"/>
                         </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            
+                            <Label Content="Hotspot Position" Margin="0 0 5 0" Grid.Row="0"/>
+                            <cont:Vector3SingleControl x:Name="hotspotPositionVecControl" Grid.Row="0" Grid.Column="1"/>
+
+                            <Label Content="Center Position" Margin="0 0 5 0" Grid.Row="1"/>
+                            <cont:Vector3SingleControl x:Name="centerPositionVecControl" Grid.Row="1" Grid.Column="1"/>
+                        </Grid>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="Flags">
