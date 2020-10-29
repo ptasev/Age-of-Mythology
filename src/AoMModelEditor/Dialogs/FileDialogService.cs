@@ -1,38 +1,21 @@
-﻿using AoMModelEditor.Settings;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+
+using WinForms = System.Windows.Forms;
 
 namespace AoMModelEditor.Dialogs
 {
     public class FileDialogService
     {
-        private readonly AppSettings _appSettings;
-
         private readonly OpenFileDialog _modelOpenFileDialog;
         private readonly SaveFileDialog _modelSaveFileDialog;
+        private readonly WinForms.FolderBrowserDialog _modelFolderBrowserDialog;
 
-        public FileDialogService(AppSettings appSettings)
+        public FileDialogService()
         {
-            _appSettings = appSettings;
-            _modelOpenFileDialog = CreateModelOfd();
-            _modelSaveFileDialog = CreateModelSfd();
-        }
-
-        private OpenFileDialog CreateModelOfd()
-        {
-            var ofd = new OpenFileDialog();
-
-            return ofd;
-        }
-
-        private SaveFileDialog CreateModelSfd()
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-
-            return sfd;
+            _modelOpenFileDialog = new OpenFileDialog();
+            _modelSaveFileDialog = new SaveFileDialog();
+            _modelFolderBrowserDialog = new WinForms.FolderBrowserDialog();
         }
 
         public OpenFileDialog GetModelOpenFileDialog()
@@ -44,5 +27,7 @@ namespace AoMModelEditor.Dialogs
         {
             return _modelSaveFileDialog;
         }
+
+        public WinForms.FolderBrowserDialog GetModelFolderBrowserDialog() => _modelFolderBrowserDialog;
     }
 }

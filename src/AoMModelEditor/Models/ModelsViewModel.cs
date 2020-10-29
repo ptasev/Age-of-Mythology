@@ -4,7 +4,6 @@ using AoMEngineLibrary.Graphics.Grn;
 using AoMModelEditor.Dialogs;
 using AoMModelEditor.Models.Brg;
 using AoMModelEditor.Settings;
-using Microsoft.Win32;
 using ReactiveUI;
 using SharpGLTF.Schema2;
 using System;
@@ -13,10 +12,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
-using System.Windows.Forms.Design;
 
 namespace AoMModelEditor.Models
 {
@@ -25,6 +21,8 @@ namespace AoMModelEditor.Models
         private BrgFile? _brg;
         private GrnFile? _grn;
 
+        private readonly object _modelLock = new object();
+        private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
         private readonly TextureManager _textureManager;
         private readonly BrgSettingsViewModel _brgSettingsViewModel;
@@ -37,17 +35,31 @@ namespace AoMModelEditor.Models
         public ReactiveCommand<Unit, Unit> ExportGltfCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportGltfBrgCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportGltfGrnCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportBrgMtrlFilesCommand { get; }
 
         public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService)
         {
+            _appSettings = appSettings;
             _fileDialogService = fileDialogService;
-            _textureManager = new TextureManager(appSettings.TexturesDirectory);
+            _textureManager = new TextureManager(_appSettings.TexturesDirectory);
             _brgSettingsViewModel = new BrgSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
 
             ExportGltfCommand = ReactiveCommand.Create(ExportGltf);
             ImportGltfBrgCommand = ReactiveCommand.Create(ImportGltfToBrg);
             ImportGltfGrnCommand = ReactiveCommand.Create(ImportGltfToGrn);
+            ExportBrgMtrlFilesCommand = ReactiveCommand.Create(ExportBrgMtrlFiles,
+                this.WhenAnyValue(vm => vm.IsBrg));
+        }
+
+        public BrgFile GetBrg()
+        {
+            return _brg ?? throw new InvalidOperationException("No brg file loaded.");
+        }
+
+        public GrnFile GetGrn()
+        {
+            return _grn ?? throw new InvalidOperationException("No grn file loaded.");
         }
 
         public void Load(string filePath)
@@ -70,28 +82,32 @@ namespace AoMModelEditor.Models
         }
         private void LoadBrg(BrgFile brg)
         {
-            _modelObjects.Clear();
-            IsBrg = true;
-            _brg = brg;
-            _grn = null;
-
-            _modelObjects.Add(_brgSettingsViewModel);
-
-            if (brg.Meshes.Count > 0)
+            lock (_modelLock)
             {
-                _modelObjects.Add(new BrgMeshViewModel(brg, brg.Meshes[0]));
-            }
+                _modelObjects.Clear();
+                _brg = brg;
+                _grn = null;
+                IsBrg = true;
+                this.RaisePropertyChanged(nameof(IsBrg));
 
-            foreach (var mat in brg.Materials)
-            {
-                _modelObjects.Add(new BrgMaterialViewModel(mat));
-            }
+                _modelObjects.Add(_brgSettingsViewModel);
 
-            if (brg.Meshes.Count > 0)
-            {
-                for (int i = 0; i < brg.Meshes[0].Attachpoints.Count; ++i)
+                if (brg.Meshes.Count > 0)
                 {
-                    _modelObjects.Add(new BrgDummyViewModel(brg.Meshes.Select(m => m.Attachpoints[i]).ToList()));
+                    _modelObjects.Add(new BrgMeshViewModel(brg, brg.Meshes[0]));
+                }
+
+                foreach (var mat in brg.Materials)
+                {
+                    _modelObjects.Add(new BrgMaterialViewModel(mat));
+                }
+
+                if (brg.Meshes.Count > 0)
+                {
+                    for (int i = 0; i < brg.Meshes[0].Attachpoints.Count; ++i)
+                    {
+                        _modelObjects.Add(new BrgDummyViewModel(brg.Meshes.Select(m => m.Attachpoints[i]).ToList()));
+                    }
                 }
             }
         }
@@ -106,24 +122,28 @@ namespace AoMModelEditor.Models
         }
         private void LoadGrn(GrnFile grn)
         {
-            _modelObjects.Clear();
-            IsBrg = false;
-            _brg = null;
-            _grn = grn;
-
-            if (grn.Meshes.Count > 0)
+            lock (_modelLock)
             {
-                //_modelObjects.Add(new BrgMeshViewModel(file, file.Meshes[0]));
-            }
+                _modelObjects.Clear();
+                _brg = null;
+                _grn = grn;
+                IsBrg = false;
+                this.RaisePropertyChanged(nameof(IsBrg));
 
-            foreach (var mat in grn.Materials)
-            {
-                //_modelObjects.Add(new BrgMaterialViewModel(mat));
-            }
+                if (grn.Meshes.Count > 0)
+                {
+                    //_modelObjects.Add(new BrgMeshViewModel(file, file.Meshes[0]));
+                }
 
-            if (grn.Meshes.Count > 0)
-            {
+                foreach (var mat in grn.Materials)
+                {
+                    //_modelObjects.Add(new BrgMaterialViewModel(mat));
+                }
 
+                if (grn.Meshes.Count > 0)
+                {
+
+                }
             }
         }
 
@@ -140,22 +160,20 @@ namespace AoMModelEditor.Models
         }
         private void SaveBrg(string filePath)
         {
-            if (_brg == null)
-                throw new InvalidOperationException("No file loaded.");
+            var brg = GetBrg();
 
             using (var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                _brg.Write(fs);
+                brg.Write(fs);
             }
         }
         private void SaveGrn(string filePath)
         {
-            if (_grn == null)
-                throw new InvalidOperationException("No file loaded.");
+            var grn = GetGrn();
 
             using (var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                _grn.Write(fs);
+                grn.Write(fs);
             }
         }
 
@@ -187,20 +205,20 @@ namespace AoMModelEditor.Models
         }
         private void ExportBrgToGltf(string filePath)
         {
-            if (_brg == null)
-                throw new InvalidOperationException("No file loaded.");
+            var brg = GetBrg();
 
+            // Assuming single-threaded brg will not be null here since IsBrg already checked
             BrgGltfConverter conv = new BrgGltfConverter();
-            var gltf = conv.Convert(_brg, _textureManager);
+            var gltf = conv.Convert(brg, _textureManager);
             gltf.Save(filePath);
         }
         private void ExportGrnToGltf(string filePath)
         {
-            if (_grn == null)
-                throw new InvalidOperationException("No file loaded.");
+            var grn = GetGrn();
 
+            // Assuming single-threaded grn will not be null here since IsBrg already checked
             GrnGltfConverter conv = new GrnGltfConverter();
-            var gltf = conv.Convert(_grn);
+            var gltf = conv.Convert(grn);
             gltf.Save(filePath);
         }
 
@@ -243,6 +261,51 @@ namespace AoMModelEditor.Models
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to import gltf file as grn.{Environment.NewLine}{ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            }
+        }
+
+        private void ExportBrgMtrlFiles()
+        {
+            try
+            {
+                var brg = GetBrg();
+
+                var ofd = _fileDialogService.GetModelSaveFileDialog();
+                var sfd = _fileDialogService.GetModelSaveFileDialog();
+                var brgFilePath = sfd.FileName ?? ofd.FileName ?? string.Empty;
+                var brgFolderPath = Path.GetDirectoryName(brgFilePath);
+                var fbd = _fileDialogService.GetModelFolderBrowserDialog();
+
+                if (!string.IsNullOrEmpty(_appSettings.MtrlFolderDialogDirectory) &&
+                    Directory.Exists(_appSettings.MtrlFolderDialogDirectory))
+                {
+                    fbd.SelectedPath = _appSettings.MtrlFolderDialogDirectory;
+                }
+                else if (!string.IsNullOrEmpty(brgFolderPath) &&
+                    Directory.Exists(brgFolderPath))
+                {
+                    fbd.SelectedPath = brgFolderPath;
+                }
+
+                if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    // Assuming single-threaded brg will not be null here since IsBrg already checked
+                    var brgFileNameNoExt = Path.GetFileNameWithoutExtension(brgFilePath);
+                    for (int i = 0; i < brg.Materials.Count; i++)
+                    {
+                        MtrlFile mtrl = new MtrlFile(brg.Materials[i]);
+                        using (var fs = File.Open(Path.Combine(fbd.SelectedPath, brgFileNameNoExt + "_" + i + ".mtrl"),
+                            FileMode.Create, FileAccess.Write, FileShare.Read))
+                        {
+                            mtrl.Write(fs);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to export brg mtrl files.{Environment.NewLine}{ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }

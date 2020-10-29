@@ -31,7 +31,7 @@ namespace AoMModelEditor
             _appSettings = new AppSettings();
             _appSettings.Read();
 
-            _fileDialogService = new FileDialogService(_appSettings);
+            _fileDialogService = new FileDialogService();
             _lastFilePath = string.Empty;
 
             ModelsViewModel = new ModelsViewModel(_appSettings, _fileDialogService);
