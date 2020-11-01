@@ -45,17 +45,30 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition/>
+                                <RowDefinition/>
                             </Grid.RowDefinitions>
-                            
-                            <Label Content="Hotspot Position" Margin="0 0 5 0" Grid.Row="0"/>
-                            <cont:Vector3SingleControl x:Name="hotspotPositionVecControl" Grid.Row="0" Grid.Column="1"/>
 
-                            <Label Content="Center Position" Margin="0 0 5 0" Grid.Row="1"/>
+                            <Label Content="Hotspot Position" Margin="0 0 5 0" Grid.Row="0" Grid.Column="0"/>
+                            <cont:Vector3SingleControl x:Name="hotspotPositionVecControl" Grid.Row="0" Grid.Column="1"/>
+                            <Label Content="Mass Position" Margin="0 0 5 0" Grid.Row="0" Grid.Column="2"/>
+                            <cont:Vector3SingleControl x:Name="massPositionVecControl" Grid.Row="0" Grid.Column="3"/>
+
+                            <Label Content="Center Position" Margin="0 0 5 0" Grid.Row="1" Grid.Column="0"/>
                             <cont:Vector3SingleControl x:Name="centerPositionVecControl" Grid.Row="1" Grid.Column="1"/>
+                            <Label Content="Center Radius" Margin="0 0 5 0" Grid.Row="1" Grid.Column="2"></Label>
+                            <TextBox x:Name="centerRadiusTextBox" Width="80" Margin="0 0 5 0" Grid.Row="1" Grid.Column="3"
+                                     HorizontalAlignment="Left" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
+
+                            <Label Content="Min Extent Position" Margin="0 0 5 0" Grid.Row="2" Grid.Column="0"/>
+                            <cont:Vector3SingleControl x:Name="minExtentPositionVecControl" Grid.Row="2" Grid.Column="1"/>
+                            <Label Content="Max Extent Position" Margin="0 0 5 0" Grid.Row="2" Grid.Column="2"/>
+                            <cont:Vector3SingleControl x:Name="maxExtentPositionVecControl" Grid.Row="2" Grid.Column="3"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>

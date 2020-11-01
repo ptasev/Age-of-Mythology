@@ -48,6 +48,16 @@ namespace AoMModelEditor.Models.Brg
             }
         }
 
+        public Vector3 MassPosition
+        {
+            get => _mesh.Header.MassPosition;
+            set
+            {
+                _mesh.Header.MassPosition = value;
+                this.RaisePropertyChanged(nameof(MassPosition));
+            }
+        }
+
         public Vector3 CenterPosition
         {
             get => _mesh.Header.CenterPosition;
@@ -55,6 +65,36 @@ namespace AoMModelEditor.Models.Brg
             {
                 _mesh.Header.CenterPosition = value;
                 this.RaisePropertyChanged(nameof(CenterPosition));
+            }
+        }
+
+        public float CenterRadius
+        {
+            get => _mesh.Header.CenterRadius;
+            set
+            {
+                _mesh.Header.CenterRadius = value;
+                this.RaisePropertyChanged(nameof(CenterRadius));
+            }
+        }
+
+        public Vector3 MinimumExtent
+        {
+            get => _mesh.Header.MinimumExtent;
+            set
+            {
+                _mesh.Header.MinimumExtent = value;
+                this.RaisePropertyChanged(nameof(MinimumExtent));
+            }
+        }
+
+        public Vector3 MaximumExtent
+        {
+            get => _mesh.Header.MaximumExtent;
+            set
+            {
+                _mesh.Header.MaximumExtent = value;
+                this.RaisePropertyChanged(nameof(MaximumExtent));
             }
         }
 

@@ -2,7 +2,9 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -74,8 +76,35 @@ namespace AoMModelEditor.Models.Brg
                     .DisposeWith(disposableRegistration);
 
                 this.Bind(ViewModel,
+                    v => v.MassPosition,
+                    view => view.massPositionVecControl.Value)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
                     v => v.CenterPosition,
                     view => view.centerPositionVecControl.Value)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.CenterRadius,
+                    view => view.centerRadiusTextBox.Text,
+                    centerRadiusTextBox.Events().LostFocus.Merge(centerRadiusTextBox.Events().KeyUp.Where(k => k.Key == Key.Enter)),
+                    f => f.ToString("F5"),
+                    f => 
+                    { 
+                        float.TryParse(f, out float r);
+                        return r; 
+                    })
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.MinimumExtent,
+                    view => view.minExtentPositionVecControl.Value)
+                    .DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                    v => v.MaximumExtent,
+                    view => view.maxExtentPositionVecControl.Value)
                     .DisposeWith(disposableRegistration);
 
                 this.OneWayBind(ViewModel,

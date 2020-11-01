@@ -19,7 +19,8 @@
 
   <ItemGroup>
     <PackageReference Include="PropertyTools.Wpf" Version="3.1.0-alpha0041" />
-    <PackageReference Include="ReactiveUI.WPF" Version="12.1.1" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="12.1.5" />
+    <PackageReference Include="ReactiveUI.WPF" Version="12.1.5" />
   </ItemGroup>
 
   <ItemGroup>
