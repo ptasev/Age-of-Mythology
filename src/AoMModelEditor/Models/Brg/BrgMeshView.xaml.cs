@@ -89,7 +89,7 @@ namespace AoMModelEditor.Models.Brg
                     v => v.CenterRadius,
                     view => view.centerRadiusTextBox.Text,
                     centerRadiusTextBox.Events().LostFocus.Merge(centerRadiusTextBox.Events().KeyUp.Where(k => k.Key == Key.Enter)),
-                    f => f.ToString("F5"),
+                    f => f.ToString("F7"),
                     f => 
                     { 
                         float.TryParse(f, out float r);

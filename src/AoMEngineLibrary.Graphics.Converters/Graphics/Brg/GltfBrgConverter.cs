@@ -779,17 +779,42 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 mat.Flags |= BrgMatFlag.PlayerXFormColor1;
             }
+            if (flags.Contains("colorxform2", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PlayerXFormColor2;
+            }
+            if (flags.Contains("colorxform3", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PlayerXFormColor3;
+            }
+
+            if (flags.Contains("pixelxform1", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PixelXForm1;
+            }
+            if (flags.Contains("pixelxform2", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PixelXForm2;
+            }
+            if (flags.Contains("pixelxform3", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PixelXForm3;
+            }
+
+            if (flags.Contains("texturexform1", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PlayerXFormTx1;
+            }
+            if (flags.Contains("texturexform2", cmp))
+            {
+                mat.Flags |= BrgMatFlag.PlayerXFormTx2;
+            }
 
             if (flags.Contains("2-sided", cmp) ||
                 flags.Contains("2 sided", cmp) ||
                 flags.Contains("2sided", cmp))
             {
                 mat.Flags |= BrgMatFlag.TwoSided;
-            }
-
-            if (flags.Contains("pixelxform1", cmp))
-            {
-                mat.Flags |= BrgMatFlag.PixelXForm1;
             }
         }
     }

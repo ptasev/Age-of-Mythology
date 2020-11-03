@@ -8,7 +8,7 @@
         xmlns:reactiveui="http://reactiveui.net"
         xmlns:models="clr-namespace:AoMModelEditor.Models"
         mc:Ignorable="d"
-        Title="MainWindow" Height="540" Width="960">
+        Title="MainWindow" Height="540" Width="1040">
     <DockPanel>
         <Menu x:Name="mainMenu" DockPanel.Dock="Top" IsMainMenu="True">
             <MenuItem Header="_File">

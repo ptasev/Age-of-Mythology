@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-
+using System.Text;
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
     SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
@@ -402,24 +402,51 @@ namespace AoMEngineLibrary.Graphics.Brg
         }
         private string GetMaterialNameWithFlags(BrgMaterial mat)
         {
-            string name = Path.GetFileNameWithoutExtension(mat.DiffuseMapName) ?? string.Empty;
+            var sb = new StringBuilder(Path.GetFileNameWithoutExtension(mat.DiffuseMapName));
+            sb.Append('(');
 
             if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1))
             {
-                name += " colorxform1";
+                sb.Append(" colorxform1");
+            }
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2))
+            {
+                sb.Append(" colorxform2");
+            }
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor3))
+            {
+                sb.Append(" colorxform3");
             }
 
             if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
             {
-                name += " pixelxform1";
+                sb.Append(" pixelxform1");
+            }
+            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm2))
+            {
+                sb.Append(" pixelxform2");
+            }
+            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm3))
+            {
+                sb.Append(" pixelxform3");
+            }
+
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx1))
+            {
+                sb.Append(" texturexform1");
+            }
+            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2))
+            {
+                sb.Append(" texturexform2");
             }
 
             if (mat.Flags.HasFlag(BrgMatFlag.TwoSided))
             {
-                name += " 2-sided";
+                sb.Append(" 2-sided");
             }
 
-            return name;
+            sb.Append(')');
+            return sb.ToString();
         }
 
         private static byte[] SaveImageAsPng(SixLabors.ImageSharp.Image image)
