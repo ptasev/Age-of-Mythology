@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Numerics;
 using System.Text;
 
@@ -10,6 +11,8 @@ namespace AoMModelEditor.Models.Brg
     public class BrgSettingsViewModel : ReactiveObject, IModelObject
     {
         public string Name { get; }
+
+        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
 
         private float _sampleRateFps;
         public float SampleRateFps

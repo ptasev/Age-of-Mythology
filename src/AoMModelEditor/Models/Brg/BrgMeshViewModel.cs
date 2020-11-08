@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Numerics;
 using System.Text;
 
@@ -13,6 +14,8 @@ namespace AoMModelEditor.Models.Brg
         private readonly BrgMesh _mesh;
 
         public string Name => "Mesh";
+
+        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
 
         private bool _isSelected;
         public bool IsSelected

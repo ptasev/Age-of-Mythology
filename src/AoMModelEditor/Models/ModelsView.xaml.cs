@@ -29,7 +29,7 @@ namespace AoMModelEditor.Models
             {
                 this.OneWayBind(ViewModel,
                     viewModel => viewModel.ModelObjects,
-                    view => view.modelObjectListView.ItemsSource)
+                    view => view.modelObjectTreeView.ItemsSource)
                     .DisposeWith(disposableRegistration);
             });
         }

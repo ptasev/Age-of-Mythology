@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Numerics;
 using System.Text;
 
@@ -15,6 +16,8 @@ namespace AoMModelEditor.Models.Brg
         {
             get => string.IsNullOrEmpty(_mat.DiffuseMapName) ? "Material" : $"Mat {_mat.DiffuseMapName}";
         }
+
+        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
 
         public BrgMatFlag Flags
         {

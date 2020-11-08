@@ -16,10 +16,16 @@
         </Grid.ColumnDefinitions>
         <GroupBox Header="Data">
             <DockPanel>
-                <TextBox DockPanel.Dock="Top" Name="texSearchBox"></TextBox>
-                <ListView Name="modelObjectListView" SelectionMode="Single">
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
+                <TreeView Name="modelObjectTreeView">
+                    <TreeView.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="Black" />
+                    </TreeView.Resources>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
                             <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
                             <Setter Property="FontWeight" Value="Normal" />
                             <Style.Triggers>
@@ -28,20 +34,20 @@
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
-                    </ListView.ItemContainerStyle>
+                    </TreeView.ItemContainerStyle>
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
                             <TextBlock Text="{Binding Path=Name}"></TextBlock>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
             </DockPanel>
         </GroupBox>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
         <DockPanel Grid.Column="2">
             <Grid>
-                <reactiveui:ViewModelViewHost ViewModel="{Binding ElementName=modelObjectListView, Path=SelectedItem}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                <reactiveui:ViewModelViewHost ViewModel="{Binding ElementName=modelObjectTreeView, Path=SelectedItem}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
             </Grid>
         </DockPanel>
     </Grid>
