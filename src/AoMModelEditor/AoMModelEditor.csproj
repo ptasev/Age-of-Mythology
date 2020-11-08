@@ -43,4 +43,16 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="Models\Grn\GrnTextureView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Models\Grn\GrnMaterialView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Models\Grn\GrnBoneView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
 </Project>

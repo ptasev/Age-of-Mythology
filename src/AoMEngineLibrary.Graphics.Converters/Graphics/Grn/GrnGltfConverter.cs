@@ -263,8 +263,8 @@ namespace AoMEngineLibrary.Graphics.Grn
                     }
 
                     var tb = cb.UseTexture();
-                    tb.WrapS = TextureWrapMode.CLAMP_TO_EDGE;
-                    tb.WrapT = TextureWrapMode.CLAMP_TO_EDGE;
+                    tb.WrapS = TextureWrapMode.REPEAT;
+                    tb.WrapT = TextureWrapMode.REPEAT;
                     tb.WithPrimaryImage(memImage);
                 }
 

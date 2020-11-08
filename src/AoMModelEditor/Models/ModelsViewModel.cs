@@ -3,6 +3,7 @@ using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
 using AoMModelEditor.Dialogs;
 using AoMModelEditor.Models.Brg;
+using AoMModelEditor.Models.Grn;
 using AoMModelEditor.Settings;
 using ReactiveUI;
 using SharpGLTF.Schema2;
@@ -130,6 +131,11 @@ namespace AoMModelEditor.Models
                 IsBrg = false;
                 this.RaisePropertyChanged(nameof(IsBrg));
 
+                if (grn.Bones.Count > 0)
+                {
+                    _modelObjects.Add(new GrnBoneViewModel(grn, 0));
+                }
+
                 if (grn.Meshes.Count > 0)
                 {
                     //_modelObjects.Add(new BrgMeshViewModel(file, file.Meshes[0]));
@@ -137,12 +143,7 @@ namespace AoMModelEditor.Models
 
                 foreach (var mat in grn.Materials)
                 {
-                    //_modelObjects.Add(new BrgMaterialViewModel(mat));
-                }
-
-                if (grn.Meshes.Count > 0)
-                {
-
+                    _modelObjects.Add(new GrnMaterialViewModel(mat));
                 }
             }
         }
