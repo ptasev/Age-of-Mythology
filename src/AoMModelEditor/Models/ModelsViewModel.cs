@@ -131,14 +131,14 @@ namespace AoMModelEditor.Models
                 IsBrg = false;
                 this.RaisePropertyChanged(nameof(IsBrg));
 
+                if (grn.Meshes.Count > 0)
+                {
+                    _modelObjects.Add(new GrnMeshesViewModel(grn.Meshes));
+                }
+
                 if (grn.Bones.Count > 0)
                 {
                     _modelObjects.Add(new GrnBoneViewModel(grn, 0));
-                }
-
-                if (grn.Meshes.Count > 0)
-                {
-                    //_modelObjects.Add(new BrgMeshViewModel(file, file.Meshes[0]));
                 }
 
                 foreach (var mat in grn.Materials)
