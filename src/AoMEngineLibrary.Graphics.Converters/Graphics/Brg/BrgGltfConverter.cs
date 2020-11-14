@@ -349,17 +349,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             foreach (var matGroup in uniqueTextures)
             {
                 string imageFile = matGroup.TexName;
-                var images = textureManager.GetTexture(imageFile);
-                MemoryImage memImage;
-                if (images != null)
-                {
-                    memImage = new MemoryImage(SaveImageAsPng(images[0][0]));
-                }
-                else
-                {
-                    // Write minimal image
-                    memImage = new MemoryImage(CreateBlankPng());
-                }
+                MemoryImage memImage = CreateMemoryImage(imageFile, textureManager);
 
                 foreach (var brgMat in matGroup.Materials)
                 {
@@ -400,6 +390,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
             }
         }
+
         private string GetMaterialNameWithFlags(BrgMaterial mat)
         {
             var sb = new StringBuilder(Path.GetFileNameWithoutExtension(mat.DiffuseMapName));
@@ -409,24 +400,23 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 sb.Append(" colorxform1");
             }
-            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2))
+            else if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2))
             {
                 sb.Append(" colorxform2");
             }
-            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor3))
+            else if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor3))
             {
                 sb.Append(" colorxform3");
             }
-
-            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
+            else if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
             {
                 sb.Append(" pixelxform1");
             }
-            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm2))
+            else if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm2))
             {
                 sb.Append(" pixelxform2");
             }
-            if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm3))
+            else if (mat.Flags.HasFlag(BrgMatFlag.PixelXForm3))
             {
                 sb.Append(" pixelxform3");
             }
@@ -435,7 +425,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 sb.Append(" texturexform1");
             }
-            if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2))
+            else if (mat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2))
             {
                 sb.Append(" texturexform2");
             }
@@ -449,6 +439,26 @@ namespace AoMEngineLibrary.Graphics.Brg
             return sb.ToString();
         }
 
+        private MemoryImage CreateMemoryImage(string imageFile, TextureManager textureManager)
+        {
+            MemoryImage memImage;
+
+            try
+            {
+                var filePath = textureManager.GetTexturePath(imageFile) ?? string.Empty;
+                var images = textureManager.GetTexture(filePath);
+                memImage = new MemoryImage(SaveImageAsPng(images[0][0]));
+            }
+            catch
+            {
+                // TODO: log exception
+
+                // Write minimal image
+                memImage = new MemoryImage(CreateBlankPng());
+            }
+
+            return memImage;
+        }
         private static byte[] SaveImageAsPng(SixLabors.ImageSharp.Image image)
         {
             using (var ms = new MemoryStream())

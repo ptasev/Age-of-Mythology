@@ -18,40 +18,53 @@ namespace AoMEngineLibrary.Graphics
             _ddtImageConverter = new DdtImageConverter();
         }
 
-        public Image[][]? GetTexture(string fileName)
+        /// <summary>
+        /// Finds the texture path based on the name of the file.
+        /// </summary>
+        /// <param name="fileName">The file name of the texture to find.</param>
+        /// <returns>The file path of the texture, or null if the file does not exist.</returns>
+        public string? GetTexturePath(string fileName)
         {
-            string extension = Path.GetExtension(fileName).ToLowerInvariant();
-            if (extension == string.Empty)
+            string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
+
+            // for now just check the main textures directory, and only for ddt files
+            // in the future need to support tga, btx and cub files, and determine which is the latest
+            var ddtPath = Path.Combine(_texturesPath, $"{fileNameNoExt}.ddt");
+            if (File.Exists(ddtPath))
             {
-                extension = ".ddt";
-                fileName += ".ddt";
+                return ddtPath;
             }
 
-            Image[][]? images;
+            return null;
+        }
+
+        public Image[][] GetTexture(string filePath)
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"The texture was not found.", filePath);
+
+            string extension = Path.GetExtension(filePath).ToLowerInvariant();
+
+            Image[][] images;
             switch (extension)
             {
                 case ".ddt":
-                    images = GetDdtTexture(fileName);
+                    images = LoadDdtTexture(filePath);
                     break;
                 default:
-                    throw new NotImplementedException($"Support for {extension} textures is not implemented.");
+                    throw new NotImplementedException($"Support for \"{extension}\" textures is not implemented.");
             }
 
-            if (images?.Length == 0 || images?[0]?.Length == 0)
+            if (images.Length == 0 || images[0].Length == 0)
             {
-                return null;
+                throw new InvalidDataException("Failed to load texture data from the file.");
             }
 
             return images;
         }
 
-        private Image[][]? GetDdtTexture(string fileName)
+        private Image[][] LoadDdtTexture(string filePath)
         {
-            string filePath = Path.Combine(_texturesPath, fileName);
-
-            if (!File.Exists(filePath))
-                return null;
-
             var ddt = new DdtFile();
             using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 ddt.Read(fs);
