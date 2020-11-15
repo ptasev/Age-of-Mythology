@@ -25,7 +25,7 @@ namespace AoMEngineLibrary.Graphics.Grn
 
         }
 
-        public GrnFile Convert(ModelRoot gltfFile)
+        public GrnFile Convert(ModelRoot gltfFile, GltfGrnParameters parameters)
         {
             GrnFile grn = new GrnFile();
             var model = gltfFile;
@@ -40,9 +40,12 @@ namespace AoMEngineLibrary.Graphics.Grn
 
             ConvertSkeleton(grn, nodes, nodeBoneIndexMap);
 
-            ConvertMeshes(grn, model, nodes, nodeBoneIndexMap);
+            if (parameters.ConvertMeshes)
+            {
+                ConvertMeshes(grn, model, nodes, nodeBoneIndexMap);
+            }
 
-            if (anim != null)
+            if (anim != null && parameters.ConvertAnimations)
                 ConvertAnimation(grn, nodes, anim, nodeBoneIndexMap);
 
             return grn;
@@ -97,7 +100,7 @@ namespace AoMEngineLibrary.Graphics.Grn
 
                 if (inst.Skin == null) continue; // throw new InvalidOperationException($"Can't convert gtlf with mesh ({mesh.Name}) without a skin.");
 
-                if (!mesh.AllPrimitivesHaveJoints) throw new InvalidOperationException($"Can't convert gtlf with mesh ({mesh.Name}) primitve without a skin.");
+                if (!mesh.AllPrimitivesHaveJoints) throw new InvalidOperationException($"Can't convert gtlf with mesh ({mesh.Name}) primitive without a skin.");
 
                 if (mesh.MorphWeights.Count > 0) throw new InvalidOperationException($"Can't convert gltf with mesh ({mesh.Name}) vertex morphs to grn.");
 

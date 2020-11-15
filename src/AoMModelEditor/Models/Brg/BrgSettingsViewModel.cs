@@ -1,10 +1,7 @@
 ﻿using AoMEngineLibrary.Graphics.Brg;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Numerics;
-using System.Text;
 
 namespace AoMModelEditor.Models.Brg
 {

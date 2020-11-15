@@ -27,6 +27,7 @@ namespace AoMModelEditor.Models
         private readonly FileDialogService _fileDialogService;
         private readonly TextureManager _textureManager;
         private readonly BrgSettingsViewModel _brgSettingsViewModel;
+        private readonly GrnSettingsViewModel _grnSettingsViewModel;
 
         public bool IsBrg { get; private set; }
 
@@ -44,6 +45,7 @@ namespace AoMModelEditor.Models
             _fileDialogService = fileDialogService;
             _textureManager = new TextureManager(_appSettings.TexturesDirectory);
             _brgSettingsViewModel = new BrgSettingsViewModel();
+            _grnSettingsViewModel = new GrnSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
 
             ExportGltfCommand = ReactiveCommand.Create(ExportGltf);
@@ -130,6 +132,8 @@ namespace AoMModelEditor.Models
                 _grn = grn;
                 IsBrg = false;
                 this.RaisePropertyChanged(nameof(IsBrg));
+
+                _modelObjects.Add(_grnSettingsViewModel);
 
                 if (grn.Meshes.Count > 0)
                 {
@@ -258,7 +262,7 @@ namespace AoMModelEditor.Models
                 {
                     var conv = new GltfGrnConverter();
                     var gltf = ModelRoot.Load(ofd.FileName);
-                    LoadGrn(conv.Convert(gltf));
+                    LoadGrn(conv.Convert(gltf, _grnSettingsViewModel.CreateGltfGrnParameters()));
                 }
             }
             catch (Exception ex)
