@@ -6,6 +6,8 @@ using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,7 +60,7 @@ namespace AoMEngineLibrary.Graphics.Grn
         {
         }
 
-        public ModelRoot Convert(GrnFile grn)
+        public ModelRoot Convert(GrnFile grn, TextureManager textureManager)
         {
             var sceneBuilder = new SceneBuilder();
 
@@ -66,7 +68,7 @@ namespace AoMEngineLibrary.Graphics.Grn
 
             if (grn.Meshes.Count > 0)
             {
-                ConvertMeshes(grn, sceneBuilder, nodeBuilders);
+                ConvertMeshes(grn, textureManager, sceneBuilder, nodeBuilders);
             }
 
             if (grn.Animation.Duration > 0)
@@ -177,9 +179,9 @@ namespace AoMEngineLibrary.Graphics.Grn
             nodeBuilder.UseScale().Value = new Vector3(bone.Scale.M11, bone.Scale.M22, bone.Scale.M33);
         }
 
-        private void ConvertMeshes(GrnFile grn, SceneBuilder sceneBuilder, NodeBuilder?[] nodeBuilders)
+        private void ConvertMeshes(GrnFile grn, TextureManager textureManager, SceneBuilder sceneBuilder, NodeBuilder?[] nodeBuilders)
         {
-            var matIdMatBuilderMap = ConvertMaterials(grn);
+            var matIdMatBuilderMap = ConvertMaterials(grn, textureManager);
 
             for (int i = 0; i < grn.Meshes.Count; i++)
             {
@@ -235,10 +237,11 @@ namespace AoMEngineLibrary.Graphics.Grn
             return vb;
         }
 
-        private Dictionary<int, MaterialBuilder> ConvertMaterials(GrnFile grn)
+        private Dictionary<int, MaterialBuilder> ConvertMaterials(GrnFile grn, TextureManager textureManager)
         {
-            var matIdMatBuilderMap = new Dictionary<int, MaterialBuilder>();
+            var textureImageMap = ConvertTextures(grn, textureManager);
 
+            var matIdMatBuilderMap = new Dictionary<int, MaterialBuilder>();
             for (int i = 0; i < grn.Materials.Count; i++)
             {
                 var mat = grn.Materials[i];
@@ -248,19 +251,9 @@ namespace AoMEngineLibrary.Graphics.Grn
                 cb.Parameter = new Vector4(0.2f, 0.5f, 0, 0);
                 cb = mb.UseChannel(KnownChannel.BaseColor);
 
-                if (!string.IsNullOrWhiteSpace(mat.DiffuseTexture.FileName))
+                if (textureImageMap.ContainsKey(mat.DiffuseTexture))
                 {
-                    string imageFile = Path.GetFileName(mat.DiffuseTexture.FileName);
-                    MemoryImage memImage;
-                    if (File.Exists(imageFile))
-                    {
-                        memImage = new MemoryImage(File.ReadAllBytes(imageFile));
-                    }
-                    else
-                    {
-                        // Write minimal image
-                        memImage = new MemoryImage(blankImageData);
-                    }
+                    MemoryImage memImage = textureImageMap[mat.DiffuseTexture];
 
                     var tb = cb.UseTexture();
                     tb.WrapS = TextureWrapMode.REPEAT;
@@ -272,6 +265,51 @@ namespace AoMEngineLibrary.Graphics.Grn
             }
 
             return matIdMatBuilderMap;
+        }
+
+        private Dictionary<GrnTexture, MemoryImage> ConvertTextures(GrnFile grn, TextureManager textureManager)
+        {
+            var textureImageMap = new Dictionary<GrnTexture, MemoryImage>();
+            for (int i = 0; i < grn.Textures.Count; ++i)
+            {
+                var texture = grn.Textures[i];
+                if (!string.IsNullOrWhiteSpace(texture.FileName))
+                {
+                    // Remove everything after first parenthesis
+                    string imageFile = Path.GetFileName(texture.FileName);
+                    int parenthIndex = imageFile.IndexOf('(');
+                    imageFile = imageFile.Remove(parenthIndex);
+
+                    // Create a memory image
+                    MemoryImage memImage;
+                    try
+                    {
+                        var filePath = textureManager.GetTexturePath(imageFile);
+                        var images = textureManager.GetTexture(filePath);
+                        using (var ms = new MemoryStream())
+                        {
+                            images[0][0].SaveAsPng(ms);
+                            memImage = new MemoryImage(ms.ToArray());
+                        }
+                    }
+                    catch
+                    {
+                        // TODO: log exception
+
+                        // Write minimal image
+                        var image = new SixLabors.ImageSharp.Image<L8>(1, 1, new L8(128));
+                        using (var ms = new MemoryStream())
+                        {
+                            image.SaveAsPng(ms);
+                            memImage = new MemoryImage(ms.ToArray());
+                        }
+                    }
+
+                    textureImageMap.Add(texture, memImage);
+                }
+            }
+
+            return textureImageMap;
         }
 
         private void ConvertAnimation(GrnFile grn, NodeBuilder?[] nodeBuilders)

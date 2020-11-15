@@ -22,8 +22,8 @@ namespace AoMEngineLibrary.Graphics
         /// Finds the texture path based on the name of the file.
         /// </summary>
         /// <param name="fileName">The file name of the texture to find.</param>
-        /// <returns>The file path of the texture, or null if the file does not exist.</returns>
-        public string? GetTexturePath(string fileName)
+        /// <returns>The file path of the texture, or empty string if the texture does not exist.</returns>
+        public string GetTexturePath(string fileName)
         {
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
 
@@ -35,7 +35,7 @@ namespace AoMEngineLibrary.Graphics
                 return ddtPath;
             }
 
-            return null;
+            return string.Empty;
         }
 
         public Image[][] GetTexture(string filePath)

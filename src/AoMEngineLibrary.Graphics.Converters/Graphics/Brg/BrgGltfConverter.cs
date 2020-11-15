@@ -445,37 +445,28 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             try
             {
-                var filePath = textureManager.GetTexturePath(imageFile) ?? string.Empty;
+                var filePath = textureManager.GetTexturePath(imageFile);
                 var images = textureManager.GetTexture(filePath);
-                memImage = new MemoryImage(SaveImageAsPng(images[0][0]));
+                using (var ms = new MemoryStream())
+                {
+                    images[0][0].SaveAsPng(ms);
+                    memImage = new MemoryImage(ms.ToArray());
+                }
             }
             catch
             {
                 // TODO: log exception
 
                 // Write minimal image
-                memImage = new MemoryImage(CreateBlankPng());
+                var image = new SixLabors.ImageSharp.Image<L8>(1, 1, new L8(128));
+                using (var ms = new MemoryStream())
+                {
+                    image.SaveAsPng(ms);
+                    memImage = new MemoryImage(ms.ToArray());
+                }
             }
 
             return memImage;
-        }
-        private static byte[] SaveImageAsPng(SixLabors.ImageSharp.Image image)
-        {
-            using (var ms = new MemoryStream())
-            {
-                image.SaveAsPng(ms);
-                return ms.ToArray();
-            }
-        }
-        private static byte[] CreateBlankPng()
-        {
-            var image = new SixLabors.ImageSharp.Image<L8>(1, 1);
-
-            using (var ms = new MemoryStream())
-            {
-                image.SaveAsPng(ms);
-                return ms.ToArray();
-            }
         }
     }
 }
