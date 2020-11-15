@@ -208,7 +208,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             var norm = mesh.Normals[face.NormalIndices[index]];
 
             vb.Geometry = new VertexPositionNormal(Vector3.Transform(vert, RotX90N), Vector3.TransformNormal(norm, RotX90N));
-            vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[face.TextureIndices[index]].X, 1 - mesh.TextureCoordinates[face.TextureIndices[index]].Y);
+            vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[face.TextureIndices[index]].X, mesh.TextureCoordinates[face.TextureIndices[index]].Y);
 
             var vertWeight = mesh.VertexWeights[face.Indices[index]];
             var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights, (First, Second) => (First, Second)).Where(vw => vw.Second > 0).ToArray();
@@ -259,7 +259,8 @@ namespace AoMEngineLibrary.Graphics.Grn
                     // Remove everything after first parenthesis
                     string imageFile = Path.GetFileName(texture.FileName);
                     int parenthIndex = imageFile.IndexOf('(');
-                    imageFile = imageFile.Remove(parenthIndex);
+                    if (parenthIndex >= 0)
+                        imageFile = imageFile.Remove(parenthIndex);
 
                     // Create a memory image
                     MemoryImage memImage;
