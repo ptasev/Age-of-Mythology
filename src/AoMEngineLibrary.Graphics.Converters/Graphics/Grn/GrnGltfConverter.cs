@@ -28,7 +28,6 @@ namespace AoMEngineLibrary.Graphics.Grn
     public class GrnGltfConverter
     {
         private const string TrackName = "Default";
-        private static readonly byte[] blankImageData;
         private static readonly Matrix4x4 RotX90N;
         private static readonly Quaternion RotX90NQuat;
 
@@ -36,24 +35,6 @@ namespace AoMEngineLibrary.Graphics.Grn
         {
             RotX90N = Matrix4x4.CreateRotationX(MathF.PI * -0.5f);
             RotX90NQuat = Quaternion.CreateFromRotationMatrix(RotX90N);
-
-            // Create 4x4 white texture;
-            var ddsBlank = new DdsFile();
-            ddsBlank.header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT | DdsHeader.Flags.DDSD_LINEARSIZE;
-            ddsBlank.header.height = 4;
-            ddsBlank.header.width = 4;
-            ddsBlank.header.pitchOrLinearSize = 8;
-            ddsBlank.header.depth = 1;
-            ddsBlank.header.mipMapCount = 1;
-            ddsBlank.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-            ddsBlank.header.ddspf.fourCC = 827611204; // DXT1
-            ddsBlank.bdata = new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0 };
-            using (var ms = new MemoryStream())
-            {
-                ddsBlank.Write(ms);
-                ms.Flush();
-                blankImageData = ms.ToArray();
-            }
         }
 
         public GrnGltfConverter()

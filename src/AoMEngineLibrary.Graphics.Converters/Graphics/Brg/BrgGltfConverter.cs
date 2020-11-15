@@ -1,5 +1,4 @@
-﻿using AoMEngineLibrary.Graphics.Dds;
-using SharpGLTF.Animations;
+﻿using SharpGLTF.Animations;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
@@ -41,38 +40,20 @@ namespace AoMEngineLibrary.Graphics.Brg
     public class BrgGltfConverter
     {
         private const string TrackName = "Default";
-        private readonly byte[] blankImageData;
 
         public BrgGltfConverter()
         {
-            // Create 4x4 white texture;
-            var ddsBlank = new DdsFile();
-            ddsBlank.header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT | DdsHeader.Flags.DDSD_LINEARSIZE;
-            ddsBlank.header.height = 4;
-            ddsBlank.header.width = 4;
-            ddsBlank.header.pitchOrLinearSize = 8;
-            ddsBlank.header.depth = 1;
-            ddsBlank.header.mipMapCount = 1;
-            ddsBlank.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-            ddsBlank.header.ddspf.fourCC = 827611204; // DXT1
-            ddsBlank.bdata = new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0 };
-            using (var ms = new MemoryStream())
-            {
-                ddsBlank.Write(ms);
-                ms.Flush();
-                blankImageData = ms.ToArray();
-            }
         }
 
-        public ModelRoot Convert(BrgFile brg, TextureManager textureManager)
+        public ModelRoot Convert(BrgFile brg, BrgGltfParameters parameters, TextureManager textureManager)
         {
             var sceneBuilder = new SceneBuilder();
-            var rootNodeBuilder = new NodeBuilder("root");
+            var rootNodeBuilder = new NodeBuilder($"{parameters.ModelName}Container");
 
             Dictionary<int, MaterialBuilder> matIdMatBuilderMap = new Dictionary<int, MaterialBuilder>();
             ConvertMaterials(brg, textureManager, matIdMatBuilderMap);
 
-            ConvertMeshes(brg, sceneBuilder, rootNodeBuilder, matIdMatBuilderMap);
+            ConvertMeshes(brg, parameters, sceneBuilder, rootNodeBuilder, matIdMatBuilderMap);
 
             ConvertAttachpoints(brg, sceneBuilder, rootNodeBuilder);
 
@@ -229,14 +210,14 @@ namespace AoMEngineLibrary.Graphics.Brg
             return mat;
         }
 
-        private void ConvertMeshes(BrgFile brg, SceneBuilder sceneBuilder, NodeBuilder nodeBuilder, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
+        private void ConvertMeshes(BrgFile brg, BrgGltfParameters parameters, SceneBuilder sceneBuilder, NodeBuilder nodeBuilder, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
         {
             var primitives = from face in brg.Meshes[0].Faces
                              group face by face.MaterialIndex into faceGroup
                              select (Material: matIdMatBuilderMap[faceGroup.Key], Faces: faceGroup.ToList());
 
             IMeshBuilder<MaterialBuilder> mb = CreateMeshBuilder(brg.Meshes[0].Header.Flags);
-            mb.Name = "brgMesh";
+            mb.Name = $"{parameters.ModelName}Mesh";
             ConvertMesh(brg.Meshes[0], primitives, mb);
 
             if (brg.Meshes.Count > 1)
@@ -255,7 +236,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
 
                 // Create the node with morphing
-                var nb = nodeBuilder.CreateNode("brgModel");
+                var nb = nodeBuilder.CreateNode($"{parameters.ModelName}Model");
                 var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
                 instBuilder.Content.UseMorphing().Value = SparseWeight8.Create(0);
 
@@ -270,7 +251,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             else
             {
                 // Create the node
-                var nb = nodeBuilder.CreateNode("brgModel");
+                var nb = nodeBuilder.CreateNode($"{parameters.ModelName}Model");
                 var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
             }
         }

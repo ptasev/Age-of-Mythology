@@ -207,19 +207,21 @@ namespace AoMModelEditor.Models
         private void ExportBrgToGltf(string filePath)
         {
             var brg = GetBrg();
+            var parms = new BrgGltfParameters()
+            {
+                ModelName = Path.GetFileNameWithoutExtension(filePath)
+            };
 
-            // Assuming single-threaded brg will not be null here since IsBrg already checked
             BrgGltfConverter conv = new BrgGltfConverter();
-            var gltf = conv.Convert(brg, _textureManager);
+            var gltf = conv.Convert(brg, parms, _textureManager);
             gltf.Save(filePath);
         }
         private void ExportGrnToGltf(string filePath)
         {
             var grn = GetGrn();
 
-            // Assuming single-threaded grn will not be null here since IsBrg already checked
             GrnGltfConverter conv = new GrnGltfConverter();
-            var gltf = conv.Convert(grn);
+            var gltf = conv.Convert(grn, _textureManager);
             gltf.Save(filePath);
         }
 
