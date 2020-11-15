@@ -63,9 +63,7 @@ namespace AoMEngineLibrary.Graphics.Grn
         private NodeBuilder?[] ConvertSkeleton(GrnFile grn)
         {
             var mb = CreateBoneMesh();
-            var rootNodeBuilder = new NodeBuilder("__GrnGltfContainer");
             var nodeBuilders = new NodeBuilder?[grn.Bones.Count];
-            nodeBuilders[0] = rootNodeBuilder;
 
             // The parent index will always be higher than the child index
             for (int i = 0; i < grn.Bones.Count; ++i)
@@ -77,8 +75,17 @@ namespace AoMEngineLibrary.Graphics.Grn
                 // Skip bones with the same name as the mesh since the mesh will create its own node
                 if (!grn.Meshes.Exists(m => m.Name == bone.Name))
                 {
-                    var parent = nodeBuilders[bone.ParentIndex] ?? throw new InvalidDataException($"The parent of bone {bone.Name} cannot be null.");
-                    NodeBuilder node = parent.CreateNode(bone.Name);
+                    NodeBuilder node;
+                    if (bone.ParentIndex == 0)
+                    {
+                        // bones that have root as parent now become top-level nodes
+                        node = new NodeBuilder(bone.Name);
+                    }
+                    else
+                    {
+                        var parent = nodeBuilders[bone.ParentIndex] ?? throw new InvalidDataException($"The parent of bone {bone.Name} cannot be null.");
+                        node = parent.CreateNode(bone.Name);
+                    }
                     ConvertBone(bone, node);
                     nodeBuilders[i] = node;
 

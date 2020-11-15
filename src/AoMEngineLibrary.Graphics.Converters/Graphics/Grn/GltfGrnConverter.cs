@@ -33,18 +33,9 @@ namespace AoMEngineLibrary.Graphics.Grn
             // We'll only export the default scene and first animation in the list
             var anim = model.LogicalAnimations.Count > 0 ? model.LogicalAnimations[0] : null;
 
-            // Get a list of nodes in the default scene, and ignore the container if it exists
+            // Get a list of nodes in the default scene as a flat list
             Dictionary<int, int> nodeBoneIndexMap = new Dictionary<int, int>();
             var nodeFlatList = Node.Flatten(model.DefaultScene);
-            var gltfContainerNode = model.DefaultScene.FindNode(n => n.Name == "__GrnGltfContainer");
-            if (gltfContainerNode != null)
-            {
-                if (gltfContainerNode.VisualParent != null)
-                    throw new InvalidDataException("__GrnGltfContainer must be a root node of the scene. It should not be modified as it will be removed during conversion.");
-
-                nodeFlatList = nodeFlatList.Skip(1);
-                nodeBoneIndexMap.Add(gltfContainerNode.LogicalIndex, 0);
-            }
             var nodes = nodeFlatList.ToList();
 
             ConvertSkeleton(grn, nodes, nodeBoneIndexMap);
