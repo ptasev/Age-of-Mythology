@@ -537,6 +537,10 @@
                 return string.Empty;
             }
         }
+        public void SetDataExtensionObjectName(int dataExtensionIndex, string objectName)
+        {
+            this.SetDataExtensionProperty(dataExtensionIndex, "__ObjectName", objectName);
+        }
         public void SetDataExtensionFileName(int dataExtensionIndex, string value)
         {
             this.SetDataExtensionProperty(dataExtensionIndex, "__FileName", value);
@@ -555,7 +559,7 @@
 
         public void SetAnimation(GrnFile animationFile)
         {
-            if (animationFile.Animation.Duration <= 0) throw new InvalidOperationException("Can't set the animation from grn with no animaton.");
+            if (animationFile.Animation.Duration <= 0) throw new InvalidOperationException("Can't set the animation from grn with no animation.");
 
             this.Animation.Duration = animationFile.Animation.Duration;
             var boneTracks = new GrnBoneTrack?[this.Bones.Count];

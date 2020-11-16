@@ -25,12 +25,6 @@ namespace AoMModelEditor.Models.Grn
         public string TextureName
         {
             get => _tex.Name;
-            set
-            {
-                //_tex.Name = value;
-                this.RaisePropertyChanged(nameof(TextureName));
-                this.RaisePropertyChanged(nameof(Name));
-            }
         }
 
         public int Width
@@ -48,8 +42,12 @@ namespace AoMModelEditor.Models.Grn
             get => Path.GetFileName(_tex.FileName);
             set
             {
-                //_tex.FileName = Path.GetFileName(value);
+                var fileName = Path.GetFileName(value);
+                _tex.ParentFile.SetDataExtensionFileName(_tex.DataExtensionIndex, fileName);
+                _tex.ParentFile.SetDataExtensionObjectName(_tex.DataExtensionIndex, Path.GetFileNameWithoutExtension(fileName));
                 this.RaisePropertyChanged(nameof(FileName));
+                this.RaisePropertyChanged(nameof(TextureName));
+                this.RaisePropertyChanged(nameof(Name));
             }
         }
 

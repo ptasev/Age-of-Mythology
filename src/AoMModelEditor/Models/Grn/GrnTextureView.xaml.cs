@@ -47,7 +47,7 @@ namespace AoMModelEditor.Models.Grn
                     view => view.heightTextBox.Text)
                     .DisposeWith(disposableRegistration);
 
-                this.OneWayBind(ViewModel,
+                this.Bind(ViewModel,
                     v => v.FileName,
                     view => view.texFileNameTextBox.Text)
                     .DisposeWith(disposableRegistration);
