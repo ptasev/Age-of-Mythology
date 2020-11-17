@@ -27,7 +27,9 @@
                 <MenuItem x:Name="exportGltfMenuItem" Header="_Export as GLTF"></MenuItem>
                 <MenuItem x:Name="importGltfBrgMenuItem" Header="_Import GLTF as BRG"></MenuItem>
                 <MenuItem x:Name="importGltfGrnMenuItem" Header="Import GLTF as _GRN"></MenuItem>
+                <Separator/>
                 <MenuItem x:Name="exportBrgMtrlFilesMenuItem" Header="Export Brg _Mtrl Files"></MenuItem>
+                <MenuItem x:Name="applyGrnAnimationMenuItem" Header="_Apply Grn Animation"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Website" Name="websiteMenuItem"></MenuItem>

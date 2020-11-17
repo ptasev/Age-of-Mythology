@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Windows;
 
 namespace AoMModelEditor.Models
@@ -29,7 +30,8 @@ namespace AoMModelEditor.Models
         private readonly BrgSettingsViewModel _brgSettingsViewModel;
         private readonly GrnSettingsViewModel _grnSettingsViewModel;
 
-        public bool IsBrg { get; private set; }
+        public bool IsBrg => _brg != null;
+        private bool IsGrn => _grn != null;
 
         private ObservableCollection<IModelObject> _modelObjects;
         public IEnumerable<IModelObject> ModelObjects => _modelObjects;
@@ -38,6 +40,7 @@ namespace AoMModelEditor.Models
         public ReactiveCommand<Unit, Unit> ImportGltfBrgCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportGltfGrnCommand { get; }
         public ReactiveCommand<Unit, Unit> ExportBrgMtrlFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApplyGrnAnimationCommand { get; }
 
         public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService)
         {
@@ -53,6 +56,8 @@ namespace AoMModelEditor.Models
             ImportGltfGrnCommand = ReactiveCommand.Create(ImportGltfToGrn);
             ExportBrgMtrlFilesCommand = ReactiveCommand.Create(ExportBrgMtrlFiles,
                 this.WhenAnyValue(vm => vm.IsBrg));
+            ApplyGrnAnimationCommand = ReactiveCommand.Create(ApplyGrnAnimation,
+                this.WhenAnyValue(vm => vm.IsGrn));
         }
 
         public BrgFile GetBrg()
@@ -90,8 +95,8 @@ namespace AoMModelEditor.Models
                 _modelObjects.Clear();
                 _brg = brg;
                 _grn = null;
-                IsBrg = true;
                 this.RaisePropertyChanged(nameof(IsBrg));
+                this.RaisePropertyChanged(nameof(IsGrn));
 
                 _modelObjects.Add(_brgSettingsViewModel);
 
@@ -130,8 +135,8 @@ namespace AoMModelEditor.Models
                 _modelObjects.Clear();
                 _brg = null;
                 _grn = grn;
-                IsBrg = false;
                 this.RaisePropertyChanged(nameof(IsBrg));
+                this.RaisePropertyChanged(nameof(IsGrn));
 
                 _modelObjects.Add(_grnSettingsViewModel);
 
@@ -278,7 +283,7 @@ namespace AoMModelEditor.Models
             {
                 var brg = GetBrg();
 
-                var ofd = _fileDialogService.GetModelSaveFileDialog();
+                var ofd = _fileDialogService.GetModelOpenFileDialog();
                 var sfd = _fileDialogService.GetModelSaveFileDialog();
                 var brgFilePath = sfd.FileName ?? ofd.FileName ?? string.Empty;
                 var brgFolderPath = Path.GetDirectoryName(brgFilePath);
@@ -313,6 +318,33 @@ namespace AoMModelEditor.Models
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to export brg mtrl files.{Environment.NewLine}{ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            }
+        }
+
+        private void ApplyGrnAnimation()
+        {
+            try
+            {
+                var grn = GetGrn();
+
+                var ofd = _fileDialogService.GetModelOpenFileDialog();
+                ofd.Filter = "Grn files (*.grn)|*.grn|All files (*.*)|*.*";
+
+                var dr = ofd.ShowDialog();
+                if (dr.HasValue && dr == true)
+                {
+                    using (var fs = File.Open(ofd.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var animGrn = new GrnFile();
+                        animGrn.Read(fs);
+                        grn.SetAnimation(animGrn);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to apply grn animation.{Environment.NewLine}{ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }

@@ -69,6 +69,11 @@ namespace AoMModelEditor
                     v => v.ModelsViewModel.ExportBrgMtrlFilesCommand,
                     view => view.exportBrgMtrlFilesMenuItem)
                     .DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                    v => v.ModelsViewModel.ApplyGrnAnimationCommand,
+                    view => view.applyGrnAnimationMenuItem)
+                    .DisposeWith(disposableRegistration);
             });
         }
     }
