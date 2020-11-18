@@ -14,7 +14,6 @@ namespace AoMModelEditor
 {
     public class MainViewModel : ReactiveObject
     {
-        private string _lastFilePath;
         private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
 
@@ -32,12 +31,12 @@ namespace AoMModelEditor
             _appSettings.Read();
 
             _fileDialogService = new FileDialogService();
-            _lastFilePath = string.Empty;
 
             ModelsViewModel = new ModelsViewModel(_appSettings, _fileDialogService);
 
             OpenCommand = ReactiveCommand.Create(Open);
-            SaveCommand = ReactiveCommand.Create(Save);
+            SaveCommand = ReactiveCommand.Create(Save,
+                ModelsViewModel.WhenAnyValue(vm => vm.IsBrg, vm => vm.IsGrn, (b, g) => b || g));
         }
 
         private void Open()
@@ -64,7 +63,6 @@ namespace AoMModelEditor
                 if (dr.HasValue && dr == true)
                 {
                     ModelsViewModel.Load(ofd.FileName);
-                    _lastFilePath = ofd.FileName;
                     Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(ofd.FileName);
                 }
             }
@@ -80,6 +78,7 @@ namespace AoMModelEditor
             try
             {
                 var sfd = _fileDialogService.GetModelSaveFileDialog();
+                var openFilePath = _fileDialogService.GetModelOpenFileDialog().FileName;
 
                 if (ModelsViewModel.IsBrg)
                 {
@@ -90,23 +89,26 @@ namespace AoMModelEditor
                     sfd.Filter = "Grn files (*.grn)|*.grn|All files (*.*)|*.*";
                 }
 
+                // Setup starting directory and file name
                 if (!string.IsNullOrEmpty(_appSettings.SaveFileDialogFileName) && Directory.Exists(_appSettings.SaveFileDialogFileName))
                 {
                     sfd.InitialDirectory = _appSettings.SaveFileDialogFileName;
                 }
-                //else if (!string.IsNullOrEmpty(_lastFilePath))
-                //{
-                //    var lastDir = Path.GetDirectoryName(_lastFilePath);
-                //    if (Directory.Exists(lastDir))
-                //        sfd.InitialDirectory = lastDir;
-                //}
-                //sfd.FileName = Path.GetFileNameWithoutExtension(_lastFilePath);
+                else if (!string.IsNullOrEmpty(openFilePath))
+                {
+                    var lastDir = Path.GetDirectoryName(openFilePath);
+                    if (Directory.Exists(lastDir))
+                        sfd.InitialDirectory = lastDir;
+
+                    var lastFileName = Path.GetFileNameWithoutExtension(openFilePath);
+                    if (!string.IsNullOrEmpty(lastFileName))
+                        sfd.FileName = lastFileName;
+                }
 
                 var dr = sfd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
                     ModelsViewModel.Save(sfd.FileName);
-                    _lastFilePath = sfd.FileName;
                     Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(sfd.FileName);
                 }
             }

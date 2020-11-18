@@ -31,7 +31,7 @@ namespace AoMModelEditor.Models
         private readonly GrnSettingsViewModel _grnSettingsViewModel;
 
         public bool IsBrg => _brg != null;
-        private bool IsGrn => _grn != null;
+        public bool IsGrn => _grn != null;
 
         private ObservableCollection<IModelObject> _modelObjects;
         public IEnumerable<IModelObject> ModelObjects => _modelObjects;
