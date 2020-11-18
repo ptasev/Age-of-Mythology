@@ -36,6 +36,7 @@ namespace AoMModelEditor.Settings
                 {
                     XmlDocument settings = new XmlDocument();
                     settings.Load(fs);
+                    if (settings.DocumentElement is null) return;
                     foreach (XmlElement? elem in settings.DocumentElement)
                     {
                         if (elem is null) continue;

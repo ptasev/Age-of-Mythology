@@ -28,7 +28,7 @@
                             </Grid.RowDefinitions>
 
                             <Label Content="Name" Margin="0 0 5 0" Grid.Row="0" Grid.Column="0"/>
-                            <TextBox x:Name="texNameTextBox" Width="200" Margin="0 0 5 0" VerticalContentAlignment="Center" Grid.Row="0" Grid.Column="1"/>
+                            <TextBox x:Name="texNameTextBox" Width="200" Margin="0 0 5 0" IsReadOnly="True" VerticalContentAlignment="Center" Grid.Row="0" Grid.Column="1"/>
                             <Label Content="Width" Margin="0 0 5 0" Grid.Row="0" Grid.Column="2"/>
                             <TextBox x:Name="widthTextBox" Width="40" Margin="0 0 5 0" VerticalContentAlignment="Center" Grid.Row="0" Grid.Column="3"/>
                             <Label Content="Height" Margin="0 0 5 0" Grid.Row="0" Grid.Column="4"/>
