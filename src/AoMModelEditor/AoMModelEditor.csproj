@@ -5,10 +5,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
+    <AssemblyName>AoM Model Editor</AssemblyName>
+    <ApplicationIcon>Resources\Anubite.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="app_settings.xml" />
+    <None Remove="Resources\OpenFile_16x.png" />
+    <None Remove="Resources\SaveAs_16x.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +30,11 @@
   <ItemGroup>
     <ProjectReference Include="..\AoMEngineLibrary.Graphics.Converters\AoMEngineLibrary.Graphics.Converters.csproj" />
     <ProjectReference Include="..\AoMEngineLibrary\AoMEngineLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\OpenFile_16x.png" />
+    <Resource Include="Resources\SaveAs_16x.png" />
   </ItemGroup>
 
   <ItemGroup>
