@@ -4,12 +4,8 @@ using System.Collections.ObjectModel;
 
 namespace AoMModelEditor.Models.Grn
 {
-    public class GrnSettingsViewModel : ReactiveObject, IModelObject
+    public class GrnSettingsViewModel : TreeViewItemModelObject
     {
-        public string Name { get; }
-
-        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
-
         private bool _convertMeshes;
         public bool ConvertMeshes
         {
@@ -33,6 +29,7 @@ namespace AoMModelEditor.Models.Grn
         }
 
         public GrnSettingsViewModel()
+            : base()
         {
             Name = "Grn Settings";
             ConvertMeshes = true;

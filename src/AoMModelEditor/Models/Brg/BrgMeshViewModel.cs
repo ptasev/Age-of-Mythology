@@ -8,21 +8,10 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Brg
 {
-    public class BrgMeshViewModel : ReactiveObject, IModelObject
+    public class BrgMeshViewModel : TreeViewItemModelObject
     {
         private readonly BrgFile _brg;
         private readonly BrgMesh _mesh;
-
-        public string Name => "Mesh";
-
-        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
-
-        private bool _isSelected;
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set => this.RaiseAndSetIfChanged(ref _isSelected, value);
-        }
 
         public int VertexCount
         {
@@ -146,9 +135,11 @@ namespace AoMModelEditor.Models.Brg
         }
 
         public BrgMeshViewModel(BrgFile brg, BrgMesh mesh)
+            : base()
         {
             _brg = brg;
             _mesh = mesh;
+            Name = "Mesh";
         }
     }
 }

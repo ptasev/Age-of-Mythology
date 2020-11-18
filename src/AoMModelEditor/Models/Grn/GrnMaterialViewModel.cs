@@ -1,32 +1,23 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Grn;
+﻿using AoMEngineLibrary.Graphics.Grn;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace AoMModelEditor.Models.Grn
 {
-    public class GrnMaterialViewModel : ReactiveObject, IModelObject
+    public class GrnMaterialViewModel : TreeViewItemModelObject
     {
         private GrnMaterial _mat;
 
-        public string Name
+        public override string Name
         {
             get => string.IsNullOrEmpty(_mat.Name) ? "Material" : $"Mat {_mat.Name}";
         }
-
-        public ObservableCollection<IModelObject> Children { get; }
 
         public string MaterialName
         {
             get => _mat.Name;
             set
             {
-                //_mat.Name = value;
+                _mat.ParentFile.SetDataExtensionObjectName(_mat.DataExtensionIndex, value);
                 this.RaisePropertyChanged(nameof(MaterialName));
                 this.RaisePropertyChanged(nameof(Name));
             }
@@ -38,10 +29,10 @@ namespace AoMModelEditor.Models.Grn
         }
 
         public GrnMaterialViewModel(GrnMaterial material)
+            : base()
         {
             _mat = material;
 
-            Children = new ObservableCollection<IModelObject>();
             var tex = _mat.DiffuseTexture;
             if (tex != null)
             {

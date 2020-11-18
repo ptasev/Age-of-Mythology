@@ -5,12 +5,8 @@ using System.Collections.ObjectModel;
 
 namespace AoMModelEditor.Models.Brg
 {
-    public class BrgSettingsViewModel : ReactiveObject, IModelObject
+    public class BrgSettingsViewModel : TreeViewItemModelObject
     {
-        public string Name { get; }
-
-        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
-
         private float _sampleRateFps;
         public float SampleRateFps
         {
@@ -25,6 +21,7 @@ namespace AoMModelEditor.Models.Brg
         }
 
         public BrgSettingsViewModel()
+            : base()
         {
             Name = "Brg Settings";
             _sampleRateFps = 10.0f;

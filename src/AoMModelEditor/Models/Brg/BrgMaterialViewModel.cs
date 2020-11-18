@@ -8,16 +8,14 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Brg
 {
-    public class BrgMaterialViewModel : ReactiveObject, IModelObject
+    public class BrgMaterialViewModel : TreeViewItemModelObject
     {
         private BrgMaterial _mat;
 
-        public string Name
+        public override string Name
         {
             get => string.IsNullOrEmpty(_mat.DiffuseMapName) ? "Material" : $"Mat {_mat.DiffuseMapName}";
         }
-
-        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
 
         public BrgMatFlag Flags
         {
@@ -137,6 +135,7 @@ namespace AoMModelEditor.Models.Brg
         }
 
         public BrgMaterialViewModel(BrgMaterial mat)
+            : base()
         {
             _mat = mat;
         }

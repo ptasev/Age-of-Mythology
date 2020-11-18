@@ -8,14 +8,10 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Brg
 {
-    public class BrgDummyViewModel : ReactiveObject, IModelObject
+    public class BrgDummyViewModel : TreeViewItemModelObject
     {
         private readonly List<BrgAttachpoint> _dummies;
         private BrgAttachpoint _dummy;
-
-        public string Name { get; }
-
-        public ObservableCollection<IModelObject> Children => new ObservableCollection<IModelObject>();
 
         private int _frame;
         public int Frame
@@ -76,6 +72,7 @@ namespace AoMModelEditor.Models.Brg
         }
 
         public BrgDummyViewModel(List<BrgAttachpoint> dummies)
+            : base()
         {
             _dummies = dummies;
             _dummy = dummies[0];

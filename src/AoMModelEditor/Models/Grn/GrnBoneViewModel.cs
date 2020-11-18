@@ -10,13 +10,9 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Grn
 {
-    public class GrnBoneViewModel : ReactiveObject, IModelObject
+    public class GrnBoneViewModel : TreeViewItemModelObject
     {
         private readonly GrnBone _bone;
-
-        public string Name { get; }
-
-        public ObservableCollection<IModelObject> Children { get; }
 
         public Vector3 Position
         {
@@ -29,12 +25,12 @@ namespace AoMModelEditor.Models.Grn
         }
 
         public GrnBoneViewModel(GrnFile grn, int boneIndex)
+            : base()
         {
             var bone = grn.Bones[boneIndex];
             _bone = bone;
             Name = bone.Name;
 
-            Children = new ObservableCollection<IModelObject>();
             for (int i = 0; i < grn.Bones.Count; ++i)
             {
                 var child = grn.Bones[i];

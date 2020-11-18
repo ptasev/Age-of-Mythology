@@ -100,9 +100,11 @@ namespace AoMModelEditor.Models
 
                 _modelObjects.Add(_brgSettingsViewModel);
 
+                BrgMeshViewModel? meshVM = null;
                 if (brg.Meshes.Count > 0)
                 {
-                    _modelObjects.Add(new BrgMeshViewModel(brg, brg.Meshes[0]));
+                    meshVM = new BrgMeshViewModel(brg, brg.Meshes[0]);
+                    _modelObjects.Add(meshVM);
                 }
 
                 foreach (var mat in brg.Materials)
@@ -117,6 +119,11 @@ namespace AoMModelEditor.Models
                         _modelObjects.Add(new BrgDummyViewModel(brg.Meshes.Select(m => m.Attachpoints[i]).ToList()));
                     }
                 }
+
+                if (!(meshVM is null))
+                    meshVM.IsSelected = true;
+                else
+                    _brgSettingsViewModel.IsSelected = true;
             }
         }
         private void LoadGrn(string filePath)
@@ -140,7 +147,8 @@ namespace AoMModelEditor.Models
 
                 _modelObjects.Add(_grnSettingsViewModel);
 
-                _modelObjects.Add(new GrnStatsViewModel(grn));
+                var statsVM = new GrnStatsViewModel(grn);
+                _modelObjects.Add(statsVM);
 
                 if (grn.Meshes.Count > 0)
                 {
@@ -156,6 +164,8 @@ namespace AoMModelEditor.Models
                 {
                     _modelObjects.Add(new GrnMaterialViewModel(mat));
                 }
+
+                statsVM.IsSelected = true;
             }
         }
 

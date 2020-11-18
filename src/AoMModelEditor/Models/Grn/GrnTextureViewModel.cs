@@ -1,26 +1,17 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Grn;
+﻿using AoMEngineLibrary.Graphics.Grn;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace AoMModelEditor.Models.Grn
 {
-    public class GrnTextureViewModel : ReactiveObject, IModelObject
+    public class GrnTextureViewModel : TreeViewItemModelObject
     {
         private GrnTexture _tex;
 
-        public string Name
+        public override string Name
         {
             get => string.IsNullOrEmpty(_tex.Name) ? "Texture" : $"Tex {_tex.Name}";
         }
-
-        public ObservableCollection<IModelObject> Children { get; }
 
         public string TextureName
         {
@@ -52,10 +43,9 @@ namespace AoMModelEditor.Models.Grn
         }
 
         public GrnTextureViewModel(GrnTexture texture)
+            : base()
         {
             _tex = texture;
-
-            Children = new ObservableCollection<IModelObject>();
         }
     }
 }

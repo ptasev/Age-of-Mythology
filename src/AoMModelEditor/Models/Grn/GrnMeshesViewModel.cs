@@ -10,15 +10,8 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Grn
 {
-    public class GrnMeshesViewModel : ReactiveObject, IModelObject
+    public class GrnMeshesViewModel : TreeViewItemModelObject
     {
-        public string Name
-        {
-            get => "Meshes";
-        }
-
-        public ObservableCollection<IModelObject> Children { get; }
-
         public ObservableCollection<GrnMeshViewModel> Meshes { get; }
 
         public int VertexCount { get; }
@@ -26,9 +19,9 @@ namespace AoMModelEditor.Models.Grn
         public int FaceCount { get; }
 
         public GrnMeshesViewModel(List<GrnMesh> meshes)
+            : base()
         {
-            Children = new ObservableCollection<IModelObject>();
-
+            Name = "Meshes";
             VertexCount = 0;
             FaceCount = 0;
             Meshes = new ObservableCollection<GrnMeshViewModel>();

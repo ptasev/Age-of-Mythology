@@ -10,16 +10,9 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Grn
 {
-    public class GrnStatsViewModel : ReactiveObject, IModelObject
+    public class GrnStatsViewModel : TreeViewItemModelObject
     {
         private readonly GrnFile _grn;
-
-        public string Name
-        {
-            get => "Grn Statistics";
-        }
-
-        public ObservableCollection<IModelObject> Children { get; }
 
         public int VertexCount { get; private set; }
 
@@ -34,9 +27,10 @@ namespace AoMModelEditor.Models.Grn
         public float AnimationDuration { get; private set; }
 
         public GrnStatsViewModel(GrnFile grn)
+            : base()
         {
             _grn = grn;
-            Children = new ObservableCollection<IModelObject>();
+            Name = "Grn Statistics";
 
             Update();
         }
