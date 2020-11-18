@@ -140,6 +140,8 @@ namespace AoMModelEditor.Models
 
                 _modelObjects.Add(_grnSettingsViewModel);
 
+                _modelObjects.Add(new GrnStatsViewModel(grn));
+
                 if (grn.Meshes.Count > 0)
                 {
                     _modelObjects.Add(new GrnMeshesViewModel(grn.Meshes));
@@ -340,6 +342,9 @@ namespace AoMModelEditor.Models
                         animGrn.Read(fs);
                         grn.SetAnimation(animGrn);
                     }
+
+                    var statsVM = _modelObjects.FirstOrDefault(x => x is GrnStatsViewModel) as GrnStatsViewModel;
+                    statsVM?.Update();
                 }
             }
             catch (Exception ex)
