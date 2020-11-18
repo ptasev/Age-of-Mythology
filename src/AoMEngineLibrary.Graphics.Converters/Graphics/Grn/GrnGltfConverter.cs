@@ -1,5 +1,4 @@
-﻿using AoMEngineLibrary.Graphics.Dds;
-using SharpGLTF.Geometry;
+﻿using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
@@ -236,9 +235,11 @@ namespace AoMEngineLibrary.Graphics.Grn
                 var mb = new MaterialBuilder(mat.Name);
                 mb.WithMetallicRoughnessShader();
                 var cb = mb.UseChannel(KnownChannel.MetallicRoughness);
-                cb.Parameter = new Vector4(0.2f, 0.5f, 0, 0);
+                cb.Parameter = new Vector4(0.1f, 0.5f, 0, 0);
                 cb = mb.UseChannel(KnownChannel.BaseColor);
+                cb.Parameter = new Vector4(0.5f, 0.5f, 0.5f, 1);
 
+                mb.WithAlpha(SharpGLTF.Materials.AlphaMode.OPAQUE);
                 if (textureImageMap.ContainsKey(mat.DiffuseTexture))
                 {
                     MemoryImage memImage = textureImageMap[mat.DiffuseTexture];

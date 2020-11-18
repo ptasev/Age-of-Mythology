@@ -337,7 +337,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                     var mb = new MaterialBuilder(GetMaterialNameWithFlags(brgMat));
                     mb.WithMetallicRoughnessShader();
                     var cb = mb.UseChannel(KnownChannel.MetallicRoughness);
-                    cb.Parameter = new Vector4(0.2f, 0.5f, 0, 0);
+                    cb.Parameter = new Vector4(0.1f, 0.5f, 0, 0);
                     cb = mb.UseChannel(KnownChannel.BaseColor);
                     cb.Parameter = new Vector4(brgMat.DiffuseColor, brgMat.Opacity);
 
@@ -357,15 +357,22 @@ namespace AoMEngineLibrary.Graphics.Brg
                         mb.DoubleSided = true;
                     }
 
-                    // TODO: add all the transforms as mask
-                    //if (brgMat.Flags.HasFlag(BrgMatFlag.PixelXForm1))
-                    //{
-                    //    mb.WithAlpha(SharpGLTF.Materials.AlphaMode.MASK);
-                    //}
-                    //else
-                    //{
-                    //    mb.WithAlpha(SharpGLTF.Materials.AlphaMode.OPAQUE);
-                    //}
+                    // TODO: Figure out alpha mode based on material and texture info
+                    if (brgMat.Flags.HasFlag(BrgMatFlag.PixelXForm1) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PixelXForm1) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PixelXForm2) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor1) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx1) ||
+                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2))
+                    {
+                        mb.WithAlpha(SharpGLTF.Materials.AlphaMode.OPAQUE);
+                    }
+                    else
+                    {
+                        mb.WithAlpha(SharpGLTF.Materials.AlphaMode.BLEND);
+                    }
 
                     matIdMatBuilderMap.Add(brgMat.Id, mb);
                 }
