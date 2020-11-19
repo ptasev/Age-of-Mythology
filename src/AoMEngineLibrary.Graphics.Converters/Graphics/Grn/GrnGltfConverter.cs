@@ -239,15 +239,28 @@ namespace AoMEngineLibrary.Graphics.Grn
                 cb = mb.UseChannel(KnownChannel.BaseColor);
                 cb.Parameter = new Vector4(0.5f, 0.5f, 0.5f, 1);
 
-                mb.WithAlpha(SharpGLTF.Materials.AlphaMode.OPAQUE);
+                Texture? tex = null;
                 if (textureImageMap.ContainsKey(mat.DiffuseTexture))
                 {
-                    MemoryImage memImage = textureImageMap[mat.DiffuseTexture];
+                    var texData = textureImageMap[mat.DiffuseTexture];
+                    MemoryImage memImage = texData.Image;
+                    tex = texData.Texture;
 
                     var tb = cb.UseTexture();
                     tb.WrapS = TextureWrapMode.REPEAT;
                     tb.WrapT = TextureWrapMode.REPEAT;
                     tb.WithPrimaryImage(memImage);
+                }
+
+                if (mat.Name.Contains("xform", StringComparison.InvariantCultureIgnoreCase) ||
+                    Path.GetFileName(mat.DiffuseTexture.FileName).Contains("xform", StringComparison.InvariantCultureIgnoreCase) ||
+                    !(tex?.AlphaTest ?? true))
+                {
+                    mb.WithAlpha(SharpGLTF.Materials.AlphaMode.OPAQUE);
+                }
+                else
+                {
+                    mb.WithAlpha(SharpGLTF.Materials.AlphaMode.MASK);
                 }
 
                 matIdMatBuilderMap.Add(i, mb);
@@ -256,9 +269,9 @@ namespace AoMEngineLibrary.Graphics.Grn
             return matIdMatBuilderMap;
         }
 
-        private Dictionary<GrnTexture, MemoryImage> ConvertTextures(GrnFile grn, TextureManager textureManager)
+        private Dictionary<GrnTexture, (MemoryImage Image, Texture? Texture)> ConvertTextures(GrnFile grn, TextureManager textureManager)
         {
-            var textureImageMap = new Dictionary<GrnTexture, MemoryImage>();
+            var textureImageMap = new Dictionary<GrnTexture, (MemoryImage Image, Texture? Texture)>();
             for (int i = 0; i < grn.Textures.Count; ++i)
             {
                 var texture = grn.Textures[i];
@@ -272,13 +285,14 @@ namespace AoMEngineLibrary.Graphics.Grn
 
                     // Create a memory image
                     MemoryImage memImage;
+                    Texture? tex = null;
                     try
                     {
                         var filePath = textureManager.GetTexturePath(imageFile);
-                        var images = textureManager.GetTexture(filePath);
+                        tex = textureManager.GetTexture(filePath);
                         using (var ms = new MemoryStream())
                         {
-                            images[0][0].SaveAsPng(ms);
+                            tex.Images[0][0].SaveAsPng(ms);
                             memImage = new MemoryImage(ms.ToArray());
                         }
                     }
@@ -295,7 +309,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                         }
                     }
 
-                    textureImageMap.Add(texture, memImage);
+                    textureImageMap.Add(texture, (memImage, tex));
                 }
             }
 

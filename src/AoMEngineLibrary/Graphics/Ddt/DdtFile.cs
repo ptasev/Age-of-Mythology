@@ -42,8 +42,8 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 AlphaBits = reader.ReadByte();
                 Format = (DdtFormat)reader.ReadByte();
                 MipMapLevels = reader.ReadByte();
-                Height = reader.ReadInt32();
                 Width = reader.ReadInt32();
+                Height = reader.ReadInt32();
 
                 Bt8ImageInfo = new Bt8ImageInfo();
                 if (Format == DdtFormat.BT8)

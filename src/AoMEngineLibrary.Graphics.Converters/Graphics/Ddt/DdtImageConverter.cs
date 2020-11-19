@@ -9,7 +9,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
 {
     public class DdtImageConverter
     {
-        public Image[][] Convert(DdtFile ddt)
+        public Texture Convert(DdtFile ddt)
         {
             var numFaces = ddt.Properties.HasFlag(DdtProperty.CubeMap) ? 6 : 1;
             var images = new Image[numFaces][];
@@ -22,8 +22,8 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     images[face] = faceImages;
                     for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
                     {
-                        var width = ddt.Width >> mip;
-                        var height = ddt.Height >> mip;
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt1(ddt.Data[face][mip], width, height);
                         var image = Image.LoadPixelData<Bgr24>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
@@ -39,8 +39,8 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     images[face] = faceImages;
                     for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
                     {
-                        var width = ddt.Width >> mip;
-                        var height = ddt.Height >> mip;
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt1Alpha(ddt.Data[face][mip], width, height);
                         var image = Image.LoadPixelData<Bgra32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
@@ -56,8 +56,8 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     images[face] = faceImages;
                     for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
                     {
-                        var width = ddt.Width >> mip;
-                        var height = ddt.Height >> mip;
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt3(ddt.Data[face][mip], width, height);
                         var image = Image.LoadPixelData<Bgra32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
@@ -73,8 +73,8 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     images[face] = faceImages;
                     for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
                     {
-                        var width = ddt.Width >> mip;
-                        var height = ddt.Height >> mip;
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt5(ddt.Data[face][mip], width, height);
                         var image = Image.LoadPixelData<Bgra32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
@@ -87,7 +87,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 throw new NotImplementedException($"Converting ddt format {ddt.Format} to image not implemented.");
             }
 
-            return images;
+            return new Texture(images, !ddt.Properties.HasFlag(DdtProperty.NoAlphaTest));
         }
 
         private static int CalcBlocks(int pixels) => Math.Max(1, (pixels + 3) / 4);

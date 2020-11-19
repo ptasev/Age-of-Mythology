@@ -330,7 +330,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             foreach (var matGroup in uniqueTextures)
             {
                 string imageFile = matGroup.TexName;
-                MemoryImage memImage = CreateMemoryImage(imageFile, textureManager);
+                var texData = CreateMemoryImage(imageFile, textureManager);
 
                 foreach (var brgMat in matGroup.Materials)
                 {
@@ -346,7 +346,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                         var tb = cb.UseTexture();
                         tb.WrapS = brgMat.Flags.HasFlag(BrgMatFlag.WrapUTx1) ? TextureWrapMode.REPEAT : TextureWrapMode.CLAMP_TO_EDGE;
                         tb.WrapT = brgMat.Flags.HasFlag(BrgMatFlag.WrapVTx1) ? TextureWrapMode.REPEAT : TextureWrapMode.CLAMP_TO_EDGE;
-                        tb.WithPrimaryImage(memImage);
+                        tb.WithPrimaryImage(texData.Image);
                     }
 
                     cb = mb.UseChannel(KnownChannel.Emissive);
@@ -365,13 +365,14 @@ namespace AoMEngineLibrary.Graphics.Brg
                         brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2) ||
                         brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormColor2) ||
                         brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx1) ||
-                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2))
+                        brgMat.Flags.HasFlag(BrgMatFlag.PlayerXFormTx2) ||
+                        !(texData.Texture?.AlphaTest ?? true))
                     {
                         mb.WithAlpha(SharpGLTF.Materials.AlphaMode.OPAQUE);
                     }
                     else
                     {
-                        mb.WithAlpha(SharpGLTF.Materials.AlphaMode.BLEND);
+                        mb.WithAlpha(SharpGLTF.Materials.AlphaMode.MASK);
                     }
 
                     matIdMatBuilderMap.Add(brgMat.Id, mb);
@@ -427,17 +428,18 @@ namespace AoMEngineLibrary.Graphics.Brg
             return sb.ToString();
         }
 
-        private MemoryImage CreateMemoryImage(string imageFile, TextureManager textureManager)
+        private (MemoryImage Image, Texture? Texture) CreateMemoryImage(string imageFile, TextureManager textureManager)
         {
             MemoryImage memImage;
+            Texture? tex = null;
 
             try
             {
                 var filePath = textureManager.GetTexturePath(imageFile);
-                var images = textureManager.GetTexture(filePath);
+                tex = textureManager.GetTexture(filePath);
                 using (var ms = new MemoryStream())
                 {
-                    images[0][0].SaveAsPng(ms);
+                    tex.Images[0][0].SaveAsPng(ms);
                     memImage = new MemoryImage(ms.ToArray());
                 }
             }
@@ -454,7 +456,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
             }
 
-            return memImage;
+            return (memImage, tex);
         }
     }
 }

@@ -689,17 +689,13 @@ namespace AoMEngineLibrary.Graphics.Brg
             //}
             mat.DiffuseMapName = GetDiffuseTexture(glMat, out BrgMatFlag wrapFlags);
             int parenthIndex = mat.DiffuseMapName.IndexOf('(');
-            if (parenthIndex > 0)
+            if (parenthIndex >= 0)
             {
                 mat.DiffuseMapName = mat.DiffuseMapName.Remove(parenthIndex);
             }
             if (mat.DiffuseMapName.Length > 0)
             {
                 mat.Flags |= wrapFlags;
-                if (glMat.Alpha == AlphaMode.MASK)
-                {
-                    mat.Flags |= BrgMatFlag.PixelXForm1;
-                }
             }
 
             this.GetMaterialFlagsFromName(glMat, mat);

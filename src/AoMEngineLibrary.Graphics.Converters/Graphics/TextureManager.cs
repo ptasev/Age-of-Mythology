@@ -38,40 +38,40 @@ namespace AoMEngineLibrary.Graphics
             return string.Empty;
         }
 
-        public Image[][] GetTexture(string filePath)
+        public Texture GetTexture(string filePath)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"The texture was not found.", filePath);
 
             string extension = Path.GetExtension(filePath).ToLowerInvariant();
 
-            Image[][] images;
+            Texture tex;
             switch (extension)
             {
                 case ".ddt":
-                    images = LoadDdtTexture(filePath);
+                    tex = LoadDdtTexture(filePath);
                     break;
                 default:
                     throw new NotImplementedException($"Support for \"{extension}\" textures is not implemented.");
             }
 
-            if (images.Length == 0 || images[0].Length == 0)
+            if (tex.Images.Length == 0 || tex.Images[0].Length == 0)
             {
                 throw new InvalidDataException("Failed to load texture data from the file.");
             }
 
-            return images;
+            return tex;
         }
 
-        private Image[][] LoadDdtTexture(string filePath)
+        private Texture LoadDdtTexture(string filePath)
         {
             var ddt = new DdtFile();
             using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 ddt.Read(fs);
 
-            var images = _ddtImageConverter.Convert(ddt);
+            var tex = _ddtImageConverter.Convert(ddt);
 
-            return images;
+            return tex;
         }
     }
 }
