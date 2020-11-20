@@ -1,23 +1,33 @@
 ﻿using AoMModelEditor.Dialogs;
 using AoMModelEditor.Models;
 using AoMModelEditor.Settings;
-using Microsoft.Win32;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
-using System.Text;
 using System.Windows;
 
 namespace AoMModelEditor
 {
+    /* 1.0 TODOs
+     * 
+     */
+
     public class MainViewModel : ReactiveObject
     {
         private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
 
-        public string Title { get; private set; }
+        private string _title;
+        public string Title 
+        {
+            get => _title;
+            set
+            {
+                _title = value;
+                this.RaisePropertyChanged(nameof(Title));
+            }
+        }
 
         public ModelsViewModel ModelsViewModel { get; }
 
@@ -26,7 +36,7 @@ namespace AoMModelEditor
 
         public MainViewModel()
         {
-            Title = Properties.Resources.AppTitleLong;
+            _title = Properties.Resources.AppTitleLong;
             _appSettings = new AppSettings();
             _appSettings.Read();
 
@@ -51,17 +61,11 @@ namespace AoMModelEditor
                 {
                     ofd.InitialDirectory = _appSettings.OpenFileDialogFileName;
                 }
-                //else if (!string.IsNullOrEmpty(_lastFilePath))
-                //{
-                //    var lastDir = Path.GetDirectoryName(_lastFilePath);
-                //    if (Directory.Exists(lastDir))
-                //        ofd.InitialDirectory = lastDir;
-                //}
-                //ofd.FileName = Path.GetFileNameWithoutExtension(_lastFilePath);
 
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
+                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
                     ModelsViewModel.Load(ofd.FileName);
                     Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(ofd.FileName);
                 }
@@ -78,7 +82,6 @@ namespace AoMModelEditor
             try
             {
                 var sfd = _fileDialogService.GetModelSaveFileDialog();
-                var openFilePath = _fileDialogService.GetModelOpenFileDialog().FileName;
 
                 if (ModelsViewModel.IsBrg)
                 {
@@ -90,24 +93,16 @@ namespace AoMModelEditor
                 }
 
                 // Setup starting directory and file name
-                if (!string.IsNullOrEmpty(_appSettings.SaveFileDialogFileName) && Directory.Exists(_appSettings.SaveFileDialogFileName))
+                if (!string.IsNullOrEmpty(_appSettings.SaveFileDialogFileName) &&
+                    Directory.Exists(_appSettings.SaveFileDialogFileName))
                 {
                     sfd.InitialDirectory = _appSettings.SaveFileDialogFileName;
-                }
-                else if (!string.IsNullOrEmpty(openFilePath))
-                {
-                    var lastDir = Path.GetDirectoryName(openFilePath);
-                    if (Directory.Exists(lastDir))
-                        sfd.InitialDirectory = lastDir;
-
-                    var lastFileName = Path.GetFileNameWithoutExtension(openFilePath);
-                    if (!string.IsNullOrEmpty(lastFileName))
-                        sfd.FileName = lastFileName;
                 }
 
                 var dr = sfd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
+                    _fileDialogService.SetLastModelFilePath(sfd.FileName);
                     ModelsViewModel.Save(sfd.FileName);
                     Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(sfd.FileName);
                 }

@@ -51,7 +51,8 @@ namespace AoMModelEditor.Models
             _grnSettingsViewModel = new GrnSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
 
-            ExportGltfCommand = ReactiveCommand.Create(ExportGltf);
+            ExportGltfCommand = ReactiveCommand.Create(ExportGltf,
+                this.WhenAnyValue(vm => vm.IsBrg, vm => vm.IsGrn, (b, g) => b || g));
             ImportGltfBrgCommand = ReactiveCommand.Create(ImportGltfToBrg);
             ImportGltfGrnCommand = ReactiveCommand.Create(ImportGltfToGrn);
             ExportBrgMtrlFilesCommand = ReactiveCommand.Create(ExportBrgMtrlFiles,
@@ -209,6 +210,7 @@ namespace AoMModelEditor.Models
                 var dr = sfd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
+                    _fileDialogService.SetLastModelFilePath(sfd.FileName);
                     if (IsBrg)
                     {
                         ExportBrgToGltf(sfd.FileName);
@@ -256,6 +258,7 @@ namespace AoMModelEditor.Models
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
+                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
                     var conv = new GltfBrgConverter();
                     var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Skip });
                     LoadBrg(conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters()));
@@ -277,6 +280,7 @@ namespace AoMModelEditor.Models
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
+                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
                     var conv = new GltfGrnConverter();
                     var gltf = ModelRoot.Load(ofd.FileName);
                     LoadGrn(conv.Convert(gltf, _grnSettingsViewModel.CreateGltfGrnParameters()));
@@ -346,6 +350,7 @@ namespace AoMModelEditor.Models
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
+                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
                     using (var fs = File.Open(ofd.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         var animGrn = new GrnFile();
