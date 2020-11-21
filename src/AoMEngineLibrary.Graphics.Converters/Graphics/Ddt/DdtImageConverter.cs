@@ -42,7 +42,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         var width = Math.Max(1, ddt.Width >> mip);
                         var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt1Alpha(ddt.Data[face][mip], width, height);
-                        var image = Image.LoadPixelData<Bgra32>(decompressedData, width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages[mip] = image;
                     }
@@ -227,56 +227,45 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
             int DecodeDxt1(byte[] stream, byte[] data, int streamIndex, int dataIndex, int stride)
             {
+                // This is some weird B5G5R5A1 (least to most sig.) custom DXT1 based format
                 ushort color0 = blockData[streamIndex++];
                 color0 |= (ushort)(blockData[streamIndex++] << 8);
 
                 ushort color1 = (blockData[streamIndex++]);
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
-                // Extract R5G6B5 (in that order)
-                colors[0].R = (byte)((color0 & 0x1f));
-                colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].B = (byte)((color0 & 0xF800) >> 11);
+                // Extract B5G5R5A1 (in that order)
+                colors[0].B = (byte)((color0 & 0x1f));
+                colors[0].G = (byte)((color0 & 0x3E0) >> 5);
+                colors[0].R = (byte)((color0 & 0x7C00) >> 10);
+                colors[0].A = (byte)((color0 & 0x8000) >> 15);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
-                colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
+                colors[0].G = (byte)(colors[0].G << 3 | colors[0].G >> 2);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
-                colors[0].A = byte.MaxValue;
 
-                colors[1].R = (byte)((color1 & 0x1f));
-                colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].B = (byte)((color1 & 0xF800) >> 11);
+                colors[1].B = (byte)((color1 & 0x1f));
+                colors[1].G = (byte)((color1 & 0x3E0) >> 5);
+                colors[1].R = (byte)((color1 & 0x7C00) >> 10);
+                colors[1].A = (byte)((color1 & 0x8000) >> 15);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
-                colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
+                colors[1].G = (byte)(colors[1].G << 3 | colors[1].G >> 2);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
-                colors[1].A = byte.MaxValue;
 
                 // Used the two extracted colors to create two new colors that are
                 // slightly different.
-                if (color0 > color1)
-                {
-                    colors[2].R = (byte)((2 * colors[0].R + colors[1].R) / 3);
-                    colors[2].G = (byte)((2 * colors[0].G + colors[1].G) / 3);
-                    colors[2].B = (byte)((2 * colors[0].B + colors[1].B) / 3);
-                    colors[2].A = byte.MaxValue;
+                colors[2].R = (byte)((2 * colors[0].R + colors[1].R) / 3);
+                colors[2].G = (byte)((2 * colors[0].G + colors[1].G) / 3);
+                colors[2].B = (byte)((2 * colors[0].B + colors[1].B) / 3);
+                colors[2].A = (byte)(colors[0].A | colors[1].A);
 
-                    colors[3].R = (byte)((colors[0].R + 2 * colors[1].R) / 3);
-                    colors[3].G = (byte)((colors[0].G + 2 * colors[1].G) / 3);
-                    colors[3].B = (byte)((colors[0].B + 2 * colors[1].B) / 3);
-                    colors[3].A = byte.MaxValue;
-                }
-                else
-                {
-                    colors[2].R = (byte)((colors[0].R + colors[1].R) / 2);
-                    colors[2].G = (byte)((colors[0].G + colors[1].G) / 2);
-                    colors[2].B = (byte)((colors[0].B + colors[1].B) / 2);
-                    colors[2].A = byte.MaxValue;
+                colors[3].R = (byte)((colors[0].R + 2 * colors[1].R) / 3);
+                colors[3].G = (byte)((colors[0].G + 2 * colors[1].G) / 3);
+                colors[3].B = (byte)((colors[0].B + 2 * colors[1].B) / 3);
+                colors[3].A = colors[2].A;
 
-                    colors[3].R = 0;
-                    colors[3].G = 0;
-                    colors[3].B = 0;
-                    colors[3].A = 0;
-                }
-
+                // Alpha bits, 1 bit per pixel
+                ushort alphaBits = (blockData[streamIndex++]);
+                alphaBits |= (ushort)(blockData[streamIndex++] << 8);
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -293,7 +282,9 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         data[dataIndex++] = col.R;
                         data[dataIndex++] = col.G;
                         data[dataIndex++] = col.B;
-                        data[dataIndex++] = col.A;
+                        // not sure if I should be ORing the col.A bit with alphaBits, don't for now
+                        data[dataIndex++] = (byte)(byte.MaxValue * ((alphaBits) & 0b1u));
+                        alphaBits = (ushort)((uint)alphaBits >> 1);
                     }
 
                     // Jump down a row and start at the beginning of the row
