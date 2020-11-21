@@ -12,9 +12,9 @@ namespace AoMEngineLibrary.Graphics
         private readonly string _texturesPath;
         private readonly DdtImageConverter _ddtImageConverter;
 
-        public TextureManager(string texturesPath)
+        public TextureManager(string gamePath)
         {
-            _texturesPath = texturesPath;
+            _texturesPath = Path.Combine(gamePath, "textures");
             _ddtImageConverter = new DdtImageConverter();
         }
 

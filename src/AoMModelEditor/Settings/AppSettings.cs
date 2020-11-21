@@ -13,14 +13,14 @@ namespace AoMModelEditor.Settings
         public string OpenFileDialogFileName { get; private set; }
         public string SaveFileDialogFileName { get; private set; }
         public string MtrlFolderDialogDirectory { get; private set; }
-        public string TexturesDirectory { get; private set; }
+        public string GameDirectory { get; private set; }
 
         public AppSettings()
         {
             OpenFileDialogFileName = string.Empty;
             SaveFileDialogFileName = string.Empty;
             MtrlFolderDialogDirectory = string.Empty;
-            TexturesDirectory = string.Empty;
+            GameDirectory = string.Empty;
         }
 
         public void Read()
@@ -53,9 +53,9 @@ namespace AoMModelEditor.Settings
                         {
                             MtrlFolderDialogDirectory = elem.InnerText;
                         }
-                        else if (elem.Name == "texturesDirectory")
+                        else if (elem.Name == "gameDirectory")
                         {
-                            TexturesDirectory = elem.InnerText;
+                            GameDirectory = elem.InnerText;
                         }
                     }
                 }

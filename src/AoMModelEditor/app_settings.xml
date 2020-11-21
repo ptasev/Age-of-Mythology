@@ -2,5 +2,5 @@
   <defaultOpenDirectory></defaultOpenDirectory>
   <defaultSaveDirectory></defaultSaveDirectory>
   <defaultMtrlSaveDirectory></defaultMtrlSaveDirectory>
-  <texturesDirectory>C:\Games\Steam\steamapps\common\Age of Mythology\textures</texturesDirectory>
+  <gameDirectory>C:\Games\Steam\steamapps\common\Age of Mythology</gameDirectory>
 </appSettings>

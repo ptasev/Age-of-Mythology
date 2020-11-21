@@ -46,7 +46,7 @@ namespace AoMModelEditor.Models
         {
             _appSettings = appSettings;
             _fileDialogService = fileDialogService;
-            _textureManager = new TextureManager(_appSettings.TexturesDirectory);
+            _textureManager = new TextureManager(_appSettings.GameDirectory);
             _brgSettingsViewModel = new BrgSettingsViewModel();
             _grnSettingsViewModel = new GrnSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
