@@ -65,6 +65,23 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     }
                 }
             }
+            else if (ddt.Format == DdtFormat.Dxt3Swizzled) // DXT3 using 444 colors
+            {
+                for (int face = 0; face < numFaces; ++face)
+                {
+                    var faceImages = new Image[ddt.MipMapLevels];
+                    images[face] = faceImages;
+                    for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
+                    {
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
+                        byte[] decompressedData = DecompressDxt3Swizzled(ddt.Data[face][mip], width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
+                        image.Mutate(p => p.Flip(FlipMode.Vertical));
+                        faceImages[mip] = image;
+                    }
+                }
+            }
             else if (ddt.Format == DdtFormat.BC3) // aka DXT5
             {
                 for (int face = 0; face < numFaces; ++face)
@@ -297,7 +314,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
         private byte[] DecompressDxt3(byte[] blockData, int width, int height)
         {
-            const byte PixelDepthBytes = 3;
+            const byte PixelDepthBytes = 4;
             const byte DivSize = 4;
             var colors = new Rgb24[4];
 
@@ -359,6 +376,81 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     ushort rowAlpha = blockData[alphaPtr++];
                     rowAlpha |= (ushort)(blockData[alphaPtr++] << 8);
 
+                    for (int j = 0; j < 8; j += 2)
+                    {
+                        byte currentAlpha = (byte)((rowAlpha >> (j * 2)) & 0x0f);
+                        currentAlpha |= (byte)(currentAlpha << 4);
+                        var col = colors[((rowVal >> j) & 0x03)];
+                        data[dataIndex++] = col.R;
+                        data[dataIndex++] = col.G;
+                        data[dataIndex++] = col.B;
+                        data[dataIndex++] = currentAlpha;
+                    }
+                    dataIndex += PixelDepthBytes * (stride - DivSize);
+                }
+
+                return streamIndex;
+            }
+        }
+
+        private byte[] DecompressDxt3Swizzled(byte[] blockData, int width, int height)
+        {
+            const byte PixelDepthBytes = 4;
+            const byte DivSize = 4;
+            var colors = new Rgb24[4];
+
+            return Decode(blockData, width, height, DivSize, PixelDepthBytes, DecodeDxt3);
+
+            int DecodeDxt3(byte[] stream, byte[] data, int streamIndex, int dataIndex, int stride)
+            {
+                // This is some weird B4G4R4A4 (least to most sig.) custom DXT3 based format with alpha after colors
+                /* 
+                 * Strategy for decompression:
+                 * -We're going to decode both alpha and color at the same time 
+                 * to save on space and time as we don't have to allocate an array 
+                 * to store values for later use.
+                 */
+
+                // Colors are stored in a pair of 16 bits
+                ushort color0 = blockData[streamIndex++];
+                color0 |= (ushort)(blockData[streamIndex++] << 8);
+
+                ushort color1 = (blockData[streamIndex++]);
+                color1 |= (ushort)(blockData[streamIndex++] << 8);
+
+                // Extract B4G4R4 (in that order)
+                colors[0].B = (byte)((color0 & 0xF));
+                colors[0].G = (byte)((color0 & 0xF0) >> 4);
+                colors[0].R = (byte)((color0 & 0xF00) >> 8);
+                colors[0].R = (byte)(colors[0].R << 4 | colors[0].R);
+                colors[0].G = (byte)(colors[0].G << 4 | colors[0].G);
+                colors[0].B = (byte)(colors[0].B << 4 | colors[0].B);
+
+                colors[1].B = (byte)((color1 & 0xF));
+                colors[1].G = (byte)((color1 & 0xF0) >> 4);
+                colors[1].R = (byte)((color1 & 0xF00) >> 8);
+                colors[1].R = (byte)(colors[1].R << 4 | colors[1].R);
+                colors[1].G = (byte)(colors[1].G << 4 | colors[1].G);
+                colors[1].B = (byte)(colors[1].B << 4 | colors[1].B);
+
+                // Used the two extracted colors to create two new colors
+                // that are slightly different.
+                colors[2].R = (byte)((2 * colors[0].R + colors[1].R) / 3);
+                colors[2].G = (byte)((2 * colors[0].G + colors[1].G) / 3);
+                colors[2].B = (byte)((2 * colors[0].B + colors[1].B) / 3);
+
+                colors[3].R = (byte)((colors[0].R + 2 * colors[1].R) / 3);
+                colors[3].G = (byte)((colors[0].G + 2 * colors[1].G) / 3);
+                colors[3].B = (byte)((colors[0].B + 2 * colors[1].B) / 3);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    // Each row of rgb values have 4 alpha values that  are
+                    // encoded in 4 bits
+                    ushort rowAlpha = blockData[streamIndex++];
+                    rowAlpha |= (ushort)(blockData[streamIndex++] << 8);
+
+                    byte rowVal = blockData[streamIndex++];
                     for (int j = 0; j < 8; j += 2)
                     {
                         byte currentAlpha = (byte)((rowAlpha >> (j * 2)) & 0x0f);
