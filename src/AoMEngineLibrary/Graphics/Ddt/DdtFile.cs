@@ -19,11 +19,14 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
         public Bt8ImageInfo Bt8ImageInfo { get; set; }
 
+        public ushort[] Bt8PaletteBuffer { get; set; }
+
         public byte[][][] Data { get; set; }
 
         public DdtFile()
         {
             Bt8ImageInfo = new Bt8ImageInfo();
+            Bt8PaletteBuffer = Array.Empty<ushort>();
             Data = Array.Empty<byte[][]>();
         }
 
@@ -86,7 +89,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 {
                     // max of 256 16-bit colors in palette
                     if (Bt8ImageInfo.NumColors > 256)
-                        throw new InvalidDataException("Palette cannot have more than 256 colors.");
+                        throw new InvalidDataException("BT8 palette cannot have more than 256 colors.");
 
                     uint paletteOffset;
                     if (AlphaBits == 4)
@@ -102,10 +105,18 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         paletteOffset = Bt8ImageInfo.R5G6B5Offset;
                     }
 
-                    // TODO: read bt8 palette and store in field
-                    //var palette = new byte[2 * Bt8ImageInfo.NumColors];
+                    if (paletteOffset == 0)
+                    {
+                        throw new InvalidDataException("Invalid BT8 palette offset.");
+                    }
 
-                    throw new NotImplementedException($"Support for format {Format} not implemented.");
+                    // Read bt8 palette
+                    reader.BaseStream.Seek(paletteOffset, SeekOrigin.Begin);
+                    Bt8PaletteBuffer = new ushort[Bt8ImageInfo.NumColors];
+                    for (uint i = 0; i < Bt8PaletteBuffer.Length; ++i)
+                    {
+                        Bt8PaletteBuffer[i] = reader.ReadUInt16();
+                    }
                 }
 
                 // Read all the byte data

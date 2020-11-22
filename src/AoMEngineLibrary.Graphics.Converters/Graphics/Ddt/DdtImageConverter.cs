@@ -2,8 +2,8 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 
 namespace AoMEngineLibrary.Graphics.Ddt
 {
@@ -86,7 +86,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     }
                 }
             }
-            else if (ddt.Format == DdtFormat.Dxt3Swizzled) // DXT3 using 444 colors
+            else if (ddt.Format == DdtFormat.Dxt3Swizzled && ddt.AlphaBits == 4) // DXT3 using 444 colors
             {
                 for (int face = 0; face < numFaces; ++face)
                 {
@@ -121,12 +121,168 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     }
                 }
             }
+            else if (ddt.Format == DdtFormat.BT8 && ddt.AlphaBits == 0)
+            {
+                for (int face = 0; face < numFaces; ++face)
+                {
+                    var faceImages = new Image[ddt.MipMapLevels];
+                    images[face] = faceImages;
+                    for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
+                    {
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
+                        byte[] decompressedData = DecodeBt8As565(ddt.Data[face][mip], ddt.Bt8PaletteBuffer, width, height);
+                        var image = Image.LoadPixelData<Rgb24>(decompressedData, width, height);
+                        image.Mutate(p => p.Flip(FlipMode.Vertical));
+                        faceImages[mip] = image;
+                    }
+                }
+            }
+            else if (ddt.Format == DdtFormat.BT8 && ddt.AlphaBits == 1)
+            {
+                for (int face = 0; face < numFaces; ++face)
+                {
+                    var faceImages = new Image[ddt.MipMapLevels];
+                    images[face] = faceImages;
+                    for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
+                    {
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
+                        byte[] decompressedData = DecodeBt8As5551(ddt.Data[face][mip], ddt.Bt8PaletteBuffer, width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
+                        image.Mutate(p => p.Flip(FlipMode.Vertical));
+                        faceImages[mip] = image;
+                    }
+                }
+            }
+            else if (ddt.Format == DdtFormat.BT8 && ddt.AlphaBits == 4)
+            {
+                for (int face = 0; face < numFaces; ++face)
+                {
+                    var faceImages = new Image[ddt.MipMapLevels];
+                    images[face] = faceImages;
+                    for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
+                    {
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
+                        byte[] decompressedData = DecodeBt8As4444(ddt.Data[face][mip], ddt.Bt8PaletteBuffer, width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
+                        image.Mutate(p => p.Flip(FlipMode.Vertical));
+                        faceImages[mip] = image;
+                    }
+                }
+            }
             else
             {
                 throw new NotImplementedException($"Converting ddt format {ddt.Format} with {ddt.AlphaBits} alpha bits to image not implemented.");
             }
 
             return new Texture(images, !ddt.Properties.HasFlag(DdtProperty.NoAlphaTest));
+        }
+
+        private byte[] DecodeBt8As565(byte[] source, ushort[] palette, int width, int height)
+        {
+            // 3 bytes per pixel output
+            byte[] dest = new byte[width * height * 3];
+
+            int sourceIndex = 0, destIndex = 0;
+            for (int row = 0; row < height; ++row)
+            {
+                for (int col = 0; col < width; ++col)
+                {
+                    var paletteIndex = source[sourceIndex++];
+                    var color = palette[paletteIndex];
+
+                    // Extract B5G6R5 (in that order)
+                    byte b = (byte)((color & 0x1Fu));
+                    byte g = (byte)((color & 0x7E0u) >> 5);
+                    byte r = (byte)((color & 0xF800u) >> 11);
+                    r = (byte)(r << 3 | r >> 2);
+                    g = (byte)(g << 2 | g >> 3);
+                    b = (byte)(b << 3 | b >> 2);
+
+                    dest[destIndex++] = r;
+                    dest[destIndex++] = g;
+                    dest[destIndex++] = b;
+                }
+            }
+
+            return dest;
+        }
+
+        private byte[] DecodeBt8As5551(byte[] source, ushort[] palette, int width, int height)
+        {
+            // 4 bytes per pixel output
+            byte[] dest = new byte[width * height * 4];
+
+            int sourceIndex = 0, destIndex = 0;
+            for (int row = 0; row < height; ++row)
+            {
+                for (int col = 0; col < width; ++col)
+                {
+                    var paletteIndex = source[sourceIndex++];
+                    var color = palette[paletteIndex];
+
+                    // Extract B5G5R5A1 (in that order)
+                    byte b = (byte)((color & 0x1Fu));
+                    byte g = (byte)((color & 0x3E0u) >> 5);
+                    byte r = (byte)((color & 0x7C00u) >> 10);
+                    byte a = (byte)((color & 0x8000u) >> 15);
+                    r = (byte)(r << 3 | r >> 2);
+                    g = (byte)(g << 3 | g >> 2);
+                    b = (byte)(b << 3 | b >> 2);
+                    a *= byte.MaxValue;
+
+                    dest[destIndex++] = r;
+                    dest[destIndex++] = g;
+                    dest[destIndex++] = b;
+                    dest[destIndex++] = a;
+                }
+            }
+
+            return dest;
+        }
+
+        private byte[] DecodeBt8As4444(ReadOnlySpan<byte> source, ushort[] palette, int width, int height)
+        {
+            // 4 bytes per pixel output
+            byte[] dest = new byte[width * height * 4];
+
+            int sourceIndex = 0, destIndex = 0;
+            for (int row = 0; row < height; ++row)
+            {
+                for (int col = 0; col < width; col += 4)
+                {
+                    ushort alpha = BinaryPrimitives.ReadUInt16LittleEndian(source.Slice(sourceIndex));
+                    sourceIndex += 2;
+
+                    Decode4444((ushort)(palette[source[sourceIndex++]] | ((alpha & 0x00F0u) << 8)), dest, ref destIndex);
+                    Decode4444((ushort)(palette[source[sourceIndex++]] | ((alpha & 0x000Fu) << 12)), dest, ref destIndex);
+                    Decode4444((ushort)(palette[source[sourceIndex++]] | ((alpha & 0xF000u))), dest, ref destIndex);
+                    Decode4444((ushort)(palette[source[sourceIndex++]] | ((alpha & 0x0F00u) << 4)), dest, ref destIndex);
+                }
+            }
+
+            return dest;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static void Decode4444(ushort color, byte[] dest, ref int destIndex)
+            {
+                // Extract B4G4R4A4 (in that order)
+                byte b = (byte)((color & 0x0Fu));
+                byte g = (byte)((color & 0xF0u) >> 4);
+                byte r = (byte)((color & 0xF00u) >> 8);
+                byte a = (byte)((color & 0xF000u) >> 12);
+                r = (byte)(r << 4 | r);
+                g = (byte)(g << 4 | g);
+                b = (byte)(b << 4 | b);
+                a = (byte)(a << 4 | a);
+
+                dest[destIndex++] = r;
+                dest[destIndex++] = g;
+                dest[destIndex++] = b;
+                dest[destIndex++] = a;
+            }
         }
 
         private static int CalcBlocks(int pixels) => Math.Max(1, (pixels + 3) / 4);
@@ -192,16 +348,16 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
                 // Extract B5G6R5 (in that order)
-                colors[0].B = (byte)((color0 & 0x1f));
-                colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].R = (byte)((color0 & 0xF800) >> 11);
+                colors[0].B = (byte)((color0 & 0x1fu));
+                colors[0].G = (byte)((color0 & 0x7E0u) >> 5);
+                colors[0].R = (byte)((color0 & 0xF800u) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].B = (byte)((color1 & 0x1f));
-                colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].R = (byte)((color1 & 0xF800) >> 11);
+                colors[1].B = (byte)((color1 & 0x1fu));
+                colors[1].G = (byte)((color1 & 0x7E0u) >> 5);
+                colors[1].R = (byte)((color1 & 0xF800u) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
@@ -272,17 +428,17 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
                 // Extract B5G6R5 (in that order)
-                colors[0].B = (byte)((color0 & 0x1f));
-                colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].R = (byte)((color0 & 0xF800) >> 11);
+                colors[0].B = (byte)((color0 & 0x1fu));
+                colors[0].G = (byte)((color0 & 0x7E0u) >> 5);
+                colors[0].R = (byte)((color0 & 0xF800u) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
                 colors[0].A = byte.MaxValue;
 
-                colors[1].B = (byte)((color1 & 0x1f));
-                colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].R = (byte)((color1 & 0xF800) >> 11);
+                colors[1].B = (byte)((color1 & 0x1fu));
+                colors[1].G = (byte)((color1 & 0x7E0u) >> 5);
+                colors[1].R = (byte)((color1 & 0xF800u) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
@@ -361,18 +517,18 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
                 // Extract B5G5R5A1 (in that order)
-                colors[0].B = (byte)((color0 & 0x1f));
-                colors[0].G = (byte)((color0 & 0x3E0) >> 5);
-                colors[0].R = (byte)((color0 & 0x7C00) >> 10);
-                colors[0].A = (byte)((color0 & 0x8000) >> 15);
+                colors[0].B = (byte)((color0 & 0x1fu));
+                colors[0].G = (byte)((color0 & 0x3E0u) >> 5);
+                colors[0].R = (byte)((color0 & 0x7C00u) >> 10);
+                colors[0].A = (byte)((color0 & 0x8000u) >> 15);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 3 | colors[0].G >> 2);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].B = (byte)((color1 & 0x1f));
-                colors[1].G = (byte)((color1 & 0x3E0) >> 5);
-                colors[1].R = (byte)((color1 & 0x7C00) >> 10);
-                colors[1].A = (byte)((color1 & 0x8000) >> 15);
+                colors[1].B = (byte)((color1 & 0x1fu));
+                colors[1].G = (byte)((color1 & 0x3E0u) >> 5);
+                colors[1].R = (byte)((color1 & 0x7C00u) >> 10);
+                colors[1].A = (byte)((color1 & 0x8000u) >> 15);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 3 | colors[1].G >> 2);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
@@ -452,16 +608,16 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
                 // Extract B5G6R5 (in that order)
-                colors[0].B = (byte)((color0 & 0x1f));
-                colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].R = (byte)((color0 & 0xF800) >> 11);
+                colors[0].B = (byte)((color0 & 0x1fu));
+                colors[0].G = (byte)((color0 & 0x7E0u) >> 5);
+                colors[0].R = (byte)((color0 & 0xF800u) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].B = (byte)((color1 & 0x1f));
-                colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].R = (byte)((color1 & 0xF800) >> 11);
+                colors[1].B = (byte)((color1 & 0x1fu));
+                colors[1].G = (byte)((color1 & 0x7E0u) >> 5);
+                colors[1].R = (byte)((color1 & 0xF800u) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
@@ -528,16 +684,16 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
                 // Extract B4G4R4 (in that order)
-                colors[0].B = (byte)((color0 & 0xF));
-                colors[0].G = (byte)((color0 & 0xF0) >> 4);
-                colors[0].R = (byte)((color0 & 0xF00) >> 8);
+                colors[0].B = (byte)((color0 & 0xFu));
+                colors[0].G = (byte)((color0 & 0xF0u) >> 4);
+                colors[0].R = (byte)((color0 & 0xF00u) >> 8);
                 colors[0].R = (byte)(colors[0].R << 4 | colors[0].R);
                 colors[0].G = (byte)(colors[0].G << 4 | colors[0].G);
                 colors[0].B = (byte)(colors[0].B << 4 | colors[0].B);
 
-                colors[1].B = (byte)((color1 & 0xF));
-                colors[1].G = (byte)((color1 & 0xF0) >> 4);
-                colors[1].R = (byte)((color1 & 0xF00) >> 8);
+                colors[1].B = (byte)((color1 & 0xFu));
+                colors[1].G = (byte)((color1 & 0xF0u) >> 4);
+                colors[1].R = (byte)((color1 & 0xF00u) >> 8);
                 colors[1].R = (byte)(colors[1].R << 4 | colors[1].R);
                 colors[1].G = (byte)(colors[1].G << 4 | colors[1].G);
                 colors[1].B = (byte)(colors[1].B << 4 | colors[1].B);
@@ -627,16 +783,16 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
                 // Extract B5G6R5 (in that order)
-                colors[0].B = (byte)((color0 & 0x1f));
-                colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].R = (byte)((color0 & 0xF800) >> 11);
+                colors[0].B = (byte)((color0 & 0x1fu));
+                colors[0].G = (byte)((color0 & 0x7E0u) >> 5);
+                colors[0].R = (byte)((color0 & 0xF800u) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].B = (byte)((color1 & 0x1f));
-                colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].R = (byte)((color1 & 0xF800) >> 11);
+                colors[1].B = (byte)((color1 & 0x1fu));
+                colors[1].G = (byte)((color1 & 0x7E0u) >> 5);
+                colors[1].R = (byte)((color1 & 0xF800u) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
