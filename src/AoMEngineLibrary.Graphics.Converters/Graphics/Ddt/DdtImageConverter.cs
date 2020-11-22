@@ -70,6 +70,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
             }
             else if (ddt.Format == DdtFormat.BC2) // aka DXT3
             {
+                // AoMEE only, supports 4-bit alpha, but some ddt have 1 for ddt.AlphaBits by mistake
                 for (int face = 0; face < numFaces; ++face)
                 {
                     var faceImages = new Image[ddt.MipMapLevels];
@@ -79,7 +80,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         var width = Math.Max(1, ddt.Width >> mip);
                         var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt3(ddt.Data[face][mip], width, height);
-                        var image = Image.LoadPixelData<Bgra32>(decompressedData, width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages[mip] = image;
                     }
@@ -104,6 +105,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
             }
             else if (ddt.Format == DdtFormat.BC3) // aka DXT5
             {
+                // AoMEE only, supports 4-bit alpha, but some ddt have 0/1 for ddt.AlphaBits by mistake
                 for (int face = 0; face < numFaces; ++face)
                 {
                     var faceImages = new Image[ddt.MipMapLevels];
@@ -113,7 +115,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         var width = Math.Max(1, ddt.Width >> mip);
                         var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt5(ddt.Data[face][mip], width, height);
-                        var image = Image.LoadPixelData<Bgra32>(decompressedData, width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages[mip] = image;
                     }
@@ -449,17 +451,17 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 ushort color1 = (blockData[streamIndex++]);
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
-                // Extract R5G6B5 (in that order)
-                colors[0].R = (byte)((color0 & 0x1f));
+                // Extract B5G6R5 (in that order)
+                colors[0].B = (byte)((color0 & 0x1f));
                 colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].B = (byte)((color0 & 0xF800) >> 11);
+                colors[0].R = (byte)((color0 & 0xF800) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].R = (byte)((color1 & 0x1f));
+                colors[1].B = (byte)((color1 & 0x1f));
                 colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].B = (byte)((color1 & 0xF800) >> 11);
+                colors[1].R = (byte)((color1 & 0xF800) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
@@ -624,17 +626,17 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 ushort color1 = (blockData[streamIndex++]);
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
-                // Extract R5G6B5 (in that order)
-                colors[0].R = (byte)((color0 & 0x1f));
+                // Extract B5G6R5 (in that order)
+                colors[0].B = (byte)((color0 & 0x1f));
                 colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].B = (byte)((color0 & 0xF800) >> 11);
+                colors[0].R = (byte)((color0 & 0xF800) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].R = (byte)((color1 & 0x1f));
+                colors[1].B = (byte)((color1 & 0x1f));
                 colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].B = (byte)((color1 & 0xF800) >> 11);
+                colors[1].R = (byte)((color1 & 0xF800) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
