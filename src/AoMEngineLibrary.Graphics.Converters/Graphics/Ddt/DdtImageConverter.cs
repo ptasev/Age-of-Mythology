@@ -14,7 +14,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
             var numFaces = ddt.Properties.HasFlag(DdtProperty.CubeMap) ? 6 : 1;
             var images = new Image[numFaces][];
 
-            if (ddt.Format == DdtFormat.Dxt1)
+            if (ddt.Format == DdtFormat.Dxt1 && ddt.AlphaBits == 0)
             {
                 for (int face = 0; face < numFaces; ++face)
                 {
@@ -25,14 +25,16 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         var width = Math.Max(1, ddt.Width >> mip);
                         var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt1(ddt.Data[face][mip], width, height);
-                        var image = Image.LoadPixelData<Bgr24>(decompressedData, width, height);
+                        var image = Image.LoadPixelData<Rgb24>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages[mip] = image;
                     }
                 }
             }
-            else if (ddt.Format == DdtFormat.Dxt1Alpha)
+            else if (ddt.Format == DdtFormat.Dxt1 && ddt.AlphaBits == 1)
             {
+                // AoMTT does not support DXT1 textures with 1-bit alpha
+                // AoMEE supports DXT1 textures with 1-bit alpha
                 for (int face = 0; face < numFaces; ++face)
                 {
                     var faceImages = new Image[ddt.MipMapLevels];
@@ -42,6 +44,24 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         var width = Math.Max(1, ddt.Width >> mip);
                         var height = Math.Max(1, ddt.Height >> mip);
                         byte[] decompressedData = DecompressDxt1Alpha(ddt.Data[face][mip], width, height);
+                        var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
+                        image.Mutate(p => p.Flip(FlipMode.Vertical));
+                        faceImages[mip] = image;
+                    }
+                }
+            }
+            else if (ddt.Format == DdtFormat.Dxt1Alpha && ddt.AlphaBits == 1)
+            {
+                // AoMTT uses this custom DXT1 based format for 1-bit alpha
+                for (int face = 0; face < numFaces; ++face)
+                {
+                    var faceImages = new Image[ddt.MipMapLevels];
+                    images[face] = faceImages;
+                    for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
+                    {
+                        var width = Math.Max(1, ddt.Width >> mip);
+                        var height = Math.Max(1, ddt.Height >> mip);
+                        byte[] decompressedData = DecompressDxt1AlphaCustom(ddt.Data[face][mip], width, height);
                         var image = Image.LoadPixelData<Rgba32>(decompressedData, width, height);
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages[mip] = image;
@@ -101,7 +121,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
             }
             else
             {
-                throw new NotImplementedException($"Converting ddt format {ddt.Format} to image not implemented.");
+                throw new NotImplementedException($"Converting ddt format {ddt.Format} with {ddt.AlphaBits} alpha bits to image not implemented.");
             }
 
             return new Texture(images, !ddt.Properties.HasFlag(DdtProperty.NoAlphaTest));
@@ -169,17 +189,17 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 ushort color1 = (blockData[streamIndex++]);
                 color1 |= (ushort)(blockData[streamIndex++] << 8);
 
-                // Extract R5G6B5 (in that order)
-                colors[0].R = (byte)((color0 & 0x1f));
+                // Extract B5G6R5 (in that order)
+                colors[0].B = (byte)((color0 & 0x1f));
                 colors[0].G = (byte)((color0 & 0x7E0) >> 5);
-                colors[0].B = (byte)((color0 & 0xF800) >> 11);
+                colors[0].R = (byte)((color0 & 0xF800) >> 11);
                 colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
                 colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
                 colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
 
-                colors[1].R = (byte)((color1 & 0x1f));
+                colors[1].B = (byte)((color1 & 0x1f));
                 colors[1].G = (byte)((color1 & 0x7E0) >> 5);
-                colors[1].B = (byte)((color1 & 0xF800) >> 11);
+                colors[1].R = (byte)((color1 & 0xF800) >> 11);
                 colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
                 colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
                 colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
@@ -234,6 +254,93 @@ namespace AoMEngineLibrary.Graphics.Ddt
         }
 
         private byte[] DecompressDxt1Alpha(byte[] blockData, int width, int height)
+        {
+            const byte PixelDepthBytes = 4;
+            const byte DivSize = 4;
+            var colors = new Rgba32[4];
+
+            return Decode(blockData, width, height, DivSize, PixelDepthBytes, DecodeDxt1);
+
+            int DecodeDxt1(byte[] stream, byte[] data, int streamIndex, int dataIndex, int stride)
+            {
+                ushort color0 = blockData[streamIndex++];
+                color0 |= (ushort)(blockData[streamIndex++] << 8);
+
+                ushort color1 = (blockData[streamIndex++]);
+                color1 |= (ushort)(blockData[streamIndex++] << 8);
+
+                // Extract B5G6R5 (in that order)
+                colors[0].B = (byte)((color0 & 0x1f));
+                colors[0].G = (byte)((color0 & 0x7E0) >> 5);
+                colors[0].R = (byte)((color0 & 0xF800) >> 11);
+                colors[0].R = (byte)(colors[0].R << 3 | colors[0].R >> 2);
+                colors[0].G = (byte)(colors[0].G << 2 | colors[0].G >> 3);
+                colors[0].B = (byte)(colors[0].B << 3 | colors[0].B >> 2);
+                colors[0].A = byte.MaxValue;
+
+                colors[1].B = (byte)((color1 & 0x1f));
+                colors[1].G = (byte)((color1 & 0x7E0) >> 5);
+                colors[1].R = (byte)((color1 & 0xF800) >> 11);
+                colors[1].R = (byte)(colors[1].R << 3 | colors[1].R >> 2);
+                colors[1].G = (byte)(colors[1].G << 2 | colors[1].G >> 3);
+                colors[1].B = (byte)(colors[1].B << 3 | colors[1].B >> 2);
+                colors[1].A = byte.MaxValue;
+
+                // Used the two extracted colors to create two new colors that are
+                // slightly different.
+                if (color0 > color1)
+                {
+                    colors[2].R = (byte)((2 * colors[0].R + colors[1].R) / 3);
+                    colors[2].G = (byte)((2 * colors[0].G + colors[1].G) / 3);
+                    colors[2].B = (byte)((2 * colors[0].B + colors[1].B) / 3);
+                    colors[2].A = byte.MaxValue;
+
+                    colors[3].R = (byte)((colors[0].R + 2 * colors[1].R) / 3);
+                    colors[3].G = (byte)((colors[0].G + 2 * colors[1].G) / 3);
+                    colors[3].B = (byte)((colors[0].B + 2 * colors[1].B) / 3);
+                    colors[3].A = byte.MaxValue;
+                }
+                else
+                {
+                    colors[2].R = (byte)((colors[0].R + colors[1].R) / 2);
+                    colors[2].G = (byte)((colors[0].G + colors[1].G) / 2);
+                    colors[2].B = (byte)((colors[0].B + colors[1].B) / 2);
+                    colors[2].A = byte.MaxValue;
+
+                    colors[3].R = 0;
+                    colors[3].G = 0;
+                    colors[3].B = 0;
+                    colors[3].A = 0;
+                }
+
+
+                for (int i = 0; i < 4; i++)
+                {
+                    // Every 2 bit is a code [0-3] and represent what color the
+                    // current pixel is
+
+                    // Read in a byte and thus 4 colors
+                    byte rowVal = blockData[streamIndex++];
+                    for (int j = 0; j < 8; j += 2)
+                    {
+                        // Extract code by shifting the row byte so that we can
+                        // AND it with 3 and get a value [0-3]
+                        var col = colors[(rowVal >> j) & 0x03];
+                        data[dataIndex++] = col.R;
+                        data[dataIndex++] = col.G;
+                        data[dataIndex++] = col.B;
+                        data[dataIndex++] = col.A;
+                    }
+
+                    // Jump down a row and start at the beginning of the row
+                    dataIndex += PixelDepthBytes * (stride - DivSize);
+                }
+
+                return streamIndex;
+            }
+        }
+
+        private byte[] DecompressDxt1AlphaCustom(byte[] blockData, int width, int height)
         {
             // Dxt1, but with output data having alpha
             const byte PixelDepthBytes = 4;
