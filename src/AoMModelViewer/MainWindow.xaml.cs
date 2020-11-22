@@ -43,41 +43,12 @@ namespace AoMModelViewer
             InitializeComponent();
             cts = new CancellationTokenSource();
 
-            // Image convert
-            {
-                var ddt = new DdtFile();
-                string fname = "animal bear map";
-                //using (var fs = File.Open(@$"C:\Games\Age of Mythology\textures\t1extracted\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
-                using (var fs = File.Open(@$"C:\Games\Steam\steamapps\common\Age of Mythology\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    ddt.Read(fs);
-                }
-                var imgConv = new DdtImageConverter();
-                var imgs = imgConv.Convert(ddt);
-                imgs[0][0].SaveAsPng($"{fname}.png");
-            }
-            return;
-
-            {
-                using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_walk.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    BrgFile f = new BrgFile(fs);
-                    new BrgGltfConverter().Convert(f, new TextureManager(string.Empty)).SaveGLTF("./brgLocustWalk.gltf");
-                }
-
-                using (var fs = File.Open(@"C:\c\Argos\ptasev\Argos\current source\models\version2.0\sfx e locust path_idle.brg", FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    BrgFile f = new BrgFile(fs);
-                    new BrgGltfConverter().Convert(f, new TextureManager(string.Empty)).SaveGLTF("./brgLocustIdle.gltf");
-                }
-            }
+            TextureConvert();
 
             string[] args = Environment.GetCommandLineArgs();
-
             if (args.Length > 1 && false)
             {
                 file = new BrgFile(File.Open(args[1], FileMode.Open, FileAccess.Read, FileShare.Read));
-                //file.WriteJson(File.Open(args[1] + ".json", FileMode.Create, FileAccess.Write, FileShare.Read));
                 if (args.Length > 2 && args[2] == "-s")
                 {
                     System.Windows.Application.Current.Shutdown();
@@ -87,17 +58,7 @@ namespace AoMModelViewer
             {
                 //archer e slinger_attacka.brg
                 file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\infantry g hoplite head standard.brg", FileMode.Open, FileAccess.Read, FileShare.Write));
-                //file.WriteJson(File.Open("infantry g hoplite head standard.brg.json.brg", FileMode.Create, FileAccess.Write, FileShare.Read));
-                var grnFile = new AoMEngineLibrary.Graphics.Grn.GrnFile();
-                grnFile.Read(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Write));
             }
-
-            // bla
-            //var ttt = ModelRoot.Load("grnGltf.gltf");
-
-            //BrgFile t = new BrgFile();
-            //t.ReadJson(File.Open("hi.brg", FileMode.Open, FileAccess.Read, FileShare.Read));
-            //t.WriteJson(File.Open("hi2.brg", FileMode.Create, FileAccess.Write, FileShare.Read));
 
             List<Point3D> positions = new List<Point3D>(file.Meshes[0].Vertices.Count);
             List<int> triangleIndices = new List<int>(file.Meshes[0].Faces.Count * 3);
@@ -139,6 +100,29 @@ namespace AoMModelViewer
             //viewport3d.Children.Add(meshVis);
             //viewport3d.Children.Add(modVis);
 
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void TextureConvert()
+        {
+            var ddt = new DdtFile();
+            //string fname = @"icons\animal bear icon 64"; // Bt8 AlphaBits 0
+            //string fname = @"ui\ui map midgard 256x256"; // Bt8 AlphaBits 1
+            string fname = @"ui\ui god thor 256x256"; // Bt8 AlphaBits 4
+            using (var fs = File.Open(@$"C:\Games\Age of Mythology\textures\t1bar\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
+            //using (var fs = File.Open(@$"C:\Games\Steam\steamapps\common\Age of Mythology\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                ddt.Read(fs);
+            }
+            var imgConv = new DdtImageConverter();
+            var tex = imgConv.Convert(ddt);
+            tex.Images[0][0].SaveAsPng($"{System.IO.Path.GetFileName(fname)}.png");
+        }
+        private void GrnToGltfAnimation()
+        {
+            var texManager = new TextureManager("./");
+            var gltfGrnParams = new GltfGrnParameters() { ConvertMeshes = true, ConvertAnimations = true };
+
             using (var fs = File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version1.0\ajax.grn", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var fs2 = File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version1.0\ajax_walka.grn", FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -147,25 +131,15 @@ namespace AoMModelViewer
                 GrnFile grnAnim = new GrnFile();
                 grnAnim.Read(fs2);
                 grn.SetAnimation(grnAnim);
-                new GrnGltfConverter().Convert(grn).SaveGLTF("./grnGltf.gltf");
-                var newGrn = new GltfGrnConverter().Convert(ModelRoot.Load("./grnGltf.gltf"));
-                new GrnGltfConverter().Convert(newGrn).SaveGLTF("./grnGltf2.gltf");
+                new GrnGltfConverter().Convert(grn, texManager).SaveGLTF("./grnGltf.gltf");
+                var newGrn = new GltfGrnConverter().Convert(ModelRoot.Load("./grnGltf.gltf"), gltfGrnParams);
+                new GrnGltfConverter().Convert(newGrn, texManager).SaveGLTF("./grnGltf2.gltf");
             }
-
-            //file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\animal aurochs_attacka.brg", FileMode.Open, FileAccess.Read));
-            //file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\infantry g hoplite head bronze.brg", FileMode.Open, FileAccess.Read));
-            file = new BrgFile(File.Open(@"C:\Games\Steam\steamapps\common\Age of Mythology\models\version2.0\infantry g hoplite_walka.brg", FileMode.Open, FileAccess.Read));
+        }
+        private void OldGltfTestCode()
+        {
+            var gltfModel = ModelRoot.Load("brgGltf.gltf");
             glTFLoader.Schema.Gltf gltf;
-            //using (var stream = File.Open("dataBuffer.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
-            //{
-            //    GltfFormatter frmt = new GltfFormatter();
-            //    gltf = frmt.FromBrg(file, stream);
-            //}
-            //glTFLoader.Interface.SaveModel(gltf, "brgGltf.gltf");
-            new BrgGltfConverter().Convert(file, new TextureManager(string.Empty)).SaveGLTF("./brgGltfConv.gltf");
-
-            var gltfModel = ModelRoot.Load("blendergltf/blendergltf.gltf");
-            //var gltfModel = ModelRoot.Load("brgGltf.gltf");
             BrgFile gltfBrg = new GltfBrgConverter().Convert(gltfModel, new GltfBrgParameters());
             using (var stream = File.Open("dataBuffer3Recreated.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
             {
@@ -173,8 +147,6 @@ namespace AoMModelViewer
                 gltf = frmt.FromBrg(gltfBrg, stream);
             }
             glTFLoader.Interface.SaveModel(gltf, "brgGltf3Recreated.gltf");
-
-            this.Loaded += MainWindow_Loaded;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

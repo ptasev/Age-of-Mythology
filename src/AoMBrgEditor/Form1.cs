@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
@@ -23,6 +24,8 @@ namespace AoMBrgEditor
             string output = "";
 
             richTextBox1.Text = output;
+
+            OldDdtTesting();
         }
 
         private string BrgDevelopmentCode()
@@ -342,23 +345,19 @@ namespace AoMBrgEditor
 
         private void OldDdtTesting()
         {
-            /*DdtFile ddt = new DdtFile(File.Open(@"C:\Users\Petar\Desktop\aom\textures\agamemnon map.ddt", FileMode.Open, FileAccess.Read, FileShare.Read));
-            Dds dds = new Dds(ddt);
-            dds.Write(File.Open(@"C:\Users\Petar\Desktop\archer x arcus corpse bodya.dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
-            foreach (string s in Directory.GetFiles(@"C:\Users\Petar\Desktop\aom\textures", "*.ddt", SearchOption.AllDirectories))
+            string texDir = @"C:\Games\Age of Mythology\textures\t1bar\textures";
+            //string texDir = @"C:\Games\Age of Mythology\textures\t2bar\textures";
+            //string texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\textures";
+            var sb = new StringBuilder();
+            foreach (string s in Directory.GetFiles(texDir, "*.ddt", SearchOption.AllDirectories))
             {
-                ddt = new DdtFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                if (ddt.Width == 256 && ddt.texelFormat == DdtTexelFormat.DXT5)
+                var ddt = new DdtFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
+                if (ddt.Format == DdtFormat.BT8)
                 {
-                    output += s + Environment.NewLine;
-                }
-                if (ddt.texelFormat == DdtTexelFormat.Grayscale8)
-                {
-                    //output += s + Environment.NewLine;
+                    sb.AppendLine($"{s}\t{ddt.AlphaBits}");
                 }
             }
-            richTextBox1.Text = output;
-            return;*/
+            richTextBox1.Text = sb.ToString();
         }
 
         private string GetAllDclsWithLight()
