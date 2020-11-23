@@ -109,6 +109,10 @@ namespace AoMModelViewer
             //string fname = @"icons\animal bear icon 64"; // Bt8 AlphaBits 0
             //string fname = @"ui\ui map midgard 256x256"; // Bt8 AlphaBits 1
             string fname = @"ui\ui god thor 256x256"; // Bt8 AlphaBits 4
+            //string fname = @"infantry g hoplite standard"; // Dxt1Alpha AlphaBits 1
+            //string fname = @"special g manticore wing"; // Dxt3Swizzled AlphaBits 4
+            //string fname = @"special c qilin"; // Bc2 AlphaBits 1 (should've been 4)
+            //string fname = @"hero g ajax"; // Bc3 AlphaBits 1 (should've been 4)
             using (var fs = File.Open(@$"C:\Games\Age of Mythology\textures\t1bar\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
             //using (var fs = File.Open(@$"C:\Games\Steam\steamapps\common\Age of Mythology\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
             {

@@ -345,14 +345,14 @@ namespace AoMBrgEditor
 
         private void OldDdtTesting()
         {
-            string texDir = @"C:\Games\Age of Mythology\textures\t1bar\textures";
+            //string texDir = @"C:\Games\Age of Mythology\textures\t1bar\textures";
             //string texDir = @"C:\Games\Age of Mythology\textures\t2bar\textures";
-            //string texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\textures";
+            string texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\textures";
             var sb = new StringBuilder();
             foreach (string s in Directory.GetFiles(texDir, "*.ddt", SearchOption.AllDirectories))
             {
                 var ddt = new DdtFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                if (ddt.Format == DdtFormat.BT8)
+                if (ddt.Format == DdtFormat.BC2)
                 {
                     sb.AppendLine($"{s}\t{ddt.AlphaBits}");
                 }
