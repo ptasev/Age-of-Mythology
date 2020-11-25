@@ -1,9 +1,13 @@
 ﻿using AoMEngineLibrary.Graphics.Textures;
+using Microsoft.Toolkit.HighPerformance.Extensions;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 
 namespace AoMEngineLibrary.Graphics.Ddt
@@ -58,6 +62,16 @@ namespace AoMEngineLibrary.Graphics.Ddt
             else if (ddt.Format == DdtFormat.BT8 && ddt.AlphaBits == 4)
             {
                 images = DecodeBt8<Rgba32>(ddt, DecodeBt8As4444);
+            }
+            else if (ddt.Format == DdtFormat.RgbaDeflated)
+            {
+                // AoMEE only. 8-bit alpha although some ddt have 0/1/4
+                images = DecodeRawDeflated<Bgra32>(ddt);
+            }
+            else if (ddt.Format == DdtFormat.RgbDeflated)
+            {
+                // AoMEE only. no alpha although some ddt have 0/1/4
+                images = DecodeRawDeflated<Bgr24>(ddt);
             }
             else
             {
@@ -122,7 +136,6 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
             return images;
         }
-
         private byte[] DecodeBt8As565(ReadOnlySpan<byte> source, ReadOnlySpan<ushort> palette, int width, int height)
         {
             // 3 bytes per pixel output
@@ -141,7 +154,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     byte g = (byte)((color & 0x7E0u) >> 5);
                     byte r = (byte)((color & 0xF800u) >> 11);
                     r = (byte)(r << 3 | r >> 2);
-                    g = (byte)(g << 2 | g >> 3);
+                    g = (byte)(g << 2 | g >> 4);
                     b = (byte)(b << 3 | b >> 2);
 
                     dest[destIndex++] = r;
@@ -152,7 +165,6 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
             return dest;
         }
-
         private byte[] DecodeBt8As5551(ReadOnlySpan<byte> source, ReadOnlySpan<ushort> palette, int width, int height)
         {
             // 4 bytes per pixel output
@@ -185,7 +197,6 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
             return dest;
         }
-
         private byte[] DecodeBt8As4444(ReadOnlySpan<byte> source, ReadOnlySpan<ushort> palette, int width, int height)
         {
             // 4 bytes per pixel output
@@ -225,6 +236,57 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 dest[destIndex++] = g;
                 dest[destIndex++] = b;
                 dest[destIndex++] = a;
+            }
+        }
+
+        private static Image[][] DecodeRawDeflated<TPixel>(DdtFile ddt)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var numFaces = ddt.Properties.HasFlag(DdtProperty.CubeMap) ? 6 : 1;
+            var images = new Image[numFaces][];
+
+            for (int face = 0; face < numFaces; ++face)
+            {
+                var faceImages = new List<Image>(ddt.MipMapLevels);
+                for (int mip = 0; mip < ddt.MipMapLevels; ++mip)
+                {
+                    var width = Math.Max(1, ddt.Width >> mip);
+                    var height = Math.Max(1, ddt.Height >> mip);
+
+                    var decompressedData = ZlibDecompress(ddt.Data[face][mip]);
+                    var pixels = decompressedData.Span.Cast<byte, TPixel>();
+                    // For some reason these textures seem to be broken in certain lower mips. Skip the remaining
+                    if (pixels.Length < (width * height))
+                        break;
+                    //var image = Image.WrapMemory<TPixel>(decompressedData.Cast<byte, TPixel>(), width, height);
+                    var image = Image.LoadPixelData<TPixel>(decompressedData.Span, width, height);
+
+                    image.Mutate(p => p.Flip(FlipMode.Vertical));
+                    faceImages.Add(image);
+                }
+                images[face] = faceImages.ToArray();
+            }
+
+            return images;
+        }
+        private static Memory<byte> ZlibDecompress(ReadOnlySpan<byte> data)
+        {
+            using (var sourceStream = new MemoryStream())
+            using (var destStream = new MemoryStream())
+            using (var decompressionStream = new DeflateStream(sourceStream, CompressionMode.Decompress))
+            {
+                // Skip zlib header/footer since deflatestream only works on raw deflate data
+                int headerSize = (data[1] & 0b10000) == 0b100000 ? 6 : 2;
+                if (data.Length <= headerSize + 4) return Memory<byte>.Empty;
+                data = data.Slice(headerSize, data.Length - 4 - headerSize);
+
+                sourceStream.Write(data);
+                sourceStream.Seek(0, SeekOrigin.Begin);
+
+                // Inflate
+                decompressionStream.CopyTo(destStream);
+                var buff = destStream.GetBuffer();
+                return buff.AsMemory().Slice(0, (int)destStream.Length);
             }
         }
     }

@@ -352,7 +352,7 @@ namespace AoMBrgEditor
             foreach (string s in Directory.GetFiles(texDir, "*.ddt", SearchOption.AllDirectories))
             {
                 var ddt = new DdtFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                if (ddt.Format == DdtFormat.BC2)
+                if (ddt.Format == DdtFormat.RgbDeflated)
                 {
                     sb.AppendLine($"{s}\t{ddt.AlphaBits}");
                 }

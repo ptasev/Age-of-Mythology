@@ -61,9 +61,18 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 }
 
                 int numFaces = Properties.HasFlag(DdtProperty.CubeMap) ? 6 : 1;
-                const int minMipDimension = 4;
-                uint totalDataSize = 0;
+                const int minMipDimension = 1;
+                //int minMipDimension = Format switch
+                //{
+                //    DdtFormat.Dxt1 => 4,
+                //    DdtFormat.Dxt1Alpha => 4,
+                //    DdtFormat.Dxt3Swizzled => 4,
+                //    DdtFormat.BC2 => 4,
+                //    DdtFormat.BC3 => 4,
+                //    _ => 1
+                //};
 
+                uint totalDataSize = 0;
                 var imageEntries = new DdtImageEntry[numFaces][];
                 for (int face = 0; face < numFaces; ++face)
                 {
