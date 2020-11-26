@@ -223,8 +223,8 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to export gltf file.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to export gltf file.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
         private void ExportBrgToGltf(string filePath)
@@ -260,14 +260,14 @@ namespace AoMModelEditor.Models
                 {
                     _fileDialogService.SetLastModelFilePath(ofd.FileName);
                     var conv = new GltfBrgConverter();
-                    var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Skip });
+                    var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Strict });
                     LoadBrg(conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters()));
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to import gltf file as brg.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to import gltf file as brg.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
         private void ImportGltfToGrn()
@@ -288,8 +288,8 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to import gltf file as grn.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to import gltf file as grn.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
 
@@ -333,8 +333,8 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to export brg mtrl files.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to export brg mtrl files.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
 
@@ -364,8 +364,8 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to apply grn animation.{Environment.NewLine}{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to apply grn animation.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
     }
