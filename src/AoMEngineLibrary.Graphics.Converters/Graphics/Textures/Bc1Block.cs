@@ -6,7 +6,7 @@ namespace AoMEngineLibrary.Graphics.Textures
 {
     public struct Bc1Block : IBcBlock
     {
-        private const int PixelsPerBlock = 16;
+        public const int PixelsPerBlock = 16;
 
         public Bgr565 Color0;
         public Bgr565 Color1;

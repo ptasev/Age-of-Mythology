@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.28407.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoMEngineLibrary", "src\AoMEngineLibrary\AoMEngineLibrary.csproj", "{6DBC106C-7292-4872-A41A-EB7CEEEF0092}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMBrgEditor", "src\AoMBrgEditor\AoMBrgEditor.csproj", "{3B38591C-D355-4124-BBE7-C6098E01B2C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoMBrgEditor", "src\AoMBrgEditor\AoMBrgEditor.csproj", "{3B38591C-D355-4124-BBE7-C6098E01B2C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMDdtConverter", "src\AoMDdtConverter\AoMDdtConverter.csproj", "{32B582DC-0BEA-4097-8E20-33A245AE1F0D}"
 EndProject
@@ -29,7 +29,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMModelEditorOld", "src\Ao
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoMModelEditor", "src\AoMModelEditor\AoMModelEditor.csproj", "{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoMEngineLibrary.Graphics.Converters", "src\AoMEngineLibrary.Graphics.Converters\AoMEngineLibrary.Graphics.Converters.csproj", "{BB8F29ED-84E4-4F53-954B-2F13A667F5E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoMEngineLibrary.Graphics.Converters", "src\AoMEngineLibrary.Graphics.Converters\AoMEngineLibrary.Graphics.Converters.csproj", "{BB8F29ED-84E4-4F53-954B-2F13A667F5E3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoMEngineLibrary.Benchmarks", "tests\AoMEngineLibrary.Benchmarks\AoMEngineLibrary.Benchmarks.csproj", "{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -179,6 +181,18 @@ Global
 		{BB8F29ED-84E4-4F53-954B-2F13A667F5E3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BB8F29ED-84E4-4F53-954B-2F13A667F5E3}.Release|x64.ActiveCfg = Release|Any CPU
 		{BB8F29ED-84E4-4F53-954B-2F13A667F5E3}.Release|x64.Build.0 = Release|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Debug|x64.Build.0 = Debug|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Release|x64.ActiveCfg = Release|Any CPU
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -196,6 +210,7 @@ Global
 		{EC51EA7A-608B-4B38-8A32-2CF6A0451ABE} = {F57D2F83-5E0E-4CEB-939E-0226861A42A2}
 		{D5C2E53D-C35C-4E1B-9640-33B20DAFBB21} = {F57D2F83-5E0E-4CEB-939E-0226861A42A2}
 		{BB8F29ED-84E4-4F53-954B-2F13A667F5E3} = {F57D2F83-5E0E-4CEB-939E-0226861A42A2}
+		{02BA8DAF-A7B4-4F85-8E19-DE347AB21194} = {025535BD-83A7-4D82-A672-570FEB96895D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {064AD83C-2634-41F5-BBD4-475F061C4CE8}
