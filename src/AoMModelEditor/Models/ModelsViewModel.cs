@@ -59,6 +59,9 @@ namespace AoMModelEditor.Models
                 this.WhenAnyValue(vm => vm.IsBrg));
             ApplyGrnAnimationCommand = ReactiveCommand.Create(ApplyGrnAnimation,
                 this.WhenAnyValue(vm => vm.IsGrn));
+
+            _modelObjects.Add(_brgSettingsViewModel);
+            _modelObjects.Add(_grnSettingsViewModel);
         }
 
         public BrgFile GetBrg()
@@ -100,6 +103,7 @@ namespace AoMModelEditor.Models
                 this.RaisePropertyChanged(nameof(IsGrn));
 
                 _modelObjects.Add(_brgSettingsViewModel);
+                _modelObjects.Add(_grnSettingsViewModel);
 
                 BrgMeshViewModel? meshVM = null;
                 if (brg.Meshes.Count > 0)
@@ -146,6 +150,7 @@ namespace AoMModelEditor.Models
                 this.RaisePropertyChanged(nameof(IsBrg));
                 this.RaisePropertyChanged(nameof(IsGrn));
 
+                _modelObjects.Add(_brgSettingsViewModel);
                 _modelObjects.Add(_grnSettingsViewModel);
 
                 var statsVM = new GrnStatsViewModel(grn);
@@ -253,7 +258,7 @@ namespace AoMModelEditor.Models
             try
             {
                 var ofd = _fileDialogService.GetModelOpenFileDialog();
-                ofd.Filter = "Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
+                ofd.Filter = "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
