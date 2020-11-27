@@ -11,6 +11,7 @@ namespace AoMEngineLibrary.Graphics.Grn
 {
     public class GltfGrnConverter
     {
+        private record GltfGrnMatMapping(int GrnMatId, int TexCoordSet);
         private static readonly Quaternion RotX90Quat;
         private static readonly Matrix4x4 RotX90;
 
@@ -91,7 +92,7 @@ namespace AoMEngineLibrary.Graphics.Grn
 
         public void ConvertMeshes(GrnFile grn, ModelRoot gltf, List<Node> nodes, Dictionary<int, int> nodeBoneIndexMap)
         {
-            Dictionary<int, int> matIdMapping = new Dictionary<int, int>();
+            var matIdMapping = new Dictionary<int, GltfGrnMatMapping>();
 
             var meshNodes = nodes.Where(n => n.Mesh != null);
             foreach (var inst in meshNodes)
@@ -114,7 +115,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 ConvertMesh(grn, inst, nodeBoneIndexMap, matIdMapping);
             }
         }
-        private void ConvertMesh(GrnFile grn, Node meshNode, Dictionary<int, int> nodeBoneIndexMap, Dictionary<int, int> matIdMapping)
+        private void ConvertMesh(GrnFile grn, Node meshNode, Dictionary<int, int> nodeBoneIndexMap, Dictionary<int, GltfGrnMatMapping> matIdMapping)
         {
             GrnMesh mesh = new GrnMesh(grn);
             mesh.DataExtensionIndex = grn.AddDataExtension(meshNode.Mesh.Name ?? meshNode.Name ?? $"mesh{meshNode.Mesh.LogicalIndex}");
@@ -147,13 +148,28 @@ namespace AoMEngineLibrary.Graphics.Grn
                     p.DrawPrimitiveType == PrimitiveType.POINTS)
                     continue;
 
+                // Get the new material index in grn
+                int faceMatId = p.Material.LogicalIndex;
+                int texCoordSet = 0;
+                if (matIdMapping.ContainsKey(faceMatId))
+                {
+                    var mapping = matIdMapping[faceMatId];
+                    faceMatId = (Int16)mapping.GrnMatId;
+                    texCoordSet = mapping.TexCoordSet;
+                }
+                else
+                {
+                    throw new InvalidDataException($"Mesh ({gltfMesh.Name}) has an invalid material id " + faceMatId + ".");
+                }
+
+                string texCoordAccessorName = $"TEXCOORD_{texCoordSet}";
+
                 // Make sure we have all the necessary data
                 var vertexAccessors = p.VertexAccessors;
                 if (!vertexAccessors.ContainsKey("POSITION")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have positions.");
                 if (!vertexAccessors.ContainsKey("NORMAL")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have normals.");
 
-                if (!vertexAccessors.ContainsKey("TEXCOORD_0")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have tex coord set.");
-                if (vertexAccessors.ContainsKey("TEXCOORD_1")) throw new InvalidOperationException($"Can't convert mesh ({gltfMesh.Name}) with more than one set of texcoords.");
+                if (!vertexAccessors.ContainsKey(texCoordAccessorName)) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have tex coord set {texCoordSet}.");
 
                 if (!vertexAccessors.ContainsKey("JOINTS_0")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have a set of joints.");
                 if (vertexAccessors.ContainsKey("JOINTS_1")) throw new InvalidOperationException($"Can't convert mesh ({gltfMesh.Name}) with more than one set of joints.");
@@ -164,7 +180,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 // Grab the data
                 var positions = vertexAccessors["POSITION"].AsVector3Array();
                 var normals = vertexAccessors["NORMAL"].AsVector3Array();
-                var texCoords = vertexAccessors["TEXCOORD_0"].AsVector2Array();
+                var texCoords = vertexAccessors[texCoordAccessorName].AsVector2Array();
                 var joints = vertexAccessors["JOINTS_0"].AsVector4Array();
                 var weights = vertexAccessors["WEIGHTS_0"].AsVector4Array();
 
@@ -196,17 +212,6 @@ namespace AoMEngineLibrary.Graphics.Grn
                     mesh.Normals.Add(finNorm);
                     mesh.TextureCoordinates.Add(new Vector3(texCoords[i], 0));
                     mesh.VertexWeights.Add(vw);
-                }
-
-                // Get the new material index in grn
-                int faceMatId = p.Material.LogicalIndex;
-                if (matIdMapping.ContainsKey(faceMatId))
-                {
-                    faceMatId = (Int16)matIdMapping[faceMatId];
-                }
-                else
-                {
-                    throw new InvalidDataException("A face has an invalid material id " + faceMatId + ".");
                 }
 
                 foreach (var tri in p.GetTriangleIndices())
@@ -336,7 +341,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             }
         }
 
-        private void ConvertMaterials(IEnumerable<Material> gltfMats, GrnFile grn, Dictionary<int, int> matIdMapping)
+        private void ConvertMaterials(IEnumerable<Material> gltfMats, GrnFile grn, Dictionary<int, GltfGrnMatMapping> matIdMapping)
         {
             foreach (var gltfMat in gltfMats)
             {
@@ -344,7 +349,7 @@ namespace AoMEngineLibrary.Graphics.Grn
 
                 GrnMaterial mat = new GrnMaterial(grn);
                 int id = grn.Materials.Count;
-                ConvertMaterial(gltfMat, mat, grn);
+                ConvertMaterial(gltfMat, mat, grn, out var texCoordSet);
 
                 int matListIndex = grn.Materials.IndexOf(mat);
                 int actualMatId = gltfMat.LogicalIndex;
@@ -352,7 +357,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 {
                     if (!matIdMapping.ContainsKey(actualMatId))
                     {
-                        matIdMapping.Add(actualMatId, matListIndex);
+                        matIdMapping.Add(actualMatId, new(matListIndex, texCoordSet));
                     }
                     grn.DataExtensions.RemoveAt(mat.DataExtensionIndex);
                 }
@@ -361,18 +366,19 @@ namespace AoMEngineLibrary.Graphics.Grn
                     grn.Materials.Add(mat);
                     if (matIdMapping.ContainsKey(actualMatId))
                     {
-                        matIdMapping[actualMatId] = id;
+                        matIdMapping[actualMatId] = new(id, texCoordSet);
                     }
                     else
                     {
-                        matIdMapping.Add(actualMatId, id);
+                        matIdMapping.Add(actualMatId, new(id, texCoordSet));
                     }
                 }
             }
         }
-        private void ConvertMaterial(Material gltfMat, GrnMaterial mat, GrnFile grn)
+        private void ConvertMaterial(Material gltfMat, GrnMaterial mat, GrnFile grn, out int texCoordSet)
         {
             mat.DataExtensionIndex = grn.AddDataExtension(gltfMat.Name ?? $"mat{gltfMat.LogicalIndex}");
+            texCoordSet = GetDiffuseBaseColorTexCoord(gltfMat);
 
             GrnTexture? tex = null;
             var diffuseTextureName = GetDiffuseTexture(gltfMat);
@@ -402,15 +408,26 @@ namespace AoMEngineLibrary.Graphics.Grn
                     }
                 }
             }
-        }
-        private string GetDiffuseTexture(Material srcMaterial)
-        {
-            var tex = srcMaterial.GetDiffuseTexture();
-            if (tex == null) return string.Empty;
-            if (tex.PrimaryImage == null) return string.Empty;
 
-            string name = tex.PrimaryImage.Name ?? tex.Name ?? srcMaterial.Name ?? $"tex{tex.LogicalIndex}";
-            return name;
+            static string GetDiffuseTexture(Material srcMaterial)
+            {
+                var tex = srcMaterial.GetDiffuseTexture();
+                if (tex == null) return string.Empty;
+                if (tex.PrimaryImage == null) return string.Empty;
+
+                string name = tex.PrimaryImage.Name ?? tex.Name ?? srcMaterial.Name ?? $"tex{tex.LogicalIndex}";
+                return name;
+            }
+            static int GetDiffuseBaseColorTexCoord(Material srcMaterial)
+            {
+                var channel = srcMaterial.FindChannel("Diffuse");
+                if (channel.HasValue) return channel.Value.TextureCoordinate;
+
+                channel = srcMaterial.FindChannel("BaseColor");
+                if (channel.HasValue) return channel.Value.TextureCoordinate;
+
+                return 0;
+            }
         }
     }
 }
