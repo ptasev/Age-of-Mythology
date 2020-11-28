@@ -117,7 +117,7 @@
             foreach (KeyValuePair<int, List<int>> rendPassTri in renderPassTriangles.TextureIndices)
             {
                 this.Faces[rendPassTri.Key].TextureIndices = rendPassTri.Value;
-                this.Faces[rendPassTri.Key].MaterialIndex = (Int16)matIndex;
+                this.Faces[rendPassTri.Key].MaterialIndex = matIndex;
             }
         }
         public void WriteRenderPass(GrnNode rendPassSecNode, int meshIndex)

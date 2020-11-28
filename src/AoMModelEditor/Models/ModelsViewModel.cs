@@ -280,7 +280,7 @@ namespace AoMModelEditor.Models
             try
             {
                 var ofd = _fileDialogService.GetModelOpenFileDialog();
-                ofd.Filter = "Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
+                ofd.Filter = "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
