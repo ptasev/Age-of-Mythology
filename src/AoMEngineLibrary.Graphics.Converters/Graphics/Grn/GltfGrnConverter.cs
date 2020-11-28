@@ -139,7 +139,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             // Export Vertices, Normals, TexCoords, VertexWeights and Faces
             int baseVertexIndex = 0;
             Mesh gltfMesh = meshNode.Mesh;
-            foreach (var p in meshNode.Mesh.Primitives)
+            foreach (var p in gltfMesh.Primitives)
             {
                 // skip primitives that aren't tris
                 if (p.DrawPrimitiveType == PrimitiveType.LINES ||
@@ -154,7 +154,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 if (matIdMapping.ContainsKey(faceMatId))
                 {
                     var mapping = matIdMapping[faceMatId];
-                    faceMatId = (Int16)mapping.GrnMatId;
+                    faceMatId = mapping.GrnMatId;
                     texCoordSet = mapping.TexCoordSet;
                 }
                 else
@@ -191,6 +191,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                     var pos = positions[i];
                     var norm = normals[i];
 
+                    // Adjust vertex and normal by inverse bind matrix since grn doesn't store that
                     GrnVertexWeight vw = new GrnVertexWeight();
                     var finPos = Vector3.Zero;
                     var finNorm = Vector3.Zero;

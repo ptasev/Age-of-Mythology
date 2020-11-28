@@ -28,9 +28,9 @@
             for (int i = 0; i < this.GetReadDataLength() / 24; ++i)
             {
                 this.Faces.Add(new GrnFace());
-                this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
-                this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
-                this.Faces[i].Indices.Add((Int16)reader.ReadInt32());
+                this.Faces[i].Indices.Add(reader.ReadInt32());
+                this.Faces[i].Indices.Add(reader.ReadInt32());
+                this.Faces[i].Indices.Add(reader.ReadInt32());
                 this.Faces[i].NormalIndices.Add(reader.ReadInt32());
                 this.Faces[i].NormalIndices.Add(reader.ReadInt32());
                 this.Faces[i].NormalIndices.Add(reader.ReadInt32());
@@ -43,7 +43,7 @@
             {
                 for (int j = 0; j < this.Faces[i].Indices.Count; ++j)
                 {
-                    writer.Write((Int32)this.Faces[i].Indices[j]);
+                    writer.Write(this.Faces[i].Indices[j]);
                 }
                 for (int j = 0; j < this.Faces[i].NormalIndices.Count; ++j)
                 {
