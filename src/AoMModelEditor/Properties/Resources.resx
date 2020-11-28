@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppTitleLong" xml:space="preserve">
-    <value>AoM Model Editor 1.0 Beta 3</value>
+    <value>AoM Model Editor 1.0 Beta 4</value>
   </data>
   <data name="AppTitleShort" xml:space="preserve">
-    <value>AME 1.0 Beta 3</value>
+    <value>AME 1.0 Beta 4</value>
   </data>
 </root>
