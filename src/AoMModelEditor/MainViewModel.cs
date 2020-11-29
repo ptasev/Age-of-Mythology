@@ -1,6 +1,7 @@
 ﻿using AoMModelEditor.Dialogs;
 using AoMModelEditor.Models;
 using AoMModelEditor.Settings;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using System;
 using System.IO;
@@ -34,15 +35,15 @@ namespace AoMModelEditor
         public ReactiveCommand<Unit, Unit> OpenCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
-        public MainViewModel()
+        public MainViewModel(AppSettings appSettings, FileDialogService fileDialogService, ModelsViewModel modelsVM, ILogger<MainViewModel> logger)
         {
             _title = Properties.Resources.AppTitleLong;
-            _appSettings = new AppSettings();
+            _appSettings = appSettings;
             _appSettings.Read();
 
-            _fileDialogService = new FileDialogService();
+            _fileDialogService = fileDialogService;
 
-            ModelsViewModel = new ModelsViewModel(_appSettings, _fileDialogService);
+            ModelsViewModel = modelsVM;
 
             OpenCommand = ReactiveCommand.Create(Open);
             SaveCommand = ReactiveCommand.Create(Save,

@@ -1,12 +1,8 @@
-﻿using ReactiveUI;
-using Splat;
+﻿using AoMModelEditor.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 
 namespace AoMModelEditor
@@ -16,9 +12,30 @@ namespace AoMModelEditor
     /// </summary>
     public partial class App : Application
     {
+        private static readonly ServiceCollection _serviceCollection;
+
+        static App()
+        {
+            var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs/ame-log-.txt");
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            _serviceCollection = new ServiceCollection();
+            ServiceLocator.Configure(_serviceCollection);
+        }
+
         public App()
         {
-            Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
+            Log.Logger.Information($"Starting app {AoMModelEditor.Properties.Resources.AppTitleLong}.");
+        }
+
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            // Create main application window
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
         }
     }
 }

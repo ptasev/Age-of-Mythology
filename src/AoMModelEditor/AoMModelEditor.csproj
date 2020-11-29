@@ -22,9 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="PropertyTools.Wpf" Version="3.1.0-alpha0041" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="12.1.5" />
     <PackageReference Include="ReactiveUI.WPF" Version="12.1.5" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="9.7.1" />
+    <PackageReference Include="Splat.Serilog" Version="9.7.1" />
   </ItemGroup>
 
   <ItemGroup>

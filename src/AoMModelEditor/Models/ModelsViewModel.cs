@@ -5,6 +5,7 @@ using AoMModelEditor.Dialogs;
 using AoMModelEditor.Models.Brg;
 using AoMModelEditor.Models.Grn;
 using AoMModelEditor.Settings;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SharpGLTF.Schema2;
 using System;
@@ -26,6 +27,7 @@ namespace AoMModelEditor.Models
         private readonly object _modelLock = new object();
         private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
+        private readonly ILogger<ModelsViewModel> _logger;
         private readonly TextureManager _textureManager;
         private readonly BrgSettingsViewModel _brgSettingsViewModel;
         private readonly GrnSettingsViewModel _grnSettingsViewModel;
@@ -42,10 +44,11 @@ namespace AoMModelEditor.Models
         public ReactiveCommand<Unit, Unit> ExportBrgMtrlFilesCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyGrnAnimationCommand { get; }
 
-        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService)
+        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService, ILogger<ModelsViewModel> logger)
         {
             _appSettings = appSettings;
             _fileDialogService = fileDialogService;
+            _logger = logger;
             _textureManager = new TextureManager(_appSettings.GameDirectory);
             _brgSettingsViewModel = new BrgSettingsViewModel();
             _grnSettingsViewModel = new GrnSettingsViewModel();
@@ -96,6 +99,7 @@ namespace AoMModelEditor.Models
         {
             lock (_modelLock)
             {
+                _logger.LogInformation("Loading brg file.");
                 _modelObjects.Clear();
                 _brg = brg;
                 _grn = null;
@@ -129,6 +133,8 @@ namespace AoMModelEditor.Models
                     meshVM.IsSelected = true;
                 else
                     _brgSettingsViewModel.IsSelected = true;
+
+                _logger.LogInformation("Finished loading brg file.");
             }
         }
         private void LoadGrn(string filePath)
@@ -144,6 +150,7 @@ namespace AoMModelEditor.Models
         {
             lock (_modelLock)
             {
+                _logger.LogInformation("Loading grn file.");
                 _modelObjects.Clear();
                 _brg = null;
                 _grn = grn;
@@ -172,6 +179,8 @@ namespace AoMModelEditor.Models
                 }
 
                 statsVM.IsSelected = true;
+
+                _logger.LogInformation("Finished loading grn file.");
             }
         }
 
@@ -188,21 +197,25 @@ namespace AoMModelEditor.Models
         }
         private void SaveBrg(string filePath)
         {
+            _logger.LogInformation("Saving brg file.");
             var brg = GetBrg();
 
             using (var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
                 brg.Write(fs);
             }
+            _logger.LogInformation("Finished saving brg file.");
         }
         private void SaveGrn(string filePath)
         {
+            _logger.LogInformation("Saving grn file.");
             var grn = GetGrn();
 
             using (var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
                 grn.Write(fs);
             }
+            _logger.LogInformation("Finished saving grn file.");
         }
 
         private void ExportGltf()
@@ -228,12 +241,14 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to export gltf file.");
                 MessageBox.Show($"Failed to export gltf file.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
         private void ExportBrgToGltf(string filePath)
         {
+            _logger.LogInformation("Exporting gltf file as brg.");
             var brg = GetBrg();
             var parms = new BrgGltfParameters()
             {
@@ -243,14 +258,17 @@ namespace AoMModelEditor.Models
             BrgGltfConverter conv = new BrgGltfConverter();
             var gltf = conv.Convert(brg, parms, _textureManager);
             gltf.Save(filePath);
+            _logger.LogInformation("Finished exporting gltf file as brg.");
         }
         private void ExportGrnToGltf(string filePath)
         {
+            _logger.LogInformation("Exporting gltf file as grn.");
             var grn = GetGrn();
 
             GrnGltfConverter conv = new GrnGltfConverter();
             var gltf = conv.Convert(grn, _textureManager);
             gltf.Save(filePath);
+            _logger.LogInformation("Finished exporting gltf file as grn.");
         }
 
         private void ImportGltfToBrg()
@@ -264,13 +282,17 @@ namespace AoMModelEditor.Models
                 if (dr.HasValue && dr == true)
                 {
                     _fileDialogService.SetLastModelFilePath(ofd.FileName);
+                    _logger.LogInformation("Importing gltf file as brg.");
                     var conv = new GltfBrgConverter();
                     var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Strict });
-                    LoadBrg(conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters()));
+                    var brg = conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters());
+                    _logger.LogInformation("Finished importing gltf file as brg.");
+                    LoadBrg(brg);
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to import gltf file as brg.");
                 MessageBox.Show($"Failed to import gltf file as brg.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
@@ -286,13 +308,17 @@ namespace AoMModelEditor.Models
                 if (dr.HasValue && dr == true)
                 {
                     _fileDialogService.SetLastModelFilePath(ofd.FileName);
+                    _logger.LogInformation("Importing gltf file as grn.");
                     var conv = new GltfGrnConverter();
                     var gltf = ModelRoot.Load(ofd.FileName);
-                    LoadGrn(conv.Convert(gltf, _grnSettingsViewModel.CreateGltfGrnParameters()));
+                    var grn = conv.Convert(gltf, _grnSettingsViewModel.CreateGltfGrnParameters());
+                    _logger.LogInformation("Finished importing gltf file as grn.");
+                    LoadGrn(grn);
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to import gltf file as grn.");
                 MessageBox.Show($"Failed to import gltf file as grn.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
@@ -338,6 +364,7 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to export brg mtrl files.");
                 MessageBox.Show($"Failed to export brg mtrl files.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }
@@ -369,6 +396,7 @@ namespace AoMModelEditor.Models
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to apply grn animation.");
                 MessageBox.Show($"Failed to apply grn animation.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             }

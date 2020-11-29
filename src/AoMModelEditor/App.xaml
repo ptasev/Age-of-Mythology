@@ -2,8 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AoMModelEditor"
-             StartupUri="MainWindow.xaml"
-             xmlns:conv="clr-namespace:AoMModelEditor.Converters">
+             xmlns:conv="clr-namespace:AoMModelEditor.Converters"
+             Startup="Application_Startup">
     <Application.Resources>
         <conv:EnumFlagConverter x:Key="eflagConverter"/>
     </Application.Resources>
