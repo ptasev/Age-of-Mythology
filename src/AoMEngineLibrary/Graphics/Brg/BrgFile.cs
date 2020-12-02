@@ -29,12 +29,16 @@
 
             this.Animation = new BrgAnimation();
         }
-        public BrgFile(System.IO.FileStream fileStream)
+        public BrgFile(FileStream fileStream)
+            : this((Stream)fileStream)
+        {
+            this.FileName = fileStream.Name;
+        }
+        public BrgFile(Stream fileStream)
             : this()
         {
             using (BrgBinaryReader reader = new BrgBinaryReader(fileStream))
             {
-                this.FileName = fileStream.Name;
                 this.Header = new BrgHeader(reader);
                 if (this.Header.Magic != "BANG")
                 {
