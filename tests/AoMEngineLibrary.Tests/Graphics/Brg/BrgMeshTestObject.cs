@@ -11,6 +11,10 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
         private readonly BrgMesh _mesh;
 
         public int HeaderVersion { get; init; }
+        public BrgMeshFormat Format { get; init; }
+        public BrgMeshInterpolationType InterpType { get; init; }
+        public BrgMeshAnimType AnimType { get; init; }
+        public BrgMeshFlag Flags { get; init; }
 
         public int VertCount { get; init; }
         public int NormalsCount { get; init; }
@@ -29,6 +33,11 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
             Assert.NotNull(_mesh.Header);
             Assert.Equal(HeaderVersion, _mesh.Header.Version);
 
+            Assert.Equal(Format, _mesh.Header.Format);
+            Assert.Equal(InterpType, _mesh.Header.InterpolationType);
+            Assert.Equal(AnimType, _mesh.Header.AnimationType);
+            Assert.Equal(Flags, _mesh.Header.Flags);
+
             HasValidVertCount();
             HasValidNormalsCount();
             HasValidTexCoordsCount();
@@ -39,6 +48,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
 
         public void HasValidVertCount()
         {
+            Assert.Equal(VertCount, _mesh.Header.NumVertices);
             Assert.Equal(VertCount, _mesh.Vertices.Count);
         }
 
@@ -54,11 +64,14 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
 
         public void HasValidFacesCount()
         {
+            if (!_mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                Assert.Equal(FaceCount, _mesh.Header.NumFaces);
             Assert.Equal(FaceCount, _mesh.Faces.Count);
         }
 
         public void HasValidNonUniformKeys()
         {
+            Assert.Equal(NonUniformKeys.Count, _mesh.ExtendedHeader.NumNonUniformKeys);
             Assert.Equal(NonUniformKeys.Count, _mesh.NonUniformKeys.Count);
             Assert.Equal(NonUniformKeys, _mesh.NonUniformKeys);
         }

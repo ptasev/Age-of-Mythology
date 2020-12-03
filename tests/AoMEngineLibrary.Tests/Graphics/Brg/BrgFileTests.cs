@@ -12,11 +12,23 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
 
         public static readonly IEnumerable<object[]> Tests = new List<object[]>
         {
+            new object[]
+            {
+                "ai marker.brg",
+                (Func<string, BrgFile>)BrgFileTestCases.GetBrgFromTestFolder,
+                (Func<BrgFile, BrgFileTestObject>)BrgFileTestCases.CreateAIMarkerTest
+            },
             new object[] 
             { 
                 "archer n throwing axeman_attacka.brg",
                 (Func<string, BrgFile>)BrgFileTestCases.GetBrgFromTestFolder,
-                (Func<BrgFile, BrgFileTestObject>)BrgFileTestCases.CreateThrowingAxemanTest 
+                (Func<BrgFile, BrgFileTestObject>)BrgFileTestCases.CreateArcherThrowingAxemanTest 
+            },
+            new object[]
+            {
+                "scenario a dwarven forge tred.brg",
+                (Func<string, BrgFile>)BrgFileTestCases.GetBrgFromTestFolder,
+                (Func<BrgFile, BrgFileTestObject>)BrgFileTestCases.CreateScenDwarvenForgeTredTest
             }
         };
 
@@ -51,34 +63,6 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
 
             // Assert
             test.Validate();
-        }
-
-        [Theory]
-        [InlineData("ai marker.brg")]
-        [InlineData("archer n throwing axeman_attacka.brg")]
-        [InlineData("scenario a dwarven forge tred.brg")]
-        public void BrgFileReadWriteTest(string fileName)
-        {
-            // TODO: Implement proper equality test for brg.
-            string filePath = Path.Combine(basePath, fileName);
-
-            byte[] newData;
-            using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var ms = new MemoryStream())
-            {
-                BrgFile file = new BrgFile(fs);
-                file.Write(ms);
-
-                ms.Flush();
-                ms.Seek(0, SeekOrigin.Begin);
-                newData = ms.ToArray();
-
-                file.Write(File.Open(filePath + "2", FileMode.Create, FileAccess.Write, FileShare.Read));
-            }
-
-            byte[] origData = File.ReadAllBytes(filePath);
-
-            Assert.Equal(origData, newData);
         }
     }
 }
