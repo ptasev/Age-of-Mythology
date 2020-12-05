@@ -33,17 +33,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
     public class GltfBrgConverter
     {
-        private struct GltfMeshData
-        {
-            public bool HasTexCoords;
-            public GltfMeshBuilder MeshBuilder;
-
-            public GltfMeshData(bool hasTexCoords, GltfMeshBuilder mb)
-            {
-                this.HasTexCoords = hasTexCoords;
-                this.MeshBuilder = mb;
-            }
-        }
+        private record GltfMeshData(GltfMeshBuilder MeshBuilder, bool HasTexCoords);
 
         public GltfBrgConverter()
         {
@@ -175,11 +165,48 @@ namespace AoMEngineLibrary.Graphics.Brg
                     hasTexCoords = tri.A.GetMaterial().MaxTextCoords > 0;
                 }
 
+                var a = SetMaterialTexCoordToSlot0(tri.A, tri.Material);
+                var b = SetMaterialTexCoordToSlot0(tri.B, tri.Material);
+                var c = SetMaterialTexCoordToSlot0(tri.C, tri.Material);
                 var mat = new NullableGltfMaterial() { m = tri.Material };
-                mb.UsePrimitive(mat).AddTriangle(tri.A, tri.B, tri.C);
+                mb.UsePrimitive(mat).AddTriangle(a, b, c);
             }
 
-            return new GltfMeshData(hasTexCoords, mb);
+            return new GltfMeshData(mb, hasTexCoords);
+
+            static IVertexBuilder SetMaterialTexCoordToSlot0(IVertexBuilder vb, GltfMaterial mat)
+            {
+                // This func will get the diffuse/base color tex coordinate index
+                // and set that to slot 0 in the vertex material
+                if (mat is null) return vb;
+
+                var vbMat = vb.GetMaterial();
+                if (vbMat.MaxTextCoords <= 1) return vb;
+
+                var texIndex = GetDiffuseBaseColorTexCoord(mat);
+                if (texIndex == 0) return vb;
+
+                // It seems the tex index is higher than the max coordinate stored in the tex coord
+                // ignore for now without warning or error (in the future at least log as warning)
+                if (texIndex >= vbMat.MaxTextCoords) return vb;
+
+                // Place the tex coord at mat tex index into slot 0.
+                vbMat.SetTexCoord(0, vbMat.GetTexCoord(texIndex));
+                vb.SetMaterial(vbMat);
+
+                return vb;
+
+                static int GetDiffuseBaseColorTexCoord(GltfMaterial srcMaterial)
+                {
+                    var channel = srcMaterial.FindChannel("Diffuse");
+                    if (channel.HasValue) return channel.Value.TextureCoordinate;
+
+                    channel = srcMaterial.FindChannel("BaseColor");
+                    if (channel.HasValue) return channel.Value.TextureCoordinate;
+
+                    return 0;
+                }
+            }
         }
 
         private List<List<(int A, int B, int C)>> CalculateFaces(List<GltfMeshData> gltfMeshes)
