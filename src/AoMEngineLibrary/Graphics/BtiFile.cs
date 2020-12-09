@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -130,6 +129,12 @@ namespace AoMEngineLibrary.Graphics
 
                 w.Write($" fmt={Format}");
             }
+        }
+
+        public void Write(string filePath)
+        {
+            using (var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                Write(fs);
         }
     }
 }

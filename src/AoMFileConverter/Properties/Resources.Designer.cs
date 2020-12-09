@@ -68,15 +68,5 @@ namespace AoMFileConverter.Properties {
                 return ResourceManager.GetString("AppTitleLong", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-        /// </summary>
-        internal static System.Drawing.Icon Chimera {
-            get {
-                object obj = ResourceManager.GetObject("Chimera", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
     }
 }

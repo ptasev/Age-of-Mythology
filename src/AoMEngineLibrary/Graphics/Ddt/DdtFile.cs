@@ -144,5 +144,42 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 }
             }
         }
+
+        public BtiFile GetTextureInfo()
+        {
+            BtiFile bti = new BtiFile();
+
+            bti.AlphaBits = AlphaBits;
+            bti.AlphaTest = !Properties.HasFlag(DdtProperty.NoAlphaTest);
+            bti.UseMips = MipMapLevels > 0;
+            bti.CanBeLowDetail = !Properties.HasFlag(DdtProperty.NoLowDetail);
+            bti.Displacement = Properties.HasFlag(DdtProperty.DisplacementMap);
+            bti.Format = GetBtiTextureFormat();
+
+            return bti;
+        }
+
+        private BtiTextureFormat GetBtiTextureFormat()
+        {
+            return Format switch
+            {
+                DdtFormat.Raw32 => BtiTextureFormat.DeflatedRGBA8,
+                DdtFormat.Raw24 => BtiTextureFormat.DeflatedRGB8,
+                DdtFormat.BT8 when AlphaBits == 0 => BtiTextureFormat.BC1,
+                DdtFormat.BT8 when AlphaBits == 1 => BtiTextureFormat.BC1,
+                DdtFormat.BT8 when AlphaBits == 4 => BtiTextureFormat.BC2,
+                DdtFormat.Dxt1 => BtiTextureFormat.BC1,
+                DdtFormat.Dxt1Alpha => BtiTextureFormat.BC1,
+                DdtFormat.Dxt3Swizzled => BtiTextureFormat.BC2,
+                DdtFormat.AlphaData => BtiTextureFormat.DeflatedR8,
+                DdtFormat.BC2 => BtiTextureFormat.BC2,
+                DdtFormat.BC3 => BtiTextureFormat.BC3,
+                DdtFormat.RgbaDeflated => BtiTextureFormat.DeflatedRGBA8,
+                DdtFormat.RgbDeflated => BtiTextureFormat.DeflatedRGB8,
+                DdtFormat.AlphaDeflated => BtiTextureFormat.DeflatedR8,
+                DdtFormat.RgDeflated => BtiTextureFormat.DeflatedRG8,
+                _ => throw new InvalidOperationException($"Cannot convert ddt format {Format} to bti texture format.")
+            };
+        }
     }
 }
