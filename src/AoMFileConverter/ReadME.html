@@ -127,11 +127,28 @@
     </div>
     <div class="readme-main">
         <h2><a name="ApIn"></a>Application Information</h2>
-        <p>This simple application converts anim.txt, prt, mtrl, and brg files to xml for the Age of Mythology game.</p>
+        <p>This application converts anim.txt, ddt, bti, cub, prt, mtrl, and brg files to user friendly formats for the Age of Mythology game.</p>
         <h2><a name="Usag"></a>Usage</h2>
         <p>Simply drag, and drop (or use Open With) an anim.txt, prt, and/or mtrl file on the EXE to convert it to an Xml file, or the other way around to convert it accordingly.</p>
         <p>The output file will be in the same location as the input file, but with an added extension.</p>
         <p>Drag a Brg file on the EXE to extract all of its Mtrl files into a materials folder in the same path as the brg file.</p>
+        <h3>Converting bti/cub to ddt</h3>
+        <p>
+            Texture files can be converted by dropping a bti or cub file on the application executable.
+            If a bti file is dropped, the app expects to find a tga file with the same name.
+            If a cub file is dropped, the app expects to find bti/tga files in the same folder as the cub with the names specified inside of the cub file.
+        </p>
+        <p>
+            The bti file must specify the number of alpha bits, and the format. For example: <span style="background-color:#222222">alpha=1 fmt=BC3</span>
+            Avoid using alpha higher than 1 unless you want the game to render semi-transparent models which takes longer. The following formats are supported:
+        </p>
+        <ul>
+            <li>BC1, Alpha 0 -- RBG 565 with no alpha. Colors use 4 element palette per 4x4 block.</li>
+            <li>BC1, Alpha 1 -- RBG 565 with alpha 1. Colors use 3 element palette per 4x4 block when the block has alpha, and 4 when it doesn't. Alpha is either on or off.</li>
+            <li>BC2, Alpha 4 -- RGB 565 with alpha 4. Colors use 4 element palette per 4x4 block. Alpha limited to 4 bits and therefore 16 values.</li>
+            <li>BC3, Alpha 8 -- RGB 565 with alpha 8. Colors use 4 element palette per 4x4 block. Alpha uses 8 element palette per 4x4 block. Typically prefer this over BC2.</li>
+            <li>BC3, Alpha 1 -- RGB 565 with alpha 1. Colors use 4 element palette per 4x4 block. Use this when you want higher quality colors than BC1, Alpha 1 at the expense of doubling the file size.</li>
+        </ul>
     </div>
     <div class="readme-main">
         <h2><a name="Issu"></a>Issues</h2>
@@ -148,6 +165,14 @@
     <div class="readme-main">
         <h2><a name="Chan"></a>Changelog</h2>
         <ul>
+            <li>
+                <strong>vNext</strong>
+                <ul>
+                    <li>Added support for converting ddt to bti/cub/tga.</li>
+                    <li>Added support for converting bti/cub to ddt.</li>
+                </ul>
+            </li>
+
             <li>
                 <strong>1.2.0+20200629</strong>
                 <ul>

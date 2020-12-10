@@ -68,6 +68,9 @@ namespace AoMEngineLibrary.Graphics.Textures
 				throw new InvalidDataException("The source image bytes are not the required length.");
 			}
 
+			var finalBlockWidth = Math.Min(BlockPixelWidth, width);
+			var finalBlockHeight = Math.Min(BlockPixelHeight, height);
+
 			var vectors = new Vector4[PixelsPerBlock].AsSpan();
 			var encodedBlocks = MemoryMarshal.Cast<byte, TBlock>(source);
 			int blockIndex = 0;
@@ -75,7 +78,7 @@ namespace AoMEngineLibrary.Graphics.Textures
 			for (int blockRow = 0; blockRow < blockHeight; ++blockRow)
 			{
 				var startRow = blockRow * BlockPixelHeight;
-				var endRow = startRow + BlockPixelHeight;
+				var endRow = (blockRow + 1) == blockHeight ? startRow + finalBlockHeight : startRow + BlockPixelHeight;
 				for (int blockCol = 0; blockCol < blockWidth; ++blockCol, ++blockIndex)
 				{
 					var block = encodedBlocks[blockIndex];
@@ -83,10 +86,11 @@ namespace AoMEngineLibrary.Graphics.Textures
 
 					var vecIndex = 0;
 					var startCol = blockCol * BlockPixelWidth;
+					var colCount = (blockCol + 1) == blockWidth ? finalBlockWidth : BlockPixelWidth;
 					for (int row = startRow; row < endRow; ++row, vecIndex += BlockPixelWidth)
 					{
-						var rowSpan = destination.Slice(row * width + startCol, BlockPixelWidth);
-						var vecSpan = vectors.Slice(vecIndex, BlockPixelWidth);
+						var rowSpan = destination.Slice(row * width + startCol, colCount);
+						var vecSpan = vectors.Slice(vecIndex, colCount);
 						pixOps.FromVector4Destructive(Configuration.Default, vecSpan, rowSpan, PixelConversionModifiers.Scale);
 					}
 				}

@@ -67,7 +67,7 @@ namespace AoMEngineLibrary.Graphics
                     token = tokens[++i];
                     var parsed = byte.TryParse(token, out byte bits);
 
-                    if (!parsed || bits != 0 || bits != 1 || bits != 4 || bits != 8)
+                    if (!parsed || !(bits == 0 || bits == 1 || bits == 4 || bits == 8))
                     {
                         throw new InvalidDataException("Alpha bits must be 0, 1, 4, or 8.");
                     }
@@ -107,6 +107,12 @@ namespace AoMEngineLibrary.Graphics
                     throw new InvalidDataException($"Unknown texture info token {token}.");
                 }
             }
+        }
+
+        public void Read(string filePath)
+        {
+            using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Read(fs);
         }
 
         public void Write(Stream stream)

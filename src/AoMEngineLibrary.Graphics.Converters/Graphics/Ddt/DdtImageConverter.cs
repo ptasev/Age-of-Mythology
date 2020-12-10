@@ -48,7 +48,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
             }
             else if (ddt.Format == DdtFormat.BC3) // aka DXT5
             {
-                // AoMEE only, supports 4-bit alpha, but some ddt have 0/1 for ddt.AlphaBits by mistake
+                // AoMEE only, supports 8-bit alpha, but some ddt have 0 for ddt.AlphaBits by mistake
                 images = DecodeBlockCompression<Bc3Block, Rgba32>(ddt);
             }
             else if (ddt.Format == DdtFormat.BT8 && ddt.AlphaBits == 0)
@@ -65,12 +65,12 @@ namespace AoMEngineLibrary.Graphics.Ddt
             }
             else if (ddt.Format == DdtFormat.RgbaDeflated)
             {
-                // AoMEE only. 8-bit alpha although some ddt have 0/1/4
+                // AoMEE only. 8-bit alpha although some ddt have 0/4
                 images = DecodeRawDeflated<Bgra32>(ddt);
             }
             else if (ddt.Format == DdtFormat.RgbDeflated)
             {
-                // AoMEE only. no alpha although some ddt have 0/1/4
+                // AoMEE only. no alpha although some ddt have 1/4
                 images = DecodeRawDeflated<Bgr24>(ddt);
             }
             else

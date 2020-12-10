@@ -21,7 +21,7 @@ namespace AoMFileConverter
                 if (args.Length == 0)
                 {
                     Console.WriteLine("No input arguments were found!");
-                    Console.WriteLine($"Drag and drop one or more files on the EXE to convert.{Environment.NewLine}Supported: anim.txt, ddt, prt, mtrl, brg");
+                    Console.WriteLine($"Drag and drop one or more files on the EXE to convert.{Environment.NewLine}Supported: anim.txt, ddt, bti, cub, prt, mtrl, brg");
                 }
 
                 foreach (string f in args)
@@ -70,6 +70,16 @@ namespace AoMFileConverter
             {
                 TextureDecoder.Decode(f, Path.GetDirectoryName(f));
                 Console.WriteLine("Success! Ddt converted.");
+            }
+            else if (f.EndsWith(".bti"))
+            {
+                TextureEncoder.Encode(f, Path.GetDirectoryName(f));
+                Console.WriteLine("Success! Bti converted.");
+            }
+            else if (f.EndsWith(".cub"))
+            {
+                TextureEncoder.Encode(f, Path.GetDirectoryName(f));
+                Console.WriteLine("Success! Cub converted.");
             }
             else if (f.EndsWith(".prt"))
             {
