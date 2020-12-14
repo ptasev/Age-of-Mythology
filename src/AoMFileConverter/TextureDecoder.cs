@@ -20,16 +20,11 @@ namespace AoMFileConverter
 
         public static void Decode(string filePath, string outputDirectoryPath)
         {
-            Texture tex;
-            BtiFile bti;
             CubFile cub = new CubFile();
-            using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                DdtFile ddt = new DdtFile();
-                ddt.Read(fs);
-                tex = converter.Convert(ddt);
-                bti = ddt.GetTextureInfo();
-            }
+            DdtFile ddt = new DdtFile();
+            ddt.Read(filePath);
+
+            Texture tex = converter.Convert(ddt);
 
             // write main image from each face
             string fileName = Path.GetFileName(filePath);
@@ -47,15 +42,16 @@ namespace AoMFileConverter
                     outputFilePath = baseOutputFilePath;
 
                 var img = tex.Images[i][0];
-                //tgaEncoder.BitsPerPixel = img.PixelType.BitsPerPixel == 24 ? TgaBitsPerPixel.Pixel24 : TgaBitsPerPixel.Pixel32;
                 img.SaveAsTga(outputFilePath + ".tga", tgaEncoder);
-                bti.Write(outputFilePath + ".bti");
             }
 
             if (tex.Images.Length > 1)
             {
                 cub.Write(baseOutputFilePath + ".cub");
             }
+
+            BtiFile bti = ddt.GetTextureInfo();
+            bti.Write(baseOutputFilePath + ".bti");
         }
     }
 }

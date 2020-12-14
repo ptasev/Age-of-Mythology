@@ -149,6 +149,12 @@ namespace AoMEngineLibrary.Graphics.Ddt
             }
         }
 
+        public void Read(string filePath)
+        {
+            using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Read(fs);
+        }
+
         public void Write(Stream stream)
         {
             using (var w = new BinaryWriter(stream))

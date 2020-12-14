@@ -139,7 +139,7 @@
             If a cub file is dropped, the app expects to find bti/tga files in the same folder as the cub with the names specified inside of the cub file.
         </p>
         <p>
-            The bti file must specify the number of alpha bits, and the format. For example: <span style="background-color:#222222">alpha=1 fmt=BC3</span>
+            The bti file must specify the number of alpha bits, and the format. For example: <span style="background-color:#474747">alpha=1 fmt=BC3</span>
             Avoid using alpha higher than 1 unless you want the game to render semi-transparent models which takes longer. The following formats are supported:
         </p>
         <ul>
@@ -148,6 +148,11 @@
             <li>BC2, Alpha 4 -- RGB 565 with alpha 4. Colors use 4 element palette per 4x4 block. Alpha limited to 4 bits and therefore 16 values.</li>
             <li>BC3, Alpha 8 -- RGB 565 with alpha 8. Colors use 4 element palette per 4x4 block. Alpha uses 8 element palette per 4x4 block. Typically prefer this over BC2.</li>
             <li>BC3, Alpha 1 -- RGB 565 with alpha 1. Colors use 4 element palette per 4x4 block. Use this when you want higher quality colors than BC1, Alpha 1 at the expense of doubling the file size.</li>
+        </ul>
+        <p>In addition to alpha and format, the following properties can be specified in the bti file:</p>
+        <ul>
+            <li>nomip -- Disables generation of mip levels.</li>
+            <li>noalphatest -- Tells the renderer not to make invisible the parts of the texture where the alpha is 0. This is typically used when the alpha represents where to use player color.</li>
         </ul>
     </div>
     <div class="readme-main">

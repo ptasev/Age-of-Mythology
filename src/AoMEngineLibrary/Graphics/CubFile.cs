@@ -5,7 +5,7 @@ namespace AoMEngineLibrary.Graphics
 {
     public class CubFile
     {
-        public readonly string[] FileNames;
+        public string[] FileNames { get; }
 
         public string UpFileName
         {
@@ -46,6 +46,41 @@ namespace AoMEngineLibrary.Graphics
         public CubFile()
         {
             FileNames = new string[6];
+        }
+
+        public void Read(Stream stream)
+        {
+            using (var r = new StreamReader(stream))
+            {
+                int index = 0;
+                while (r.Peek() >= 0)
+                {
+                    var line = r.ReadLine();
+
+                    line = line.TrimStart();
+
+                    if (line[0] == '/' && line[1] == '/')
+                        continue;
+
+                    line = line.TrimEnd();
+
+                    if (line.Length <= 0)
+                        continue;
+
+                    FileNames[index++] = line;
+                    if (index >= FileNames.Length)
+                        break;
+                }
+
+                if (index < FileNames.Length)
+                    throw new InvalidDataException("Expected 6 texture names in cub file.");
+            }
+        }
+
+        public void Read(string filePath)
+        {
+            using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Read(fs);
         }
 
         public void Write(Stream stream)

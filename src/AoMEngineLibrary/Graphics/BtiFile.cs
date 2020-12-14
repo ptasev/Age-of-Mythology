@@ -59,6 +59,7 @@ namespace AoMEngineLibrary.Graphics
             // set defaults
             Reset();
 
+            bool foundAlpha = false, foundFormat = false;
             for (int i = 0; i < tokens.Length; ++i)
             {
                 var token = tokens[i];
@@ -73,6 +74,7 @@ namespace AoMEngineLibrary.Graphics
                     }
 
                     AlphaBits = bits;
+                    foundAlpha = true;
                 }
                 else if (token.Equals("fmt", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -85,6 +87,7 @@ namespace AoMEngineLibrary.Graphics
                     }
 
                     Format = fmt;
+                    foundFormat = true;
                 }
                 else if (token.Equals("nomip", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -106,6 +109,11 @@ namespace AoMEngineLibrary.Graphics
                 {
                     throw new InvalidDataException($"Unknown texture info token {token}.");
                 }
+            }
+
+            if (!foundAlpha || !foundFormat)
+            {
+                throw new InvalidDataException("The bti must specify both the alpha and the format (fmt).");
             }
         }
 
