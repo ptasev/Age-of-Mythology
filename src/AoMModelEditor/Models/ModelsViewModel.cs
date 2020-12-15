@@ -109,10 +109,12 @@ namespace AoMModelEditor.Models
                 _modelObjects.Add(_brgSettingsViewModel);
                 _modelObjects.Add(_grnSettingsViewModel);
 
-                BrgMeshViewModel? meshVM = null;
+                var statsVM = new BrgStatsViewModel(brg);
+                _modelObjects.Add(statsVM);
+
                 if (brg.Meshes.Count > 0)
                 {
-                    meshVM = new BrgMeshViewModel(brg, brg.Meshes[0]);
+                    BrgMeshViewModel meshVM = new BrgMeshViewModel(brg, brg.Meshes[0]);
                     _modelObjects.Add(meshVM);
                 }
 
@@ -129,10 +131,7 @@ namespace AoMModelEditor.Models
                     }
                 }
 
-                if (!(meshVM is null))
-                    meshVM.IsSelected = true;
-                else
-                    _brgSettingsViewModel.IsSelected = true;
+                statsVM.IsSelected = true;
 
                 _logger.LogInformation("Finished loading brg file.");
             }
@@ -237,6 +236,8 @@ namespace AoMModelEditor.Models
                     {
                         ExportGrnToGltf(sfd.FileName);
                     }
+
+                    MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = sfd.FileName });
                 }
             }
             catch (Exception ex)
@@ -288,6 +289,8 @@ namespace AoMModelEditor.Models
                     var brg = conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters());
                     _logger.LogInformation("Finished importing gltf file as brg.");
                     LoadBrg(brg);
+
+                    MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
                 }
             }
             catch (Exception ex)
@@ -314,6 +317,8 @@ namespace AoMModelEditor.Models
                     var grn = conv.Convert(gltf, _grnSettingsViewModel.CreateGltfGrnParameters());
                     _logger.LogInformation("Finished importing gltf file as grn.");
                     LoadGrn(grn);
+
+                    MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
                 }
             }
             catch (Exception ex)
@@ -389,6 +394,8 @@ namespace AoMModelEditor.Models
                         animGrn.Read(fs);
                         grn.SetAnimation(animGrn);
                     }
+
+                    MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
 
                     var statsVM = _modelObjects.FirstOrDefault(x => x is GrnStatsViewModel) as GrnStatsViewModel;
                     statsVM?.Update();

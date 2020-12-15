@@ -58,6 +58,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Models\Brg\BrgStatsView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Models\Grn\GrnStatsView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

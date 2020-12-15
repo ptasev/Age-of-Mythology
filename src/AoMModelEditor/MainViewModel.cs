@@ -48,6 +48,11 @@ namespace AoMModelEditor
             OpenCommand = ReactiveCommand.Create(Open);
             SaveCommand = ReactiveCommand.Create(Save,
                 ModelsViewModel.WhenAnyValue(vm => vm.IsBrg, vm => vm.IsGrn, (b, g) => b || g));
+
+            // not worried about disposing subscription since this class lives for lifetime of app
+            MessageBus.Current
+                .Listen<ModelFileChangedArgs>()
+                .Subscribe(x => Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(x.FilePath));
         }
 
         private void Open()

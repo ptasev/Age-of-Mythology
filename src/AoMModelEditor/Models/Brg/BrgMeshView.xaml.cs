@@ -42,22 +42,27 @@ namespace AoMModelEditor.Models.Brg
 
                 this.OneWayBind(ViewModel,
                     v => v.VertexCount,
-                    view => view.vertCountTextBlock.Text)
+                    view => view.vertCountTextBlock.Content)
                     .DisposeWith(disposableRegistration);
 
                 this.OneWayBind(ViewModel,
                     v => v.FaceCount,
-                    view => view.faceCountTextBlock.Text)
+                    view => view.faceCountTextBlock.Content)
+                    .DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                    v => v.DummyCount,
+                    view => view.dummyCountLabel.Content)
                     .DisposeWith(disposableRegistration);
 
                 this.OneWayBind(ViewModel,
                     v => v.FrameCount,
-                    view => view.frameCountTextBlock.Text)
+                    view => view.frameCountTextBlock.Content)
                     .DisposeWith(disposableRegistration);
 
                 this.OneWayBind(ViewModel,
                     v => v.AnimLength,
-                    view => view.animLengthTextBlock.Text)
+                    view => view.animLengthTextBlock.Content)
                     .DisposeWith(disposableRegistration);
 
                 this.Bind(ViewModel,

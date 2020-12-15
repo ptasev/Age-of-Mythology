@@ -1,12 +1,6 @@
-﻿using AoMEngineLibrary.Graphics.Brg;
-using AoMEngineLibrary.Graphics.Grn;
+﻿using AoMEngineLibrary.Graphics.Grn;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace AoMModelEditor.Models.Grn
 {

@@ -16,22 +16,20 @@
                 <GroupBox Header="Base Data">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0 0 5 0" VerticalAlignment="Center">
-                                <Run Text="Verts: "/>
-                                <Run x:Name="vertCountTextBlock"/>
-                            </TextBlock>
-                            <TextBlock Margin="0 0 5 0" VerticalAlignment="Center">
-                                <Run Text="Faces: "/>
-                                <Run x:Name="faceCountTextBlock"/>
-                            </TextBlock>
-                            <TextBlock Margin="0 0 5 0" VerticalAlignment="Center">
-                                <Run Text="Frames: "/>
-                                <Run x:Name="frameCountTextBlock"/>
-                            </TextBlock>
-                            <TextBlock Margin="0 0 5 0" VerticalAlignment="Center">
-                                <Run Text="Anim Length: "/>
-                                <Run x:Name="animLengthTextBlock"/>
-                            </TextBlock>
+                            <Label Margin="0 0 0 0" Content="Verts:"/>
+                            <Label Margin="0 0 5 0" x:Name="vertCountTextBlock"/>
+
+                            <Label Margin="0 0 0 0" Content="Faces:"/>
+                            <Label Margin="0 0 5 0" x:Name="faceCountTextBlock"/>
+
+                            <Label Margin="0 0 0 0" Content="Dummies:"/>
+                            <Label Margin="0 0 5 0" x:Name="dummyCountLabel"/>
+
+                            <Label Margin="0 0 0 0" Content="Frames:"/>
+                            <Label Margin="0 0 5 0" x:Name="frameCountTextBlock"/>
+
+                            <Label Margin="0 0 0 0" Content="Animation Duration:"/>
+                            <Label Margin="0 0 5 0" x:Name="animLengthTextBlock"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Margin="0 0 5 0" Content="Animation Type:"/>
