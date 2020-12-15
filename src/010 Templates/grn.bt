@@ -109,6 +109,40 @@ typedef enum <int32>
 
 typedef struct
 {
+    int32 NumStrings;
+    int32 StringsLength;
+    struct {string String;} Strings[NumStrings] <optimize=false>;
+    byte padding[(-StringsLength) & 3];
+} GrnStringData;
+
+typedef struct
+{
+    int32 StringTableIndex;
+} GrnDataExtensionPropertyNodeData;
+
+typedef struct
+{
+    int32 Unknown;
+    int32 StringTableIndex;
+} GrnDataExtensionPropertyValueNodeData;
+
+typedef struct
+{
+    int32 TransformChannelId;
+    int32 Unknown[5];
+    int32 NumPositions;
+    int32 NumRotations;
+    int32 NumScaleShears;
+    int32 Unknown2[4];
+    float PositionKeys[NumPositions];
+    float RotationKeys[NumRotations];
+    float ScaleShearKeys[NumScaleShears];
+
+    // the rest is position vec3s, rotation quats, and scale 3x3s
+} GrnAnimationTransformTrackKeysNodeData;
+
+typedef struct
+{
     GrnCaseType CaseType;
     uint32 NumberOfEntries;
     uint32 FrameDirectoryCRC;
@@ -145,15 +179,37 @@ typedef struct
     FSeek(CurrentPosition);
 } GrnSectionInfoNode;
 
-typedef struct
+typedef struct (uint32 sectionOffset)
 {
     GrnCaseType CaseType;
     uint32 Offset;
     uint32 NumChildNodes;
 
+    local long CurrentPosition = FTell();
+    FSeek(sectionOffset + Offset);
+
+    if (CaseType == GCT_StringTable)
+    {
+        GrnStringData Data;
+    }
+    else if (CaseType == GCT_DataExtensionProperty)
+    {
+        GrnDataExtensionPropertyNodeData Data;
+    }
+    else if (CaseType == GCT_DataExtensionPropertyValue)
+    {
+        GrnDataExtensionPropertyValueNodeData Data;
+    }
+    else if (CaseType == GCT_AnimationTransformTrackKeys)
+    {
+        GrnAnimationTransformTrackKeysNodeData Data;
+    }
+
+    FSeek(CurrentPosition);
+
     if (NumChildNodes > 0)
     {
-        struct GrnNodeContainerS ChildNodes(NumChildNodes, 0);
+        struct GrnNodeContainerS ChildNodes(NumChildNodes, sectionOffset);
     }
 } GrnDefaultNode <read=ReadGrnDefaultNode>;
 string ReadGrnDefaultNode(GrnDefaultNode &gDN)
@@ -180,21 +236,13 @@ typedef struct GrnNodeContainerS (int32 Length, uint32 sectionOffset)
         }
         else
         {
-            GrnDefaultNode Node;
+            GrnDefaultNode Node(sectionOffset);
             Length -= Node.NumChildNodes;
         }
 
         --Length;
     }
 } GrnNodeContainer;
-
-typedef struct
-{
-    int32 NumStrings;
-    int32 StringsLength;
-    struct {string String;} Strings[NumStrings] <optimize=false>;
-    byte padding[(-StringsLength) & 3];
-} GrnStringData;
 
 struct
 {

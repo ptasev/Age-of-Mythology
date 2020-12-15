@@ -25,7 +25,7 @@
         public GrnAnimationTransformTrackKeysNode(GrnNode parentNode)
             : base(parentNode, GrnNodeType.AnimationTransformTrackKeys)
         {
-            this.Unknown = new Int32[5] { 0, 1, 2, 2, 1 };
+            this.Unknown = new Int32[5] { 0, 1, 1, 1, 1 };
             this.PositionKeys = new List<float>();
             this.RotationKeys = new List<float>();
             this.ScaleKeys = new List<float>();
