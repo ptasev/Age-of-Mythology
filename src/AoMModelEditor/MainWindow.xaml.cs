@@ -1,6 +1,7 @@
 ﻿using ReactiveUI;
 using Splat;
 using System;
+using System.Diagnostics;
 using System.Reactive.Disposables;
 
 namespace AoMModelEditor
@@ -63,6 +64,16 @@ namespace AoMModelEditor
                     view => view.applyGrnAnimationMenuItem)
                     .DisposeWith(disposableRegistration);
             });
+        }
+
+        private void websiteMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://petar.page/l/aom-ame-home") { UseShellExecute = true });
+        }
+
+        private void sourceCodeMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://petar.page/l/aom-ame-code") { UseShellExecute = true });
         }
     }
 }

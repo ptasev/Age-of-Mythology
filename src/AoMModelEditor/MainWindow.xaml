@@ -32,8 +32,8 @@
                 <MenuItem x:Name="applyGrnAnimationMenuItem" Header="_Apply Grn Animation"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_Website" Name="websiteMenuItem"></MenuItem>
-                <MenuItem Header="_Issues" Name="issuesMenuItem"></MenuItem>
+                <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
+                <MenuItem Header="_Source Code" Name="sourceCodeMenuItem" Click="sourceCodeMenuItem_Click"></MenuItem>
             </MenuItem>
         </Menu>
 
