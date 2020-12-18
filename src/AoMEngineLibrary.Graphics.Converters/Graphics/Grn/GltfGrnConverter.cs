@@ -1,4 +1,5 @@
-﻿using SharpGLTF.Schema2;
+﻿using SharpGLTF.Runtime;
+using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 using System;
 using System.Collections.Generic;
@@ -141,13 +142,11 @@ namespace AoMEngineLibrary.Graphics.Grn
             // Export Vertices, Normals, TexCoords, VertexWeights and Faces
             int baseVertexIndex = 0;
             Mesh gltfMesh = meshNode.Mesh;
-            foreach (var p in gltfMesh.Primitives)
+            var meshDecoder = gltfMesh.Decode();
+            foreach (var p in meshDecoder.Primitives)
             {
                 // skip primitives that aren't tris
-                if (p.DrawPrimitiveType == PrimitiveType.LINES ||
-                    p.DrawPrimitiveType == PrimitiveType.LINE_LOOP ||
-                    p.DrawPrimitiveType == PrimitiveType.LINE_STRIP ||
-                    p.DrawPrimitiveType == PrimitiveType.POINTS)
+                if (!p.TriangleIndices.Any())
                     continue;
 
                 // Get the new material index in grn
@@ -167,37 +166,24 @@ namespace AoMEngineLibrary.Graphics.Grn
                 string texCoordAccessorName = $"TEXCOORD_{texCoordSet}";
 
                 // Make sure we have all the necessary data
-                var vertexAccessors = p.VertexAccessors;
-                if (!vertexAccessors.ContainsKey("POSITION")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have positions.");
-                if (!vertexAccessors.ContainsKey("NORMAL")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have normals.");
+                if (p.VertexCount < 3) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have at least 3 positions.");
 
-                if (!vertexAccessors.ContainsKey(texCoordAccessorName)) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have tex coord set {texCoordSet}.");
+                if (p.TexCoordsCount <= texCoordSet) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have tex coord set {texCoordSet}.");
 
-                if (!vertexAccessors.ContainsKey("JOINTS_0")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have a set of joints.");
-                if (vertexAccessors.ContainsKey("JOINTS_1")) throw new InvalidOperationException($"Can't convert mesh ({gltfMesh.Name}) with more than one set of joints.");
-
-                if (!vertexAccessors.ContainsKey("WEIGHTS_0")) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have a set of weights.");
-                if (vertexAccessors.ContainsKey("WEIGHTS_1")) throw new InvalidOperationException($"Can't convert mesh ({gltfMesh.Name}) with more than one set of joint weights.");
+                if (p.JointsWeightsCount < 4) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have a set of joints.");
+                if (p.JointsWeightsCount > 4) throw new InvalidOperationException($"Can't convert mesh ({gltfMesh.Name}) with more than one set of joints/weights (4).");
 
                 // Grab the data
-                var positions = vertexAccessors["POSITION"].AsVector3Array();
-                var normals = vertexAccessors["NORMAL"].AsVector3Array();
-                var texCoords = vertexAccessors[texCoordAccessorName].AsVector2Array();
-                var joints = vertexAccessors["JOINTS_0"].AsVector4Array();
-                var weights = vertexAccessors["WEIGHTS_0"].AsVector4Array();
-
-                if (positions.Count < 3) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have at least 3 positions.");
-
-                for (int i = 0; i < positions.Count; ++i)
+                for (int i = 0; i < p.VertexCount; ++i)
                 {
-                    var pos = positions[i];
-                    var norm = normals[i];
+                    var pos = p.GetPosition(i);
+                    var norm = p.GetNormal(i);
 
                     // Adjust vertex and normal by inverse bind matrix since grn doesn't store that
                     GrnVertexWeight vw = new GrnVertexWeight();
                     var finPos = Vector3.Zero;
                     var finNorm = Vector3.Zero;
-                    var sw = new SparseWeight8(joints[i], weights[i]);
+                    var sw = p.GetSkinWeights(i);
                     var wNorm = 1.0f / sw.WeightSum;
                     foreach (var iw in sw.GetIndexedWeights())
                     {
@@ -213,11 +199,11 @@ namespace AoMEngineLibrary.Graphics.Grn
                     finNorm = Vector3.Normalize(finNorm);
                     mesh.Vertices.Add(finPos);
                     mesh.Normals.Add(finNorm);
-                    mesh.TextureCoordinates.Add(new Vector3(texCoords[i], 0));
+                    mesh.TextureCoordinates.Add(new Vector3(p.GetTextureCoord(i, texCoordSet), 0));
                     mesh.VertexWeights.Add(vw);
                 }
 
-                foreach (var tri in p.GetTriangleIndices())
+                foreach (var tri in p.TriangleIndices)
                 {
                     var a = tri.A + baseVertexIndex;
                     var b = tri.B + baseVertexIndex;
@@ -237,7 +223,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                     mesh.Faces.Add(face);
                 }
 
-                baseVertexIndex += positions.Count;
+                baseVertexIndex += p.VertexCount;
             }
 
             if (mesh.Faces.Count > 0 && mesh.Vertices.Count > 0)
