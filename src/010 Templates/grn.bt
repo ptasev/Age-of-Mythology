@@ -139,6 +139,9 @@ typedef struct
     float ScaleShearKeys[NumScaleShears];
 
     // the rest is position vec3s, rotation quats, and scale 3x3s
+    float PosControls[3 * NumPositions];
+    float RotControls[4 * NumRotations];
+    float ScaControls[9 * NumScaleShears];
 } GrnAnimationTransformTrackKeysNodeData;
 
 typedef struct

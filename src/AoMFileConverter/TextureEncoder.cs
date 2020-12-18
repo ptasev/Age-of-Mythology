@@ -34,14 +34,14 @@ namespace AoMFileConverter
 
         private static void EncodeBti(string filePath, string outputDirectoryPath)
         {
-            var tgaFilePath = Path.ChangeExtension(filePath, ".tga");
-            if (!File.Exists(tgaFilePath))
+            var imageFilePath = GetImageFilePath(filePath);
+            if (imageFilePath is null)
                 throw new InvalidOperationException("The related tga file could not be found.");
 
             BtiFile bti = new BtiFile();
             bti.Read(filePath);
 
-            var image = Image.Load<Rgba32>(tgaFilePath);
+            var image = Image.Load<Rgba32>(imageFilePath);
             var ddt = converter.Convert(new[] { image }, bti);
 
             var fileName = Path.GetFileName(filePath);
@@ -62,15 +62,15 @@ namespace AoMFileConverter
             cub.Read(filePath);
 
             var images = new Image[6];
-            string inputDirectoryPath = Path.GetDirectoryName(filePath);
+            string inputDirectoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
             for (int i = 0; i < cub.FileNames.Length; ++i)
             {
                 var fileName = cub.FileNames[i];
-                var tgaFilePath = Path.Combine(inputDirectoryPath, fileName + ".tga");
-                if (!File.Exists(tgaFilePath))
+                var imageFilePath = GetImageFilePath(Path.Combine(inputDirectoryPath, fileName + ".tga"));
+                if (imageFilePath is null)
                     throw new InvalidOperationException($"The cub referenced tga file could not be found ({fileName}).");
 
-                var image = Image.Load<Rgba32>(tgaFilePath);
+                var image = Image.Load<Rgba32>(imageFilePath);
                 images[i] = image;
             }
 
@@ -79,6 +79,25 @@ namespace AoMFileConverter
 
             var ddt = converter.Convert(images, bti);
             ddt.Write(ddtFilePath);
+        }
+
+        private static string? GetImageFilePath(string filePath)
+        {
+            var tgaFilePath = Path.ChangeExtension(filePath, ".tga");
+            var pngFilePath = Path.ChangeExtension(filePath, ".png");
+
+            if (File.Exists(tgaFilePath))
+            {
+                return tgaFilePath;
+            }
+            else if (File.Exists(pngFilePath))
+            {
+                return pngFilePath;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

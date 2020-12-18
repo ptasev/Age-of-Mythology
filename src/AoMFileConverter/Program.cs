@@ -68,17 +68,17 @@ namespace AoMFileConverter
             }
             else if (f.EndsWith(".ddt"))
             {
-                TextureDecoder.Decode(f, Path.GetDirectoryName(f));
+                TextureDecoder.Decode(f, Path.GetDirectoryName(f) ?? string.Empty);
                 Console.WriteLine("Success! Ddt converted.");
             }
             else if (f.EndsWith(".bti"))
             {
-                TextureEncoder.Encode(f, Path.GetDirectoryName(f));
+                TextureEncoder.Encode(f, Path.GetDirectoryName(f) ?? string.Empty);
                 Console.WriteLine("Success! Bti converted.");
             }
             else if (f.EndsWith(".cub"))
             {
-                TextureEncoder.Encode(f, Path.GetDirectoryName(f));
+                TextureEncoder.Encode(f, Path.GetDirectoryName(f) ?? string.Empty);
                 Console.WriteLine("Success! Cub converted.");
             }
             else if (f.EndsWith(".prt"))
@@ -96,7 +96,7 @@ namespace AoMFileConverter
             }
             else if (magic == "BANG")
             {
-                string brgMtrlOutputPath = Path.Combine(Path.GetDirectoryName(f), "materials");
+                string brgMtrlOutputPath = Path.Combine(Path.GetDirectoryName(f) ?? string.Empty, "materials");
                 if (!Directory.Exists(brgMtrlOutputPath))
                 {
                     Directory.CreateDirectory(brgMtrlOutputPath);
@@ -119,12 +119,12 @@ namespace AoMFileConverter
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(f);
 
-                if (xmlDoc.DocumentElement.Name == "AnimFile")
+                if (xmlDoc?.DocumentElement?.Name == "AnimFile")
                 {
                     AnimFile.ConvertToAnim(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(f + ".txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                     Console.WriteLine("Success! Anim converted.");
                 }
-                else if (xmlDoc.DocumentElement.Name == "ParticleFile")
+                else if (xmlDoc?.DocumentElement?.Name == "ParticleFile")
                 {
                     PrtFile file = PrtFile.DeserializeAsXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
                     file.Write(File.Open(f + ".prt", FileMode.Create, FileAccess.Write, FileShare.Read));
