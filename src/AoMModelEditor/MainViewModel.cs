@@ -39,7 +39,6 @@ namespace AoMModelEditor
         {
             _title = Properties.Resources.AppTitleLong;
             _appSettings = appSettings;
-            _appSettings.Read();
 
             _fileDialogService = fileDialogService;
 

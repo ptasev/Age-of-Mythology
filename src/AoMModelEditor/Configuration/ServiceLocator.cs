@@ -8,13 +8,25 @@ using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 using Splat.Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace AoMModelEditor.Configuration
 {
     public class ServiceLocator
     {
+        private static readonly ConcurrentDictionary<int, ServiceLocator> _serviceLocators = new ConcurrentDictionary<int, ServiceLocator>();
         private static ServiceProvider? _rootServiceProvider;
+
+        public static ServiceLocator Current
+        {
+            get
+            {
+                // TODO: figure out way to get unique ID to have a different scope per Window
+                int currentViewId = 0;
+                return _serviceLocators.GetOrAdd(currentViewId, key => new ServiceLocator());
+            }
+        }
 
         public static void Configure(IServiceCollection serviceCollection)
         {
@@ -45,6 +57,32 @@ namespace AoMModelEditor.Configuration
             serviceCollection.AddSingleton<ModelsViewModel>();
 
             _rootServiceProvider = serviceCollection.BuildServiceProvider();
+
+            // According to docs I may need to call ReactiveUI func again on built container??
+            _rootServiceProvider.UseMicrosoftDependencyResolver();
+        }
+
+        private readonly IServiceScope _serviceScope;
+
+        private ServiceLocator()
+        {
+            _serviceScope = _rootServiceProvider!.CreateScope();
+        }
+
+        public T GetService<T>()
+            where T : notnull
+        {
+            return _rootServiceProvider!.GetRequiredService<T>();
+        }
+
+        public T? GetService<T>(bool isRequired)
+            where T : notnull
+        {
+            if (isRequired)
+            {
+                return _serviceScope.ServiceProvider.GetRequiredService<T>();
+            }
+            return _serviceScope.ServiceProvider.GetService<T>();
         }
     }
 }

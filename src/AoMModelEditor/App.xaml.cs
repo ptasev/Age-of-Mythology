@@ -1,4 +1,5 @@
 ﻿using AoMModelEditor.Configuration;
+using AoMModelEditor.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
@@ -29,6 +30,8 @@ namespace AoMModelEditor
         public App()
         {
             Log.Logger.Information($"Starting app {AoMModelEditor.Properties.Resources.AppTitleLong}.");
+            var appSettings = ServiceLocator.Current.GetService<AppSettings>();
+            appSettings.Read();
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)

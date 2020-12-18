@@ -34,6 +34,7 @@
             <MenuItem Header="_Help">
                 <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
                 <MenuItem Header="_Source Code" Name="sourceCodeMenuItem" Click="sourceCodeMenuItem_Click"></MenuItem>
+                <MenuItem Header="_Brg Flags Doc" Name="brgFlagsDocMenuItem" Click="brgFlagsDocMenuItem_Click"></MenuItem>
             </MenuItem>
         </Menu>
 

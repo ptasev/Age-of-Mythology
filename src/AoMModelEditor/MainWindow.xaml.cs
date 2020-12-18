@@ -75,5 +75,10 @@ namespace AoMModelEditor
         {
             Process.Start(new ProcessStartInfo("https://petar.page/l/aom-ame-code") { UseShellExecute = true });
         }
+
+        private void brgFlagsDocMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://docs.google.com/spreadsheets/d/1m6AZHjt3YU4fxH_-w9Smi1WEBa651PXgavQrC_a1_1o/edit?usp=sharing") { UseShellExecute = true });
+        }
     }
 }
