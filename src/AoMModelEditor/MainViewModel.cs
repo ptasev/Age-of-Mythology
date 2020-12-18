@@ -1,4 +1,4 @@
-﻿using AoMModelEditor.Dialogs;
+﻿using AoMModelEditor.Services;
 using AoMModelEditor.Models;
 using AoMModelEditor.Settings;
 using Microsoft.Extensions.Logging;

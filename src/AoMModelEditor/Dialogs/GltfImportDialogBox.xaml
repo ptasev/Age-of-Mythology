@@ -1,0 +1,33 @@
+﻿<Window x:Class="AoMModelEditor.Dialogs.GltfImportDialogBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AoMModelEditor.Dialogs"
+        mc:Ignorable="d"
+        Title="glTF Import" Height="auto" Width="auto" MaxWidth="600" MaxHeight="400" MinWidth="300" MinHeight="140" SizeToContent="WidthAndHeight"
+        ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" >
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <GroupBox Header="Animation">
+                    <StackPanel>
+                        <Label Content="Selected the animation to import, if any:"/>
+                        <ListBox x:Name="animationListBox" SelectionMode="Single" MinHeight="30">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Name}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </GroupBox>
+                <StackPanel Orientation="Horizontal">
+                    <Button Margin="5 5 0 5" Padding="5" Content="OK" HorizontalAlignment="Right" Name="okButton" Click="okButton_Click"/>
+                    <Button Margin="5 5 0 5" Padding="5" Content="Cancel" HorizontalAlignment="Right" MinWidth="40" IsCancel="True"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

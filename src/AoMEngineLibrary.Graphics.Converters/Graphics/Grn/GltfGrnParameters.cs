@@ -10,10 +10,13 @@ namespace AoMEngineLibrary.Graphics.Grn
 
         public bool ConvertAnimations { get; set; }
 
+        public int AnimationIndex { get; set; }
+
         public GltfGrnParameters()
         {
             ConvertMeshes = true;
             ConvertAnimations = false;
+            AnimationIndex = 0;
         }
     }
 }

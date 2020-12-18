@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using WinForms = System.Windows.Forms;
 
-namespace AoMModelEditor.Dialogs
+namespace AoMModelEditor.Services
 {
     public class FileDialogService
     {

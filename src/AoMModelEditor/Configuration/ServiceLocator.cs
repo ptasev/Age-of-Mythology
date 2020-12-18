@@ -1,4 +1,4 @@
-﻿using AoMModelEditor.Dialogs;
+﻿using AoMModelEditor.Services;
 using AoMModelEditor.Models;
 using AoMModelEditor.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +50,7 @@ namespace AoMModelEditor.Configuration
 
             Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
 
+            serviceCollection.AddSingleton<GltfImportDialogService>();
             serviceCollection.AddSingleton<FileDialogService>();
             serviceCollection.AddSingleton<AppSettings>();
 

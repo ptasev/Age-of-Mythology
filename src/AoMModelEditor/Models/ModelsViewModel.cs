@@ -1,7 +1,7 @@
 ﻿using AoMEngineLibrary.Graphics;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
-using AoMModelEditor.Dialogs;
+using AoMModelEditor.Services;
 using AoMModelEditor.Models.Brg;
 using AoMModelEditor.Models.Grn;
 using AoMModelEditor.Settings;
@@ -27,6 +27,7 @@ namespace AoMModelEditor.Models
         private readonly object _modelLock = new object();
         private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
+        private readonly GltfImportDialogService _gltfDialogService;
         private readonly ILogger<ModelsViewModel> _logger;
         private readonly TextureManager _textureManager;
         private readonly BrgSettingsViewModel _brgSettingsViewModel;
@@ -44,10 +45,11 @@ namespace AoMModelEditor.Models
         public ReactiveCommand<Unit, Unit> ExportBrgMtrlFilesCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyGrnAnimationCommand { get; }
 
-        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService, ILogger<ModelsViewModel> logger)
+        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService, GltfImportDialogService gltfDialogService, ILogger<ModelsViewModel> logger)
         {
             _appSettings = appSettings;
             _fileDialogService = fileDialogService;
+            _gltfDialogService = gltfDialogService;
             _logger = logger;
             _textureManager = new TextureManager(_appSettings.GameDirectory);
             _brgSettingsViewModel = new BrgSettingsViewModel();
@@ -279,19 +281,29 @@ namespace AoMModelEditor.Models
                 var ofd = _fileDialogService.GetModelOpenFileDialog();
                 ofd.Filter = "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
+                // Load gltf file
                 var dr = ofd.ShowDialog();
-                if (dr.HasValue && dr == true)
-                {
-                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
-                    _logger.LogInformation("Importing gltf file as brg.");
-                    var conv = new GltfBrgConverter();
-                    var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Strict });
-                    var brg = conv.Convert(gltf, _brgSettingsViewModel.CreateGltfBrgParameters());
-                    _logger.LogInformation("Finished importing gltf file as brg.");
-                    LoadBrg(brg);
+                if (dr != true) return;
 
-                    MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
-                }
+                _fileDialogService.SetLastModelFilePath(ofd.FileName);
+                _logger.LogInformation("Loading gltf file.");
+                var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Strict });
+                _logger.LogInformation("Finished loading gltf file.");
+
+                // Get settings and convert
+                var gltfImportResult = _gltfDialogService.OpenImportDialog(gltf);
+                if (gltfImportResult is null) return;
+
+                var settings = _brgSettingsViewModel.CreateGltfBrgParameters();
+                settings.AnimationIndex = gltfImportResult.Animation?.LogicalIndex ?? 0;
+
+                _logger.LogInformation("Converting gltf file to brg.");
+                var conv = new GltfBrgConverter();
+                var brg = conv.Convert(gltf, settings);
+                _logger.LogInformation("Finished converting gltf file to brg.");
+
+                LoadBrg(brg);
+                MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
             }
             catch (Exception ex)
             {
@@ -307,19 +319,29 @@ namespace AoMModelEditor.Models
                 var ofd = _fileDialogService.GetModelOpenFileDialog();
                 ofd.Filter = "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
+                // Load gltf file
                 var dr = ofd.ShowDialog();
-                if (dr.HasValue && dr == true)
-                {
-                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
-                    _logger.LogInformation("Importing gltf file as grn.");
-                    var conv = new GltfGrnConverter();
-                    var gltf = ModelRoot.Load(ofd.FileName);
-                    var grn = conv.Convert(gltf, _grnSettingsViewModel.CreateGltfGrnParameters());
-                    _logger.LogInformation("Finished importing gltf file as grn.");
-                    LoadGrn(grn);
+                if (dr != true) return;
 
-                    MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
-                }
+                _fileDialogService.SetLastModelFilePath(ofd.FileName);
+                _logger.LogInformation("Loading gltf file.");
+                var gltf = ModelRoot.Load(ofd.FileName);
+                _logger.LogInformation("Finished loading gltf file.");
+
+                // Get settings and convert
+                var gltfImportResult = _gltfDialogService.OpenImportDialog(gltf);
+                if (gltfImportResult is null) return;
+
+                var settings = _grnSettingsViewModel.CreateGltfGrnParameters();
+                settings.AnimationIndex = gltfImportResult.Animation?.LogicalIndex ?? 0;
+
+                _logger.LogInformation("Converting gltf file to grn.");
+                var conv = new GltfGrnConverter();
+                var grn = conv.Convert(gltf, settings);
+                _logger.LogInformation("Finished converting gltf file to grn.");
+
+                LoadGrn(grn);
+                MessageBus.Current.SendMessage(new ModelFileChangedArgs { FilePath = ofd.FileName });
             }
             catch (Exception ex)
             {
