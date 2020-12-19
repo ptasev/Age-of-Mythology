@@ -124,18 +124,18 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 var faces = new List<BrgFace>()
                 {
-                    new BrgFace() { Indices = new List<short>() { 0, 2, 1 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 3, 2 } },
-                    new BrgFace() { Indices = new List<short>() { 2, 3, 4 } },
-                    new BrgFace() { Indices = new List<short>() { 2, 4, 5 } },
-                    new BrgFace() { Indices = new List<short>() { 1, 2, 5 } },
-                    new BrgFace() { Indices = new List<short>() { 1, 5, 6 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 7, 4 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 4, 3 } },
-                    new BrgFace() { Indices = new List<short>() { 5, 4, 7 } },
-                    new BrgFace() { Indices = new List<short>() { 5, 7, 6 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 6, 7 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 1, 6 } }
+                    new BrgFace() { Indices = new List<ushort>() { 0, 2, 1 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 3, 2 } },
+                    new BrgFace() { Indices = new List<ushort>() { 2, 3, 4 } },
+                    new BrgFace() { Indices = new List<ushort>() { 2, 4, 5 } },
+                    new BrgFace() { Indices = new List<ushort>() { 1, 2, 5 } },
+                    new BrgFace() { Indices = new List<ushort>() { 1, 5, 6 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 7, 4 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 4, 3 } },
+                    new BrgFace() { Indices = new List<ushort>() { 5, 4, 7 } },
+                    new BrgFace() { Indices = new List<ushort>() { 5, 7, 6 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 6, 7 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 1, 6 } }
                 };
 
                 foreach (var face in faces)

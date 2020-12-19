@@ -1,24 +1,22 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using Extensions;
-    using Newtonsoft.Json;
     using System;
     using System.Numerics;
 
     public class BrgMeshHeader
     {
-        public Int16 Version { get; set; }
+        public ushort Version { get; set; }
         public BrgMeshFormat Format { get; set; }
-        public Int16 NumVertices { get; set; }
-        public Int16 NumFaces { get; set; }
+        public ushort NumVertices { get; set; }
+        public ushort NumFaces { get; set; }
         public BrgMeshInterpolationType InterpolationType { get; set; }
         public BrgMeshAnimType AnimationType { get; set; }
-        public Int16 UserDataEntryCount { get; set; }
+        public ushort UserDataEntryCount { get; set; }
         public Vector3 CenterPosition { get; set; }
         public Single CenterRadius { get; set; }
         public Vector3 MassPosition { get; set; }
         public Vector3 HotspotPosition { get; set; }
-        public Int16 ExtendedHeaderSize { get; set; }
+        public ushort ExtendedHeaderSize { get; set; }
         public BrgMeshFlag Flags { get; set; }
         public Vector3 MinimumExtent { get; set; }
         public Vector3 MaximumExtent { get; set; }
@@ -29,18 +27,18 @@
         }
         public BrgMeshHeader(BrgBinaryReader reader)
         {
-            this.Version = reader.ReadInt16();
+            this.Version = reader.ReadUInt16();
             this.Format = (BrgMeshFormat)reader.ReadInt16();
-            this.NumVertices = reader.ReadInt16();
-            this.NumFaces = reader.ReadInt16();
+            this.NumVertices = reader.ReadUInt16();
+            this.NumFaces = reader.ReadUInt16();
             this.InterpolationType = (BrgMeshInterpolationType)reader.ReadByte();
             this.AnimationType = (BrgMeshAnimType)reader.ReadByte();
-            this.UserDataEntryCount = reader.ReadInt16();
+            this.UserDataEntryCount = reader.ReadUInt16();
             this.CenterPosition = reader.ReadVector3D(false);
             this.CenterRadius = reader.ReadSingle();
             this.MassPosition = reader.ReadVector3D(false);
             this.HotspotPosition = reader.ReadVector3D(false);
-            this.ExtendedHeaderSize = reader.ReadInt16();
+            this.ExtendedHeaderSize = reader.ReadUInt16();
             this.Flags = (BrgMeshFlag)reader.ReadInt16();
             this.MinimumExtent = reader.ReadVector3D(false);
             this.MaximumExtent = reader.ReadVector3D(false);

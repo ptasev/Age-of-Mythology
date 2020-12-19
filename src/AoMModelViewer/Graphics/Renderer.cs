@@ -119,7 +119,7 @@ namespace AoMModelViewer.Graphics
                 mesh.Normals.ForEach(x => x.X = -x.X);
                 foreach (var face in mesh.Faces)
                 {
-                    short temp = face.Indices[1];
+                    var temp = face.Indices[1];
                     face.Indices[1] = face.Indices[2];
                     face.Indices[2] = temp;
                 }

@@ -427,8 +427,8 @@ namespace AoMModelViewer
             posAccessor.Name = "posBufferViewAccessor";
             posAccessor.Type = Accessor.TypeEnum.VEC3;
 
-            short faceMin = short.MaxValue;
-            short faceMax = short.MinValue;
+            var faceMin = ushort.MaxValue;
+            var faceMax = ushort.MinValue;
             using (FileStream fs = File.Open("indexBuffer.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
             using (BinaryWriter writer = new BinaryWriter(fs))
             {
@@ -497,7 +497,7 @@ namespace AoMModelViewer
             public int MaterialIndex { get; }
             public List<Dictionary<string, int>> Targets { get; }
             public List<BrgFace> Faces { get; }
-            public List<short> Indices { get; }
+            public List<ushort> Indices { get; }
 
             private BrgMesh? baseMesh;
 
@@ -507,13 +507,13 @@ namespace AoMModelViewer
                 if (faces.Count > 0) MaterialIndex = materialIndex;
                 Targets = new List<Dictionary<string, int>>();
 
-                Dictionary<short, short>  mapNewIndices = new Dictionary<short, short>();
-                Indices = new List<short>();
+                var mapNewIndices = new Dictionary<ushort, ushort>();
+                Indices = new List<ushort>();
                 foreach (BrgFace face in Faces)
                 {
                     for (int i = 0; i < face.Indices.Count; ++i)
                     {
-                        short oldIndex = face.Indices[i];
+                        var oldIndex = face.Indices[i];
 
                         if (mapNewIndices.ContainsKey(oldIndex))
                         {
@@ -521,7 +521,7 @@ namespace AoMModelViewer
                         }
                         else
                         {
-                            short newIndex = (short)Indices.Count;
+                            var newIndex = (ushort)Indices.Count;
                             mapNewIndices.Add(oldIndex, newIndex);
                             face.Indices[i] = newIndex;
                             Indices.Add(oldIndex);
@@ -576,8 +576,8 @@ namespace AoMModelViewer
             private void CreateIndexBuffer(BrgMesh mesh, GltfFormatter formatter, Stream bufferStream)
             {
                 long bufferViewOffset;
-                short faceMin = short.MaxValue;
-                short faceMax = short.MinValue;
+                var faceMin = ushort.MaxValue;
+                var faceMax = ushort.MinValue;
                 using (BinaryWriter writer = new BinaryWriter(bufferStream, Encoding.UTF8, true))
                 {
                     // padding
@@ -1023,18 +1023,18 @@ namespace AoMModelViewer
 
                 Faces = new List<BrgFace>()
                 {
-                    new BrgFace() { Indices = new List<short>() { 0, 2, 1 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 3, 2 } },
-                    new BrgFace() { Indices = new List<short>() { 2, 3, 4 } },
-                    new BrgFace() { Indices = new List<short>() { 2, 4, 5 } },
-                    new BrgFace() { Indices = new List<short>() { 1, 2, 5 } },
-                    new BrgFace() { Indices = new List<short>() { 1, 5, 6 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 7, 4 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 4, 3 } },
-                    new BrgFace() { Indices = new List<short>() { 5, 4, 7 } },
-                    new BrgFace() { Indices = new List<short>() { 5, 7, 6 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 6, 7 } },
-                    new BrgFace() { Indices = new List<short>() { 0, 1, 6 } }
+                    new BrgFace() { Indices = new List<ushort>() { 0, 2, 1 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 3, 2 } },
+                    new BrgFace() { Indices = new List<ushort>() { 2, 3, 4 } },
+                    new BrgFace() { Indices = new List<ushort>() { 2, 4, 5 } },
+                    new BrgFace() { Indices = new List<ushort>() { 1, 2, 5 } },
+                    new BrgFace() { Indices = new List<ushort>() { 1, 5, 6 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 7, 4 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 4, 3 } },
+                    new BrgFace() { Indices = new List<ushort>() { 5, 4, 7 } },
+                    new BrgFace() { Indices = new List<ushort>() { 5, 7, 6 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 6, 7 } },
+                    new BrgFace() { Indices = new List<ushort>() { 0, 1, 6 } }
                 };
             }
 
@@ -1065,8 +1065,8 @@ namespace AoMModelViewer
             private void CreateIndexBuffer(GltfFormatter formatter, Stream bufferStream)
             {
                 long bufferViewOffset;
-                short faceMin = short.MaxValue;
-                short faceMax = short.MinValue;
+                var faceMin = ushort.MaxValue;
+                var faceMax = ushort.MinValue;
                 using (BinaryWriter writer = new BinaryWriter(bufferStream, Encoding.UTF8, true))
                 {
                     // padding

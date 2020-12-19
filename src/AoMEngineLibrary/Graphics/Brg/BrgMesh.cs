@@ -1,10 +1,9 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using Extensions;
-    using Newtonsoft.Json;
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.IO;
     using System.Numerics;
 
     public class BrgMesh
@@ -18,7 +17,7 @@
 
         public List<Vector2> TextureCoordinates { get; set; }
         public List<Vector4> Colors { get; set; }
-        public List<Int16> VertexMaterials { get; set; }
+        public List<short> VertexMaterials { get; set; }
 
         public BrgMeshExtendedHeader ExtendedHeader { get; set; }
         public BrgUserDataEntry[] UserDataEntries { get; set; }
@@ -109,9 +108,9 @@
 
                     for (int i = 0; i < this.Header.NumFaces; i++)
                     {
-                        this.Faces[i].Indices.Add(reader.ReadInt16());
-                        this.Faces[i].Indices.Add(reader.ReadInt16());
-                        this.Faces[i].Indices.Add(reader.ReadInt16());
+                        this.Faces[i].Indices.Add(reader.ReadUInt16());
+                        this.Faces[i].Indices.Add(reader.ReadUInt16());
+                        this.Faces[i].Indices.Add(reader.ReadUInt16());
                     }
 
                     if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
@@ -160,12 +159,12 @@
             }
             if (this.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                Int16 numMatrix = this.ExtendedHeader.NumDummies;
-                Int16 numIndex = this.ExtendedHeader.NumNameIndexes;
+                var numMatrix = this.ExtendedHeader.NumDummies;
+                var numIndex = this.ExtendedHeader.NumNameIndexes;
                 if (this.Header.Version == 19 || this.Header.Version == 22)
                 {
-                    numMatrix = reader.ReadInt16();
-                    numIndex = reader.ReadInt16();
+                    numMatrix = reader.ReadUInt16();
+                    numIndex = reader.ReadUInt16();
                     reader.ReadInt16();
                 }
 
@@ -262,17 +261,20 @@
 
         public void Write(BrgBinaryWriter writer)
         {
+            if (Vertices.Count > ushort.MaxValue) throw new InvalidDataException($"Brg meshes cannot have more than {ushort.MaxValue} vertices.");
+            if (Faces.Count > ushort.MaxValue) throw new InvalidDataException($"Brg meshes cannot have more than {ushort.MaxValue} faces.");
+
             this.Header.Version = 22;
             if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                this.Header.NumVertices = (Int16)(this.particleData.Length / 4);
+                this.Header.NumVertices = (ushort)(this.particleData.Length / 4);
             }
             else
             {
-                this.Header.NumVertices = (Int16)this.Vertices.Count;
+                this.Header.NumVertices = (ushort)this.Vertices.Count;
             }
-            this.Header.NumFaces = (Int16)this.Faces.Count;
-            this.Header.UserDataEntryCount = (Int16)this.UserDataEntries.Length;
+            this.Header.NumFaces = (ushort)this.Faces.Count;
+            this.Header.UserDataEntryCount = (ushort)this.UserDataEntries.Length;
             this.Header.CenterRadius = Math.Max(Math.Max(this.Header.MaximumExtent.X, this.Header.MaximumExtent.Y), this.Header.MaximumExtent.Z);
             this.Header.ExtendedHeaderSize = 40;
             this.Header.Write(writer);

@@ -283,10 +283,11 @@ namespace AoMEngineLibrary.Graphics.Grn
                     }
                 }
 
-                input.Vertices = positionWeightMap.Keys.Select(kv => kv.Item1).ToList();
-                input.VertexWeights = positionWeightMap.Keys.Select(kv => kv.Item2).ToList();
-                input.Normals = normalMap.Keys.ToList();
-                input.TextureCoordinates = texCoordMap.Keys.ToList();
+                var posWeightMapSorted = positionWeightMap.OrderBy(kv => kv.Value);
+                input.Vertices = posWeightMapSorted.Select(kv => kv.Key.Item1).ToList();
+                input.VertexWeights = posWeightMapSorted.Select(kv => kv.Key.Item2).ToList();
+                input.Normals = normalMap.OrderBy(kv => kv.Value).Select(kv => kv.Key).ToList();
+                input.TextureCoordinates = texCoordMap.OrderBy(kv => kv.Value).Select(kv => kv.Key).ToList();
                 input.Faces = faces;
 
                 int GetPosIndex((Vector3, GrnVertexWeight) pos)

@@ -6,17 +6,17 @@
 
     public class BrgMeshExtendedHeader
     {
-        public Int16 NumNameIndexes { get; set; }
-        public Int16 NumDummies { get; set; }
-        public Int16 NameLength { get; set; } // unknown091
-        public Int16 PointMaterial { get; set; }
+        public ushort NumNameIndexes { get; set; }
+        public ushort NumDummies { get; set; }
+        public ushort NameLength { get; set; } // unknown091
+        public short PointMaterial { get; set; }
         public float PointRadius { get; set; } // unknown09Unused
         public byte NumMaterials { get; set; } // lastMaterialIndex
         public byte ShadowNameLength0 { get; set; }
         public byte ShadowNameLength1 { get; set; }
         public byte ShadowNameLength2 { get; set; }
         public float AnimationLength { get; set; }
-        public int MaterialLibraryTimestamp { get; set; } // unknown09Const
+        public uint MaterialLibraryTimestamp { get; set; } // unknown09Const
         public float Reserved { get; set; }
         public float ExportedScaleFactor { get; set; } // animTimeMult
         public int NumNonUniformKeys { get; set; } //09c
@@ -28,9 +28,9 @@
         }
         public BrgMeshExtendedHeader(BrgBinaryReader reader, int extendedHeaderSize)
         {
-            this.NumNameIndexes = reader.ReadInt16();
-            this.NumDummies = reader.ReadInt16();
-            this.NameLength = reader.ReadInt16();
+            this.NumNameIndexes = reader.ReadUInt16();
+            this.NumDummies = reader.ReadUInt16();
+            this.NameLength = reader.ReadUInt16();
             if (extendedHeaderSize > 6)
             {
                 this.PointMaterial = reader.ReadInt16();
@@ -49,7 +49,7 @@
             }
             if (extendedHeaderSize > 20)
             {
-                this.MaterialLibraryTimestamp = reader.ReadInt32();
+                this.MaterialLibraryTimestamp = reader.ReadUInt32();
             }
             if (extendedHeaderSize > 24)
             {

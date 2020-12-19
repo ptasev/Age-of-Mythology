@@ -630,9 +630,9 @@
 
                     //System.Windows.Forms.MessageBox.Show("3.1");
                     Maxscript.Command("face = brgFaceArray[{0}]", i + 1);
-                    f.Indices.Add((Int16)(Maxscript.QueryInteger("face.x") - 1 + currNumVertices));
-                    f.Indices.Add((Int16)(Maxscript.QueryInteger("face.z") - 1 + currNumVertices));
-                    f.Indices.Add((Int16)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices));
+                    f.Indices.Add((ushort)(Maxscript.QueryInteger("face.x") - 1 + currNumVertices));
+                    f.Indices.Add((ushort)(Maxscript.QueryInteger("face.z") - 1 + currNumVertices));
+                    f.Indices.Add((ushort)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices));
 
                     //System.Windows.Forms.MessageBox.Show("3.2");
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))

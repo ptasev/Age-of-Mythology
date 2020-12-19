@@ -3,6 +3,7 @@ using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -13,7 +14,6 @@ using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
     SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
-using System.IO;
 
 namespace AoMEngineLibrary.Graphics.Brg
 {
@@ -146,8 +146,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             // Update header data
             mesh.Header.Version = 22;
             mesh.Header.ExtendedHeaderSize = 40;
-            mesh.Header.NumVertices = (short)mesh.Vertices.Count;
-            mesh.Header.NumFaces = (short)mesh.Faces.Count;
+            mesh.Header.NumVertices = (ushort)mesh.Vertices.Count;
+            mesh.Header.NumFaces = (ushort)mesh.Faces.Count;
 
             // Calculate extents, etc.
             Vector3 centerPos = new Vector3();
@@ -239,9 +239,9 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                         BrgFace f = new BrgFace();
                         mesh.Faces.Add(f);
-                        f.Indices.Add((Int16)a);
-                        f.Indices.Add((Int16)c);
-                        f.Indices.Add((Int16)b);
+                        f.Indices.Add((ushort)a);
+                        f.Indices.Add((ushort)c);
+                        f.Indices.Add((ushort)b);
                         f.MaterialIndex = faceMatIndex;
 
                         if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
@@ -306,7 +306,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 var b = indexMap[face.Indices[1]];
                 var c = indexMap[face.Indices[2]];
                 bool triAdded = indices.Add((a, b, c));
-                newFace.Indices = new List<short>() { (short)a, (short)b, (short)c };
+                newFace.Indices = new List<ushort>() { (ushort)a, (ushort)b, (ushort)c };
 
                 // if the triangle was unique then add
                 if (triAdded == true)
@@ -329,8 +329,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                     frame.TextureCoordinates = verts.Select(v => v.Item3).ToList();
                 }
 
-                frame.Header.NumVertices = (short)frame.Vertices.Count;
-                frame.Header.NumFaces = (short)faces.Count;
+                frame.Header.NumVertices = (ushort)frame.Vertices.Count;
+                frame.Header.NumFaces = (ushort)faces.Count;
             }
 
             // Update base mesh faces
