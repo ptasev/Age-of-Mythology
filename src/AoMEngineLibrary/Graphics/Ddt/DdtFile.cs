@@ -268,7 +268,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
             bti.AlphaBits = AlphaBits;
             bti.AlphaTest = !Properties.HasFlag(DdtProperty.NoAlphaTest);
-            bti.UseMips = MipMapLevels > 0;
+            bti.UseMips = MipMapLevels > 1;
             bti.CanBeLowDetail = !Properties.HasFlag(DdtProperty.NoLowDetail);
             bti.Displacement = Properties.HasFlag(DdtProperty.DisplacementMap);
             bti.Format = GetBtiTextureFormat();

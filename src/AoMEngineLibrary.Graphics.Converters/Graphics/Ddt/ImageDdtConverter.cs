@@ -1,10 +1,13 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
+using ICSharpCode.SharpZipLib.Zip.Compression;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,6 +65,34 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     img.Dispose();
                 }
 
+                // Swizzle R and B
+                if (bti.Format == BtiTextureFormat.DeflatedRGB8)
+                {
+                    for (int m = 0; m < encodedData.Length; ++m)
+                    {
+                        var data = encodedData[m];
+                        for (int i = 0; i < data.Length; i += 3)
+                        {
+                            var temp = data[i];
+                            data[i] = data[i + 2];
+                            data[i + 2] = temp;
+                        }
+                    }
+                }
+                else if (bti.Format == BtiTextureFormat.DeflatedRGBA8)
+                {
+                    for (int m = 0; m < encodedData.Length; ++m)
+                    {
+                        var data = encodedData[m];
+                        for (int i = 0; i < data.Length; i += 4)
+                        {
+                            var temp = data[i];
+                            data[i] = data[i + 2];
+                            data[i + 2] = temp;
+                        }
+                    }
+                }
+
                 if (shouldDeflate)
                 {
                     for (int m = 0; m < encodedData.Length; ++m)
@@ -89,9 +120,12 @@ namespace AoMEngineLibrary.Graphics.Ddt
                 BtiTextureFormat.BC2 when alphaBits == 4 => CompressionFormat.BC2,
                 BtiTextureFormat.BC3 when alphaBits == 1 => CompressionFormat.BC3,
                 BtiTextureFormat.BC3 when alphaBits == 8 => CompressionFormat.BC3,
-                BtiTextureFormat.DeflatedR8 when alphaBits == 0 => CompressionFormat.R,
-                BtiTextureFormat.DeflatedRG8 when alphaBits == 0 => CompressionFormat.RG,
+                // Commented these out since they're never used in the game, so better not to bother
+                //BtiTextureFormat.DeflatedR8 when alphaBits == 0 => CompressionFormat.R,
+                //BtiTextureFormat.DeflatedRG8 when alphaBits == 0 => CompressionFormat.RG,
                 BtiTextureFormat.DeflatedRGB8 when alphaBits == 0 => CompressionFormat.RGB,
+                // Added this because I wasn't sure if 1 bit alpha meant alpha test
+                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 0 => CompressionFormat.RGBA,
                 BtiTextureFormat.DeflatedRGBA8 when alphaBits == 1 => CompressionFormat.RGBA,
                 BtiTextureFormat.DeflatedRGBA8 when alphaBits == 8 => CompressionFormat.RGBA,
                 _ => throw new InvalidOperationException($"Cannot convert format {texFormat} with alpha bits {alphaBits} to ddt texture.")
@@ -127,7 +161,14 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
         private static byte[] ZlibCompress(ReadOnlySpan<byte> data)
         {
-            throw new NotImplementedException("Zlib compression is not implemented.");
+            using (var mso = new MemoryStream())
+            using (var dos = new DeflaterOutputStream(mso, new Deflater(Deflater.BEST_COMPRESSION)))
+            {
+                dos.Write(data);
+                dos.Flush();
+                dos.Finish();
+                return mso.ToArray();
+            }
         }
     }
 }

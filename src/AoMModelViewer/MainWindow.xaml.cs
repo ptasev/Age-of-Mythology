@@ -113,9 +113,9 @@ namespace AoMModelViewer
             //string fname = @"special g manticore wing"; // Dxt3Swizzled AlphaBits 4 TT
             //string fname = @"special c qilin"; // Bc2 AlphaBits 1 EE
             //string fname = @"hero g ajax"; // Bc3 AlphaBits 1 EE
-            string fname = @"sfx a ip glow"; // Bc3 AlphaBits 0 (should've been Bc1) EE
+            //string fname = @"sfx a ip glow"; // Bc3 AlphaBits 0 (should've been Bc1) EE
             //string fname = @"terrain\blendcornercreep"; // RgbaDeflated AlphaBits 8 EE
-            //string fname = @"terrain\greekroada"; // RgbDeflated AlphaBits 0 EE
+            string fname = @"terrain\greekroada"; // RgbDeflated AlphaBits 0 EE
             //using (var fs = File.Open(@$"C:\Games\Age of Mythology\textures\t1bar\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var fs = File.Open(@$"C:\Games\Steam\steamapps\common\Age of Mythology\textures\{fname}.ddt", FileMode.Open, FileAccess.Read, FileShare.Read))
             {

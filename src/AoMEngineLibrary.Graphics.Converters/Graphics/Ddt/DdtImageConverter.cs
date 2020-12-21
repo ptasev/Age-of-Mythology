@@ -1,4 +1,6 @@
 ﻿using AoMEngineLibrary.Graphics.Textures;
+using ICSharpCode.SharpZipLib;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Microsoft.Toolkit.HighPerformance.Extensions;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -253,16 +255,20 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     var width = Math.Max(1, ddt.Width >> mip);
                     var height = Math.Max(1, ddt.Height >> mip);
 
-                    var decompressedData = ZlibDecompress(ddt.Data[face][mip]);
-                    var pixels = decompressedData.Span.Cast<byte, TPixel>();
-                    // For some reason these textures seem to be broken in certain lower mips. Skip the remaining
-                    if (pixels.Length < (width * height))
-                        break;
-                    //var image = Image.WrapMemory<TPixel>(decompressedData.Cast<byte, TPixel>(), width, height);
-                    var image = Image.LoadPixelData<TPixel>(decompressedData.Span, width, height);
+                    try
+                    {
+                        var decompressedData = ZlibDecompress(ddt.Data[face][mip]);
+                        //var image = Image.WrapMemory<TPixel>(decompressedData.Cast<byte, TPixel>(), width, height);
+                        var image = Image.LoadPixelData<TPixel>(decompressedData.Span, width, height);
 
-                    image.Mutate(p => p.Flip(FlipMode.Vertical));
-                    faceImages.Add(image);
+                        image.Mutate(p => p.Flip(FlipMode.Vertical));
+                        faceImages.Add(image);
+                    }
+                    catch (SharpZipBaseException ex) when (ex.Message.StartsWith("Unexpected EOF") && mip > 0)
+                    {
+                        // For some reason these textures seem to be broken in certain lower mips. Skip the remaining
+                        break;
+                    }
                 }
                 images[face] = faceImages.ToArray();
             }
@@ -273,18 +279,14 @@ namespace AoMEngineLibrary.Graphics.Ddt
         {
             using (var sourceStream = new MemoryStream())
             using (var destStream = new MemoryStream())
-            using (var decompressionStream = new DeflateStream(sourceStream, CompressionMode.Decompress))
+            using (var iis = new InflaterInputStream(sourceStream))
             {
-                // Skip zlib header/footer since deflatestream only works on raw deflate data
-                int headerSize = (data[1] & 0b10000) == 0b100000 ? 6 : 2;
-                if (data.Length <= headerSize + 4) return Memory<byte>.Empty;
-                data = data.Slice(headerSize, data.Length - 4 - headerSize);
-
                 sourceStream.Write(data);
                 sourceStream.Seek(0, SeekOrigin.Begin);
 
                 // Inflate
-                decompressionStream.CopyTo(destStream);
+                iis.CopyTo(destStream);
+
                 var buff = destStream.GetBuffer();
                 return buff.AsMemory().Slice(0, (int)destStream.Length);
             }
