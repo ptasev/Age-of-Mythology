@@ -245,7 +245,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 tb.SetPoint(brg.Animation.MeshKeys[0], SparseWeight8.Create(0));
                 for (int i = 1; i < brg.Animation.MeshKeys.Count; ++i)
                 {
-                    tb.SetPoint(brg.Animation.MeshKeys[i], new SparseWeight8(new Vector4(i - 1, 0, 0, 0), new Vector4(1, 0, 0, 0)));
+                    tb.SetPoint(brg.Animation.MeshKeys[i], SparseWeight8.Create(new Vector4(i - 1, 0, 0, 0), new Vector4(1, 0, 0, 0)));
                 }
             }
             else

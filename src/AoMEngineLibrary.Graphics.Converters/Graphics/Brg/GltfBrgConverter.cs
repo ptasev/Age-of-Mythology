@@ -77,7 +77,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         {
             Dictionary<int, int> matIdMapping = new Dictionary<int, int>();
 
-            var sceneTemplate = SceneTemplate.Create(gltfScene, false);
+            var sceneTemplate = SceneTemplate.Create(gltfScene, new RuntimeOptions() { IsolateMemory = false });
             var instance = sceneTemplate.CreateInstance();
 
             Predicate<string> noDummySelector = nodeName => !nodeName.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase);

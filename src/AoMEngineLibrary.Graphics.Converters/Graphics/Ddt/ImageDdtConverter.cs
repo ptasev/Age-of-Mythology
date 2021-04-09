@@ -1,4 +1,5 @@
 ﻿using BCnEncoder.Encoder;
+using BCnEncoder.ImageSharp;
 using BCnEncoder.Shared;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
@@ -9,8 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AoMEngineLibrary.Graphics.Ddt
 {
@@ -41,12 +40,12 @@ namespace AoMEngineLibrary.Graphics.Ddt
             bool shouldDeflate = ShouldDeflate(bti.Format);
 
             BcEncoder encoder = new BcEncoder();
-            encoder.OutputOptions.generateMipMaps = bti.UseMips;
-            encoder.OutputOptions.quality = CompressionQuality.BestQuality;
-            encoder.OutputOptions.fileFormat = OutputFileFormat.Dds;
-            encoder.OutputOptions.format = GetCompressionFormat(bti.Format, bti.AlphaBits);
-            encoder.OutputOptions.ddsBc1WriteAlphaFlag = false;
-            encoder.OutputOptions.maxMipMapLevel = GetMipLevels(width, height);
+            encoder.OutputOptions.GenerateMipMaps = bti.UseMips;
+            encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
+            encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
+            encoder.OutputOptions.Format = GetCompressionFormat(bti.Format, bti.AlphaBits);
+            encoder.OutputOptions.DdsBc1WriteAlphaFlag = false;
+            encoder.OutputOptions.MaxMipMapLevel = GetMipLevels(width, height);
 
             for (int f = 0; f < images.Count; ++f)
             {
@@ -115,19 +114,19 @@ namespace AoMEngineLibrary.Graphics.Ddt
         {
             return texFormat switch
             {
-                BtiTextureFormat.BC1 when alphaBits == 0 => CompressionFormat.BC1,
-                BtiTextureFormat.BC1 when alphaBits == 1 => CompressionFormat.BC1WithAlpha,
-                BtiTextureFormat.BC2 when alphaBits == 4 => CompressionFormat.BC2,
-                BtiTextureFormat.BC3 when alphaBits == 1 => CompressionFormat.BC3,
-                BtiTextureFormat.BC3 when alphaBits == 8 => CompressionFormat.BC3,
+                BtiTextureFormat.BC1 when alphaBits == 0 => CompressionFormat.Bc1,
+                BtiTextureFormat.BC1 when alphaBits == 1 => CompressionFormat.Bc1WithAlpha,
+                BtiTextureFormat.BC2 when alphaBits == 4 => CompressionFormat.Bc2,
+                BtiTextureFormat.BC3 when alphaBits == 1 => CompressionFormat.Bc3,
+                BtiTextureFormat.BC3 when alphaBits == 8 => CompressionFormat.Bc3,
                 // Commented these out since they're never used in the game, so better not to bother
                 //BtiTextureFormat.DeflatedR8 when alphaBits == 0 => CompressionFormat.R,
                 //BtiTextureFormat.DeflatedRG8 when alphaBits == 0 => CompressionFormat.RG,
-                BtiTextureFormat.DeflatedRGB8 when alphaBits == 0 => CompressionFormat.RGB,
+                BtiTextureFormat.DeflatedRGB8 when alphaBits == 0 => CompressionFormat.Rgb,
                 // Added this because I wasn't sure if 1 bit alpha meant alpha test
-                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 0 => CompressionFormat.RGBA,
-                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 1 => CompressionFormat.RGBA,
-                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 8 => CompressionFormat.RGBA,
+                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 0 => CompressionFormat.Rgba,
+                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 1 => CompressionFormat.Rgba,
+                BtiTextureFormat.DeflatedRGBA8 when alphaBits == 8 => CompressionFormat.Rgba,
                 _ => throw new InvalidOperationException($"Cannot convert format {texFormat} with alpha bits {alphaBits} to ddt texture.")
             };
         }

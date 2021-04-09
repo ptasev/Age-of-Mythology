@@ -183,7 +183,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                     if (nb == null) throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
                     return (nb, nb.GetInverseBindMatrix(Matrix4x4.Identity));
                 }).ToArray();
-                var inst = sceneBuilder.AddSkinnedMesh(mb, mb.Name, joints);
+                var inst = sceneBuilder.AddSkinnedMesh(mb, joints).WithName(mb.Name);
             }
         }
         private GltfMeshBuilder ConvertMesh(GrnMesh mesh, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
@@ -219,7 +219,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             var vertWeight = mesh.VertexWeights[face.Indices[index]];
             var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights, (First, Second) => (First, Second)).Where(vw => vw.Second > 0).ToArray();
             if (vws.Length > 4) throw new NotSupportedException("A vertex cannot be bound to more than 4 bones.");
-            vb.Skinning.SetWeights(SparseWeight8.Create(vws));
+            vb.Skinning.SetBindings(SparseWeight8.Create(vws));
 
             return vb;
         }

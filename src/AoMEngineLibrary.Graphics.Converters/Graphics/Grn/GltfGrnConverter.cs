@@ -1,12 +1,10 @@
 ﻿using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
-using SharpGLTF.Transforms;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace AoMEngineLibrary.Graphics.Grn
 {
@@ -349,7 +347,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 boneTrack.DataExtensionIndex = grnBone.DataExtensionIndex;
 
                 // Get translation animation data
-                var translationSampler = gltfAnim.FindTranslationSampler(node);
+                var translationSampler = gltfAnim.FindTranslationChannel(node)?.GetTranslationSampler();
                 List<(float, Vector3)>? keys = null;
                 if (translationSampler != null)
                     keys = translationSampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE ?
@@ -372,7 +370,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 }
 
                 // Get rotation animation data
-                var rotationSampler = gltfAnim.FindRotationSampler(node);
+                var rotationSampler = gltfAnim.FindRotationChannel(node)?.GetRotationSampler();
                 List<(float, Quaternion)>? rotKeys = null;
                 if (rotationSampler != null)
                     rotKeys = rotationSampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE ?
@@ -395,7 +393,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                 }
 
                 // Get scale animation data
-                var scaleSampler = gltfAnim.FindScaleSampler(node);
+                var scaleSampler = gltfAnim.FindScaleChannel(node)?.GetScaleSampler();
                 List<(float, Matrix4x4)>? scaleKeys = null;
                 if (scaleSampler != null)
                     scaleKeys = scaleSampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE ?

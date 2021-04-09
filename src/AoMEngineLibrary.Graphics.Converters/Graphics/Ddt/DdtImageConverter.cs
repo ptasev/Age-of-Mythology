@@ -1,11 +1,13 @@
 ﻿using AoMEngineLibrary.Graphics.Textures;
 using ICSharpCode.SharpZipLib;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
-using Microsoft.Toolkit.HighPerformance.Extensions;
+using Microsoft.Toolkit.HighPerformance;
+using Microsoft.Toolkit.HighPerformance.Buffers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
@@ -258,8 +260,8 @@ namespace AoMEngineLibrary.Graphics.Ddt
                     try
                     {
                         var decompressedData = ZlibDecompress(ddt.Data[face][mip]);
-                        //var image = Image.WrapMemory<TPixel>(decompressedData.Cast<byte, TPixel>(), width, height);
-                        var image = Image.LoadPixelData<TPixel>(decompressedData.Span, width, height);
+                        var pixelData = new PixelMemoryOwner<TPixel>(decompressedData, width, height);
+                        var image = Image.WrapMemory(pixelData, width, height);
 
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages.Add(image);
@@ -275,20 +277,57 @@ namespace AoMEngineLibrary.Graphics.Ddt
 
             return images;
         }
-        private static Memory<byte> ZlibDecompress(ReadOnlySpan<byte> data)
+        private static IMemoryOwner<byte> ZlibDecompress(ReadOnlyMemory<byte> data)
         {
-            using (var sourceStream = new MemoryStream())
-            using (var destStream = new MemoryStream())
-            using (var iis = new InflaterInputStream(sourceStream))
+            using (var ss = data.AsStream())
+            using (var iis = new InflaterInputStream(ss))
             {
-                sourceStream.Write(data);
-                sourceStream.Seek(0, SeekOrigin.Begin);
+                var bufferWriter = new ArrayPoolBufferWriter<byte>(data.Length);
 
                 // Inflate
-                iis.CopyTo(destStream);
+                iis.CopyTo(bufferWriter.AsStream());
 
-                var buff = destStream.GetBuffer();
-                return buff.AsMemory().Slice(0, (int)destStream.Length);
+                return bufferWriter;
+            }
+        }
+
+        private class PixelMemoryOwner<TPixel> : IMemoryOwner<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            private bool disposedValue;
+            private readonly IMemoryOwner<byte> _pixelBytes;
+            private readonly Memory<TPixel> _pixelMemory;
+
+            public Memory<TPixel> Memory => _pixelMemory;
+
+            public PixelMemoryOwner(IMemoryOwner<byte> pixelBytes, int width, int height)
+            {
+                _pixelBytes = pixelBytes;
+
+                _pixelMemory = _pixelBytes.Memory.Cast<byte, TPixel>();
+                if (_pixelMemory.Length < width * height)
+                {
+                    throw new ArgumentException("The pixel bytes length is smaller than expected.", nameof(pixelBytes));
+                }
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        _pixelBytes.Dispose();
+                    }
+
+                    disposedValue = true;
+                }
+            }
+
+            public void Dispose()
+            {
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
             }
         }
     }
