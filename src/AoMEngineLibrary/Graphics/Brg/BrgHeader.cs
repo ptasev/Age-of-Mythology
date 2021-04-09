@@ -1,8 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using Newtonsoft.Json;
-    using System;
-
     public class BrgHeader
     {
         public string Magic { get; set; }

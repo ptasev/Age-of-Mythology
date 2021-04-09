@@ -1,9 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using Extensions;
-    using Newtonsoft.Json;
-    using System;
-
     public class BrgMeshExtendedHeader
     {
         public ushort NumNameIndexes { get; set; }
