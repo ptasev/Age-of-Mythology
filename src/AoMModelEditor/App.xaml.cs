@@ -39,6 +39,8 @@ namespace AoMModelEditor
             // Create main application window
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
+
+            mainWindow.ViewModel?.HandleStartupArgs(e.Args);
         }
     }
 }

@@ -18,6 +18,7 @@ namespace AoMModelEditor
     {
         private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
+        private readonly ILogger<MainViewModel> _logger;
 
         private string _title;
         public string Title 
@@ -39,8 +40,8 @@ namespace AoMModelEditor
         {
             _title = Properties.Resources.AppTitleLong;
             _appSettings = appSettings;
-
             _fileDialogService = fileDialogService;
+            _logger = logger;
 
             ModelsViewModel = modelsVM;
 
@@ -52,6 +53,31 @@ namespace AoMModelEditor
             MessageBus.Current
                 .Listen<ModelFileChangedArgs>()
                 .Subscribe(x => Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(x.FilePath));
+        }
+
+        public void HandleStartupArgs(string[] args)
+        {
+            try
+            {
+                if (args.Length < 1)
+                    return;
+
+                if (File.Exists(args[0]))
+                {
+                    Open(args[0]);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to handle startup args.");
+            }
+        }
+
+        private void Open(string filePath)
+        {
+            _fileDialogService.SetLastModelFilePath(filePath);
+            ModelsViewModel.Load(filePath);
+            Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
         }
 
         private void Open()
@@ -70,9 +96,7 @@ namespace AoMModelEditor
                 var dr = ofd.ShowDialog();
                 if (dr.HasValue && dr == true)
                 {
-                    _fileDialogService.SetLastModelFilePath(ofd.FileName);
-                    ModelsViewModel.Load(ofd.FileName);
-                    Title = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(ofd.FileName);
+                    Open(ofd.FileName);
                 }
             }
             catch (Exception ex)
