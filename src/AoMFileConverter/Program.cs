@@ -83,8 +83,12 @@ namespace AoMFileConverter
             }
             else if (f.EndsWith(".prt"))
             {
-                PrtFile file = new PrtFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                file.SerializeAsXml(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read))
+                {
+                    PrtFile file = new PrtFile(fs);
+                    file.SerializeAsXml(fso);
+                }
                 Console.WriteLine("Success! Prt converted.");
             }
             else if (magic == "MTRL")
@@ -126,8 +130,12 @@ namespace AoMFileConverter
                 }
                 else if (xmlDoc?.DocumentElement?.Name == "ParticleFile")
                 {
-                    PrtFile file = PrtFile.DeserializeAsXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    file.Write(File.Open(f + ".prt", FileMode.Create, FileAccess.Write, FileShare.Read));
+                    using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var fso = File.Open(f + ".prt", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        PrtFile file = PrtFile.DeserializeAsXml(fs);
+                        file.Write(fso);
+                    }
                     Console.WriteLine("Success! Prt converted.");
                 }
                 else

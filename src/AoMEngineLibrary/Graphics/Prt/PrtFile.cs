@@ -129,7 +129,7 @@
 
         public void SerializeAsXml(Stream stream)
         {
-            using (XmlCommentWriter writer = new XmlCommentWriter(stream, new System.Xml.XmlWriterSettings() { Indent = true}))
+            using (XmlCommentWriter writer = new XmlCommentWriter(stream, new System.Xml.XmlWriterSettings() { Indent = true, CloseOutput = false }))
             {
                 writer.Alphabetize = true;
                 writer.Metadata = false;
@@ -147,7 +147,7 @@
         public static PrtFile DeserializeAsXml(Stream stream)
         {
             XmlSerializer deserializer = new XmlSerializer(typeof(PrtFile));
-            using (TextReader reader = new StreamReader(stream))
+            using (TextReader reader = new StreamReader(stream, null, true, -1, true))
             {
                 return (PrtFile)deserializer.Deserialize(reader);
             }

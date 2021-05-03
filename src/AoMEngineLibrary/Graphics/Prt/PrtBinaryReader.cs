@@ -1,15 +1,14 @@
-﻿namespace AoMEngineLibrary.Graphics.Prt
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Numerics;
-    using System.Text;
+﻿using System;
+using System.IO;
+using System.Numerics;
+using System.Text;
 
+namespace AoMEngineLibrary.Graphics.Prt
+{
     public class PrtBinaryReader : BinaryReader
     {
-        public PrtBinaryReader(System.IO.Stream stream)
-            : base(stream)
+        public PrtBinaryReader(Stream stream)
+            : base(stream, Encoding.Unicode, true)
         {
         }
 
