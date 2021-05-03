@@ -175,7 +175,6 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         private static void ConvertMesh(IMeshDecoder<GltfMaterial> decoder, IGeometryTransform transform, bool sceneHasTexCoords, BrgMesh mesh, Dictionary<int, int> matIdMapping)
         {
-            int baseVertexIndex = 0;
             foreach (var p in decoder.Primitives)
             {
                 // Skip primitives without material
@@ -183,6 +182,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 if (p.Material is null) continue;
 
                 // Get positions and normals
+                var baseVertexIndex = mesh.Vertices.Count;
                 for (int i = 0; i < p.VertexCount; ++i)
                 {
                     var pos = p.GetPosition(i, transform);
@@ -251,8 +251,6 @@ namespace AoMEngineLibrary.Graphics.Brg
                             mesh.VertexMaterials[f.Indices[2]] = f.MaterialIndex;
                         }
                     }
-
-                    baseVertexIndex += p.VertexCount;
                 }
             }
         }

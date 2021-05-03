@@ -61,7 +61,7 @@ namespace AoMModelEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AoM Model Editor 2020.1.
+        ///   Looks up a localized string similar to AoM Model Editor 1.1.0.
         /// </summary>
         internal static string AppTitleLong {
             get {
@@ -70,7 +70,7 @@ namespace AoMModelEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AME 2020.1.
+        ///   Looks up a localized string similar to AME 1.1.0.
         /// </summary>
         internal static string AppTitleShort {
             get {

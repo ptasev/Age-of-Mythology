@@ -127,7 +127,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             {
                 // Adjust skin transforms for difference between gltf and grn coord system
                 var skinJoint = meshNode.Skin.GetJoint(i);
-                skinTransforms[i] = skinJoint.InverseBindMatrix * skinJoint.Joint.WorldMatrix * RotX90;
+                skinTransforms[i] = skinJoint.InverseBindMatrix * skinJoint.Joint.WorldMatrix;
 
                 var bb = new GrnBoneBinding();
                 bb.BoneIndex = nodeBoneIndexMap[skinJoint.Joint.LogicalIndex];
@@ -187,12 +187,16 @@ namespace AoMEngineLibrary.Graphics.Grn
                     {
                         if (iw.Weight <= 0) continue;
 
-                        var normalizedWeight = (iw.Weight / wNorm);
+                        var normalizedWeight = (iw.Weight * wNorm);
                         finPos += Vector3.Transform(pos, skinTransforms[iw.Index]) * normalizedWeight;
                         finNorm += Vector3.TransformNormal(norm, skinTransforms[iw.Index]) * normalizedWeight;
                         vw.BoneIndices.Add(iw.Index);
                         vw.Weights.Add(normalizedWeight);
                     }
+
+                    // Adjust for coord sys differences
+                    finPos = Vector3.Transform(finPos, RotX90);
+                    finNorm = Vector3.TransformNormal(finNorm, RotX90);
 
                     finNorm = Vector3.Normalize(finNorm);
                     mesh.Vertices.Add(finPos);
