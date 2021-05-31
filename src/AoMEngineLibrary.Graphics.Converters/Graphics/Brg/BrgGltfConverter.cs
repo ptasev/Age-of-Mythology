@@ -124,23 +124,23 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 var faces = new List<BrgFace>()
                 {
-                    new BrgFace() { Indices = new List<ushort>() { 0, 2, 1 } },
-                    new BrgFace() { Indices = new List<ushort>() { 0, 3, 2 } },
-                    new BrgFace() { Indices = new List<ushort>() { 2, 3, 4 } },
-                    new BrgFace() { Indices = new List<ushort>() { 2, 4, 5 } },
-                    new BrgFace() { Indices = new List<ushort>() { 1, 2, 5 } },
-                    new BrgFace() { Indices = new List<ushort>() { 1, 5, 6 } },
-                    new BrgFace() { Indices = new List<ushort>() { 0, 7, 4 } },
-                    new BrgFace() { Indices = new List<ushort>() { 0, 4, 3 } },
-                    new BrgFace() { Indices = new List<ushort>() { 5, 4, 7 } },
-                    new BrgFace() { Indices = new List<ushort>() { 5, 7, 6 } },
-                    new BrgFace() { Indices = new List<ushort>() { 0, 6, 7 } },
-                    new BrgFace() { Indices = new List<ushort>() { 0, 1, 6 } }
+                    new BrgFace(0, 2, 1),
+                    new BrgFace(0, 3, 2),
+                    new BrgFace(2, 3, 4),
+                    new BrgFace(2, 4, 5),
+                    new BrgFace(1, 2, 5),
+                    new BrgFace(1, 5, 6),
+                    new BrgFace(0, 7, 4),
+                    new BrgFace(0, 4, 3),
+                    new BrgFace(5, 4, 7),
+                    new BrgFace(5, 7, 6),
+                    new BrgFace(0, 6, 7),
+                    new BrgFace(0, 1, 6)
                 };
 
                 foreach (var face in faces)
                 {
-                    pb.AddTriangle(vbs[face.Indices[0]], vbs[face.Indices[1]], vbs[face.Indices[2]]);
+                    pb.AddTriangle(vbs[face.A], vbs[face.B], vbs[face.C]);
                 }
             }
         }
@@ -285,7 +285,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 
                 foreach (var face in prim.Faces)
                 {
-                    pb.AddTriangle(GetVertexBuilder(mesh, face.Indices[0]), GetVertexBuilder(mesh, face.Indices[2]), GetVertexBuilder(mesh, face.Indices[1]));
+                    pb.AddTriangle(GetVertexBuilder(mesh, face.A), GetVertexBuilder(mesh, face.C), GetVertexBuilder(mesh, face.B));
                 }
             }
         }

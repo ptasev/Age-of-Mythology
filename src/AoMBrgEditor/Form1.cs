@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
+using AoMEngineLibrary.Graphics.Prt;
 
 namespace AoMBrgEditor
 {
@@ -25,7 +26,7 @@ namespace AoMBrgEditor
 
             richTextBox1.Text = output;
 
-            OldDdtTesting();
+            PrtTesting();
         }
 
         private string BrgDevelopmentCode()
@@ -355,6 +356,32 @@ namespace AoMBrgEditor
                 if (ddt.Format == DdtFormat.RgbDeflated)
                 {
                     sb.AppendLine($"{s}\t{ddt.AlphaBits}");
+                }
+            }
+            richTextBox1.Text = sb.ToString();
+        }
+
+        private void PrtTesting()
+        {
+            string texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\modelsfx\ttt";
+            var sb = new StringBuilder();
+            foreach (string s in Directory.GetFiles(texDir, "*.prt", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    using (var fs = File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var prt = new PrtFile(fs);
+                        if (prt.Version < 12)
+                        {
+                            sb.AppendLine($"{s}\t{prt.Version}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    sb.AppendLine($"{s}\t{ex}");
+                    sb.AppendLine("==================================================================");
                 }
             }
             richTextBox1.Text = sb.ToString();

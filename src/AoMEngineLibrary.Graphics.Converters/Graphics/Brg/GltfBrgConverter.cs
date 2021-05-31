@@ -231,24 +231,20 @@ namespace AoMEngineLibrary.Graphics.Brg
                         }
                     }
 
-                    foreach (var t in p.TriangleIndices)
+                    foreach (var (A, B, C) in p.TriangleIndices)
                     {
-                        var a = t.A + baseVertexIndex;
-                        var b = t.B + baseVertexIndex;
-                        var c = t.C + baseVertexIndex;
+                        var a = System.Convert.ToUInt16(A + baseVertexIndex);
+                        var b = System.Convert.ToUInt16(B + baseVertexIndex);
+                        var c = System.Convert.ToUInt16(C + baseVertexIndex);
 
-                        BrgFace f = new BrgFace();
+                        var f = new BrgFace(a, c, b) { MaterialIndex = faceMatIndex };
                         mesh.Faces.Add(f);
-                        f.Indices.Add((ushort)a);
-                        f.Indices.Add((ushort)c);
-                        f.Indices.Add((ushort)b);
-                        f.MaterialIndex = faceMatIndex;
 
                         if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                         {
-                            mesh.VertexMaterials[f.Indices[0]] = f.MaterialIndex;
-                            mesh.VertexMaterials[f.Indices[1]] = f.MaterialIndex;
-                            mesh.VertexMaterials[f.Indices[2]] = f.MaterialIndex;
+                            mesh.VertexMaterials[f.A] = f.MaterialIndex;
+                            mesh.VertexMaterials[f.B] = f.MaterialIndex;
+                            mesh.VertexMaterials[f.C] = f.MaterialIndex;
                         }
                     }
                 }
@@ -297,17 +293,18 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             foreach (var face in baseMesh.Faces)
             {
-                var newFace = new BrgFace();
-                newFace.MaterialIndex = face.MaterialIndex;
+                var a = indexMap[face.A];
+                var b = indexMap[face.B];
+                var c = indexMap[face.C];
+                var triAdded = indices.Add((a, b, c));
 
-                var a = indexMap[face.Indices[0]];
-                var b = indexMap[face.Indices[1]];
-                var c = indexMap[face.Indices[2]];
-                bool triAdded = indices.Add((a, b, c));
-                newFace.Indices = new List<ushort>() { (ushort)a, (ushort)b, (ushort)c };
+                var newFace = new BrgFace((ushort)a, (ushort)b, (ushort)c)
+                {
+                    MaterialIndex = face.MaterialIndex
+                };
 
                 // if the triangle was unique then add
-                if (triAdded == true)
+                if (triAdded)
                 {
                     faces.Add(newFace);
                 }
@@ -336,9 +333,9 @@ namespace AoMEngineLibrary.Graphics.Brg
             baseMesh.VertexMaterials = Enumerable.Repeat((short)0, baseMesh.Vertices.Count).ToList();
             foreach (var face in baseMesh.Faces)
             {
-                baseMesh.VertexMaterials[face.Indices[0]] = face.MaterialIndex;
-                baseMesh.VertexMaterials[face.Indices[1]] = face.MaterialIndex;
-                baseMesh.VertexMaterials[face.Indices[2]] = face.MaterialIndex;
+                baseMesh.VertexMaterials[face.A] = face.MaterialIndex;
+                baseMesh.VertexMaterials[face.B] = face.MaterialIndex;
+                baseMesh.VertexMaterials[face.C] = face.MaterialIndex;
             }
 
             static int GetExistingIndex(IReadOnlyList<BrgMesh> frames, int vertIndex, List<(Vector3, Vector3, Vector2)>[] frameVertices)

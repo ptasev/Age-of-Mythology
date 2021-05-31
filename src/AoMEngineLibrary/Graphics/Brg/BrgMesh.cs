@@ -89,36 +89,36 @@
                     }
                 }
 
-                if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
-                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
                 {
-                    this.Faces = new List<BrgFace>(this.Header.NumFaces);
-                    for (int i = 0; i < this.Header.NumFaces; ++i)
+                    Faces = new List<BrgFace>(Header.NumFaces);
+                    for (var i = 0; i < Header.NumFaces; ++i)
                     {
-                        this.Faces.Add(new BrgFace());
+                        Faces.Add(new BrgFace());
                     }
 
-                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        for (int i = 0; i < this.Header.NumFaces; i++)
+                        for (var i = 0; i < Header.NumFaces; i++)
                         {
-                            this.Faces[i].MaterialIndex = reader.ReadInt16();
+                            Faces[i].MaterialIndex = reader.ReadInt16();
                         }
                     }
 
-                    for (int i = 0; i < this.Header.NumFaces; i++)
+                    for (var i = 0; i < Header.NumFaces; i++)
                     {
-                        this.Faces[i].Indices.Add(reader.ReadUInt16());
-                        this.Faces[i].Indices.Add(reader.ReadUInt16());
-                        this.Faces[i].Indices.Add(reader.ReadUInt16());
+                        Faces[i].A = reader.ReadUInt16();
+                        Faces[i].B = reader.ReadUInt16();
+                        Faces[i].C = reader.ReadUInt16();
                     }
 
-                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        this.VertexMaterials = new List<Int16>(this.Header.NumVertices);
-                        for (int i = 0; i < this.Header.NumVertices; i++)
+                        VertexMaterials = new List<short>(Header.NumVertices);
+                        for (var i = 0; i < Header.NumVertices; i++)
                         {
-                            this.VertexMaterials.Add(reader.ReadInt16());
+                            VertexMaterials.Add(reader.ReadInt16());
                         }
                     }
                 }
@@ -302,29 +302,29 @@
                     }
                 }
 
-                if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
-                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
                 {
-                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        for (int i = 0; i < this.Faces.Count; i++)
+                        for (var i = 0; i < Faces.Count; i++)
                         {
-                            writer.Write(this.Faces[i].MaterialIndex);
+                            writer.Write(Faces[i].MaterialIndex);
                         }
                     }
 
-                    for (int i = 0; i < this.Faces.Count; i++)
+                    for (var i = 0; i < Faces.Count; i++)
                     {
-                        writer.Write((Int16)this.Faces[i].Indices[0]);
-                        writer.Write((Int16)this.Faces[i].Indices[1]);
-                        writer.Write((Int16)this.Faces[i].Indices[2]);
+                        writer.Write(Faces[i].A);
+                        writer.Write(Faces[i].B);
+                        writer.Write(Faces[i].C);
                     }
 
-                    if (this.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    if (Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        for (int i = 0; i < this.VertexMaterials.Count; i++)
+                        for (var i = 0; i < VertexMaterials.Count; i++)
                         {
-                            writer.Write(this.VertexMaterials[i]);
+                            writer.Write(VertexMaterials[i]);
                         }
                     }
                 }

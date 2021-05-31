@@ -73,9 +73,9 @@ namespace AoMModelViewer
 
             for (int i = 0; i < file.Meshes[0].Faces.Count; ++i)
             {
-                triangleIndices.Add(file.Meshes[0].Faces[i].Indices[0]);
-                triangleIndices.Add(file.Meshes[0].Faces[i].Indices[1]);
-                triangleIndices.Add(file.Meshes[0].Faces[i].Indices[2]);
+                triangleIndices.Add(file.Meshes[0].Faces[i].A);
+                triangleIndices.Add(file.Meshes[0].Faces[i].B);
+                triangleIndices.Add(file.Meshes[0].Faces[i].C);
             }
 
             Mesh3D mesh = new Mesh3D(positions, triangleIndices);

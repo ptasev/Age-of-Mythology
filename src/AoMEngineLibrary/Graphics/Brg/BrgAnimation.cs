@@ -1,20 +1,17 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgAnimation
     {
         public float Duration { get; set; }
-        public List<float> MeshKeys { get; set; }
+
+        public List<float> MeshKeys { get; }
 
         public BrgAnimation()
         {
-            this.Duration = 0f;
-            this.MeshKeys = new List<float>();
+            Duration = 0f;
+            MeshKeys = new List<float>();
         }
     }
 }

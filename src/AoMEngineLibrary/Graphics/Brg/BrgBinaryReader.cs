@@ -1,14 +1,14 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Numerics;
-    using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Numerics;
+using System.Text;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgBinaryReader : BinaryReader
     {
-        public BrgBinaryReader(System.IO.Stream stream)
+        public BrgBinaryReader(Stream stream)
             : base(stream)
         {
         }
