@@ -119,9 +119,9 @@ namespace AoMModelViewer.Graphics
                 mesh.Normals.ForEach(x => x.X = -x.X);
                 foreach (var face in mesh.Faces)
                 {
-                    var temp = face.Indices[1];
-                    face.Indices[1] = face.Indices[2];
-                    face.Indices[2] = temp;
+                    var temp = face.B;
+                    face.B = face.C;
+                    face.C = temp;
                 }
 
                 //mesh = new BrgMesh(file);

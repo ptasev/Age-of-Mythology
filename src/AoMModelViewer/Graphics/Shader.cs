@@ -42,15 +42,15 @@ namespace AoMModelViewer.Graphics
 
         public Vector4 Vertex(int iface, int nthvert)
         {
-            Vector3 glVertex = vertices[faces[iface].Indices[nthvert]]; // read the vertex
+            Vector3 glVertex = vertices[faces[iface][nthvert]]; // read the vertex
             Vector4 output = Vector4.Transform(glVertex, modelView); // transform to view space
             output = Vector4.Transform(output, projection); // transform it to clip space
 
-            var normal = normals[faces[iface].Indices[nthvert]];
+            var normal = normals[faces[iface][nthvert]];
             normal = Vector3.TransformNormal(normal, modelView);
             normal = Vector3.Normalize(normal);
 
-            var texCoord = texCoords[faces[iface].Indices[nthvert]];
+            var texCoord = texCoords[faces[iface][nthvert]];
 
             switch (nthvert)
             {

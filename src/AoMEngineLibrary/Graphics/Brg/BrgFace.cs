@@ -4,6 +4,8 @@ namespace AoMEngineLibrary.Graphics.Brg
 {
     public class BrgFace
     {
+        public const int IndexCount = 3;
+
         public short MaterialIndex { get; set; }
 
         public ushort A { get; set; }

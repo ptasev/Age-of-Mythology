@@ -180,7 +180,7 @@
                 Maxscript.CommentTitle("Load Faces");
                 foreach (var face in mesh.Faces)
                 {
-                    Maxscript.Append(faceArray, Maxscript.Point3Literal(face.Indices[0] + 1, face.Indices[2] + 1, face.Indices[1] + 1));
+                    Maxscript.Append(faceArray, Maxscript.Point3Literal(face.A + 1, face.C + 1, face.B + 1));
                 }
 
                 int mObjNum = 0;
@@ -208,11 +208,11 @@
                 for (int i = 0; i < mesh.Faces.Count; ++i)
                 {
                     Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                        i + 1, 1, mesh.Faces[i].Indices[0] + 1);
+                        i + 1, 1, mesh.Faces[i].A + 1);
                     Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                        i + 1, 2, mesh.Faces[i].Indices[2] + 1);
+                        i + 1, 2, mesh.Faces[i].C + 1);
                     Maxscript.Command("meshSetNormalIdFunc {0} {1} {2}",
-                        i + 1, 3, mesh.Faces[i].Indices[1] + 1);
+                        i + 1, 3, mesh.Faces[i].B + 1);
                 }
                 Maxscript.Command("{0}.modifiers[#edit_normals].MakeExplicit selection:#{{1..{1}}}", mainObject, mesh.Normals.Count);
                 Maxscript.Command("meshSetNormalFunc = {0}.modifiers[#edit_normals].SetNormal", mainObject);
@@ -630,16 +630,16 @@
 
                     //System.Windows.Forms.MessageBox.Show("3.1");
                     Maxscript.Command("face = brgFaceArray[{0}]", i + 1);
-                    f.Indices.Add((ushort)(Maxscript.QueryInteger("face.x") - 1 + currNumVertices));
-                    f.Indices.Add((ushort)(Maxscript.QueryInteger("face.z") - 1 + currNumVertices));
-                    f.Indices.Add((ushort)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices));
+                    f.A = (ushort)(Maxscript.QueryInteger("face.x") - 1 + currNumVertices);
+                    f.B = (ushort)(Maxscript.QueryInteger("face.z") - 1 + currNumVertices);
+                    f.C = (ushort)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices);
 
                     //System.Windows.Forms.MessageBox.Show("3.2");
                     if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
                     {
-                        mesh.VertexMaterials[f.Indices[0]] = f.MaterialIndex;
-                        mesh.VertexMaterials[f.Indices[1]] = f.MaterialIndex;
-                        mesh.VertexMaterials[f.Indices[2]] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.A] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.B] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.C] = f.MaterialIndex;
                     }
                 }
             }

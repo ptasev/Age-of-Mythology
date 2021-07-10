@@ -9,22 +9,13 @@ using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace AoMModelViewer
 {
@@ -142,18 +133,6 @@ namespace AoMModelViewer
                 var newGrn = new GltfGrnConverter().Convert(ModelRoot.Load("./grnGltf.gltf"), gltfGrnParams);
                 new GrnGltfConverter().Convert(newGrn, texManager).SaveGLTF("./grnGltf2.gltf");
             }
-        }
-        private void OldGltfTestCode()
-        {
-            var gltfModel = ModelRoot.Load("brgGltf.gltf");
-            glTFLoader.Schema.Gltf gltf;
-            BrgFile gltfBrg = new GltfBrgConverter().Convert(gltfModel, new GltfBrgParameters());
-            using (var stream = File.Open("dataBuffer3Recreated.bin", FileMode.Create, FileAccess.Write, FileShare.Read))
-            {
-                GltfFormatter frmt = new GltfFormatter();
-                gltf = frmt.FromBrg(gltfBrg, stream);
-            }
-            glTFLoader.Interface.SaveModel(gltf, "brgGltf3Recreated.gltf");
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
