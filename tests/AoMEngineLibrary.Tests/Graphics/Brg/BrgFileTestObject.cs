@@ -27,7 +27,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
         public void Validate()
         {
             Assert.NotNull(_brg.Header);
-            Assert.Equal("BANG", _brg.Header.Magic);
+            Assert.Equal(BrgHeader.BangMagic, _brg.Header.Magic);
 
             // Test Meshes
             HasValidMeshData();

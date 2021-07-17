@@ -1,7 +1,7 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
+﻿using System;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     [Flags]
     public enum BrgMeshFlag : ushort
     {

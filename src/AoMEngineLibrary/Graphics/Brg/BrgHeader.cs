@@ -2,39 +2,46 @@
 {
     public class BrgHeader
     {
-        public string Magic { get; set; }
-        public int Unknown01 { get; set; }
+        public const uint BangMagic = 1299657828; // BANG chars
+
+        // all of these are unsigned in game code, but use int for some for ease of use in C#
+        public uint Magic { get; set; }
+        public uint Reserved1 { get; set; }
         public int NumMaterials { get; set; }
-        public int Unknown02 { get; set; }
+        public uint Reserved2 { get; set; }
         public int NumMeshes { get; set; }
-        public int Reserved { get; set; }
-        public int Unknown03 { get; set; }
+        public uint Reserved3 { get; set; }
+        public byte Revision { get; set; }
+        public byte[] Padding { get; }
 
         public BrgHeader()
         {
-            this.Magic = "BANG";
-            this.Unknown03 = 1999922179;
+            Magic = BangMagic;
+            Revision = 3;
+            Padding = new byte[] { 0x64, 0x34, 0x77 };
         }
         public BrgHeader(BrgBinaryReader reader)
         {
-            this.Magic = reader.ReadString(4);
-            this.Unknown01 = reader.ReadInt32();
-            this.NumMaterials = reader.ReadInt32();
-            this.Unknown02 = reader.ReadInt32();
-            this.NumMeshes = reader.ReadInt32();
-            this.Reserved = reader.ReadInt32();
-            this.Unknown03 = reader.ReadInt32();
+            Magic = reader.ReadUInt32();
+            Reserved1 = reader.ReadUInt32();
+            NumMaterials = reader.ReadInt32();
+            Reserved2 = reader.ReadUInt32();
+            NumMeshes = reader.ReadInt32();
+            Reserved3 = reader.ReadUInt32();
+            Revision = reader.ReadByte();
+            Padding = reader.ReadBytes(3);
         }
 
         public void Write(BrgBinaryWriter writer)
         {
-            writer.Write(1196310850); // magic "BANG"
-            writer.Write(this.Unknown01);
-            writer.Write(this.NumMaterials);
-            writer.Write(this.Unknown02);
-            writer.Write(this.NumMeshes);
-            writer.Write(this.Reserved);
-            writer.Write(1999922179);
+            writer.Write(Magic);
+            writer.Write(Reserved1);
+            writer.Write(NumMaterials);
+            writer.Write(Reserved2);
+            writer.Write(NumMeshes);
+            writer.Write(Reserved3);
+            writer.Write(Revision);
+            writer.Write(Padding);
         }
     }
 }

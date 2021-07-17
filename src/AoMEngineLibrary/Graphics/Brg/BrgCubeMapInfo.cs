@@ -1,8 +1,8 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.Text;
+﻿using System;
+using System.Text;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgCubeMapInfo : IEquatable<BrgCubeMapInfo>
     {
         public byte Mode { get; set; }
@@ -11,8 +11,8 @@
         public byte TextureMapNameLength { get; private set; }
 
         private string _cubeMapName;
-        public string CubeMapName 
-        { 
+        public string CubeMapName
+        {
             get => _cubeMapName;
             set
             {
@@ -47,12 +47,12 @@
                 return false;
             }
 
-            bool ret = this.Mode == other.Mode &&
-                this.TextureFactor == other.TextureFactor &&
-                this.CubeMapNameLength == other.CubeMapNameLength &&
-                this.TextureMapNameLength == other.TextureMapNameLength &&
-                this.CubeMapName == other.CubeMapName &&
-                this.TextureMapName == other.TextureMapName;
+            var ret = Mode == other.Mode &&
+                TextureFactor == other.TextureFactor &&
+                CubeMapNameLength == other.CubeMapNameLength &&
+                TextureMapNameLength == other.TextureMapNameLength &&
+                CubeMapName == other.CubeMapName &&
+                TextureMapName == other.TextureMapName;
 
             return ret;
         }

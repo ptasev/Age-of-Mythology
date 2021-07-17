@@ -190,7 +190,7 @@ namespace AoMBrgEditor
                         }
                         continue;
                         //output += Path.GetFileName(s) + Environment.NewLine;
-                        output += "animTime = " + file.AsetHeader.animTime;
+                        output += "animTime = " + file.AsetHeader.AnimTime;
                         output += "\tmeshCount = " + file.Meshes.Count;
                         //output += "\tmeshFormat = " + file.Mesh[0].meshFormat;
                         output += "\tunknown01b = " + file.Meshes[0].Header.Format;

@@ -17,25 +17,25 @@ namespace AoMEngineLibrary.Graphics.Brg
         {
             BrgUserDataEntry dataEntry;
 
-            dataEntry.dataNameLength = this.ReadInt32();
-            dataEntry.dataType = this.ReadInt32();
+            dataEntry.dataNameLength = ReadInt32();
+            dataEntry.dataType = ReadInt32();
             switch (dataEntry.dataType)
             {
                 case 1:
-                    dataEntry.data = this.ReadInt32();
-                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength + (int)dataEntry.data);
+                    dataEntry.data = ReadInt32();
+                    dataEntry.dataName = ReadString(dataEntry.dataNameLength + (int)dataEntry.data);
                     break;
                 case 2:
-                    dataEntry.data = this.ReadInt32();
-                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength);
+                    dataEntry.data = ReadInt32();
+                    dataEntry.dataName = ReadString(dataEntry.dataNameLength);
                     break;
                 case 3:
-                    dataEntry.data = this.ReadSingle();
-                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength);
+                    dataEntry.data = ReadSingle();
+                    dataEntry.dataName = ReadString(dataEntry.dataNameLength);
                     break;
                 default:
-                    dataEntry.data = this.ReadInt32();
-                    dataEntry.dataName = this.ReadString(dataEntry.dataNameLength);
+                    dataEntry.data = ReadInt32();
+                    dataEntry.dataName = ReadString(dataEntry.dataNameLength);
                     break;
             }
 
@@ -44,19 +44,19 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public Vector3 ReadVector3D(bool isHalf)
         {
-            Vector3 v = new Vector3();
+            var v = new Vector3();
 
             if (!isHalf)
             {
-                v.X = this.ReadSingle();
-                v.Y = this.ReadSingle();
-                v.Z = this.ReadSingle();
+                v.X = ReadSingle();
+                v.Y = ReadSingle();
+                v.Z = ReadSingle();
             }
             else
             {
-                v.X = this.ReadHalf();
-                v.Y = this.ReadHalf();
-                v.Z = this.ReadHalf();
+                v.X = ReadHalf();
+                v.Y = ReadHalf();
+                v.Z = ReadHalf();
             }
 
             return v;
@@ -64,17 +64,17 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public Vector2 ReadVector2D(bool isHalf = false)
         {
-            Vector2 v = new Vector2();
+            var v = new Vector2();
 
             if (!isHalf)
             {
-                v.X = this.ReadSingle();
-                v.Y = this.ReadSingle();
+                v.X = ReadSingle();
+                v.Y = ReadSingle();
             }
             else
             {
-                v.X = this.ReadHalf();
-                v.Y = this.ReadHalf();
+                v.X = ReadHalf();
+                v.Y = ReadHalf();
             }
 
             return v;
@@ -82,38 +82,38 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public Vector4 ReadTexel()
         {
-            var b = this.ReadByte() / 255.0f;
-            var g = this.ReadByte() / 255.0f;
-            var r = this.ReadByte() / 255.0f;
-            var a = this.ReadByte() / 255.0f;
+            var b = ReadByte() / 255.0f;
+            var g = ReadByte() / 255.0f;
+            var r = ReadByte() / 255.0f;
+            var a = ReadByte() / 255.0f;
             return Vector4.Clamp(new Vector4(r, g, b, a),
                 Vector4.Zero, Vector4.One);
         }
 
         public float ReadHalf()
         {
-            byte[] f = new byte[4];
-            byte[] h = this.ReadBytes(2);
+            var f = new byte[4];
+            var h = ReadBytes(2);
             f[2] = h[0];
             f[3] = h[1];
             return BitConverter.ToSingle(f, 0);
         }
         public string ReadString(byte terminator = 0x0)
         {
-            string filename = "";
-            List<byte> fnBytes = new List<byte>();
-            byte filenameByte = this.ReadByte();
+            var filename = "";
+            var fnBytes = new List<byte>();
+            var filenameByte = ReadByte();
             while (filenameByte != terminator)
             {
                 filename += (char)filenameByte;
                 fnBytes.Add(filenameByte);
-                filenameByte = this.ReadByte();
+                filenameByte = ReadByte();
             }
             return Encoding.UTF8.GetString(fnBytes.ToArray());
         }
         public string ReadString(int length)
         {
-            return Encoding.UTF8.GetString(this.ReadBytes(length));
+            return Encoding.UTF8.GetString(ReadBytes(length));
         }
     }
 }

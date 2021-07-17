@@ -1,11 +1,10 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Numerics;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Numerics;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgMesh
     {
         public BrgFile ParentFile { get; set; }
@@ -28,64 +27,69 @@
 
         public BrgMesh(BrgFile file)
         {
-            this.ParentFile = file;
-            this.Header = new BrgMeshHeader();
-            this.Header.Version = 22;
-            this.Header.ExtendedHeaderSize = 40;
+            ParentFile = file;
+            Header = new BrgMeshHeader
+            {
+                Version = 22,
+                ExtendedHeaderSize = 40
+            };
 
-            this.Vertices = new List<Vector3>();
-            this.Normals = new List<Vector3>();
-            this.Faces = new List<BrgFace>();
+            Vertices = new List<Vector3>();
+            Normals = new List<Vector3>();
+            Faces = new List<BrgFace>();
 
-            this.TextureCoordinates = new List<Vector2>();
-            this.Colors = new List<Vector4>();
-            this.VertexMaterials = new List<Int16>();
+            TextureCoordinates = new List<Vector2>();
+            Colors = new List<Vector4>();
+            VertexMaterials = new List<short>();
 
-            this.ExtendedHeader = new BrgMeshExtendedHeader();
-            this.ExtendedHeader.MaterialLibraryTimestamp = 191738312;
-            this.ExtendedHeader.ExportedScaleFactor = 1f;
+            ExtendedHeader = new BrgMeshExtendedHeader
+            {
+                MaterialLibraryTimestamp = 191738312,
+                ExportedScaleFactor = 1f
+            };
 
-            this.UserDataEntries = new BrgUserDataEntry[0];
-            this.particleData = new float[0];
+            UserDataEntries = new BrgUserDataEntry[0];
+            particleData = new float[0];
 
-            this.Attachpoints = new List<BrgAttachpoint>();
-            this.NonUniformKeys = new List<float>();
+            Attachpoints = new List<BrgAttachpoint>();
+            NonUniformKeys = new List<float>();
         }
         public BrgMesh(BrgBinaryReader reader, BrgFile file)
             : this(file)
         {
-            this.ParentFile = file;
-            this.Header = new BrgMeshHeader(reader);
+            ParentFile = file;
+            Header = new BrgMeshHeader(reader);
             
-            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                this.Vertices = new List<Vector3>(this.Header.NumVertices);
-                for (int i = 0; i < this.Header.NumVertices; i++)
+                Vertices = new List<Vector3>(Header.NumVertices);
+                for (var i = 0; i < Header.NumVertices; i++)
                 {
-                    this.Vertices.Add(reader.ReadVector3D(this.Header.Version == 22));
+                    Vertices.Add(reader.ReadVector3D(Header.Version == 22));
                 }
-                this.Normals = new List<Vector3>(this.Header.NumVertices);
-                for (int i = 0; i < this.Header.NumVertices; i++)
+
+                Normals = new List<Vector3>(Header.NumVertices);
+                for (var i = 0; i < Header.NumVertices; i++)
                 {
-                    if (this.Header.Version >= 13 && this.Header.Version <= 17)
+                    if (Header.Version >= 13 && Header.Version <= 17)
                     {
                         reader.ReadInt16(); // TODO figure this out
                     }
                     else // v == 18, 19 or 22
                     {
-                        this.Normals.Add(reader.ReadVector3D(this.Header.Version == 22));
+                        Normals.Add(reader.ReadVector3D(Header.Version == 22));
                     }
                 }
 
-                if ((!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
-                    this.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) ||
-                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
-                    this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                if ((!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) ||
+                    Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
+                    Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    this.TextureCoordinates = new List<Vector2>(this.Header.NumVertices);
-                    for (int i = 0; i < this.Header.NumVertices; i++)
+                    TextureCoordinates = new List<Vector2>(Header.NumVertices);
+                    for (var i = 0; i < Header.NumVertices; i++)
                     {
-                        this.TextureCoordinates.Add(reader.ReadVector2D(this.Header.Version == 22));
+                        TextureCoordinates.Add(reader.ReadVector2D(Header.Version == 22));
                     }
                 }
 
@@ -124,136 +128,136 @@
                 }
             }
 
-            this.UserDataEntries = new BrgUserDataEntry[this.Header.UserDataEntryCount];
-            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            UserDataEntries = new BrgUserDataEntry[Header.UserDataEntryCount];
+            if (!Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < this.Header.UserDataEntryCount; i++)
+                for (var i = 0; i < Header.UserDataEntryCount; i++)
                 {
-                    this.UserDataEntries[i] = reader.ReadUserDataEntry(false);
+                    UserDataEntries[i] = reader.ReadUserDataEntry(false);
                 }
             }
 
-            this.ExtendedHeader = new BrgMeshExtendedHeader(reader, this.Header.ExtendedHeaderSize);
+            ExtendedHeader = new BrgMeshExtendedHeader(reader, Header.ExtendedHeaderSize);
             
-            if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                this.particleData = new float[4 * this.Header.NumVertices];
-                for (int i = 0; i < this.particleData.Length; i++)
+                particleData = new float[4 * Header.NumVertices];
+                for (var i = 0; i < particleData.Length; i++)
                 {
-                    this.particleData[i] = reader.ReadSingle();
+                    particleData[i] = reader.ReadSingle();
                 }
-                for (int i = 0; i < this.Header.UserDataEntryCount; i++)
+                for (var i = 0; i < Header.UserDataEntryCount; i++)
                 {
-                    this.UserDataEntries[i] = reader.ReadUserDataEntry(true);
+                    UserDataEntries[i] = reader.ReadUserDataEntry(true);
                 }
             }
 
-            if (this.Header.Version == 13)
+            if (Header.Version == 13)
             {
-                reader.ReadBytes(this.ExtendedHeader.NameLength);
+                reader.ReadBytes(ExtendedHeader.NameLength);
             }
 
-            if (this.Header.Version >= 13 && this.Header.Version <= 18)
+            if (Header.Version >= 13 && Header.Version <= 18)
             {
-                this.Header.Flags |= BrgMeshFlag.ATTACHPOINTS;
+                Header.Flags |= BrgMeshFlag.ATTACHPOINTS;
             }
-            if (this.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                var numMatrix = this.ExtendedHeader.NumDummies;
-                var numIndex = this.ExtendedHeader.NumNameIndexes;
-                if (this.Header.Version == 19 || this.Header.Version == 22)
+                var numMatrix = ExtendedHeader.NumDummies;
+                var numIndex = ExtendedHeader.NumNameIndexes;
+                if (Header.Version == 19 || Header.Version == 22)
                 {
                     numMatrix = reader.ReadUInt16();
                     numIndex = reader.ReadUInt16();
                     reader.ReadInt16();
                 }
 
-                BrgAttachpoint[] attpts = new BrgAttachpoint[numMatrix];
-                for (int i = 0; i < numMatrix; i++)
+                var attpts = new BrgAttachpoint[numMatrix];
+                for (var i = 0; i < numMatrix; i++)
                 {
                     attpts[i] = new BrgAttachpoint();
                 }
-                for (int i = 0; i < numMatrix; i++)
+                for (var i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].Up = reader.ReadVector3D(this.Header.Version == 22);
+                    attpts[i].Up = reader.ReadVector3D(Header.Version == 22);
                 }
-                for (int i = 0; i < numMatrix; i++)
+                for (var i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].Forward = reader.ReadVector3D(this.Header.Version == 22);
+                    attpts[i].Forward = reader.ReadVector3D(Header.Version == 22);
                 }
-                for (int i = 0; i < numMatrix; i++)
+                for (var i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].Right = reader.ReadVector3D(this.Header.Version == 22);
+                    attpts[i].Right = reader.ReadVector3D(Header.Version == 22);
                 }
-                if (this.Header.Version == 19 || this.Header.Version == 22)
+                if (Header.Version == 19 || Header.Version == 22)
                 {
-                    for (int i = 0; i < numMatrix; i++)
+                    for (var i = 0; i < numMatrix; i++)
                     {
-                        attpts[i].Position = reader.ReadVector3D(this.Header.Version == 22);
+                        attpts[i].Position = reader.ReadVector3D(Header.Version == 22);
                     }
                 }
-                for (int i = 0; i < numMatrix; i++)
+                for (var i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].BoundingBoxMin = reader.ReadVector3D(this.Header.Version == 22);
+                    attpts[i].BoundingBoxMin = reader.ReadVector3D(Header.Version == 22);
                 }
-                for (int i = 0; i < numMatrix; i++)
+                for (var i = 0; i < numMatrix; i++)
                 {
-                    attpts[i].BoundingBoxMax = reader.ReadVector3D(this.Header.Version == 22);
+                    attpts[i].BoundingBoxMax = reader.ReadVector3D(Header.Version == 22);
                 }
 
-                List<int> nameId = new List<int>();
-                for (int i = 0; i < numIndex; i++)
+                var nameId = new List<int>();
+                for (var i = 0; i < numIndex; i++)
                 {
-                    int duplicate = reader.ReadInt32(); // have yet to find a model with duplicates
+                    var duplicate = reader.ReadInt32(); // have yet to find a model with duplicates
                     reader.ReadInt32(); // TODO figure out what this means
-                    for (int j = 0; j < duplicate; j++)
+                    for (var j = 0; j < duplicate; j++)
                     {
                         nameId.Add(i);
                     }
                 }
                 
-                for (int i = 0; i < nameId.Count; i++)
+                for (var i = 0; i < nameId.Count; i++)
                 {
-                    this.Attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
-                    this.Attachpoints[i].NameId = nameId[i];
+                    Attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
+                    Attachpoints[i].NameId = nameId[i];
                     //attpts[reader.ReadByte()].NameId = nameId[i];
                 }
                 //attachpoints = new List<BrgAttachpoint>(attpts);
             }
 
-            if (((this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
-                this.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) &&
-                !this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
-                this.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            if (((Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
+                Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) &&
+                !Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
+                Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
             {
-                this.Colors = new List<Vector4>(this.Header.NumVertices);
-                for (int i = 0; i < this.Header.NumVertices; i++)
+                Colors = new List<Vector4>(Header.NumVertices);
+                for (var i = 0; i < Header.NumVertices; i++)
                 {
-                    this.Colors.Add(reader.ReadTexel());
+                    Colors.Add(reader.ReadTexel());
                 }
             }
 
             // Only seen on first mesh
-            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+            if (Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
-                this.NonUniformKeys = new List<float>(this.ExtendedHeader.NumNonUniformKeys);
-                for (int i = 0; i < this.ExtendedHeader.NumNonUniformKeys; i++)
+                NonUniformKeys = new List<float>(ExtendedHeader.NumNonUniformKeys);
+                for (var i = 0; i < ExtendedHeader.NumNonUniformKeys; i++)
                 {
-                    this.NonUniformKeys.Add(reader.ReadSingle());
+                    NonUniformKeys.Add(reader.ReadSingle());
                 }
             }
 
-            if (this.Header.Version >= 14 && this.Header.Version <= 19)
+            if (Header.Version >= 14 && Header.Version <= 19)
             {
                 // Face Normals??
-                Vector3[] legacy = new Vector3[this.Header.NumFaces];
-                for (int i = 0; i < this.Header.NumFaces; i++)
+                var legacy = new Vector3[Header.NumFaces];
+                for (var i = 0; i < Header.NumFaces; i++)
                 {
                     legacy[i] = reader.ReadVector3D(false);
                 }
             }
 
-            if (!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && this.Header.Version != 22)
+            if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) && Header.Version != 22)
             {
                 reader.ReadBytes(ExtendedHeader.ShadowNameLength0 + ExtendedHeader.ShadowNameLength1);
             }
@@ -264,41 +268,41 @@
             if (Vertices.Count > ushort.MaxValue) throw new InvalidDataException($"Brg meshes cannot have more than {ushort.MaxValue} vertices.");
             if (Faces.Count > ushort.MaxValue) throw new InvalidDataException($"Brg meshes cannot have more than {ushort.MaxValue} faces.");
 
-            this.Header.Version = 22;
-            if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            Header.Version = 22;
+            if (Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                this.Header.NumVertices = (ushort)(this.particleData.Length / 4);
+                Header.NumVertices = (ushort)(particleData.Length / 4);
             }
             else
             {
-                this.Header.NumVertices = (ushort)this.Vertices.Count;
+                Header.NumVertices = (ushort)Vertices.Count;
             }
-            this.Header.NumFaces = (ushort)this.Faces.Count;
-            this.Header.UserDataEntryCount = (ushort)this.UserDataEntries.Length;
-            this.Header.CenterRadius = Math.Max(Math.Max(this.Header.MaximumExtent.X, this.Header.MaximumExtent.Y), this.Header.MaximumExtent.Z);
-            this.Header.ExtendedHeaderSize = 40;
-            this.Header.Write(writer);
+            Header.NumFaces = (ushort)Faces.Count;
+            Header.UserDataEntryCount = (ushort)UserDataEntries.Length;
+            Header.CenterRadius = Math.Max(Math.Max(Header.MaximumExtent.X, Header.MaximumExtent.Y), Header.MaximumExtent.Z);
+            Header.ExtendedHeaderSize = 40;
+            Header.Write(writer);
 
-            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < this.Vertices.Count; i++)
+                for (var i = 0; i < Vertices.Count; i++)
                 {
-                    writer.WriteVector3D(this.Vertices[i], true);
+                    writer.WriteVector3D(Vertices[i], true);
                 }
-                for (int i = 0; i < this.Vertices.Count; i++)
+                for (var i = 0; i < Vertices.Count; i++)
                 {
-                    writer.WriteVector3D(this.Normals[i], true);
+                    writer.WriteVector3D(Normals[i], true);
                 }
 
-                if ((!this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
-                    this.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) ||
-                    this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
-                    this.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                if ((!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) ||
+                    Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) ||
+                    Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM)) &&
+                    Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
                 {
-                    for (int i = 0; i < this.TextureCoordinates.Count; i++)
+                    for (var i = 0; i < TextureCoordinates.Count; i++)
                     {
-                        writer.WriteHalf(this.TextureCoordinates[i].X);
-                        writer.WriteHalf(this.TextureCoordinates[i].Y);
+                        writer.WriteHalf(TextureCoordinates[i].X);
+                        writer.WriteHalf(TextureCoordinates[i].Y);
                     }
                 }
 
@@ -330,36 +334,36 @@
                 }
             }
 
-            if (!this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < this.UserDataEntries.Length; i++)
+                for (var i = 0; i < UserDataEntries.Length; i++)
                 {
-                    writer.WriteUserDataEntry(ref this.UserDataEntries[i], false);
+                    writer.WriteUserDataEntry(ref UserDataEntries[i], false);
                 }
             }
 
-            this.ExtendedHeader.NumNonUniformKeys = NonUniformKeys.Count;
-            this.ExtendedHeader.Write(writer);
+            ExtendedHeader.NumNonUniformKeys = NonUniformKeys.Count;
+            ExtendedHeader.Write(writer);
 
-            if (this.Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
+            if (Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
-                for (int i = 0; i < this.particleData.Length; i++)
+                for (var i = 0; i < particleData.Length; i++)
                 {
-                    writer.Write(this.particleData[i]);
+                    writer.Write(particleData[i]);
                 }
-                for (int i = 0; i < this.UserDataEntries.Length; i++)
+                for (var i = 0; i < UserDataEntries.Length; i++)
                 {
-                    writer.WriteUserDataEntry(ref this.UserDataEntries[i], true);
+                    writer.WriteUserDataEntry(ref UserDataEntries[i], true);
                 }
             }
 
-            if (this.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                writer.Write((Int16)this.Attachpoints.Count);
+                writer.Write((short)Attachpoints.Count);
 
-                List<int> nameId = new List<int>();
-                int maxNameId = -1;
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                var nameId = new List<int>();
+                var maxNameId = -1;
+                foreach (var att in Attachpoints)
                 {
                     nameId.Add(att.NameId);
                     if (att.NameId > maxNameId)
@@ -367,42 +371,42 @@
                         maxNameId = att.NameId;
                     }
                 }
-                Int16 numIndex = (Int16)(maxNameId + 1);//(Int16)(55 - maxNameId);
-                writer.Write((Int16)numIndex);
-                writer.Write((Int16)1);
+                var numIndex = (short)(maxNameId + 1);//(Int16)(55 - maxNameId);
+                writer.Write((short)numIndex);
+                writer.Write((short)1);
 
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                foreach (var att in Attachpoints)
                 {
                     writer.WriteVector3D(att.Up, true);
                 }
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                foreach (var att in Attachpoints)
                 {
                     writer.WriteVector3D(att.Forward, true);
                 }
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                foreach (var att in Attachpoints)
                 {
                     writer.WriteVector3D(att.Right, true);
                 }
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                foreach (var att in Attachpoints)
                 {
                     writer.WriteVector3D(att.Position, true);
                 }
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                foreach (var att in Attachpoints)
                 {
                     writer.WriteVector3D(att.BoundingBoxMin, true);
                 }
-                foreach (BrgAttachpoint att in this.Attachpoints)
+                foreach (var att in Attachpoints)
                 {
                     writer.WriteVector3D(att.BoundingBoxMax, true);
                 }
 
-                int[] dup = new int[numIndex];
-                for (int i = 0; i < nameId.Count; i++)
+                var dup = new int[numIndex];
+                for (var i = 0; i < nameId.Count; i++)
                 {
                     dup[nameId[i]] += 1;
                 }
-                int countId = 0;
-                for (int i = 0; i < numIndex; i++)
+                var countId = 0;
+                for (var i = 0; i < numIndex; i++)
                 {
                     writer.Write(dup[i]);
                     if (dup[i] == 0)
@@ -416,11 +420,11 @@
                     countId += dup[i];
                 }
 
-                List<int> nameId2 = new List<int>(nameId);
+                var nameId2 = new List<int>(nameId);
                 nameId.Sort();
-                for (int i = 0; i < this.Attachpoints.Count; i++)
+                for (var i = 0; i < Attachpoints.Count; i++)
                 {
-                    for (int j = 0; j < this.Attachpoints.Count; j++)
+                    for (var j = 0; j < Attachpoints.Count; j++)
                     {
                         if (nameId[i] == nameId2[j])
                         {
@@ -432,22 +436,22 @@
                 }
             }
 
-            if (((this.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
-                this.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) &&
-                !this.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
-                this.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+            if (((Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
+                Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)) &&
+                !Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH)) ||
+                Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
             {
-                for (int i = 0; i < this.Colors.Count; i++)
+                for (var i = 0; i < Colors.Count; i++)
                 {
-                    writer.WriteTexel(this.Colors[i]);
+                    writer.WriteTexel(Colors[i]);
                 }
             }
 
-            if (this.Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+            if (Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
-                for (int i = 0; i < this.NonUniformKeys.Count; i++)
+                for (var i = 0; i < NonUniformKeys.Count; i++)
                 {
-                    writer.Write(this.NonUniformKeys[i]);
+                    writer.Write(NonUniformKeys[i]);
                 }
             }
         }

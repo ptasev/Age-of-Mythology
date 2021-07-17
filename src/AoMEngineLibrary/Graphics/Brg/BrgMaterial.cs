@@ -1,12 +1,9 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.IO;
-    using System.Numerics;
-    using System.Text;
+﻿using System;
+using System.Numerics;
+using System.Text;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgMaterial : IEquatable<BrgMaterial>
     {
         public BrgFile ParentFile;
@@ -56,25 +53,25 @@
             Reserved = reader.ReadSingle();
             DiffuseMapNameLength = reader.ReadByte();
             reader.ReadBytes(3); // padding
-            this.AmbientColor = reader.ReadVector3D(false);
-            this.DiffuseColor = reader.ReadVector3D(false);
-            this.SpecularColor = reader.ReadVector3D(false);
-            this.EmissiveColor = reader.ReadVector3D(false);
+            AmbientColor = reader.ReadVector3D(false);
+            DiffuseColor = reader.ReadVector3D(false);
+            SpecularColor = reader.ReadVector3D(false);
+            EmissiveColor = reader.ReadVector3D(false);
 
-            this.DiffuseMapName = reader.ReadString((int)DiffuseMapNameLength);
+            DiffuseMapName = reader.ReadString((int)DiffuseMapNameLength);
             if (Flags.HasFlag(BrgMatFlag.BumpMap))
             {
                 BumpMapNameLength = reader.ReadInt32();
-                this.BumpMapName = reader.ReadString(BumpMapNameLength);
+                BumpMapName = reader.ReadString(BumpMapNameLength);
             }
 
             if (Flags.HasFlag(BrgMatFlag.SpecularExponent))
             {
-                this.SpecularExponent = reader.ReadSingle();
+                SpecularExponent = reader.ReadSingle();
             }
             if (Flags.HasFlag(BrgMatFlag.Alpha))
             {
-                this.Opacity = reader.ReadSingle();
+                Opacity = reader.ReadSingle();
             }
 
             if (Flags.HasFlag(BrgMatFlag.CubeMapInfo))
@@ -96,55 +93,55 @@
         }
         public BrgMaterial(BrgFile file)
         {
-            this.ParentFile = file;
-            this.Id = 0;
-            this.Flags = 0;
-            this.Reserved = 0;
+            ParentFile = file;
+            Id = 0;
+            Flags = 0;
+            Reserved = 0;
 
-            this.AmbientColor = Vector3.One;
-            this.DiffuseColor = Vector3.One;
-            this.SpecularColor = Vector3.Zero;
-            this.EmissiveColor = Vector3.Zero;
+            AmbientColor = Vector3.One;
+            DiffuseColor = Vector3.One;
+            SpecularColor = Vector3.Zero;
+            EmissiveColor = Vector3.Zero;
 
-            this.Opacity = 1f;
-            this.SpecularExponent = 0f;
+            Opacity = 1f;
+            SpecularExponent = 0f;
 
-            this._diffuseMap = string.Empty;
-            this._bumpMap = string.Empty;
+            _diffuseMap = string.Empty;
+            _bumpMap = string.Empty;
 
-            this.CubeMapInfo = new BrgCubeMapInfo();
+            CubeMapInfo = new BrgCubeMapInfo();
         }
 
         public void Write(BrgBinaryWriter writer)
         {
-            writer.Write(this.Id);
-            writer.Write((int)this.Flags);
+            writer.Write(Id);
+            writer.Write((int)Flags);
 
-            writer.Write(this.Reserved);
+            writer.Write(Reserved);
             writer.Write((int)DiffuseMapNameLength);
 
-            writer.WriteVector3D(this.AmbientColor, false);
-            writer.WriteVector3D(this.DiffuseColor, false);
-            writer.WriteVector3D(this.SpecularColor, false);
-            writer.WriteVector3D(this.EmissiveColor, false);
+            writer.WriteVector3D(AmbientColor, false);
+            writer.WriteVector3D(DiffuseColor, false);
+            writer.WriteVector3D(SpecularColor, false);
+            writer.WriteVector3D(EmissiveColor, false);
 
-            writer.WriteString(this.DiffuseMapName, 0);
-            if (this.Flags.HasFlag(BrgMatFlag.BumpMap))
+            writer.WriteString(DiffuseMapName, 0);
+            if (Flags.HasFlag(BrgMatFlag.BumpMap))
             {
-                writer.Write(this.BumpMapNameLength);
-                writer.WriteString(this.BumpMapName, 0);
+                writer.Write(BumpMapNameLength);
+                writer.WriteString(BumpMapName, 0);
             }
 
-            if (this.Flags.HasFlag(BrgMatFlag.SpecularExponent))
+            if (Flags.HasFlag(BrgMatFlag.SpecularExponent))
             {
-                writer.Write(this.SpecularExponent);
+                writer.Write(SpecularExponent);
             }
-            if (this.Flags.HasFlag(BrgMatFlag.Alpha))
+            if (Flags.HasFlag(BrgMatFlag.Alpha))
             {
-                writer.Write(this.Opacity);
+                writer.Write(Opacity);
             }
 
-            if (this.Flags.HasFlag(BrgMatFlag.CubeMapInfo))
+            if (Flags.HasFlag(BrgMatFlag.CubeMapInfo))
             {
                 writer.Write(CubeMapInfo.Mode);
                 writer.Write(CubeMapInfo.TextureFactor);
@@ -172,19 +169,19 @@
 
             //ret = ret && this.ParentFile == m.ParentFile;
             //ret = ret && this.id == m.id;
-            bool ret = this.Flags == m.Flags &&
-                this.Reserved == m.Reserved &&
-                this.AmbientColor == m.AmbientColor &&
-                this.DiffuseColor == m.DiffuseColor &&
-                this.SpecularColor == m.SpecularColor &&
-                this.EmissiveColor == m.EmissiveColor &&
-                this.DiffuseMapNameLength == m.DiffuseMapNameLength &&
-                this.BumpMapNameLength == m.BumpMapNameLength &&
-                this.DiffuseMapName == m.DiffuseMapName &&
-                this.BumpMapName == m.BumpMapName &&
-                this.SpecularExponent == m.SpecularExponent &&
-                this.Opacity == m.Opacity &&
-                this.CubeMapInfo.Equals(m.CubeMapInfo);
+            var ret = Flags == m.Flags &&
+                Reserved == m.Reserved &&
+                AmbientColor == m.AmbientColor &&
+                DiffuseColor == m.DiffuseColor &&
+                SpecularColor == m.SpecularColor &&
+                EmissiveColor == m.EmissiveColor &&
+                DiffuseMapNameLength == m.DiffuseMapNameLength &&
+                BumpMapNameLength == m.BumpMapNameLength &&
+                DiffuseMapName == m.DiffuseMapName &&
+                BumpMapName == m.BumpMapName &&
+                SpecularExponent == m.SpecularExponent &&
+                Opacity == m.Opacity &&
+                CubeMapInfo.Equals(m.CubeMapInfo);
 
             // Return true if the fields match:
             return ret;

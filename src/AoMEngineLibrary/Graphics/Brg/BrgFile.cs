@@ -1,9 +1,9 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgFile
     {
         public string FileName { get; set; }
@@ -18,50 +18,50 @@
 
         public BrgFile()
         {
-            this.FileName = string.Empty;
-            this.Header = new BrgHeader();
-            this.AsetHeader = new BrgAsetHeader();
+            FileName = string.Empty;
+            Header = new BrgHeader();
+            AsetHeader = new BrgAsetHeader();
 
-            this.Meshes = new List<BrgMesh>();
-            this.Materials = new List<BrgMaterial>();
+            Meshes = new List<BrgMesh>();
+            Materials = new List<BrgMaterial>();
 
-            this.Animation = new BrgAnimation();
+            Animation = new BrgAnimation();
         }
         public BrgFile(FileStream fileStream)
             : this((Stream)fileStream)
         {
-            this.FileName = fileStream.Name;
+            FileName = fileStream.Name;
         }
         public BrgFile(Stream fileStream)
             : this()
         {
-            using (BrgBinaryReader reader = new BrgBinaryReader(fileStream))
+            using (var reader = new BrgBinaryReader(fileStream))
             {
-                this.Header = new BrgHeader(reader);
-                if (this.Header.Magic != "BANG")
+                Header = new BrgHeader(reader);
+                if (Header.Magic != BrgHeader.BangMagic)
                 {
                     throw new Exception("This is not a BRG file!");
                 }
-                this.AsetHeader = new BrgAsetHeader();
+                AsetHeader = new BrgAsetHeader();
 
-                int asetCount = 0;
-                this.Meshes = new List<BrgMesh>(this.Header.NumMeshes);
-                this.Materials = new List<BrgMaterial>();
+                var asetCount = 0;
+                Meshes = new List<BrgMesh>(Header.NumMeshes);
+                Materials = new List<BrgMaterial>();
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
-                    string magic = reader.ReadString(4);
+                    var magic = reader.ReadString(4);
                     if (magic == "ASET")
                     {
-                        this.AsetHeader = new BrgAsetHeader(reader);
+                        AsetHeader = new BrgAsetHeader(reader);
                         ++asetCount;
                     }
                     else if (magic == "MESI")
                     {
-                        this.Meshes.Add(new BrgMesh(reader, this));
+                        Meshes.Add(new BrgMesh(reader, this));
                     }
                     else if (magic == "MTRL")
                     {
-                        BrgMaterial mat = new BrgMaterial(reader, this);
+                        var mat = new BrgMaterial(reader, this);
                         Materials.Add(mat);
                         if (!ContainsMaterialID(mat.Id))
                         {
@@ -98,25 +98,25 @@
                     throw new Exception("The end of stream was not reached!");
                 }
 
-                this.Animation.Duration = this.Meshes[0].ExtendedHeader.AnimationLength;
-                if (this.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+                Animation.Duration = Meshes[0].ExtendedHeader.AnimationLength;
+                if (Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
                 {
-                    for (int i = 0; i < this.Meshes.Count; ++i)
+                    for (var i = 0; i < Meshes.Count; ++i)
                     {
-                        this.Animation.MeshKeys.Add(this.Meshes[0].NonUniformKeys[i] * this.Animation.Duration);
+                        Animation.MeshKeys.Add(Meshes[0].NonUniformKeys[i] * Animation.Duration);
                     }
                 }
-                else if (this.Meshes.Count > 1)
+                else if (Meshes.Count > 1)
                 {
-                    float divisor = this.Meshes.Count - 1;
-                    for (int i = 0; i < this.Meshes.Count; ++i)
+                    float divisor = Meshes.Count - 1;
+                    for (var i = 0; i < Meshes.Count; ++i)
                     {
-                        this.Animation.MeshKeys.Add((float)i / divisor * this.Animation.Duration);
+                        Animation.MeshKeys.Add(i / divisor * Animation.Duration);
                     }
                 }
                 else
                 {
-                    this.Animation.MeshKeys.Add(0);
+                    Animation.MeshKeys.Add(0);
                 }
             }
         }
@@ -126,40 +126,40 @@
         {
             using (fileStream)
             {
-                this.FileName = fileStream.Name;
+                FileName = fileStream.Name;
                 Write((Stream)fileStream);
             }
         }
-        public void Write(Stream fileStream)
+        public void Write(Stream stream)
         {
-            using (BrgBinaryWriter writer = new BrgBinaryWriter(fileStream, true))
+            using (var writer = new BrgBinaryWriter(stream, true))
             {
-                this.Header.Write(writer);
+                Header.Write(writer);
 
-                if (this.Header.NumMeshes > 1)
+                if (Header.NumMeshes > 1)
                 {
                     updateAsetHeader();
                     writer.Write(1413829441); // magic "ASET"
-                    this.AsetHeader.Write(writer);
+                    AsetHeader.Write(writer);
                 }
 
-                for (int i = 0; i < this.Meshes.Count; i++)
+                for (var i = 0; i < Meshes.Count; i++)
                 {
                     writer.Write(1230193997); // magic "MESI"
-                    this.Meshes[i].Write(writer);
+                    Meshes[i].Write(writer);
                 }
 
-                for (int i = 0; i < this.Materials.Count; i++)
+                for (var i = 0; i < Materials.Count; i++)
                 {
                     writer.Write(1280463949); // magic "MTRL"
-                    this.Materials[i].Write(writer);
+                    Materials[i].Write(writer);
                 }
             }
         }
 
         public bool ContainsMaterialID(int id)
         {
-            for (int i = 0; i < Materials.Count; i++)
+            for (var i = 0; i < Materials.Count; i++)
             {
                 if (Materials[i].Id == id)
                 {
@@ -171,35 +171,35 @@
         }
         private void updateAsetHeader()
         {
-            AsetHeader.numFrames = this.Animation.MeshKeys.Count;
-            AsetHeader.frameStep = 1f / (float)AsetHeader.numFrames;
-            AsetHeader.animTime = this.Animation.Duration;
-            AsetHeader.frequency = 1f / (float)AsetHeader.animTime;
-            AsetHeader.spf = AsetHeader.animTime / (float)AsetHeader.numFrames;
-            AsetHeader.fps = (float)AsetHeader.numFrames / AsetHeader.animTime;
+            AsetHeader.NumFrames = (uint)Animation.MeshKeys.Count;
+            AsetHeader.InvFrames = 1f / AsetHeader.NumFrames;
+            AsetHeader.AnimTime = Animation.Duration;
+            AsetHeader.Frequency = 1f / AsetHeader.AnimTime;
+            AsetHeader.Spf = AsetHeader.AnimTime / AsetHeader.NumFrames;
+            AsetHeader.Fps = AsetHeader.NumFrames / AsetHeader.AnimTime;
         }
 
         public void UpdateMeshSettings()
         {
-            if (this.Meshes.Count == 0)
+            if (Meshes.Count == 0)
             {
                 return;
             }
 
-            BrgMesh mesh = this.Meshes[0];
-            for (int i = 0; i < this.Meshes.Count; i++)
+            var mesh = Meshes[0];
+            for (var i = 0; i < Meshes.Count; i++)
             {
                 UpdateMeshSettings(i, mesh.Header.Flags, mesh.Header.Format, mesh.Header.AnimationType, mesh.Header.InterpolationType);
             }
         }
         public void UpdateMeshSettings(BrgMeshFlag flags, BrgMeshFormat format, BrgMeshAnimType animType, BrgMeshInterpolationType interpolationType)
         {
-            if (this.Meshes.Count == 0)
+            if (Meshes.Count == 0)
             {
                 return;
             }
 
-            for (int i = 0; i < this.Meshes.Count; i++)
+            for (var i = 0; i < Meshes.Count; i++)
             {
                 UpdateMeshSettings(i, flags, format, animType, interpolationType);
             }
@@ -208,26 +208,26 @@
         {
             if (meshIndex > 0)
             {
-                this.Meshes[meshIndex].Header.Flags = flags;
-                this.Meshes[meshIndex].Header.Format = format;
-                this.Meshes[meshIndex].Header.AnimationType = animType;
-                this.Meshes[meshIndex].Header.InterpolationType = interpolationType;
-                this.Meshes[meshIndex].Header.Flags |= BrgMeshFlag.SECONDARYMESH;
-                this.Meshes[meshIndex].Header.AnimationType &= ~BrgMeshAnimType.NonUniform;
+                Meshes[meshIndex].Header.Flags = flags;
+                Meshes[meshIndex].Header.Format = format;
+                Meshes[meshIndex].Header.AnimationType = animType;
+                Meshes[meshIndex].Header.InterpolationType = interpolationType;
+                Meshes[meshIndex].Header.Flags |= BrgMeshFlag.SECONDARYMESH;
+                Meshes[meshIndex].Header.AnimationType &= ~BrgMeshAnimType.NonUniform;
             }
             else
             {
-                this.Meshes[meshIndex].Header.Flags = flags;
-                this.Meshes[meshIndex].Header.Format = format;
-                this.Meshes[meshIndex].Header.AnimationType = animType;
-                this.Meshes[meshIndex].Header.InterpolationType = interpolationType;
+                Meshes[meshIndex].Header.Flags = flags;
+                Meshes[meshIndex].Header.Format = format;
+                Meshes[meshIndex].Header.AnimationType = animType;
+                Meshes[meshIndex].Header.InterpolationType = interpolationType;
 
-                if (this.Meshes[meshIndex].Header.AnimationType == BrgMeshAnimType.NonUniform)
+                if (Meshes[meshIndex].Header.AnimationType == BrgMeshAnimType.NonUniform)
                 {
-                    this.Meshes[meshIndex].NonUniformKeys = new List<float>(this.Header.NumMeshes);
-                    for (int i = 0; i < this.Header.NumMeshes; i++)
+                    Meshes[meshIndex].NonUniformKeys = new List<float>(Header.NumMeshes);
+                    for (var i = 0; i < Header.NumMeshes; i++)
                     {
-                        this.Meshes[meshIndex].NonUniformKeys.Add(this.Animation.MeshKeys[i] / this.Animation.Duration);
+                        Meshes[meshIndex].NonUniformKeys.Add(Animation.MeshKeys[i] / Animation.Duration);
                     }
                 }
             }

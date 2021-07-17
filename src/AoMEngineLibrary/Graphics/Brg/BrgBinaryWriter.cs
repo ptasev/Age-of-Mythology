@@ -1,10 +1,10 @@
-﻿namespace AoMEngineLibrary.Graphics.Brg
-{
-    using System;
-    using System.IO;
-    using System.Numerics;
-    using System.Text;
+﻿using System;
+using System.IO;
+using System.Numerics;
+using System.Text;
 
+namespace AoMEngineLibrary.Graphics.Brg
+{
     public class BrgBinaryWriter : BinaryWriter
     {
         public BrgBinaryWriter(Stream stream)
@@ -19,25 +19,25 @@
 
         public void WriteUserDataEntry(ref BrgUserDataEntry dataEntry, bool isParticle)
         {
-            this.Write(dataEntry.dataNameLength);
-            this.Write(dataEntry.dataType);
+            Write(dataEntry.dataNameLength);
+            Write(dataEntry.dataType);
             switch (dataEntry.dataType)
             {
                 case 1:
-                    this.Write((Int32)dataEntry.data);
-                    this.WriteString(dataEntry.dataName, 0);
+                    Write((int)dataEntry.data);
+                    WriteString(dataEntry.dataName, 0);
                     break;
                 case 2:
-                    this.Write((Int32)dataEntry.data);
-                    this.WriteString(dataEntry.dataName, 0);
+                    Write((int)dataEntry.data);
+                    WriteString(dataEntry.dataName, 0);
                     break;
                 case 3:
-                    this.Write((Single)dataEntry.data);
-                    this.WriteString(dataEntry.dataName, 0);
+                    Write((float)dataEntry.data);
+                    WriteString(dataEntry.dataName, 0);
                     break;
                 default:
-                    this.Write((Int32)dataEntry.data);
-                    this.WriteString(dataEntry.dataName, 0);
+                    Write((int)dataEntry.data);
+                    WriteString(dataEntry.dataName, 0);
                     break;
             }
         }
@@ -46,15 +46,15 @@
         {
             if (!isHalf)
             {
-                this.Write(v.X);
-                this.Write(v.Y);
-                this.Write(v.Z);
+                Write(v.X);
+                Write(v.Y);
+                Write(v.Z);
             }
             else
             {
-                this.WriteHalf(v.X);
-                this.WriteHalf(v.Y);
-                this.WriteHalf(v.Z);
+                WriteHalf(v.X);
+                WriteHalf(v.Y);
+                WriteHalf(v.Z);
             }
         }
 
@@ -62,36 +62,36 @@
         {
             var res = Vector4.Clamp(t * 255, Vector4.Zero, Vector4.One);
 
-            this.Write((byte)res.Z); // B
-            this.Write((byte)res.Y); // G
-            this.Write((byte)res.X); // R
-            this.Write((byte)res.W); // A
+            Write((byte)res.Z); // B
+            Write((byte)res.Y); // G
+            Write((byte)res.X); // R
+            Write((byte)res.W); // A
         }
 
         public void WriteHalf(float half)
         {
-            byte[] f = BitConverter.GetBytes(half);
-            this.Write(f[2]);
-            this.Write(f[3]);
+            var f = BitConverter.GetBytes(half);
+            Write(f[2]);
+            Write(f[3]);
         }
         public void WriteString(string str)
         {
-            byte[] data = Encoding.UTF8.GetBytes(str);
-            this.Write(data);
-            this.Write((byte)0x0);
+            var data = Encoding.UTF8.GetBytes(str);
+            Write(data);
+            Write((byte)0x0);
         }
         public void WriteString(string str, int lengthSize)
         {
-            byte[] data = Encoding.UTF8.GetBytes(str);
+            var data = Encoding.UTF8.GetBytes(str);
             if (lengthSize == 2)
             {
-                this.Write((Int16)data.Length);
+                Write((short)data.Length);
             }
             else if (lengthSize == 4)
             {
-                this.Write(data.Length);
+                Write(data.Length);
             }
-            this.Write(data);
+            Write(data);
         }
     }
 }

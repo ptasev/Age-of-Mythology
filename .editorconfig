@@ -71,7 +71,7 @@ csharp_prefer_braces = false:suggestion
 #Style - expression bodied member options
 
 #prefer block bodies for accessors
-csharp_style_expression_bodied_accessors = false:suggestion
+csharp_style_expression_bodied_accessors = when_on_single_line:suggestion
 #prefer block bodies for methods
 csharp_style_expression_bodied_methods = false:suggestion
 #prefer block bodies for properties
@@ -124,6 +124,9 @@ csharp_preferred_modifier_order = public, private, protected, internal, static, 
 
 #prefer pattern matching instead of is expression with type casts
 csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+
+# IDE0063: Use simple 'using' statement
+csharp_prefer_simple_using_statement = false:silent
 
 #Style - qualification options
 

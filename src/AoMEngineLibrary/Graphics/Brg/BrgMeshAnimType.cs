@@ -1,7 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Brg
 {
-    using System;
-
     public enum BrgMeshAnimType : byte
     {
         KeyFrame = 0x0000, // keyframe based animation
