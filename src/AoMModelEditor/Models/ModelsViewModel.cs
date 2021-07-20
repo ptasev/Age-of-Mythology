@@ -127,9 +127,9 @@ namespace AoMModelEditor.Models
 
                 if (brg.Meshes.Count > 0)
                 {
-                    for (int i = 0; i < brg.Meshes[0].Attachpoints.Count; ++i)
+                    for (int i = 0; i < brg.Meshes[0].Dummies.Count; ++i)
                     {
-                        _modelObjects.Add(new BrgDummyViewModel(brg.Meshes.Select(m => m.Attachpoints[i]).ToList()));
+                        _modelObjects.Add(new BrgDummyViewModel(brg.Meshes.Select(m => m.Dummies[i]).ToList()));
                     }
                 }
 

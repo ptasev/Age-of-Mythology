@@ -13,6 +13,7 @@ namespace AoMMaxPlugin
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Windows.Forms;
     using System.Xml;
@@ -176,8 +177,7 @@ namespace AoMMaxPlugin
             attachpointListBox.MouseDoubleClick += attachpointListBox_MouseDoubleClick;
             attachpointListBox.BackColor = uiUp.GetEditControlColor();
             attachpointListBox.ForeColor = uiUp.GetTextColor();
-            string[] atpts = new string[55];
-            Array.Copy(BrgAttachpoint.AttachpointNames, atpts, 55);
+            var atpts = BrgDummyTypeInfo.Entries.Select(x => x.Name).ToArray();
             Array.Sort(atpts);
             attachpointListBox.DataSource = atpts;
 
@@ -544,8 +544,10 @@ namespace AoMMaxPlugin
             int index = attachpointListBox.IndexFromPoint(e.Location);
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
-                BrgAttachpoint att = new BrgAttachpoint();
-                att.NameId = BrgAttachpoint.GetIdByName((string)attachpointListBox.Items[index]);
+                var att = new BrgDummy()
+                {
+                    Type = BrgDummyTypeInfo.GetByName((string)attachpointListBox.Items[index]).Type
+                };
                 Maxscript.NewDummy("newDummy", att.GetMaxName(), att.GetMaxTransform(), att.GetMaxPosition(), att.GetMaxBoxSize(), att.GetMaxScale());
             }
         }
@@ -608,9 +610,9 @@ namespace AoMMaxPlugin
                 return;
             }
 
-            if (this.brgObjectsTreeListView.SelectedObject is BrgAttachpoint)
+            if (this.brgObjectsTreeListView.SelectedObject is BrgDummy)
             {
-                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgAttachpoint)this.brgObjectsTreeListView.SelectedObject).GetMaxName());
+                Maxscript.Command("selectDummy = getNodeByName \"{0}\"", ((BrgDummy)this.brgObjectsTreeListView.SelectedObject).GetMaxName());
                 if (Maxscript.QueryBoolean("selectDummy != undefined"))
                 {
                     Maxscript.Command("select selectDummy");

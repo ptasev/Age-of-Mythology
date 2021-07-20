@@ -71,14 +71,14 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 var ttb = hnb.UseTranslation().UseTrackBuilder(TrackName);
                 ttb.SetPoint(brg.Animation.MeshKeys[0], brg.Meshes[0].Header.HotspotPosition);
-                for (int i = 1; i < brg.Meshes.Count; ++i)
+                for (var i = 1; i < brg.Meshes.Count; ++i)
                 {
                     ttb.SetPoint(brg.Animation.MeshKeys[i], brg.Meshes[i].Header.HotspotPosition);
                 }
             }
             sceneBuilder.AddRigidMesh(mb, hnb);
 
-            for (int i = 0; i < brg.Meshes[0].Attachpoints.Count; ++i)
+            for (var i = 0; i < brg.Meshes[0].Dummies.Count; ++i)
             {
                 var nb = ConvertAttachpoint(brg, i, nodeBuilder);
                 sceneBuilder.AddRigidMesh(mb, nb);
@@ -168,7 +168,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         }
         private NodeBuilder ConvertAttachpoint(BrgFile brg, int attpIndex, NodeBuilder nodeBuilder)
         {
-            var attp = brg.Meshes[0].Attachpoints[attpIndex];
+            var attp = brg.Meshes[0].Dummies[attpIndex];
             var nb = nodeBuilder.CreateNode("Dummy_" + attp.Name);
 
             var worldMatrix = GetAttachpointWorldMatrix(attp);
@@ -189,7 +189,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 for (int i = 1; i < brg.Meshes.Count; ++i)
                 {
-                    attp = brg.Meshes[i].Attachpoints[attpIndex];
+                    attp = brg.Meshes[i].Dummies[attpIndex];
                     worldMatrix = GetAttachpointWorldMatrix(attp);
                     Matrix4x4.Decompose(worldMatrix, out scale, out rot, out trans);
                     ttb.SetPoint(brg.Animation.MeshKeys[i], trans);
@@ -200,9 +200,9 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             return nb;
         }
-        private Matrix4x4 GetAttachpointWorldMatrix(BrgAttachpoint attp)
+        private Matrix4x4 GetAttachpointWorldMatrix(BrgDummy attp)
         {
-            Matrix4x4 mat = new Matrix4x4();
+            var mat = new Matrix4x4();
             mat.M11 = attp.Right.X; mat.M12 = attp.Right.Y; mat.M13 = attp.Right.Z;
             mat.M21 = attp.Up.X; mat.M22 = attp.Up.Y; mat.M23 = attp.Up.Z;
             mat.M31 = attp.Forward.X; mat.M32 = attp.Forward.Y; mat.M33 = attp.Forward.Z;

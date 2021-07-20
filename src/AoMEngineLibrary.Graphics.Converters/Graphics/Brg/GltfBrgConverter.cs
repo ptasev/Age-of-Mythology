@@ -384,8 +384,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 mesh.Header.Flags |= BrgMeshFlag.ATTACHPOINTS;
                 foreach (var dummy in dummies)
                 {
-                    string aName = dummy.Name;
-                    if (!BrgAttachpoint.TryGetIdByName(aName.Substring(6), out int nameId))
+                    var aName = dummy.Name;
+                    if (!BrgDummyTypeInfo.TryGetByName(aName.Substring(6), out var typeInfo))
                     {
                         // Check if it's hotspot
                         if (aName.Equals("Dummy_hotspot", StringComparison.InvariantCultureIgnoreCase))
@@ -396,36 +396,19 @@ namespace AoMEngineLibrary.Graphics.Brg
                         continue;
                     }
 
-                    BrgAttachpoint att = new BrgAttachpoint();
-                    att.NameId = nameId;
                     var transform = dummy.ModelMatrix;
-
-                    att.Up.X = transform.M21;
-                    att.Up.Y = transform.M22;
-                    att.Up.Z = transform.M23;
-
-                    att.Forward.X = transform.M31;
-                    att.Forward.Y = transform.M32;
-                    att.Forward.Z = transform.M33;
-
-                    att.Right.X = transform.M11;
-                    att.Right.Y = transform.M12;
-                    att.Right.Z = transform.M13;
-
-                    att.Position.X = -transform.M41;
-                    att.Position.Y = transform.M42;
-                    att.Position.Z = transform.M43;
+                    var att = new BrgDummy
+                    {
+                        Type = typeInfo.Type,
+                        Up = new Vector3(transform.M21, transform.M22, transform.M23),
+                        Forward = new Vector3(transform.M31, transform.M32, transform.M33),
+                        Right = new Vector3(transform.M11, transform.M12, transform.M13),
+                        Position = new Vector3(-transform.M41, transform.M42, transform.M43)
+                    };
 
                     // TODO: Calculate dummy bounding box
-                    var bBox = new Vector3(0.5f, 0.5f, 0.5f);
-                    att.BoundingBoxMin.X = -bBox.X;
-                    att.BoundingBoxMin.Z = -bBox.Y;
-                    att.BoundingBoxMin.Y = -bBox.Z;
-                    att.BoundingBoxMax.X = bBox.X;
-                    att.BoundingBoxMax.Z = bBox.Y;
-                    att.BoundingBoxMax.Y = bBox.Z;
 
-                    mesh.Attachpoints.Add(att);
+                    mesh.Dummies.Add(att);
                 }
             }
         }

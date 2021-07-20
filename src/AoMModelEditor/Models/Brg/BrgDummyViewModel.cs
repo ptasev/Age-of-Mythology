@@ -10,8 +10,8 @@ namespace AoMModelEditor.Models.Brg
 {
     public class BrgDummyViewModel : TreeViewItemModelObject
     {
-        private readonly List<BrgAttachpoint> _dummies;
-        private BrgAttachpoint _dummy;
+        private readonly List<BrgDummy> _dummies;
+        private BrgDummy _dummy;
 
         private int _frame;
         public int Frame
@@ -71,7 +71,7 @@ namespace AoMModelEditor.Models.Brg
             }
         }
 
-        public BrgDummyViewModel(List<BrgAttachpoint> dummies)
+        public BrgDummyViewModel(List<BrgDummy> dummies)
             : base()
         {
             _dummies = dummies;

@@ -2,7 +2,7 @@
 {
     public class BrgHeader
     {
-        public const uint BangMagic = 1299657828; // BANG chars
+        public const uint BangMagic = 1196310850; // BANG chars
 
         // all of these are unsigned in game code, but use int for some for ease of use in C#
         public uint Magic { get; set; }

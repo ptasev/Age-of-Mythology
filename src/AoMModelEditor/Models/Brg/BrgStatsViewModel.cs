@@ -37,7 +37,7 @@ namespace AoMModelEditor.Models.Brg
 
             VertexCount = mesh.Vertices.Count;
             FaceCount = mesh.Faces.Count;
-            DummyCount = mesh.Attachpoints.Count;
+            DummyCount = mesh.Dummies.Count;
 
             FrameCount = _brg.Meshes.Count;
             MaterialCount = _brg.Materials.Count;

@@ -239,9 +239,9 @@
             {
                 Maxscript.NewArray(attachDummyArray);
             }
-            for (int i = 0; i < mesh.Attachpoints.Count; ++i)
+            for (int i = 0; i < mesh.Dummies.Count; ++i)
             {
-                BrgAttachpoint att = mesh.Attachpoints[i];
+                BrgDummy att = mesh.Dummies[i];
                 if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
                 {
                     Maxscript.Command("attachpoint = {0}[{1}]", attachDummyArray, i + 1);
@@ -655,17 +655,18 @@
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
             if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                mesh.Attachpoints = new List<BrgAttachpoint>();
+                mesh.Dummies = new BrgDummyCollection();
                 for (int i = 0; i < numAttachpoints; i++)
                 {
                     string aName = Maxscript.QueryString("{0}[{1}].name", attachDummy, i + 1);
-                    int nameId;
-                    if (!BrgAttachpoint.TryGetIdByName(aName.Substring(6), out nameId)) continue;
-                    BrgAttachpoint att = new BrgAttachpoint();
+                    if (!BrgDummyTypeInfo.TryGetByName(aName.Substring(6), out var typeInfo)) continue;
+                    var att = new BrgDummy()
+                    {
+                        Type = typeInfo.Type
+                    };
                     //System.Windows.Forms.MessageBox.Show(aName);
                     //System.Windows.Forms.MessageBox.Show("5.1");
                     //System.Windows.Forms.MessageBox.Show(mesh.Attachpoints.Count + " " + i);
-                    att.NameId = nameId;
                     Maxscript.Command("{0}[{1}].name = \"{2}\"", attachDummy, i + 1, att.GetMaxName());
                     //System.Windows.Forms.MessageBox.Show("5.2");
                     Maxscript.SetVarAtTime(time, "{0}Transform", "{0}[{1}].rotation as matrix3", attachDummy, i + 1);
@@ -676,31 +677,31 @@
                     Vector3 bBox = scale / 2;
                     //System.Windows.Forms.MessageBox.Show("5.4");
 
-                    att.Up.X = -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy);
-                    att.Up.Y = Maxscript.QueryFloat("{0}Transform[3].z", attachDummy);
-                    att.Up.Z = -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy);
+                    att.Up = new Vector3(
+                        -Maxscript.QueryFloat("{0}Transform[1].z", attachDummy),
+                        Maxscript.QueryFloat("{0}Transform[3].z", attachDummy),
+                        -Maxscript.QueryFloat("{0}Transform[2].z", attachDummy));
 
-                    att.Forward.X = -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy);
-                    att.Forward.Y = Maxscript.QueryFloat("{0}Transform[3].y", attachDummy);
-                    att.Forward.Z = -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy);
+                    att.Forward = new Vector3(
+                        -Maxscript.QueryFloat("{0}Transform[1].y", attachDummy),
+                        Maxscript.QueryFloat("{0}Transform[3].y", attachDummy),
+                        -Maxscript.QueryFloat("{0}Transform[2].y", attachDummy));
 
-                    att.Right.X = -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy);
-                    att.Right.Y = Maxscript.QueryFloat("{0}Transform[3].x", attachDummy);
-                    att.Right.Z = -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy);
+                    att.Right = new Vector3(
+                        -Maxscript.QueryFloat("{0}Transform[1].x", attachDummy),
+                        Maxscript.QueryFloat("{0}Transform[3].x", attachDummy),
+                        -Maxscript.QueryFloat("{0}Transform[2].x", attachDummy));
 
-                    att.Position.X = -Maxscript.QueryFloat("{0}Position.x", attachDummy);
-                    att.Position.Z = -Maxscript.QueryFloat("{0}Position.y", attachDummy);
-                    att.Position.Y = Maxscript.QueryFloat("{0}Position.z", attachDummy);
+                    att.Position = new Vector3(
+                        -Maxscript.QueryFloat("{0}Position.x", attachDummy),
+                        Maxscript.QueryFloat("{0}Position.z", attachDummy),
+                        -Maxscript.QueryFloat("{0}Position.y", attachDummy));
                     //System.Windows.Forms.MessageBox.Show("5.5");
 
-                    att.BoundingBoxMin.X = -bBox.X;
-                    att.BoundingBoxMin.Z = -bBox.Y;
-                    att.BoundingBoxMin.Y = -bBox.Z;
-                    att.BoundingBoxMax.X = bBox.X;
-                    att.BoundingBoxMax.Z = bBox.Y;
-                    att.BoundingBoxMax.Y = bBox.Z;
+                    att.BoundingBoxMin = new Vector3(-bBox.X, -bBox.Z, -bBox.Y);
+                    att.BoundingBoxMax = new Vector3(bBox.X, bBox.Z, bBox.Y);
 
-                    mesh.Attachpoints.Add(att);
+                    mesh.Dummies.Add(att);
                 }
                 //System.Windows.Forms.MessageBox.Show("# Atpts: " + Attachpoint.Count);
             }
@@ -833,7 +834,7 @@
             this.Plugin.brgObjectsTreeListView.ClearObjects();
             this.Plugin.brgObjectsTreeListView.AddObject(this.File.Meshes[0]);
             this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Materials);
-            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Meshes[0].Attachpoints);
+            this.Plugin.brgObjectsTreeListView.AddObjects(this.File.Meshes[0].Dummies);
             this.Plugin.brgObjectsTreeListView.SelectObject(this.File.Meshes[0], true);
 
             // General Info

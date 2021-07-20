@@ -23,7 +23,7 @@ namespace AoMModelEditor.Models.Brg
             get => _mesh.Faces.Count;
         }
 
-        public int DummyCount => _mesh.Attachpoints.Count;
+        public int DummyCount => _mesh.Dummies.Count;
 
         public int FrameCount => _brg.Meshes.Count;
 

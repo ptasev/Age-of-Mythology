@@ -22,7 +22,8 @@ namespace AoMEngineLibrary.Graphics.Brg
         public BrgUserDataEntry[] UserDataEntries { get; set; }
         private float[] particleData;
 
-        public List<BrgAttachpoint> Attachpoints { get; set; }
+        public BrgDummyCollection Dummies { get; set; }
+
         public List<float> NonUniformKeys { get; set; }
 
         public BrgMesh(BrgFile file)
@@ -51,7 +52,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             UserDataEntries = new BrgUserDataEntry[0];
             particleData = new float[0];
 
-            Attachpoints = new List<BrgAttachpoint>();
+            Dummies = new BrgDummyCollection();
             NonUniformKeys = new List<float>();
         }
         public BrgMesh(BrgBinaryReader reader, BrgFile file)
@@ -59,7 +60,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         {
             ParentFile = file;
             Header = new BrgMeshHeader(reader);
-            
+
             if (!Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))
             {
                 Vertices = new List<Vector3>(Header.NumVertices);
@@ -163,66 +164,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
             if (Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                var numMatrix = ExtendedHeader.NumDummies;
-                var numIndex = ExtendedHeader.NumNameIndexes;
-                if (Header.Version == 19 || Header.Version == 22)
-                {
-                    numMatrix = reader.ReadUInt16();
-                    numIndex = reader.ReadUInt16();
-                    reader.ReadInt16();
-                }
-
-                var attpts = new BrgAttachpoint[numMatrix];
-                for (var i = 0; i < numMatrix; i++)
-                {
-                    attpts[i] = new BrgAttachpoint();
-                }
-                for (var i = 0; i < numMatrix; i++)
-                {
-                    attpts[i].Up = reader.ReadVector3D(Header.Version == 22);
-                }
-                for (var i = 0; i < numMatrix; i++)
-                {
-                    attpts[i].Forward = reader.ReadVector3D(Header.Version == 22);
-                }
-                for (var i = 0; i < numMatrix; i++)
-                {
-                    attpts[i].Right = reader.ReadVector3D(Header.Version == 22);
-                }
-                if (Header.Version == 19 || Header.Version == 22)
-                {
-                    for (var i = 0; i < numMatrix; i++)
-                    {
-                        attpts[i].Position = reader.ReadVector3D(Header.Version == 22);
-                    }
-                }
-                for (var i = 0; i < numMatrix; i++)
-                {
-                    attpts[i].BoundingBoxMin = reader.ReadVector3D(Header.Version == 22);
-                }
-                for (var i = 0; i < numMatrix; i++)
-                {
-                    attpts[i].BoundingBoxMax = reader.ReadVector3D(Header.Version == 22);
-                }
-
-                var nameId = new List<int>();
-                for (var i = 0; i < numIndex; i++)
-                {
-                    var duplicate = reader.ReadInt32(); // have yet to find a model with duplicates
-                    reader.ReadInt32(); // TODO figure out what this means
-                    for (var j = 0; j < duplicate; j++)
-                    {
-                        nameId.Add(i);
-                    }
-                }
-                
-                for (var i = 0; i < nameId.Count; i++)
-                {
-                    Attachpoints.Add(new BrgAttachpoint(attpts[reader.ReadByte()]));
-                    Attachpoints[i].NameId = nameId[i];
-                    //attpts[reader.ReadByte()].NameId = nameId[i];
-                }
-                //attachpoints = new List<BrgAttachpoint>(attpts);
+                Dummies.Read(reader, Header.Version, ExtendedHeader.NumDummies, ExtendedHeader.NumNameIndexes);
             }
 
             if (((Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
@@ -238,7 +180,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
 
             // Only seen on first mesh
-            if (Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) &&
+                Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
                 NonUniformKeys = new List<float>(ExtendedHeader.NumNonUniformKeys);
                 for (var i = 0; i < ExtendedHeader.NumNonUniformKeys; i++)
@@ -359,81 +302,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             if (Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
             {
-                writer.Write((short)Attachpoints.Count);
-
-                var nameId = new List<int>();
-                var maxNameId = -1;
-                foreach (var att in Attachpoints)
-                {
-                    nameId.Add(att.NameId);
-                    if (att.NameId > maxNameId)
-                    {
-                        maxNameId = att.NameId;
-                    }
-                }
-                var numIndex = (short)(maxNameId + 1);//(Int16)(55 - maxNameId);
-                writer.Write((short)numIndex);
-                writer.Write((short)1);
-
-                foreach (var att in Attachpoints)
-                {
-                    writer.WriteVector3D(att.Up, true);
-                }
-                foreach (var att in Attachpoints)
-                {
-                    writer.WriteVector3D(att.Forward, true);
-                }
-                foreach (var att in Attachpoints)
-                {
-                    writer.WriteVector3D(att.Right, true);
-                }
-                foreach (var att in Attachpoints)
-                {
-                    writer.WriteVector3D(att.Position, true);
-                }
-                foreach (var att in Attachpoints)
-                {
-                    writer.WriteVector3D(att.BoundingBoxMin, true);
-                }
-                foreach (var att in Attachpoints)
-                {
-                    writer.WriteVector3D(att.BoundingBoxMax, true);
-                }
-
-                var dup = new int[numIndex];
-                for (var i = 0; i < nameId.Count; i++)
-                {
-                    dup[nameId[i]] += 1;
-                }
-                var countId = 0;
-                for (var i = 0; i < numIndex; i++)
-                {
-                    writer.Write(dup[i]);
-                    if (dup[i] == 0)
-                    {
-                        writer.Write(0);
-                    }
-                    else
-                    {
-                        writer.Write(countId);
-                    }
-                    countId += dup[i];
-                }
-
-                var nameId2 = new List<int>(nameId);
-                nameId.Sort();
-                for (var i = 0; i < Attachpoints.Count; i++)
-                {
-                    for (var j = 0; j < Attachpoints.Count; j++)
-                    {
-                        if (nameId[i] == nameId2[j])
-                        {
-                            nameId2[j] = -1;
-                            writer.Write((byte)j);
-                            break;
-                        }
-                    }
-                }
+                Dummies.Write(writer, Header.Version);
             }
 
             if (((Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
@@ -447,7 +316,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
             }
 
-            if (Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+            if (!Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) &&
+                Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
             {
                 for (var i = 0; i < NonUniformKeys.Count; i++)
                 {
