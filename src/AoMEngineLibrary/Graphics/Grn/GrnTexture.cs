@@ -1,40 +1,24 @@
-﻿namespace AoMEngineLibrary.Graphics.Grn
-{
-    using AoMEngineLibrary.Graphics.Grn.Nodes;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿using AoMEngineLibrary.Graphics.Grn.Nodes;
+using System;
+using System.IO;
 
+namespace AoMEngineLibrary.Graphics.Grn
+{
     public class GrnTexture : IGrnObject, IEquatable<GrnTexture>
     {
         public Int32 DataExtensionIndex { get; set; }
 
         public GrnFile ParentFile { get; set; }
-        public string Name
-        {
-            get
-            {
-                return this.ParentFile.GetDataExtensionObjectName(this.DataExtensionIndex);
-            }
-        }
-        public string FileName
-        {
-            get
-            {
-                return this.ParentFile.GetDataExtensionFileName(this.DataExtensionIndex);
-            }
-        }
+        public string Name => ParentFile.GetDataExtensionObjectName(DataExtensionIndex);
+        public string FileName => ParentFile.GetDataExtensionFileName(DataExtensionIndex);
 
         public int Width { get; set; }
         public int Height { get; set; }
 
         public GrnTexture(GrnFile parentFile)
         {
-            this.ParentFile = parentFile;
-            this.DataExtensionIndex = 0;
+            ParentFile = parentFile;
+            DataExtensionIndex = 0;
         }
 
         internal void Read(GrnNode textureMap)
@@ -69,17 +53,21 @@
             texMapNode.AppendChild(refNode);
         }
 
-        public bool Equals(GrnTexture tex)
+        public bool Equals(GrnTexture? tex)
         {
-            if ((object)tex == null)
+            if (tex == null)
             {
                 return false;
             }
 
-            return this.Name == tex.Name &&
-                this.FileName == tex.FileName &&
-                this.Width == tex.Width &&
-                this.Height == tex.Height;
+            return Name == tex.Name &&
+                FileName == tex.FileName &&
+                Width == tex.Width &&
+                Height == tex.Height;
         }
+
+        public override bool Equals(object? obj) => Equals(obj as GrnTexture);
+
+        public override int GetHashCode() => HashCode.Combine(Name, FileName, Width, Height);
     }
 }

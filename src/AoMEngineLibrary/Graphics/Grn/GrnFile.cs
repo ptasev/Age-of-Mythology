@@ -440,14 +440,14 @@
                 foreach (KeyValuePair<string, string> deProp in dataExt)
                 {
                     GrnDataExtensionPropertyNode dePropNode = new GrnDataExtensionPropertyNode(datExtPropSecNode);
-                    dePropNode.StringTableIndex = (int)stringMap[deProp.Key];
+                    dePropNode.StringTableIndex = (int)stringMap[deProp.Key]!;
                     datExtPropSecNode.AppendChild(dePropNode);
 
                     GrnNode deValSection = new GrnNode(dePropNode, GrnNodeType.DataExtensionValueSection);
                     dePropNode.AppendChild(deValSection);
 
                     GrnDataExtensionPropertyValueNode dePValNode = new GrnDataExtensionPropertyValueNode(deValSection);
-                    dePValNode.StringTableIndex = (int)stringMap[deProp.Value];
+                    dePValNode.StringTableIndex = (int)stringMap[deProp.Value]!;
                     deValSection.AppendChild(dePValNode);
                 }
             }
@@ -527,7 +527,7 @@
         }
         public string GetDataExtensionProperty(int dataExtensionIndex, string property)
         {
-            string propValue;
+            string? propValue;
             if (this.DataExtensions[dataExtensionIndex].TryGetValue(property, out propValue))
             {
                 return propValue;

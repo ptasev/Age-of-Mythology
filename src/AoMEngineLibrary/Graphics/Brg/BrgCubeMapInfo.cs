@@ -40,7 +40,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             _textureMapName = string.Empty;
         }
 
-        public bool Equals(BrgCubeMapInfo other)
+        public bool Equals(BrgCubeMapInfo? other)
         {
             if (other == null)
             {
@@ -56,5 +56,9 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             return ret;
         }
+
+        public override bool Equals(object? obj) => Equals(obj as BrgCubeMapInfo);
+
+        public override int GetHashCode() => HashCode.Combine(Mode, TextureFactor, CubeMapName, TextureMapName);
     }
 }

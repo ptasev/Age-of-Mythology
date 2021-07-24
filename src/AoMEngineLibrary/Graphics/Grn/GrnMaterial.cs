@@ -1,25 +1,20 @@
-﻿namespace AoMEngineLibrary.Graphics.Grn
-{
-    using AoMEngineLibrary.Graphics.Grn.Nodes;
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.Specialized;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿using AoMEngineLibrary.Graphics.Grn.Nodes;
+using System;
+using System.IO;
 
+namespace AoMEngineLibrary.Graphics.Grn
+{
     public class GrnMaterial : IGrnObject, IEquatable<GrnMaterial>
     {
         public GrnFile ParentFile { get; set; }
-        public Int32 DataExtensionIndex { get; set; }
-        public Int32 DiffuseTextureIndex { get; set; }
+        public int DataExtensionIndex { get; set; }
+        public int DiffuseTextureIndex { get; set; }
 
         public string Name
         {
             get
             {
-                foreach (KeyValuePair<string, string> dataExt in this.ParentFile.DataExtensions[this.DataExtensionIndex])
+                foreach (var dataExt in ParentFile.DataExtensions[DataExtensionIndex])
                 {
                     if (dataExt.Key == "__ObjectName")
                     {
@@ -30,63 +25,60 @@
                 return "(unnamed)";
             }
         }
-        public GrnTexture DiffuseTexture
-        {
-            get
-            {
-                return this.ParentFile.Textures[this.DiffuseTextureIndex];
-            }
-        }
+        public GrnTexture DiffuseTexture => ParentFile.Textures[DiffuseTextureIndex];
 
         public GrnMaterial(GrnFile parentFile)
         {
-            this.ParentFile = parentFile;
-            this.DataExtensionIndex = 0;
-            this.DiffuseTextureIndex = 0;
+            ParentFile = parentFile;
+            DataExtensionIndex = 0;
+            DiffuseTextureIndex = 0;
         }
 
         internal void Read(GrnNode material)
         {
             // -- Each material has diffuseTex (0, textureIndex(+1), 1), and dataExtRef
-            GrnMaterialSimpleDiffuseTextureNode? matDiffuse = 
+            var matDiffuse = 
                 material.FindNode<GrnMaterialSimpleDiffuseTextureNode>(
                 GrnNodeType.MaterialSimpleDiffuseTexture);
             if (matDiffuse != null)
             {
-                this.DiffuseTextureIndex = matDiffuse.TextureMapIndex - 1;
+                DiffuseTextureIndex = matDiffuse.TextureMapIndex - 1;
             }
 
-            GrnDataExtensionReferenceNode? refNode = material.FindNode<GrnDataExtensionReferenceNode>(
+            var refNode = material.FindNode<GrnDataExtensionReferenceNode>(
                 GrnNodeType.DataExtensionReference);
             if (refNode == null) throw new InvalidDataException("Material node has no data extension reference.");
-            this.DataExtensionIndex = refNode.DataExtensionIndex - 1;
+            DataExtensionIndex = refNode.DataExtensionIndex - 1;
         }
         public void Write(GrnNode matSecNode)
         {
-            GrnNode matNode = new GrnNode(matSecNode, GrnNodeType.Material);
+            var matNode = new GrnNode(matSecNode, GrnNodeType.Material);
             matSecNode.AppendChild(matNode);
-            GrnMaterialSimpleDiffuseTextureNode matDiffNode =
-                new GrnMaterialSimpleDiffuseTextureNode(matNode);
-            matDiffNode.TextureMapIndex = this.DiffuseTextureIndex + 1;
+            var matDiffNode = new GrnMaterialSimpleDiffuseTextureNode(matNode);
+            matDiffNode.TextureMapIndex = DiffuseTextureIndex + 1;
             matNode.AppendChild(matDiffNode);
-            GrnDataExtensionReferenceNode refNode = new GrnDataExtensionReferenceNode(matNode);
+            var refNode = new GrnDataExtensionReferenceNode(matNode);
             refNode.DataExtensionIndex = this.DataExtensionIndex + 1;
             matNode.AppendChild(refNode);
         }
 
-        public bool Equals(GrnMaterial m)
+        public bool Equals(GrnMaterial? m)
         {
             // If parameter is null return false:
-            if ((object)m == null)
+            if (m == null)
             {
                 return false;
             }
 
-            bool ret = this.Name == m.Name &&
-                this.DiffuseTextureIndex == m.DiffuseTextureIndex;
+            var ret = Name == m.Name &&
+                DiffuseTextureIndex == m.DiffuseTextureIndex;
 
             // Return true if the fields match:
             return ret;
         }
+
+        public override bool Equals(object? obj) => Equals(obj as GrnMaterial);
+
+        public override int GetHashCode() => HashCode.Combine(Name, DiffuseTextureIndex);
     }
 }

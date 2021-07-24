@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -18,8 +14,8 @@ namespace AoMEngineLibrary.Anim
             using (TextReader reader = new StreamReader(animFile))
             {
                 XDocument XDoc = new XDocument(new XElement("AnimFile"));
-                XNode elem = XDoc.FirstNode;
-                string line;
+                XNode elem = XDoc.FirstNode!;
+                string? line;
                 bool nextLevel = false;
 
                 while ((line = reader.ReadLine()) != null)
@@ -40,7 +36,7 @@ namespace AoMEngineLibrary.Anim
                         else
                         {
                             elem.AddAfterSelf(new XComment(line));
-                            elem = elem.NextNode;
+                            elem = elem.NextNode!;
                         }
                     }
                     else if (line == "{")
@@ -71,13 +67,13 @@ namespace AoMEngineLibrary.Anim
                         if ((elem.Parent == null || nextLevel) && elem is XElement)
                         {
                             ((XElement)elem).Add(new XElement(function));
-                            elem = ((XElement)elem).LastNode;
+                            elem = ((XElement)elem).LastNode!;
                             nextLevel = false;
                         }
                         else
                         {
                             elem.AddAfterSelf(new XElement(function));
-                            elem = elem.NextNode;
+                            elem = elem.NextNode!;
                         }
 
                         if (spaceIndex == -1)
@@ -116,12 +112,12 @@ namespace AoMEngineLibrary.Anim
         {
             using (TextWriter writer = new StreamWriter(animFile))
             {
-                XDocument XDoc = XDocument.Load(xmlFile);
-                Write(writer, ((XElement)XDoc.FirstNode).FirstNode, "");
+                var XDoc = XDocument.Load(xmlFile);
+                Write(writer, ((XElement?)XDoc.FirstNode)?.FirstNode, "");
             }
         }
 
-        private static void Write(TextWriter writer, XNode node, string tabs)
+        private static void Write(TextWriter writer, XNode? node, string tabs)
         {
             if (node == null)
             {
@@ -133,26 +129,26 @@ namespace AoMEngineLibrary.Anim
                 writer.Write(tabs);
                 writer.WriteLine(((XComment)node).Value);
             }
-            else if (node is XElement)
+            else if (node is XElement elem)
             {
                 writer.Write(tabs);
-                writer.Write(((XElement)node).Name);
+                writer.Write(elem.Name);
 
-                if (((XElement)node).HasAttributes)
+                if (elem.HasAttributes)
                 {
-                    writer.Write(" " + ((XElement)node).Attribute("data").Value);
+                    writer.Write(" " + elem.Attribute("data")?.Value);
                 }
 
-                if (((XElement)node).HasElements)
+                if (elem.HasElements)
                 {
                     writer.WriteLine();
                     writer.WriteLine(tabs + "{");
-                    Write(writer, ((XElement)node).FirstNode, tabs + AnimFile.IndentString);
+                    Write(writer, elem.FirstNode, tabs + AnimFile.IndentString);
                     writer.WriteLine(tabs + "}");
                 }
-                else if (!string.IsNullOrEmpty(((XElement)node).Value) && !string.IsNullOrWhiteSpace(((XElement)node).Value))
+                else if (!string.IsNullOrEmpty(elem.Value) && !string.IsNullOrWhiteSpace(elem.Value))
                 {
-                    writer.Write(" " + ((XElement)node).Value);
+                    writer.Write(" " + elem.Value);
                     writer.WriteLine();
                 }
                 else
@@ -164,7 +160,7 @@ namespace AoMEngineLibrary.Anim
             {
                 throw new Exception("Could not recognize this type of xml compnonent!");
             }
-            
+
             Write(writer, node.NextNode, tabs);
         }
     }

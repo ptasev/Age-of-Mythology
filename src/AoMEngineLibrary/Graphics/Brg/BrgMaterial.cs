@@ -159,7 +159,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
-        public bool Equals(BrgMaterial m)
+        public bool Equals(BrgMaterial? m)
         {
             // If parameter is null return false:
             if (m == null)
@@ -186,5 +186,9 @@ namespace AoMEngineLibrary.Graphics.Brg
             // Return true if the fields match:
             return ret;
         }
+
+        public override bool Equals(object? obj) => Equals(obj as BrgMaterial);
+
+        public override int GetHashCode() => HashCode.Combine(Id, Flags);
     }
 }

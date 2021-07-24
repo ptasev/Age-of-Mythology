@@ -1,10 +1,10 @@
-﻿namespace AoMEngineLibrary.Graphics.Prt
-{
-    using System;
-    using System.IO;
-    using System.Xml.Serialization;
-    using XmlCommentSerialization;
+﻿using System;
+using System.IO;
+using System.Xml.Serialization;
+using XmlCommentSerialization;
 
+namespace AoMEngineLibrary.Graphics.Prt
+{
     [XmlRootAttribute("ParticleFile", IsNullable = false)]
     public class PrtFile
     {
@@ -149,7 +149,7 @@
             XmlSerializer deserializer = new XmlSerializer(typeof(PrtFile));
             using (TextReader reader = new StreamReader(stream, null, true, -1, true))
             {
-                return (PrtFile)deserializer.Deserialize(reader);
+                return (PrtFile?)deserializer.Deserialize(reader) ?? new PrtFile();
             }
         }
 

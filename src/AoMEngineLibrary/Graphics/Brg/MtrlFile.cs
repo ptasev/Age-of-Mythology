@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Xml;
@@ -568,7 +569,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         public void SerializeAsXml(Stream stream)
         {
             var xdoc = new XDocument(new XElement("Material"));
-            var elem = (XElement)xdoc.FirstNode;
+            var elem = (XElement)xdoc.FirstNode!;
             elem.Add(new XElement("diffuse", new XAttribute("R", Diffuse.X), new XAttribute("G", Diffuse.Y), new XAttribute("B", Diffuse.Z)));
             elem.Add(new XElement("ambient", new XAttribute("R", Ambient.X), new XAttribute("G", Ambient.Y), new XAttribute("B", Ambient.Z)));
             elem.Add(new XElement("specular", new XAttribute("R", Specular.X), new XAttribute("G", Specular.Y), new XAttribute("B", Specular.Z)));
@@ -633,8 +634,9 @@ namespace AoMEngineLibrary.Graphics.Brg
             var file = new MtrlFile();
             var xdoc = XDocument.Load(stream);
             var elem = xdoc.Root;
+            var elements = elem?.Elements() ?? Enumerable.Empty<XElement>();
 
-            foreach (var e in elem.Elements())
+            foreach (var e in elements)
             {
                 switch (e.Name.LocalName)
                 {

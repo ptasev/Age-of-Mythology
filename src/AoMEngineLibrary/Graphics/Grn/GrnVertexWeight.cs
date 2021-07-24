@@ -1,11 +1,9 @@
-﻿namespace AoMEngineLibrary.Graphics.Grn
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
+namespace AoMEngineLibrary.Graphics.Grn
+{
     public class GrnVertexWeight : IEquatable<GrnVertexWeight>
     {
         public List<int> BoneIndices { get; set; }
@@ -13,24 +11,15 @@
 
         public GrnVertexWeight()
         {
-            this.BoneIndices = new List<int>();
-            this.Weights = new List<float>();
+            BoneIndices = new List<int>();
+            Weights = new List<float>();
         }
 
-        public override int GetHashCode()
-        {
-            return BoneIndices.FirstOrDefault() ^ (int)Weights.FirstOrDefault();
-        }
+        public override int GetHashCode() => BoneIndices.FirstOrDefault() ^ (int)Weights.FirstOrDefault();
 
-        public override bool Equals(object obj)
-        {
-            if (obj is GrnVertexWeight vw)
-                return Equals(vw);
-            else
-                return false;
-        }
+        public override bool Equals(object? obj) => Equals(obj as GrnVertexWeight);
 
-        public bool Equals(GrnVertexWeight other)
+        public bool Equals(GrnVertexWeight? other)
         {
             if (other is null) return false;
 

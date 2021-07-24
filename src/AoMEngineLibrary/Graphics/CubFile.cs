@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace AoMEngineLibrary.Graphics
 {
@@ -52,10 +51,11 @@ namespace AoMEngineLibrary.Graphics
         {
             using (var r = new StreamReader(stream))
             {
-                int index = 0;
+                var index = 0;
                 while (r.Peek() >= 0)
                 {
                     var line = r.ReadLine();
+                    if (line is null) break;
 
                     line = line.TrimStart();
 
