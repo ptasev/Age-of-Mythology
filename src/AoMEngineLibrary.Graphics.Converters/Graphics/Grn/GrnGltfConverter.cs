@@ -243,13 +243,14 @@ namespace AoMEngineLibrary.Graphics.Grn
                 if (textureImageMap.ContainsKey(mat.DiffuseTexture))
                 {
                     var texData = textureImageMap[mat.DiffuseTexture];
-                    MemoryImage memImage = texData.Image;
+                    var imageBuilder = texData.Image;
                     tex = texData.Texture;
 
                     var tb = cb.UseTexture();
+                    tb.Name = imageBuilder.Name;
                     tb.WrapS = TextureWrapMode.REPEAT;
                     tb.WrapT = TextureWrapMode.REPEAT;
-                    tb.WithPrimaryImage(memImage);
+                    tb.WithPrimaryImage(imageBuilder);
                 }
 
                 if (mat.Name.Contains("xform", StringComparison.InvariantCultureIgnoreCase) ||
@@ -269,9 +270,9 @@ namespace AoMEngineLibrary.Graphics.Grn
             return matIdMatBuilderMap;
         }
 
-        private Dictionary<GrnTexture, (MemoryImage Image, Texture? Texture)> ConvertTextures(GrnFile grn, TextureManager textureManager)
+        private Dictionary<GrnTexture, (ImageBuilder Image, Texture? Texture)> ConvertTextures(GrnFile grn, TextureManager textureManager)
         {
-            var textureImageMap = new Dictionary<GrnTexture, (MemoryImage Image, Texture? Texture)>();
+            var textureImageMap = new Dictionary<GrnTexture, (ImageBuilder Image, Texture? Texture)>();
             for (int i = 0; i < grn.Textures.Count; ++i)
             {
                 var texture = grn.Textures[i];
@@ -284,7 +285,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                         imageFile = imageFile.Remove(parenthIndex);
 
                     // Create a memory image
-                    MemoryImage memImage;
+                    ImageBuilder imageBuilder;
                     Texture? tex = null;
                     try
                     {
@@ -293,7 +294,8 @@ namespace AoMEngineLibrary.Graphics.Grn
                         using (var ms = new MemoryStream())
                         {
                             tex.Images[0][0].SaveAsPng(ms);
-                            memImage = new MemoryImage(ms.ToArray());
+                            var memImage = new MemoryImage(ms.ToArray());
+                            imageBuilder = ImageBuilder.From(memImage, texture.Name);
                         }
                     }
                     catch
@@ -305,11 +307,12 @@ namespace AoMEngineLibrary.Graphics.Grn
                         using (var ms = new MemoryStream())
                         {
                             image.SaveAsPng(ms);
-                            memImage = new MemoryImage(ms.ToArray());
+                            var memImage = new MemoryImage(ms.ToArray());
+                            imageBuilder = ImageBuilder.From(memImage, texture.Name);
                         }
                     }
 
-                    textureImageMap.Add(texture, (memImage, tex));
+                    textureImageMap.Add(texture, (imageBuilder, tex));
                 }
             }
 

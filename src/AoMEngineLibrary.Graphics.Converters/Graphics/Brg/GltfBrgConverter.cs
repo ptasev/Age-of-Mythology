@@ -129,7 +129,6 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             // Add every drawable instance in the scene to the mesh frame
             var drawableInstances = instance
-                .DrawableInstances
                 .Where(d => nodeNameSelector(d.Template.NodeName));
             foreach (var drawableInstance in drawableInstances)
             {

@@ -238,14 +238,17 @@ namespace AoMEngineLibrary.Graphics.Brg
                 // Create the node with morphing
                 var nb = nodeBuilder.CreateNode($"{parameters.ModelName}Model");
                 var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
-                instBuilder.Content.UseMorphing().Value = SparseWeight8.Create(0);
+                var morphWeights = new float[brg.Animation.MeshKeys.Count - 1];
+                instBuilder.Content.UseMorphing().SetValue(morphWeights);
 
                 // Animate morph weights
                 var tb = instBuilder.Content.UseMorphing().UseTrackBuilder(TrackName);
-                tb.SetPoint(brg.Animation.MeshKeys[0], SparseWeight8.Create(0));
-                for (int i = 1; i < brg.Animation.MeshKeys.Count; ++i)
+                tb.SetPoint(brg.Animation.MeshKeys[0], morphWeights);
+                for (var i = 1; i < brg.Animation.MeshKeys.Count; ++i)
                 {
-                    tb.SetPoint(brg.Animation.MeshKeys[i], SparseWeight8.Create(new Vector4(i - 1, 0, 0, 0), new Vector4(1, 0, 0, 0)));
+                    Array.Clear(morphWeights, 0, morphWeights.Length);
+                    morphWeights[i - 1] = 1.0f;
+                    tb.SetPoint(brg.Animation.MeshKeys[i], morphWeights);
                 }
             }
             else
@@ -344,6 +347,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                     if (!string.IsNullOrWhiteSpace(matGroup.TexName))
                     {
                         var tb = cb.UseTexture();
+                        tb.Name = texData.Image.Name;
                         tb.WrapS = brgMat.Flags.HasFlag(BrgMatFlag.WrapUTx1) ? TextureWrapMode.REPEAT : TextureWrapMode.CLAMP_TO_EDGE;
                         tb.WrapT = brgMat.Flags.HasFlag(BrgMatFlag.WrapVTx1) ? TextureWrapMode.REPEAT : TextureWrapMode.CLAMP_TO_EDGE;
                         tb.WithPrimaryImage(texData.Image);
@@ -428,9 +432,9 @@ namespace AoMEngineLibrary.Graphics.Brg
             return sb.ToString();
         }
 
-        private (MemoryImage Image, Texture? Texture) CreateMemoryImage(string imageFile, TextureManager textureManager)
+        private (ImageBuilder Image, Texture? Texture) CreateMemoryImage(string imageFile, TextureManager textureManager)
         {
-            MemoryImage memImage;
+            ImageBuilder imageBuilder;
             Texture? tex = null;
 
             try
@@ -440,7 +444,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 using (var ms = new MemoryStream())
                 {
                     tex.Images[0][0].SaveAsPng(ms);
-                    memImage = new MemoryImage(ms.ToArray());
+                    var memImage = new MemoryImage(ms.ToArray());
+                    imageBuilder = ImageBuilder.From(memImage, imageFile);
                 }
             }
             catch
@@ -452,11 +457,12 @@ namespace AoMEngineLibrary.Graphics.Brg
                 using (var ms = new MemoryStream())
                 {
                     image.SaveAsPng(ms);
-                    memImage = new MemoryImage(ms.ToArray());
+                    var memImage = new MemoryImage(ms.ToArray());
+                    imageBuilder = ImageBuilder.From(memImage, imageFile);
                 }
             }
 
-            return (memImage, tex);
+            return (imageBuilder, tex);
         }
     }
 }
