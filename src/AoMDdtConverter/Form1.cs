@@ -16,8 +16,8 @@
     public partial class Form1 : Form
     {
         private List<string> args;
-        private string exportSettings;
-        private string importSettings;
+        private string exportSettings = string.Empty;
+        private string importSettings = string.Empty;
         private bool convertRunning;
 
         public Form1()
@@ -28,6 +28,7 @@
             this.MaximizeBox = false;
             this.importSettingsTableLayoutPanel.SetColumnSpan(this.defaultCompressionGroupBox, 2);
             this.outputRichTextBox.HideSelection = false;
+            args = new List<string>();
             
             Dictionary<string, string> compressionTypes = new Dictionary<string, string>(7);
             compressionTypes.Add("BC1 (DXT1)", "BC1");
@@ -100,7 +101,7 @@
             string outputDir;
             if (args.Count > 1)
             {
-                outputDir = Path.Combine(Path.GetDirectoryName(args[0]), "converted");
+                outputDir = Path.Combine(Path.GetDirectoryName(args[0])!, "converted");
                 if (!Directory.Exists(outputDir))
                 {
                     Directory.CreateDirectory(outputDir);
@@ -108,7 +109,7 @@
             }
             else
             {
-                outputDir = Path.GetDirectoryName(args[0]);
+                outputDir = Path.GetDirectoryName(args[0])!;
             }
 
             foreach (string f in args)

@@ -54,9 +54,9 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
             else
             {
-                v.X = ReadHalf();
-                v.Y = ReadHalf();
-                v.Z = ReadHalf();
+                v.X = ReadAoMHalf();
+                v.Y = ReadAoMHalf();
+                v.Z = ReadAoMHalf();
             }
 
             return v;
@@ -73,8 +73,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
             else
             {
-                v.X = ReadHalf();
-                v.Y = ReadHalf();
+                v.X = ReadAoMHalf();
+                v.Y = ReadAoMHalf();
             }
 
             return v;
@@ -90,7 +90,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 Vector4.Zero, Vector4.One);
         }
 
-        public float ReadHalf()
+        private float ReadAoMHalf()
         {
             var f = new byte[4];
             var h = ReadBytes(2);

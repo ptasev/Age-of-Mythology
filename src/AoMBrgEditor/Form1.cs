@@ -16,7 +16,7 @@ namespace AoMBrgEditor
     // I ended up going in a different direction, and this turned into a sandbox for experimenting
     public partial class Form1 : Form
     {
-        BrgFile file;
+        BrgFile? file;
 
         public Form1()
         {
@@ -441,7 +441,7 @@ namespace AoMBrgEditor
 
                             var newData = ms.ToArray();
 
-                            byte[] origData = File.Exists(mtrlFilePath) ? File.ReadAllBytes(mtrlFilePath) : null;
+                            byte[]? origData = File.Exists(mtrlFilePath) ? File.ReadAllBytes(mtrlFilePath) : null;
                             if (origData == null || !origData.SequenceEqual(newData))
                             {
                                 output += $"{fileName} {Environment.NewLine}";
@@ -797,7 +797,7 @@ namespace AoMBrgEditor
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                file.Write(File.Open(dlg.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
+                file?.Write(File.Open(dlg.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
             }
         }
 

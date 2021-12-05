@@ -51,6 +51,7 @@ namespace AoMBrgEditor
                 NumMipLevels = reader.ReadByte();
                 Height = reader.ReadInt32();
                 Width = reader.ReadInt32();
+                imageData = Array.Empty<byte>();
 
                 // TODO: implement the rest
             }
