@@ -2,7 +2,7 @@
 
 namespace AoMEngineLibrary.Graphics.Brg
 {
-    public class BrgFace
+    public class BrgFace : IEquatable<BrgFace>
     {
         public const int IndexCount = 3;
 
@@ -50,5 +50,24 @@ namespace AoMEngineLibrary.Graphics.Brg
                 };
             }
         }
+
+        public bool Equals(BrgFace? f)
+        {
+            if (f is null)
+            {
+                return false;
+            }
+
+            var ret = A == f.A &&
+                B == f.B &&
+                C == f.C &&
+                MaterialIndex == f.MaterialIndex;
+
+            return ret;
+        }
+
+        public override bool Equals(object? obj) => Equals(obj as BrgFace);
+
+        public override int GetHashCode() => HashCode.Combine(A, B, C, MaterialIndex);
     }
 }

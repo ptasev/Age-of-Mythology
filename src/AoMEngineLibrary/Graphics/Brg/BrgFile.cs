@@ -57,11 +57,11 @@ namespace AoMEngineLibrary.Graphics.Brg
                     }
                     else if (magic == "MESI")
                     {
-                        Meshes.Add(new BrgMesh(reader, this));
+                        Meshes.Add(new BrgMesh(reader));
                     }
                     else if (magic == "MTRL")
                     {
-                        var mat = new BrgMaterial(reader, this);
+                        var mat = new BrgMaterial(reader);
                         Materials.Add(mat);
                         if (!ContainsMaterialID(mat.Id))
                         {

@@ -270,7 +270,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             var typeInfo = item.Type.GetInfo();
             if (dummies.Count >= typeInfo.Max)
             {
-                throw new NotSupportedException($"There can only be a max of {typeInfo.Max} dummy objects of type {typeInfo.Type}.");
+                throw new InvalidOperationException($"There can only be a max of {typeInfo.Max} dummy objects of type {typeInfo.Type}.");
             }
 
             dummies.Add(item);

@@ -26,6 +26,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
         public BrgMeshTestObject(BrgMesh mesh)
         {
             _mesh = mesh;
+            NonUniformKeys = new List<float>();
         }
 
         public void Validate()

@@ -6,8 +6,6 @@ namespace AoMEngineLibrary.Graphics.Brg
 {
     public class BrgMaterial : IEquatable<BrgMaterial>
     {
-        public BrgFile ParentFile;
-
         public int Id { get; set; }
         public BrgMatFlag Flags { get; set; }
         public float Reserved { get; set; }
@@ -45,8 +43,8 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public BrgCubeMapInfo CubeMapInfo { get; set; }
 
-        public BrgMaterial(BrgBinaryReader reader, BrgFile file)
-            : this(file)
+        public BrgMaterial(BrgBinaryReader reader)
+            : this()
         {
             Id = reader.ReadInt32();
             Flags = (BrgMatFlag)reader.ReadInt32();
@@ -91,9 +89,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
             }
         }
-        public BrgMaterial(BrgFile file)
+        public BrgMaterial()
         {
-            ParentFile = file;
             Id = 0;
             Flags = 0;
             Reserved = 0;
@@ -167,7 +164,6 @@ namespace AoMEngineLibrary.Graphics.Brg
                 return false;
             }
 
-            //ret = ret && this.ParentFile == m.ParentFile;
             //ret = ret && this.id == m.id;
             var ret = Flags == m.Flags &&
                 Reserved == m.Reserved &&

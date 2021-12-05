@@ -21,6 +21,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
         public BrgMaterialTestObject(BrgMaterial mat)
         {
             _mat = mat;
+            DiffuseMapName = string.Empty;
         }
 
         public void Validate()

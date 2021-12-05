@@ -42,7 +42,7 @@
         public void Clear()
         {
             this.File = new BrgFile();
-            this.File.Meshes.Add(new BrgMesh(this.File));
+            this.File.Meshes.Add(new BrgMesh());
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
             this.File.Meshes[0].Header.InterpolationType = BrgMeshInterpolationType.Default;
             this.File.Meshes[0].Header.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
@@ -406,7 +406,7 @@
                     brg.Header.NumMaterials = Maxscript.QueryInteger("{0}.material.materialList.count", mainObject);
                     for (int i = 0; i < brg.Header.NumMaterials; i++)
                     {
-                        BrgMaterial mat = new BrgMaterial(brg);
+                        BrgMaterial mat = new BrgMaterial();
                         mat.Id = brg.Materials.Count + 1;
                         Maxscript.Command("mat = {0}.material.materialList[{1}]", mainObject, i + 1);
                         this.ExportBrgMaterial(mainObject, mat);
@@ -436,7 +436,7 @@
                 }
                 else if (Maxscript.QueryBoolean("classof {0}.material == Standardmaterial", mainObject))
                 {
-                    BrgMaterial mat = new BrgMaterial(brg);
+                    BrgMaterial mat = new BrgMaterial();
                     mat.Id = brg.Materials.Count + 1;
                     Maxscript.Command("mat = {0}.material", mainObject);
                     this.ExportBrgMaterial(mainObject, mat);
@@ -465,7 +465,7 @@
                 {
                     if (m == 0)
                     {
-                        BrgMesh mesh = new BrgMesh(brg);
+                        BrgMesh mesh = new BrgMesh();
                         mesh.Vertices = new List<Vector3>(totalNumVerts);
                         mesh.Normals = new List<Vector3>(totalNumVerts);
                         mesh.TextureCoordinates = new List<Vector2>(totalNumVerts);

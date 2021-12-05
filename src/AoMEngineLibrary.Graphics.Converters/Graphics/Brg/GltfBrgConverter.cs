@@ -96,7 +96,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
 
                 // Add a new mesh (frame)
-                var mesh = new BrgMesh(brg);
+                var mesh = new BrgMesh();
                 mesh.Header.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
                 mesh.ExtendedHeader.AnimationLength = brg.Animation.Duration;
                 if (i > 0)
@@ -418,7 +418,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 if (gltfMat == null) continue;
 
-                BrgMaterial mat = new BrgMaterial(brg);
+                var mat = new BrgMaterial();
                 mat.Id = brg.Materials.Count + 1;
                 ConvertMaterial(gltfMat, mat);
 

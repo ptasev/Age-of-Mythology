@@ -7,7 +7,6 @@ namespace AoMEngineLibrary.Graphics.Brg
 {
     public class BrgMesh
     {
-        public BrgFile ParentFile { get; set; }
         public BrgMeshHeader Header { get; set; }
 
         public List<Vector3> Vertices { get; set; }
@@ -26,9 +25,8 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public List<float> NonUniformKeys { get; set; }
 
-        public BrgMesh(BrgFile file)
+        public BrgMesh()
         {
-            ParentFile = file;
             Header = new BrgMeshHeader
             {
                 Version = 22,
@@ -55,10 +53,9 @@ namespace AoMEngineLibrary.Graphics.Brg
             Dummies = new BrgDummyCollection();
             NonUniformKeys = new List<float>();
         }
-        public BrgMesh(BrgBinaryReader reader, BrgFile file)
-            : this(file)
+        public BrgMesh(BrgBinaryReader reader)
+            : this()
         {
-            ParentFile = file;
             Header = new BrgMeshHeader(reader);
 
             if (!Header.Flags.HasFlag(BrgMeshFlag.PARTICLEPOINTS))

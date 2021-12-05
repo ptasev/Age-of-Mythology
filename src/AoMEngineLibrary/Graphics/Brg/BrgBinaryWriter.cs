@@ -58,14 +58,18 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
+        private static readonly Vector4 MaxBytes = new(byte.MaxValue);
+        private static readonly Vector4 Half = new(0.5f);
         public void WriteTexel(Vector4 t)
         {
-            var res = Vector4.Clamp(t * 255, Vector4.Zero, Vector4.One);
+            t *= MaxBytes;
+            t += Half;
+            t = Vector4.Clamp(t, Vector4.Zero, MaxBytes);
 
-            Write((byte)res.Z); // B
-            Write((byte)res.Y); // G
-            Write((byte)res.X); // R
-            Write((byte)res.W); // A
+            Write((byte)t.Z); // B
+            Write((byte)t.Y); // G
+            Write((byte)t.X); // R
+            Write((byte)t.W); // A
         }
 
         public void WriteHalf(float half)
