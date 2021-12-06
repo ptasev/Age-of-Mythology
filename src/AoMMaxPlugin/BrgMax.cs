@@ -46,7 +46,7 @@
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
             this.File.Meshes[0].Header.InterpolationType = BrgMeshInterpolationType.Default;
             this.File.Meshes[0].Header.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
-            this.File.Meshes[0].Header.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
+            this.File.Meshes[0].Header.Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength;
             this.File.Meshes[0].Header.AnimationType = BrgMeshAnimType.KeyFrame;
         }
         #endregion

@@ -20,7 +20,7 @@ public class BrgMeshTests
                         Header = new BrgMeshHeader()
                         {
                             Version = 22,
-                            Format = BrgMeshFormat.ANIMATED | BrgMeshFormat.HASFACENORMALS,
+                            Format = BrgMeshFormat.AnimationLength | BrgMeshFormat.HasFaceNormals,
                             NumVertices = 3,
                             NumFaces = 1,
                             InterpolationType = BrgMeshInterpolationType.Default,

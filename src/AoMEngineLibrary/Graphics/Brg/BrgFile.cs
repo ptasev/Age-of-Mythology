@@ -40,87 +40,145 @@ namespace AoMEngineLibrary.Graphics.Brg
                 Header = new BrgHeader(reader);
                 if (Header.Magic != BrgHeader.BangMagic)
                 {
-                    throw new Exception("This is not a BRG file!");
+                    throw new FileFormatException("This is not a BRG file.");
                 }
-                AsetHeader = new BrgAsetHeader();
 
-                var asetCount = 0;
+                AsetHeader = new BrgAsetHeader();
                 Meshes = new List<BrgMesh>(Header.NumMeshes);
                 Materials = new List<BrgMaterial>();
-                while (reader.BaseStream.Position < reader.BaseStream.Length)
+                Animation = new BrgAnimation();
+
+                if (Header.NumMeshes > 1)
                 {
-                    var magic = reader.ReadString(4);
-                    if (magic == "ASET")
-                    {
-                        AsetHeader = new BrgAsetHeader(reader);
-                        ++asetCount;
-                    }
-                    else if (magic == "MESI")
-                    {
-                        Meshes.Add(new BrgMesh(reader));
-                    }
-                    else if (magic == "MTRL")
-                    {
-                        var mat = new BrgMaterial(reader);
-                        Materials.Add(mat);
-                        if (!ContainsMaterialID(mat.Id))
-                        {
-                            //Materials.Add(mat);
-                        }
-                        else
-                        {
-                            //throw new Exception("Duplicate material ids!");
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("The type tag " +/* magic +*/ " is not recognized!");
-                    }
+                    ReadAnimation(reader);
+                }
+                else
+                {
+                    ReadMesh(reader);
+                    Animation.MeshKeys.Add(0);
                 }
 
-                if (asetCount > 1)
+                if (Header.NumMaterials > 0)
                 {
-                    //throw new Exception("Multiple ASETs!");
+                    ReadMaterials(reader);
                 }
 
                 if (Header.NumMeshes < Meshes.Count)
                 {
-                    throw new Exception("Inconsistent mesh count!");
+                    throw new InvalidDataException("Inconsistent mesh count!");
                 }
 
                 if (Header.NumMaterials < Materials.Count)
                 {
-                    throw new Exception("Inconsistent material count!");
-                }
-
-                if (reader.BaseStream.Position < reader.BaseStream.Length)
-                {
-                    throw new Exception("The end of stream was not reached!");
-                }
-
-                Animation.Duration = Meshes[0].ExtendedHeader.AnimationLength;
-                if (Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
-                {
-                    for (var i = 0; i < Meshes.Count; ++i)
-                    {
-                        Animation.MeshKeys.Add(Meshes[0].NonUniformKeys[i] * Animation.Duration);
-                    }
-                }
-                else if (Meshes.Count > 1)
-                {
-                    float divisor = Meshes.Count - 1;
-                    for (var i = 0; i < Meshes.Count; ++i)
-                    {
-                        Animation.MeshKeys.Add(i / divisor * Animation.Duration);
-                    }
-                }
-                else
-                {
-                    Animation.MeshKeys.Add(0);
+                    throw new InvalidDataException("Inconsistent material count!");
                 }
             }
         }
 
+        private void ReadAnimation(BrgBinaryReader reader)
+        {
+            var magic = reader.ReadString(4);
+            if (magic != "ASET")
+            {
+                throw new InvalidDataException($"This ({magic.Trim('\0')}) is not a valid mesh animation set chunk.");
+            }
+
+            AsetHeader = new BrgAsetHeader(reader);
+            for (var i = 0; i < AsetHeader.NumFrames; ++i)
+            {
+                ReadMesh(reader);
+            }
+
+            // Determine animation duration
+            if (Meshes[0].Header.Format.HasFlag(BrgMeshFormat.AnimationLength))
+            {
+                Animation.Duration = Meshes[0].ExtendedHeader.AnimationLength;
+            }
+            else if (AsetHeader.AnimTime < 0.000001f)
+            {
+                Animation.Duration = 1.0f;
+            }
+            else
+            {
+                Animation.Duration = AsetHeader.AnimTime;
+            }
+
+            // Compute animation keys
+            if (Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+            {
+                for (var i = 0; i < Meshes.Count; ++i)
+                {
+                    Animation.MeshKeys.Add(Meshes[0].NonUniformKeys[i] * Animation.Duration);
+                }
+            }
+            else if (Meshes.Count > 1)
+            {
+                float divisor = Meshes.Count - 1;
+                for (var i = 0; i < Meshes.Count; ++i)
+                {
+                    Animation.MeshKeys.Add(i / divisor * Animation.Duration);
+                }
+            }
+            else
+            {
+                Animation.MeshKeys.Add(0);
+            }
+        }
+
+        private void ReadMesh(BrgBinaryReader reader)
+        {
+            // keep reading tags until we find a mesh tag, or an invalid tag
+            while (true)
+            {
+                var magic = reader.ReadString(4);
+                if (magic == "MESI")
+                {
+                    Meshes.Add(new BrgMesh(reader));
+                    break;
+                }
+                else if (magic == "ASET")
+                {
+                    // Read ASET data during mesh read, but ignore it
+                    _ = new BrgAsetHeader(reader);
+                }
+                else if (magic == "AFRM")
+                {
+                    // seems to be some sort of legacy tag that AoM code skips
+                }
+                else
+                {
+                    throw new InvalidDataException($"This ({magic.Trim('\0')}) is not a valid mesh chunk.");
+                }
+            }
+        }
+
+        private void ReadMaterials(BrgBinaryReader reader)
+        {
+            for (var i = 0; i < Header.NumMaterials; ++i)
+            {
+                ReadMaterial(reader);
+            }
+        }
+
+        private void ReadMaterial(BrgBinaryReader reader)
+        {
+            var magic = reader.ReadString(4);
+            if (magic != "MTRL")
+            {
+                throw new InvalidDataException($"This ({magic.Trim('\0')}) is not a valid material chunk.");
+            }
+
+            var mat = new BrgMaterial(reader);
+            Materials.Add(mat);
+            if (!ContainsMaterialID(mat.Id))
+            {
+                //Materials.Add(mat);
+            }
+            else
+            {
+                //throw new Exception("Duplicate material ids!");
+            }
+        }
 
         public void Write(FileStream fileStream)
         {

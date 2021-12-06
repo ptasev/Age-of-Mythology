@@ -26,7 +26,33 @@ namespace AoMBrgEditor
 
             richTextBox1.Text = output;
 
-            PrtTesting();
+            BrgTesting();
+        }
+
+        private void BrgTesting()
+        {
+            string texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\models\";
+            var sb = new StringBuilder();
+            foreach (string s in Directory.GetFiles(texDir, "*.brg", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    using (var fs = File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var brg = new BrgFile(fs);
+                        if (brg.Meshes.Count > 0 && brg.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                        {
+                            sb.AppendLine($"{s}\t");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    sb.AppendLine($"{s}\t{ex}");
+                    sb.AppendLine("==================================================================");
+                }
+            }
+            richTextBox1.Text = sb.ToString();
         }
 
         private string BrgDevelopmentCode()
@@ -78,7 +104,7 @@ namespace AoMBrgEditor
                     {
                         output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
                     }
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Format.HasFlag(BrgMeshFormat.ANIMTEXCOORDSNAP)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Format.HasFlag(BrgMeshFormat.AnimTextureSnap)))
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Format.ToString() + Environment.NewLine;
                     }

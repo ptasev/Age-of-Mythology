@@ -55,7 +55,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
                 var test0 = new BrgMeshTestObject(brg.Meshes[0])
                 {
                     HeaderVersion = 22,
-                    Format = BrgMeshFormat.HASFACENORMALS,
+                    Format = BrgMeshFormat.HasFaceNormals,
                     InterpType = BrgMeshInterpolationType.Default,
                     AnimType = BrgMeshAnimType.KeyFrame,
                     Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL,
@@ -107,7 +107,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
                 var test0 = new BrgMeshTestObject(brg.Meshes[0])
                 {
                     HeaderVersion = 22,
-                    Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED,
+                    Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength,
                     InterpType = BrgMeshInterpolationType.Default,
                     AnimType = BrgMeshAnimType.NonUniform,
                     Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS,
@@ -121,7 +121,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
                 var test1 = new BrgMeshTestObject(brg.Meshes[1])
                 {
                     HeaderVersion = 22,
-                    Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED,
+                    Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength,
                     InterpType = BrgMeshInterpolationType.Default,
                     AnimType = BrgMeshAnimType.KeyFrame,
                     Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS | BrgMeshFlag.SECONDARYMESH,
@@ -174,7 +174,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
                 var test0 = new BrgMeshTestObject(brg.Meshes[0])
                 {
                     HeaderVersion = 22,
-                    Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED | BrgMeshFormat.ANIMTEXCOORDSNAP,
+                    Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength | BrgMeshFormat.AnimTextureSnap,
                     InterpType = BrgMeshInterpolationType.Default,
                     AnimType = BrgMeshAnimType.KeyFrame,
                     Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS | BrgMeshFlag.ANIMTEXCOORDS,
@@ -188,7 +188,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
                 var test1 = new BrgMeshTestObject(brg.Meshes[1])
                 {
                     HeaderVersion = 22,
-                    Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMTEXCOORDSNAP,
+                    Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimTextureSnap,
                     InterpType = BrgMeshInterpolationType.Default,
                     AnimType = BrgMeshAnimType.KeyFrame,
                     Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS | BrgMeshFlag.SECONDARYMESH | BrgMeshFlag.ANIMTEXCOORDS,

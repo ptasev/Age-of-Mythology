@@ -97,7 +97,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 // Add a new mesh (frame)
                 var mesh = new BrgMesh();
-                mesh.Header.Format = BrgMeshFormat.HASFACENORMALS | BrgMeshFormat.ANIMATED;
+                mesh.Header.Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength;
                 mesh.ExtendedHeader.AnimationLength = brg.Animation.Duration;
                 if (i > 0)
                 {
