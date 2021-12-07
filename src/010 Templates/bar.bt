@@ -9,34 +9,32 @@
 LittleEndian();
 SetBackColor(cLtGray);
 
-struct {
-    struct HEADER {
-        byte unknown01[12];
-        int fileCount;
-        int definitionsLength;
-        int definitionsOffset;
-        int barFileVersion;
-    } header;
+struct HEADER {
+    byte unknown01[12];
+    int fileCount;
+    int definitionsLength;
+    int definitionsOffset;
+    int barFileVersion;
+} header;
 
-    FSeek(header.definitionsOffset);
-    int EOContent;
-    local int block[header.fileCount];
-    local int last = EOContent;
-    local int data;
-    local int i;
-    for (i = 0; i < header.fileCount - 1; i++) {
-        data = ReadInt(FTell());
-        block[i] = data - last;
-        last = data;
-        FSkip(4);
-    }
-    block[i] = FileSize() - (last + header.fileCount * 4 + header.definitionsOffset);
+FSeek(header.definitionsOffset);
+int entryOffsets[header.fileCount];
+local int64 entriesOffset = header.definitionsOffset + header.fileCount * 4;
 
-    i = 0;
+local int i;
+for (i = 0; i < header.fileCount; ++i)
+{
+    FSeek(entryOffsets[i] + entriesOffset);
     struct Entry {
-        int offset <bgcolor=cGreen>;
+        int offset <bgcolor=cLtGreen>;
         int length;
-        int length2 <bgcolor=cGreen>;
+        int length2; // always expected to match length
+
+        if (length2 != length)
+        {
+            // in Alpha bar files length2 does not exist
+            FSeek(FTell() - 4);
+        }
         
         int16 year;
         byte month;
@@ -46,16 +44,14 @@ struct {
         byte second;
         byte milisecond;
         
-        char fileName[block[i] - 20];
-        local int64 currentPos = FTell();
+        string fileName <bgcolor=cLtPurple>;
 
+        local int64 currentPos = FTell();    
         FSeek(offset);
         byte data[length] <bgcolor=cLtRed>;
-
         FSeek(currentPos);
-        i++;
-    } entry[header.fileCount] <bgcolor=cLtBlue,read=entryName,optimize=false>;
-} file;
+    } entry <bgcolor=cLtBlue,read=entryName,optimize=false>;
+}
 
 string entryName(Entry &entry) {
     return entry.fileName;

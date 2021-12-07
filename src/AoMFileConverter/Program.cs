@@ -1,12 +1,9 @@
 ﻿using AoMEngineLibrary.Anim;
+using AoMEngineLibrary.Data.Bar;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Prt;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace AoMFileConverter
@@ -54,11 +51,15 @@ namespace AoMFileConverter
 
         private static void Convert(string f)
         {
-            string magic;
-            using (FileStream fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+            var magic = string.Empty;
+            var isDirectory = Directory.Exists(f);
+            if (!isDirectory)
             {
-                BrgBinaryReader reader = new BrgBinaryReader(fs);
-                magic = reader.ReadString(4);
+                using (FileStream fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    BrgBinaryReader reader = new BrgBinaryReader(fs);
+                    magic = reader.ReadString(4);
+                }
             }
 
             if (f.EndsWith("anim.txt"))
@@ -90,6 +91,33 @@ namespace AoMFileConverter
                     file.SerializeAsXml(fso);
                 }
                 Console.WriteLine("Success! Prt converted.");
+            }
+            else if (f.EndsWith(".bar"))
+            {
+                using var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var bar = BarFile.Open(fs, false);
+                var outDir = f;
+                var dotIndex = outDir.LastIndexOf('.');
+                if (dotIndex != -1)
+                {
+                    outDir = outDir.Remove(dotIndex) + "bar";
+                    bar.ExtractToDirectory(outDir, true);
+                    Console.WriteLine("Success! Bar file extracted.");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to compute output file name.");
+                }
+            }
+            else if (isDirectory)
+            {
+                using (var bar = new BarFile())
+                using (var fso = File.Open(f + ".bar", FileMode.Create, FileAccess.Write, FileShare.Read))
+                {
+                    bar.AddEntriesFromDirectory(f);
+                    bar.Write(fso, false);
+                }
+                Console.WriteLine("Success! Bar file created.");
             }
             else if (magic == "MTRL")
             {

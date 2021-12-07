@@ -158,7 +158,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                         BoundingBoxMin = minVecs[index],
                         BoundingBoxMax = maxVecs[index]
                     };
-                    Add(dummy);
+                    Add(dummy, false);
                 }
             }
         }
@@ -258,7 +258,9 @@ namespace AoMEngineLibrary.Graphics.Brg
         }
 
         /// <inheritdoc/>
-        public void Add(BrgDummy item)
+        public void Add(BrgDummy item) => Add(item, true);
+
+        public void Add(BrgDummy item, bool validateDummyCount)
         {
             if (!_dummyEntries.TryGetValue(item.Type, out var dummies))
             {
@@ -267,10 +269,16 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
 
             // Check if we're at max objects for this dummy type
-            var typeInfo = item.Type.GetInfo();
-            if (dummies.Count >= typeInfo.Max)
+            if (validateDummyCount)
             {
-                throw new InvalidOperationException($"There can only be a max of {typeInfo.Max} dummy objects of type {typeInfo.Type}.");
+                // turns out this is only a warning in the AoM code, and many files violate this number
+                // we don't want to prevent opening these files if this rule is violated
+
+                var typeInfo = item.Type.GetInfo();
+                if (dummies.Count >= typeInfo.Max)
+                {
+                    throw new InvalidOperationException($"There can only be a max of {typeInfo.Max} dummy objects of type {typeInfo.Type}.");
+                }
             }
 
             dummies.Add(item);

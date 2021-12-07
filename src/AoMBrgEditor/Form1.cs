@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using AoMEngineLibrary.Data.Bar;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Grn;
 using AoMEngineLibrary.Graphics.Prt;
@@ -26,7 +27,35 @@ namespace AoMBrgEditor
 
             richTextBox1.Text = output;
 
-            BrgTesting();
+            BarTesting();
+        }
+
+        private void BarTesting()
+        {
+            //var texDir = @"C:\Games\Age of Mythology\";
+            //var texDir = @"C:\Games\AoM_2002.0801\";
+            var texDir = @"C:\Games\AoM_2002.0904\";
+            var sb = new StringBuilder();
+            foreach (string s in Directory.GetFiles(texDir, "*.bar", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    using (var fs = File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        using var bar = BarFile.Open(fs, false);
+                        if (bar.Entries.Any(x => x.Modified.Millisecond != 0))
+                        {
+                            sb.AppendLine($"{s}\t");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    sb.AppendLine($"{s}\t{ex}");
+                    sb.AppendLine("==================================================================");
+                }
+            }
+            richTextBox1.Text = sb.ToString();
         }
 
         private void BrgTesting()
