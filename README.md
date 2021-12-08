@@ -1,7 +1,5 @@
 # Age of Mythology
 
-Releases:
+Libraries and apps for interacting with files for the Age of Mythology game.
 
-[Application Website](http://modding.petartasev.com)
-
-NOTE: The AEL references certain dlls in the 3ds Max directories.
+You can find releases [here](https://petar.page/l/modding).

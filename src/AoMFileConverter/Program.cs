@@ -1,5 +1,6 @@
 ﻿using AoMEngineLibrary.Anim;
 using AoMEngineLibrary.Data.Bar;
+using AoMEngineLibrary.Extensions;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Prt;
 using System;
@@ -21,7 +22,7 @@ namespace AoMFileConverter
                     Console.WriteLine($"Drag and drop one or more files on the EXE to convert.{Environment.NewLine}Supported: anim.txt, ddt, bti, cub, prt, mtrl, brg");
                 }
 
-                foreach (string f in args)
+                foreach (var f in args)
                 {
                     try
                     {
@@ -55,10 +56,10 @@ namespace AoMFileConverter
             var isDirectory = Directory.Exists(f);
             if (!isDirectory)
             {
-                using (FileStream fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    BrgBinaryReader reader = new BrgBinaryReader(fs);
-                    magic = reader.ReadString(4);
+                    using var reader = new BinaryReader(fs);
+                    magic = reader.ReadStringOfLength(4);
                 }
             }
 
@@ -121,9 +122,13 @@ namespace AoMFileConverter
             }
             else if (magic == "MTRL")
             {
-                MtrlFile file = new MtrlFile();
-                file.Read(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                file.SerializeAsXml(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read))
+                {
+                    var file = new MtrlFile();
+                    file.Read(fs);
+                    file.SerializeAsXml(fso);
+                }
                 Console.WriteLine("Success! Mtrl converted.");
             }
             else if (magic == "BANG")
@@ -148,7 +153,7 @@ namespace AoMFileConverter
             }
             else
             {
-                XmlDocument xmlDoc = new XmlDocument();
+                var xmlDoc = new XmlDocument();
                 xmlDoc.Load(f);
 
                 if (xmlDoc?.DocumentElement?.Name == "AnimFile")
@@ -161,17 +166,18 @@ namespace AoMFileConverter
                     using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
                     using (var fso = File.Open(f + ".prt", FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
-                        PrtFile file = PrtFile.DeserializeAsXml(fs);
+                        var file = PrtFile.DeserializeAsXml(fs);
                         file.Write(fso);
                     }
                     Console.WriteLine("Success! Prt converted.");
                 }
                 else
                 {
-                    MtrlFile file = MtrlFile.DeserializeAsXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    using (var fs = File.Open(f + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var fso = File.Open(f + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
-                        file.Write(fs);
+                        var file = MtrlFile.DeserializeAsXml(fs);
+                        file.Write(fso);
                     }
                     Console.WriteLine("Success! Mtrl converted.");
                 }

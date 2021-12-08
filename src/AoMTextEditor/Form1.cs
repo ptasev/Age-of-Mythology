@@ -41,7 +41,7 @@ namespace AoMTextEditor
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Console.WriteLine("The file could not be read:");
                 //Console.WriteLine(ex.Message);
@@ -136,7 +136,7 @@ namespace AoMTextEditor
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Failed to import the xml file!");
                 //MessageBox.Show(ex.Message);

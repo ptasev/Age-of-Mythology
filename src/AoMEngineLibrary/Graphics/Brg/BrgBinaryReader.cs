@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoMEngineLibrary.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -23,19 +24,19 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 case 1:
                     dataEntry.data = ReadInt32();
-                    dataEntry.dataName = ReadString(dataEntry.dataNameLength + (int)dataEntry.data);
+                    dataEntry.dataName = this.ReadStringOfLength(dataEntry.dataNameLength + (int)dataEntry.data);
                     break;
                 case 2:
                     dataEntry.data = ReadInt32();
-                    dataEntry.dataName = ReadString(dataEntry.dataNameLength);
+                    dataEntry.dataName = this.ReadStringOfLength(dataEntry.dataNameLength);
                     break;
                 case 3:
                     dataEntry.data = ReadSingle();
-                    dataEntry.dataName = ReadString(dataEntry.dataNameLength);
+                    dataEntry.dataName = this.ReadStringOfLength(dataEntry.dataNameLength);
                     break;
                 default:
                     dataEntry.data = ReadInt32();
-                    dataEntry.dataName = ReadString(dataEntry.dataNameLength);
+                    dataEntry.dataName = this.ReadStringOfLength(dataEntry.dataNameLength);
                     break;
             }
 
@@ -97,23 +98,6 @@ namespace AoMEngineLibrary.Graphics.Brg
             f[2] = h[0];
             f[3] = h[1];
             return BitConverter.ToSingle(f, 0);
-        }
-        public string ReadString(byte terminator = 0x0)
-        {
-            var filename = "";
-            var fnBytes = new List<byte>();
-            var filenameByte = ReadByte();
-            while (filenameByte != terminator)
-            {
-                filename += (char)filenameByte;
-                fnBytes.Add(filenameByte);
-                filenameByte = ReadByte();
-            }
-            return Encoding.UTF8.GetString(fnBytes.ToArray());
-        }
-        public string ReadString(int length)
-        {
-            return Encoding.UTF8.GetString(ReadBytes(length));
         }
     }
 }

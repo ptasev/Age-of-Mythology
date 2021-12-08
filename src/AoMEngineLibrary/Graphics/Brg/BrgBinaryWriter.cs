@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoMEngineLibrary.Extensions;
+using System;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -25,19 +26,19 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 case 1:
                     Write((int)dataEntry.data);
-                    WriteString(dataEntry.dataName, 0);
+                    this.WriteLengthPrefixedString(dataEntry.dataName, 0);
                     break;
                 case 2:
                     Write((int)dataEntry.data);
-                    WriteString(dataEntry.dataName, 0);
+                    this.WriteLengthPrefixedString(dataEntry.dataName, 0);
                     break;
                 case 3:
                     Write((float)dataEntry.data);
-                    WriteString(dataEntry.dataName, 0);
+                    this.WriteLengthPrefixedString(dataEntry.dataName, 0);
                     break;
                 default:
                     Write((int)dataEntry.data);
-                    WriteString(dataEntry.dataName, 0);
+                    this.WriteLengthPrefixedString(dataEntry.dataName, 0);
                     break;
             }
         }
@@ -77,25 +78,6 @@ namespace AoMEngineLibrary.Graphics.Brg
             var f = BitConverter.GetBytes(half);
             Write(f[2]);
             Write(f[3]);
-        }
-        public void WriteString(string str)
-        {
-            var data = Encoding.UTF8.GetBytes(str);
-            Write(data);
-            Write((byte)0x0);
-        }
-        public void WriteString(string str, int lengthSize)
-        {
-            var data = Encoding.UTF8.GetBytes(str);
-            if (lengthSize == 2)
-            {
-                Write((short)data.Length);
-            }
-            else if (lengthSize == 4)
-            {
-                Write(data.Length);
-            }
-            Write(data);
         }
     }
 }

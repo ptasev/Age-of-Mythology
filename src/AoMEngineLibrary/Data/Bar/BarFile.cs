@@ -55,7 +55,7 @@ public class BarFile : IDisposable
 
         ThrowIfDisposed();
 
-        var entry = new BarEntry(this, filePath, Array.Empty<byte>());
+        var entry = new BarEntry(this, filePath);
         AddEntry(entry);
         return entry;
     }

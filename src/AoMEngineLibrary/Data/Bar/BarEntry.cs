@@ -29,24 +29,19 @@ public class BarEntry
 
     public string FilePath { get; }
 
-    internal BarEntry(BarFile parent, string filePath, IReadOnlyList<byte> data)
-        : this(parent, filePath, data, DateTime.Now)
-    {
-    }
-
-    internal BarEntry(BarFile parent, string filePath, IReadOnlyList<byte> data, DateTime modified)
+    internal BarEntry(BarFile parent, string filePath)
     {
         ArgumentNullException.ThrowIfNull(parent);
         ArgumentNullException.ThrowIfNull(filePath);
 
         Archive = parent;
-        _data = data;
+        _data = Array.Empty<byte>();
         IsLoadedInMemory = true;
 
         Offset = 0;
-        Size = data.Count;
-        Size2 = data.Count;
-        Modified = modified;
+        Size = 0;
+        Size2 = 0;
+        Modified = DateTime.Now;
         FilePath = filePath;
     }
 

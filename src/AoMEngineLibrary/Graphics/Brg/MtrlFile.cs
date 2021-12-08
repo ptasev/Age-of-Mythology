@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoMEngineLibrary.Extensions;
+using System;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -76,6 +77,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         private const string Zero = "0";
         private const string IndentString = "    ";
         private const float Epsilon = 0.000001f;
+        private const uint MaxPath = 260; // Used in game code for Win max path
 
         public uint TextureNameLength { get; private set; }
         public uint SecondaryTextureNameLength { get; private set; }
@@ -138,8 +140,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _texture;
             set
             {
-                _texture = value;
-                TextureNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+                (_texture, TextureNameLength) = UpdateTextureFile(value);
             }
         }
 
@@ -149,8 +150,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _secondaryTexture;
             set
             {
-                _secondaryTexture = value;
-                SecondaryTextureNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+                (_secondaryTexture, SecondaryTextureNameLength) = UpdateTextureFile(value);
             }
         }
 
@@ -160,8 +160,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _bumpMap;
             set
             {
-                _bumpMap = value;
-                BumpMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+                (_bumpMap, BumpMapNameLength) = UpdateTextureFile(value);
             }
         }
 
@@ -171,8 +170,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _specMap;
             set
             {
-                _specMap = value;
-                SpecMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+                (_specMap, SpecMapNameLength) = UpdateTextureFile(value);
             }
         }
 
@@ -182,8 +180,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _glossMap;
             set
             {
-                _glossMap = value;
-                GlossMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+                (_glossMap, GlossMapNameLength) = UpdateTextureFile(value);
             }
         }
 
@@ -193,8 +190,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _emissiveMap;
             set
             {
-                _emissiveMap = value;
-                EmissiveMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
+                (_emissiveMap, EmissiveMapNameLength) = UpdateTextureFile(value);
             }
         }
 
@@ -372,7 +368,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public void Read(Stream stream)
         {
-            using (var reader = new BrgBinaryReader(stream))
+            using (var reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
                 var magic = reader.ReadUInt32();
                 if (magic != 1280463949)
@@ -387,10 +383,10 @@ namespace AoMEngineLibrary.Graphics.Brg
                 GlossMapNameLength = reader.ReadUInt32();
                 EmissiveMapNameLength = reader.ReadUInt32();
 
-                Diffuse = reader.ReadVector3D(false);
-                Ambient = reader.ReadVector3D(false);
-                Specular = reader.ReadVector3D(false);
-                Emissive = reader.ReadVector3D(false);
+                Diffuse = reader.ReadVector3();
+                Ambient = reader.ReadVector3();
+                Specular = reader.ReadVector3();
+                Emissive = reader.ReadVector3();
                 SpecularPower = reader.ReadSingle();
                 Alpha = reader.ReadSingle();
 
@@ -440,39 +436,39 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 if (TextureNameLength > 0)
                 {
-                    Texture = reader.ReadString();
+                    Texture = reader.ReadNullTerminatedString();
                 }
 
                 if (SecondaryTextureNameLength > 0)
                 {
-                    SecondaryTexture = reader.ReadString();
+                    SecondaryTexture = reader.ReadNullTerminatedString();
                 }
 
                 if (BumpMapNameLength > 0)
                 {
-                    BumpMap = reader.ReadString();
+                    BumpMap = reader.ReadNullTerminatedString();
                 }
 
                 if (SpecMapNameLength > 0)
                 {
-                    SpecMap = reader.ReadString();
+                    SpecMap = reader.ReadNullTerminatedString();
                 }
 
                 if (GlossMapNameLength > 0)
                 {
-                    GlossMap = reader.ReadString();
+                    GlossMap = reader.ReadNullTerminatedString();
                 }
 
                 if (EmissiveMapNameLength > 0)
                 {
-                    EmissiveMap = reader.ReadString();
+                    EmissiveMap = reader.ReadNullTerminatedString();
                 }
             }
         }
 
         public void Write(Stream stream)
         {
-            using (var writer = new BrgBinaryWriter(stream, true))
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
             {
                 writer.Write(1280463949); // MTRL
 
@@ -483,10 +479,10 @@ namespace AoMEngineLibrary.Graphics.Brg
                 writer.Write(GlossMapNameLength);
                 writer.Write(EmissiveMapNameLength);
 
-                writer.WriteVector3D(Diffuse, false);
-                writer.WriteVector3D(Ambient, false);
-                writer.WriteVector3D(Specular, false);
-                writer.WriteVector3D(Emissive, false);
+                writer.WriteVector3(Diffuse);
+                writer.WriteVector3(Ambient);
+                writer.WriteVector3(Specular);
+                writer.WriteVector3(Emissive);
                 writer.Write(SpecularPower);
                 writer.Write(Alpha);
 
@@ -536,32 +532,32 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 if (TextureNameLength > 0)
                 {
-                    writer.WriteString(Texture);
+                    writer.WriteNullTerminatedString(Texture);
                 }
 
                 if (SecondaryTextureNameLength > 0)
                 {
-                    writer.WriteString(SecondaryTexture);
+                    writer.WriteNullTerminatedString(SecondaryTexture);
                 }
 
                 if (BumpMapNameLength > 0)
                 {
-                    writer.WriteString(BumpMap);
+                    writer.WriteNullTerminatedString(BumpMap);
                 }
 
                 if (SpecMapNameLength > 0)
                 {
-                    writer.WriteString(SpecMap);
+                    writer.WriteNullTerminatedString(SpecMap);
                 }
 
                 if (GlossMapNameLength > 0)
                 {
-                    writer.WriteString(GlossMap);
+                    writer.WriteNullTerminatedString(GlossMap);
                 }
 
                 if (EmissiveMapNameLength > 0)
                 {
-                    writer.WriteString(EmissiveMap);
+                    writer.WriteNullTerminatedString(EmissiveMap);
                 }
             }
         }
@@ -632,6 +628,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         public static MtrlFile DeserializeAsXml(Stream stream)
         {
             var file = new MtrlFile();
+            // default xml reader settings do not close input
             var xdoc = XDocument.Load(stream);
             var elem = xdoc.Root;
             var elements = elem?.Elements() ?? Enumerable.Empty<XElement>();
@@ -764,6 +761,17 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
 
             return file;
+        }
+
+        private (string Texture, uint Length) UpdateTextureFile(string texture)
+        {
+            ArgumentNullException.ThrowIfNull(texture);
+
+            var strLen = Encoding.UTF8.GetByteCount(texture);
+            if (strLen > MaxPath)
+                throw new ArgumentOutOfRangeException($"Texture name exceeded max length of {MaxPath}");
+
+            return (texture, (uint)strLen);
         }
     }
 }

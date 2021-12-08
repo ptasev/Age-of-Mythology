@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoMEngineLibrary.Extensions;
+using System;
 using System.Numerics;
 using System.Text;
 
@@ -25,8 +26,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _diffuseMap;
             set
             {
+                DiffuseMapNameLength = Convert.ToByte(Encoding.UTF8.GetByteCount(value));
                 _diffuseMap = value;
-                DiffuseMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
             }
         }
 
@@ -36,8 +37,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _bumpMap;
             set
             {
-                _bumpMap = value;
                 BumpMapNameLength = Encoding.UTF8.GetByteCount(value);
+                _bumpMap = value;
             }
         }
 
@@ -56,11 +57,11 @@ namespace AoMEngineLibrary.Graphics.Brg
             SpecularColor = reader.ReadVector3D(false);
             EmissiveColor = reader.ReadVector3D(false);
 
-            DiffuseMapName = reader.ReadString((int)DiffuseMapNameLength);
+            DiffuseMapName = reader.ReadStringOfLength(DiffuseMapNameLength);
             if (Flags.HasFlag(BrgMatFlag.BumpMap))
             {
                 BumpMapNameLength = reader.ReadInt32();
-                BumpMapName = reader.ReadString(BumpMapNameLength);
+                BumpMapName = reader.ReadStringOfLength(BumpMapNameLength);
             }
 
             if (Flags.HasFlag(BrgMatFlag.SpecularExponent))
@@ -81,11 +82,11 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 if (cubeMapNameLength > 0)
                 {
-                    CubeMapInfo.CubeMapName = reader.ReadString((int)cubeMapNameLength);
+                    CubeMapInfo.CubeMapName = reader.ReadStringOfLength(cubeMapNameLength);
                 }
                 if (textureMapNameLength > 0)
                 {
-                    CubeMapInfo.TextureMapName = reader.ReadString((int)textureMapNameLength);
+                    CubeMapInfo.TextureMapName = reader.ReadStringOfLength(textureMapNameLength);
                 }
             }
         }
@@ -122,11 +123,11 @@ namespace AoMEngineLibrary.Graphics.Brg
             writer.WriteVector3D(SpecularColor, false);
             writer.WriteVector3D(EmissiveColor, false);
 
-            writer.WriteString(DiffuseMapName, 0);
+            writer.WriteLengthPrefixedString(DiffuseMapName, 0);
             if (Flags.HasFlag(BrgMatFlag.BumpMap))
             {
                 writer.Write(BumpMapNameLength);
-                writer.WriteString(BumpMapName, 0);
+                writer.WriteLengthPrefixedString(BumpMapName, 0);
             }
 
             if (Flags.HasFlag(BrgMatFlag.SpecularExponent))
@@ -147,11 +148,11 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 if (CubeMapInfo.CubeMapNameLength > 0)
                 {
-                    writer.WriteString(CubeMapInfo.CubeMapName, 0);
+                    writer.WriteLengthPrefixedString(CubeMapInfo.CubeMapName, 0);
                 }
                 if (CubeMapInfo.TextureMapNameLength > 0)
                 {
-                    writer.WriteString(CubeMapInfo.TextureMapName, 0);
+                    writer.WriteLengthPrefixedString(CubeMapInfo.TextureMapName, 0);
                 }
             }
         }

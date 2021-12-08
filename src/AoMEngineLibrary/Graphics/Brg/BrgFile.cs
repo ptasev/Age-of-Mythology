@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoMEngineLibrary.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -77,7 +78,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         private void ReadAnimation(BrgBinaryReader reader)
         {
-            var magic = reader.ReadString(4);
+            var magic = reader.ReadStringOfLength(4);
             if (magic != "ASET")
             {
                 throw new InvalidDataException($"This ({magic.Trim('\0')}) is not a valid mesh animation set chunk.");
@@ -130,7 +131,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             // keep reading tags until we find a mesh tag, or an invalid tag
             while (true)
             {
-                var magic = reader.ReadString(4);
+                var magic = reader.ReadStringOfLength(4);
                 if (magic == "MESI")
                 {
                     Meshes.Add(new BrgMesh(reader));
@@ -162,7 +163,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         private void ReadMaterial(BrgBinaryReader reader)
         {
-            var magic = reader.ReadString(4);
+            var magic = reader.ReadStringOfLength(4);
             if (magic != "MTRL")
             {
                 throw new InvalidDataException($"This ({magic.Trim('\0')}) is not a valid material chunk.");

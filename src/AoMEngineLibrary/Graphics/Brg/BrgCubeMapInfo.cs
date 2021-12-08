@@ -16,8 +16,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _cubeMapName;
             set
             {
+                CubeMapNameLength = Convert.ToByte(Encoding.UTF8.GetByteCount(value));
                 _cubeMapName = value;
-                CubeMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
             }
         }
 
@@ -27,8 +27,8 @@ namespace AoMEngineLibrary.Graphics.Brg
             get => _textureMapName;
             set
             {
+                TextureMapNameLength = Convert.ToByte(Encoding.UTF8.GetByteCount(value));
                 _textureMapName = value;
-                TextureMapNameLength = (byte)Encoding.UTF8.GetByteCount(value);
             }
         }
 

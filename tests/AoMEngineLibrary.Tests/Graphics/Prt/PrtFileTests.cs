@@ -17,13 +17,13 @@ namespace AoMEngineLibrary.Tests.Graphics.Prt
         [MemberData(nameof(Tests))]
         public void PrtFileReadWriteTest(string fileName)
         {
-            string filePath = Path.Combine(basePath, fileName);
+            var filePath = Path.Combine(basePath, fileName);
 
             byte[] newData;
             using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var ms = new MemoryStream())
             {
-                PrtFile file = new PrtFile(fs);
+                var file = new PrtFile(fs);
                 file.Write(ms);
 
                 ms.Flush();
@@ -31,7 +31,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Prt
                 newData = ms.ToArray();
             }
 
-            byte[] origData = File.ReadAllBytes(filePath);
+            var origData = File.ReadAllBytes(filePath);
 
             Assert.Equal(origData, newData);
         }

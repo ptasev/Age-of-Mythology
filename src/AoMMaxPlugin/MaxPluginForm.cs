@@ -1,23 +1,21 @@
 ﻿#define DEBUGBOX // allows the use of messageboxes in debug mode
+using AoMEngineLibrary.Graphics.Brg;
+using AoMEngineLibrary.Graphics.Grn;
+using BrightIdeasSoftware;
+using ManagedServices;
+using MaxCustomControls;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace AoMMaxPlugin
 {
-    using AoMEngineLibrary.Extensions;
-    using AoMEngineLibrary.Graphics;
-    using AoMEngineLibrary.Graphics.Brg;
-    using AoMEngineLibrary.Graphics.Grn;
-    using BrightIdeasSoftware;
-    using ManagedServices;
-    using MaxCustomControls;
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-    using System.Windows.Forms;
-    using System.Xml;
-
+    [SupportedOSPlatform("windows")]
     public partial class MaxPluginForm : MaxForm
     {
         // 7.2 -- Fix getting all the animation keys in brg, Exporting normals is now done after applying all modifier to the mesh, Fixed bugs with exporting grn mesh skin, Added more descriptive errors
@@ -317,6 +315,7 @@ namespace AoMMaxPlugin
             return Color.FromArgb(d, d, d);
         }
 
+        [SupportedOSPlatform("windows")]
         private class ToolStripMaxPluginRenderer : MaxToolStripSystemRenderer//ToolStripProfessionalRenderer
         {
             protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
