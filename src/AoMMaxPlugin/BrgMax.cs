@@ -45,7 +45,7 @@
             this.File.Meshes.Add(new BrgMesh());
             this.FileName = Path.GetDirectoryName(this.FileName) + "\\Untitled";
             this.File.Meshes[0].Header.InterpolationType = BrgMeshInterpolationType.Default;
-            this.File.Meshes[0].Header.Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.MATERIAL | BrgMeshFlag.ATTACHPOINTS;
+            this.File.Meshes[0].Header.Flags = BrgMeshFlag.Texture1 | BrgMeshFlag.Material | BrgMeshFlag.DummyObjects;
             this.File.Meshes[0].Header.Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength;
             this.File.Meshes[0].Header.AnimationType = BrgMeshAnimType.KeyFrame;
         }
@@ -103,7 +103,7 @@
             string texVerts = "";
             string faceMats = "";
             string faceArray = "";
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
             {
                 vertArray = Maxscript.NewArray("vertArray");
                 normArray = Maxscript.NewArray("normArray");
@@ -117,26 +117,26 @@
             Maxscript.Command("uvwSetVertPosFunc = {0}.Unwrap_UVW.SetVertexPosition", mainObject);
             for (int i = 0; i < mesh.Vertices.Count; i++)
             {
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
                 {
                     Maxscript.AnimateAtTime(time, "meshSetVertFunc {0} {1} {2}", mainObject, i + 1,
                         Maxscript.Point3Literal(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
 
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS) &&
-                        mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimTxCoords) &&
+                        mesh.Header.Flags.HasFlag(BrgMeshFlag.Texture1))
                     {
                         Maxscript.Animate("uvwSetVertPosFunc {0}s {1} {2}", time, i + 1,
                             Maxscript.Point3Literal(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
                     }
 
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMVERTCOLORALPHA))
+                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimVertexColor))
                     {
-                        if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
+                        if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AlphaChannel))
                         {
                             Maxscript.AnimateAtTime(time, "meshop.setVertAlpha {0} -2 {1} {2}",
                                 mainObject, i + 1, mesh.Colors[i].W);
                         }
-                        else if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
+                        else if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ColorChannel))
                         {
                             Maxscript.AnimateAtTime(time, "meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
                                 mesh.Colors[i].X, mesh.Colors[i].Y, mesh.Colors[i].Z);
@@ -147,18 +147,18 @@
                 {
                     Maxscript.Append(vertArray, Maxscript.Point3Literal(-mesh.Vertices[i].X, -mesh.Vertices[i].Z, mesh.Vertices[i].Y));
 
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Texture1))
                     {
                         Maxscript.Append(texVerts, Maxscript.Point3Literal(mesh.TextureCoordinates[i].X, mesh.TextureCoordinates[i].Y, 0));
                     }
 
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL))
+                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AlphaChannel))
                     {
                         //Maxscript.Command("meshop.supportVAlphas {0}", mainObject);
                         Maxscript.Command("meshop.setVertAlpha {0} -2 {1} {2}",
                             mainObject, i + 1, mesh.Colors[i].W);
                     }
-                    else if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
+                    else if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ColorChannel))
                     {
                         Maxscript.Command("meshop.setVertColor {0} 0 {1} (color {2} {3} {4})", mainObject, i + 1,
                             mesh.Colors[i].X, mesh.Colors[i].Y, mesh.Colors[i].Z);
@@ -166,9 +166,9 @@
                 }
             }
 
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
             {
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Material))
                 {
                     Maxscript.CommentTitle("Load Face Materials");
                     foreach (var fMat in mesh.Faces)
@@ -223,7 +223,7 @@
                 }
                 Maxscript.Command("collapseStack {0}", mainObject);
 
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimTxCoords))
                 {
                     Maxscript.Command("select {0}", mainObject);
                     Maxscript.Command("addModifier {0} (Unwrap_UVW()) ui:off", mainObject);
@@ -235,14 +235,14 @@
 
             Maxscript.CommentTitle("Load Attachpoints");
             string attachDummyArray = "attachDummyArray";
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
             {
                 Maxscript.NewArray(attachDummyArray);
             }
             for (int i = 0; i < mesh.Dummies.Count; ++i)
             {
                 BrgDummy att = mesh.Dummies[i];
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
                 {
                     Maxscript.Command("attachpoint = {0}[{1}]", attachDummyArray, i + 1);
                     Maxscript.AnimateAtTime(time, "attachpoint.rotation = {0}", att.GetMaxTransform());
@@ -454,7 +454,7 @@
                 }
                 else
                 {
-                    if (flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    if (flags.HasFlag(BrgMeshFlag.Material))
                     {
                         throw new Exception("Not all meshes have a material applied! " + Maxscript.QueryString("{0}.name", mainObject));
                     }
@@ -487,8 +487,8 @@
 
                 this.ExportAttachpoints(attachDummy, mesh, brg.Animation.MeshKeys[i]);
                 HashSet<int> diffFaceMats = new HashSet<int>();
-                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) &&
-                    mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary) &&
+                    mesh.Header.Flags.HasFlag(BrgMeshFlag.Material))
                 {
                     for (int j = 0; j < mesh.Faces.Count; ++j)
                     {
@@ -526,7 +526,7 @@
             string mainMesh = "mainMesh";
             string mainObjectName = Maxscript.QueryString("{0}.name", mainObject);
             // Figure out the proper data to import
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
             {
                 Maxscript.Command("{0} = ExportPreservedTexCoordData (GetMeshSnapshotAtTime {1} {2})", mainMesh, mainObject, time);
             }
@@ -591,9 +591,9 @@
             }
 
             //System.Windows.Forms.MessageBox.Show("2");
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH) || mesh.Header.Flags.HasFlag(BrgMeshFlag.ANIMTEXCOORDS))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary) || mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimTxCoords))
             {
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Texture1))
                 {
                     for (int i = 0; i < numVertices; i++)
                     {
@@ -604,28 +604,23 @@
             }
 
             //System.Windows.Forms.MessageBox.Show("3");
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary) &&
+                mesh.Header.Flags.HasFlag(BrgMeshFlag.Material))
             {
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                {
-                    mesh.VertexMaterials.AddRange(new Int16[numVertices]);
-                }
+                mesh.VertexMaterials.AddRange(new Int16[numVertices]);
                 for (int i = 0; i < numFaces; ++i)
                 {
                     BrgFace f = new BrgFace();
                     mesh.Faces.Add(f);
 
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    int faceMatId = Maxscript.QueryInteger("getFaceMatId {0} {1}", mainMesh, i + 1);
+                    if (matIdMapping.ContainsKey(faceMatId))
                     {
-                        int faceMatId = Maxscript.QueryInteger("getFaceMatId {0} {1}", mainMesh, i + 1);
-                        if (matIdMapping.ContainsKey(faceMatId))
-                        {
-                            f.MaterialIndex = (Int16)matIdMapping[faceMatId];
-                        }
-                        else
-                        {
-                            throw new Exception("In mesh " + mainObjectName + " face index " + (i + 1) + " has an invalid material id " + faceMatId + ".");
-                        }
+                        f.MaterialIndex = (Int16)matIdMapping[faceMatId];
+                    }
+                    else
+                    {
+                        throw new Exception("In mesh " + mainObjectName + " face index " + (i + 1) + " has an invalid material id " + faceMatId + ".");
                     }
 
                     //System.Windows.Forms.MessageBox.Show("3.1");
@@ -635,12 +630,9 @@
                     f.C = (ushort)(Maxscript.QueryInteger("face.y") - 1 + currNumVertices);
 
                     //System.Windows.Forms.MessageBox.Show("3.2");
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                    {
-                        mesh.VertexMaterials[f.A] = f.MaterialIndex;
-                        mesh.VertexMaterials[f.B] = f.MaterialIndex;
-                        mesh.VertexMaterials[f.C] = f.MaterialIndex;
-                    }
+                    mesh.VertexMaterials[f.A] = f.MaterialIndex;
+                    mesh.VertexMaterials[f.B] = f.MaterialIndex;
+                    mesh.VertexMaterials[f.C] = f.MaterialIndex;
                 }
             }
 
@@ -653,7 +645,7 @@
             int numAttachpoints = Maxscript.QueryInteger("{0}.count", attachDummy);
 
             //System.Windows.Forms.MessageBox.Show("5 " + numAttachpoints);
-            if (mesh.Header.Flags.HasFlag(BrgMeshFlag.ATTACHPOINTS))
+            if (mesh.Header.Flags.HasFlag(BrgMeshFlag.DummyObjects))
             {
                 mesh.Dummies = new BrgDummyCollection();
                 for (int i = 0; i < numAttachpoints; i++)

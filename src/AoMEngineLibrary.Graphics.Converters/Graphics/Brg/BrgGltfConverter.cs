@@ -260,8 +260,8 @@ namespace AoMEngineLibrary.Graphics.Brg
         }
         private IMeshBuilder<MaterialBuilder> CreateMeshBuilder(BrgMeshFlag flags)
         {
-            bool hasColor = flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) || flags.HasFlag(BrgMeshFlag.COLORCHANNEL);
-            bool hasTex = flags.HasFlag(BrgMeshFlag.TEXCOORDSA);
+            bool hasColor = flags.HasFlag(BrgMeshFlag.AlphaChannel) || flags.HasFlag(BrgMeshFlag.ColorChannel);
+            bool hasTex = flags.HasFlag(BrgMeshFlag.Texture1);
 
             if (hasColor && hasTex)
             {
@@ -301,15 +301,15 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             vb.Geometry = new VertexPositionNormal(-vert.X, vert.Y, vert.Z, -norm.X, norm.Y, norm.Z);
 
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
             {
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.TEXCOORDSA))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Texture1))
                 {
                     vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[index].X, 1 - mesh.TextureCoordinates[index].Y);
                 }
 
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORALPHACHANNEL) ||
-                    mesh.Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL))
+                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AlphaChannel) ||
+                    mesh.Header.Flags.HasFlag(BrgMeshFlag.ColorChannel))
                 {
                     vb.Material.Color = mesh.Colors[index];
                 }

@@ -106,9 +106,19 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
 
             var rightVecs = new Vector3[dummyObjects];
-            for (var i = 0; i < upVecs.Length; ++i)
+            if (meshVersion >= 19)
             {
-                rightVecs[i] = reader.ReadVector3D(halfVectors);
+                for (var i = 0; i < upVecs.Length; ++i)
+                {
+                    rightVecs[i] = reader.ReadVector3D(halfVectors);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < upVecs.Length; ++i)
+                {
+                    rightVecs[i] = Vector3.Cross(upVecs[i], fwdVecs[i]);
+                }
             }
 
             var posVecs = new Vector3[dummyObjects];

@@ -31,7 +31,7 @@ public class BrgMeshTests
                             MassPosition = new Vector3(0.1f, 0.2f, 0.3f),
                             HotspotPosition = new Vector3(0.6f, 0.7f, 0.8f),
                             ExtendedHeaderSize = 40,
-                            Flags = BrgMeshFlag.TEXCOORDSA | BrgMeshFlag.ATTACHPOINTS | BrgMeshFlag.MATERIAL | BrgMeshFlag.COLORCHANNEL,
+                            Flags = BrgMeshFlag.Texture1 | BrgMeshFlag.DummyObjects | BrgMeshFlag.Material | BrgMeshFlag.ColorChannel,
                             MinimumExtent = new Vector3(-0.4f, -0.3f, -0.1f),
                             MaximumExtent = new Vector3(0.4f, 0.3f, 0.1f)
                         },
@@ -85,7 +85,6 @@ public class BrgMeshTests
                             NumNonUniformKeys = 4,
                             NumUniqueMaterials = 1
                         },
-                        UserDataEntries = new BrgUserDataEntry[0],
                         Dummies = new BrgDummyCollection()
                         {
                             new BrgDummy() { Type = BrgDummyType.Chin, Up = new Vector3(2), Forward = new Vector3(4), Right = new Vector3(6), Position = new Vector3(8)},
@@ -175,10 +174,10 @@ public class BrgMeshTests
             Assert.Equal(test.Mesh.Vertices, result.Vertices);
             Assert.Equal(test.Mesh.Normals, result.Normals);
             Assert.Equal(test.Mesh.Faces, result.Faces);
+            Assert.Equal(test.Mesh.ParticleRadius, result.ParticleRadius);
             Assert.Equal(test.Mesh.TextureCoordinates, result.TextureCoordinates);
             Assert.Equal(test.Mesh.Colors, result.Colors);
             Assert.Equal(test.Mesh.VertexMaterials, result.VertexMaterials);
-            Assert.Equal(test.Mesh.UserDataEntries, result.UserDataEntries);
             Assert.Equal(test.Mesh.NonUniformKeys, result.NonUniformKeys);
 
             Assert.Equal(test.Mesh.ExtendedHeader.NumNameIndexes, result.ExtendedHeader.NumNameIndexes);

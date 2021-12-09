@@ -65,7 +65,7 @@ namespace AoMEngineLibrary.Tests.Graphics.Brg
 
         public void HasValidFacesCount()
         {
-            if (!_mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+            if (!_mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
                 Assert.Equal(FaceCount, _mesh.Header.NumFaces);
             Assert.Equal(FaceCount, _mesh.Faces.Count);
         }

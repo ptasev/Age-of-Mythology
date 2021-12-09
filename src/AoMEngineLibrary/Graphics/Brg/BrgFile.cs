@@ -105,7 +105,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
 
             // Compute animation keys
-            if (Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform))
+            if (Meshes[0].Header.AnimationType == BrgMeshAnimType.NonUniform)
             {
                 for (var i = 0; i < Meshes.Count; ++i)
                 {
@@ -134,7 +134,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 var magic = reader.ReadStringOfLength(4);
                 if (magic == "MESI")
                 {
-                    Meshes.Add(new BrgMesh(reader));
+                    var baseMesh = Meshes.Count > 0 ? Meshes[0] : null;
+                    Meshes.Add(new BrgMesh(reader, baseMesh));
                     break;
                 }
                 else if (magic == "ASET")
@@ -216,7 +217,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
-        public bool ContainsMaterialID(int id)
+        private bool ContainsMaterialID(int id)
         {
             for (var i = 0; i < Materials.Count; i++)
             {
@@ -271,7 +272,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 Meshes[meshIndex].Header.Format = format;
                 Meshes[meshIndex].Header.AnimationType = animType;
                 Meshes[meshIndex].Header.InterpolationType = interpolationType;
-                Meshes[meshIndex].Header.Flags |= BrgMeshFlag.SECONDARYMESH;
+                Meshes[meshIndex].Header.Flags |= BrgMeshFlag.Secondary;
                 Meshes[meshIndex].Header.AnimationType &= ~BrgMeshAnimType.NonUniform;
             }
             else

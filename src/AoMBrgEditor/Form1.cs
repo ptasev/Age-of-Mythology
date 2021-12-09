@@ -27,7 +27,7 @@ namespace AoMBrgEditor
 
             richTextBox1.Text = output;
 
-            BarTesting();
+            BrgTesting();
         }
 
         private void BarTesting()
@@ -36,7 +36,7 @@ namespace AoMBrgEditor
             //var texDir = @"C:\Games\AoM_2002.0801\";
             var texDir = @"C:\Games\AoM_2002.0904\";
             var sb = new StringBuilder();
-            foreach (string s in Directory.GetFiles(texDir, "*.bar", SearchOption.AllDirectories))
+            foreach (var s in Directory.GetFiles(texDir, "*.bar", SearchOption.AllDirectories))
             {
                 try
                 {
@@ -60,16 +60,18 @@ namespace AoMBrgEditor
 
         private void BrgTesting()
         {
-            string texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\models\";
+            //var texDir = @"C:\Games\Steam\steamapps\common\Age of Mythology\models\";
+            var texDir = @"C:\Games\AoM_2002.0801\models\modelsbar";
+            //var texDir = @"C:\Games\AoM_2002.0904\models\modelsbar";
             var sb = new StringBuilder();
-            foreach (string s in Directory.GetFiles(texDir, "*.brg", SearchOption.AllDirectories))
+            foreach (var s in Directory.GetFiles(texDir, "*.brg", SearchOption.AllDirectories))
             {
                 try
                 {
                     using (var fs = File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         var brg = new BrgFile(fs);
-                        if (brg.Meshes.Count > 0 && brg.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.PARTICLESYSTEM))
+                        if (brg.Meshes.Any(x => x.Dummies.Count > 0 && x.Header.Version < 19))
                         {
                             sb.AppendLine($"{s}\t");
                         }
@@ -129,7 +131,7 @@ namespace AoMBrgEditor
                 try
                 {
                     file = new BrgFile(File.Open(s, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.COLORCHANNEL)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.Flags.HasFlag(BrgMeshFlag.ColorChannel)))
                     {
                         output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Flags.ToString() + Environment.NewLine;
                     }
@@ -137,7 +139,7 @@ namespace AoMBrgEditor
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.Format.ToString() + Environment.NewLine;
                     }
-                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.AnimationType.HasFlag(BrgMeshAnimType.NonUniform)))
+                    if (file.Meshes.Count > 0 && (file.Meshes[0].Header.AnimationType == BrgMeshAnimType.NonUniform))
                     {
                         //output += Path.GetFileName(s) + " " + file.Meshes[0].Header.AnimationType.ToString() + Environment.NewLine;
                     }

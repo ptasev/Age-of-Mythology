@@ -101,7 +101,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 mesh.ExtendedHeader.AnimationLength = brg.Animation.Duration;
                 if (i > 0)
                 {
-                    mesh.Header.Flags |= BrgMeshFlag.SECONDARYMESH;
+                    mesh.Header.Flags |= BrgMeshFlag.Secondary;
                 }
                 brg.Meshes.Add(mesh);
 
@@ -195,8 +195,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 {
                     // the scene may have tex coords, but maybe not each primitive
                     // the API will simply get a tex coord with (0, 0) for ones that don't
-                    mesh.Header.Flags |= BrgMeshFlag.TEXCOORDSA;
-                    if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                    mesh.Header.Flags |= BrgMeshFlag.Texture1;
+                    if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
                     {
                         var texCoordSet = GetDiffuseBaseColorTexCoordSet(p.Material);
                         for (int i = 0; i < p.VertexCount; ++i)
@@ -208,26 +208,20 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
 
                 // Get faces
-                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
                 {
-                    mesh.Header.Flags |= BrgMeshFlag.MATERIAL;
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                    {
-                        mesh.VertexMaterials.AddRange(Enumerable.Repeat((short)0, mesh.Vertices.Count));
-                    }
+                    mesh.Header.Flags |= BrgMeshFlag.Material;
+                    mesh.VertexMaterials.AddRange(Enumerable.Repeat((short)0, mesh.Vertices.Count));
 
                     short faceMatIndex = 0;
-                    if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
+                    var faceMatId = p.Material.LogicalIndex;
+                    if (matIdMapping.ContainsKey(faceMatId))
                     {
-                        int faceMatId = p.Material.LogicalIndex;
-                        if (matIdMapping.ContainsKey(faceMatId))
-                        {
-                            faceMatIndex = (Int16)matIdMapping[faceMatId];
-                        }
-                        else
-                        {
-                            throw new InvalidDataException("A face has an invalid material id " + faceMatId + ".");
-                        }
+                        faceMatIndex = (short)matIdMapping[faceMatId];
+                    }
+                    else
+                    {
+                        throw new InvalidDataException($"A face has an invalid material id {faceMatId}.");
                     }
 
                     foreach (var (A, B, C) in p.TriangleIndices)
@@ -239,12 +233,9 @@ namespace AoMEngineLibrary.Graphics.Brg
                         var f = new BrgFace(a, c, b) { MaterialIndex = faceMatIndex };
                         mesh.Faces.Add(f);
 
-                        if (mesh.Header.Flags.HasFlag(BrgMeshFlag.MATERIAL))
-                        {
-                            mesh.VertexMaterials[f.A] = f.MaterialIndex;
-                            mesh.VertexMaterials[f.B] = f.MaterialIndex;
-                            mesh.VertexMaterials[f.C] = f.MaterialIndex;
-                        }
+                        mesh.VertexMaterials[f.A] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.B] = f.MaterialIndex;
+                        mesh.VertexMaterials[f.C] = f.MaterialIndex;
                     }
                 }
             }
@@ -318,7 +309,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 frame.Vertices = verts.Select(v => v.Item1).ToList();
                 frame.Normals = verts.Select(v => v.Item2).ToList();
 
-                if (!frame.Header.Flags.HasFlag(BrgMeshFlag.SECONDARYMESH))
+                if (!frame.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
                 {
                     frame.TextureCoordinates = verts.Select(v => v.Item3).ToList();
                 }
@@ -380,7 +371,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             if (dummies.Any())
             {
-                mesh.Header.Flags |= BrgMeshFlag.ATTACHPOINTS;
+                mesh.Header.Flags |= BrgMeshFlag.DummyObjects;
                 foreach (var dummy in dummies)
                 {
                     var aName = dummy.Name;

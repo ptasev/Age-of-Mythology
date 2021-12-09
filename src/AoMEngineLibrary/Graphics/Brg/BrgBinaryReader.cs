@@ -1,9 +1,7 @@
 ﻿using AoMEngineLibrary.Extensions;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Text;
 
 namespace AoMEngineLibrary.Graphics.Brg
 {
@@ -14,7 +12,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         {
         }
 
-        public BrgUserDataEntry ReadUserDataEntry(bool isParticle)
+        public BrgUserDataEntry ReadUserDataEntry()
         {
             BrgUserDataEntry dataEntry;
 
