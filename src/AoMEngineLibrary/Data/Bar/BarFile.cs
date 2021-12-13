@@ -8,6 +8,15 @@ using System.Text;
 
 namespace AoMEngineLibrary.Data.Bar;
 
+/// <summary>
+/// An object for interacting with "BAR" archives.
+/// </summary>
+/// <remarks>
+/// Only the BAR archive entry headers are kept in memory, and not the data.
+/// The entry data can be forced to be loaded and kept in memory by calling <see cref="LoadInMemory"/>.
+/// If the all of the data is loaded in memory (<see cref="IsLoadedInMemory"/>), then the underlying
+/// stream will be closed if the instance has ownership of it.
+/// </remarks>
 public class BarFile : IDisposable
 {
     private bool _disposedValue;
@@ -92,6 +101,9 @@ public class BarFile : IDisposable
             CloseStream();
     }
 
+    /// <summary>
+    /// Deletes all entries from the archive and closes the stream if the instance owns it.
+    /// </summary>
     public void DeleteAll()
     {
         foreach (var entry in _entries.Values)
@@ -106,9 +118,9 @@ public class BarFile : IDisposable
     }
 
     /// <summary>
-    /// Loads all entry data into memory.
+    /// Loads all entry data in memory and closes the stream if the instance owns it.
     /// </summary>
-    public void LoadIntoMemory()
+    public void LoadInMemory()
     {
         foreach (var entry in _entries.Values)
         {
@@ -123,7 +135,7 @@ public class BarFile : IDisposable
 
     /// <summary>
     /// Opens the file from the given stream, and hold onto it for lazy loading of entry data.
-    /// The <see cref="BarFile"/> obtains ownership of the stream, unless left open.
+    /// The <see cref="BarFile"/> obtains ownership of the stream, unless <paramref name="leaveOpen"/> is true.
     /// </summary>
     public static BarFile Open(Stream stream, bool leaveOpen)
     {
@@ -134,7 +146,7 @@ public class BarFile : IDisposable
 
     /// <summary>
     /// Reads the file from the given stream, and hold onto it for lazy loading of entry data.
-    /// The <see cref="BarFile"/> obtains ownership of the stream, unless left open.
+    /// The <see cref="BarFile"/> obtains ownership of the stream, unless <paramref name="leaveOpen"/> is true.
     /// </summary>
     private void Read(Stream stream, bool leaveOpen)
     {
@@ -217,7 +229,7 @@ public class BarFile : IDisposable
 
     /// <summary>
     /// Writes the file to the given stream, and hold onto it for lazy loading of entry data.
-    /// The <see cref="BarFile"/> obtains ownership of the stream, unless left open.
+    /// The <see cref="BarFile"/> obtains ownership of the stream, unless <paramref name="leaveOpen"/> is true.
     /// </summary>
     public void Write(Stream stream, bool leaveOpen)
     {

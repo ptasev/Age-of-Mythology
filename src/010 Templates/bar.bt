@@ -9,12 +9,15 @@
 LittleEndian();
 SetBackColor(cLtGray);
 
-struct HEADER {
-    byte unknown01[12];
+struct HEADER
+{
+    uint magic <comment="always 0">;
+    uint version <comment="always 0">;
+    uint crc <comment="adler32 on everything after header">;
     int fileCount;
     int definitionsLength;
     int definitionsOffset;
-    int barFileVersion;
+    uint flags;
 } header;
 
 FSeek(header.definitionsOffset);
@@ -25,7 +28,8 @@ local int i;
 for (i = 0; i < header.fileCount; ++i)
 {
     FSeek(entryOffsets[i] + entriesOffset);
-    struct Entry {
+    struct Entry
+    {
         int offset <bgcolor=cLtGreen>;
         int length;
         int length2; // always expected to match length
@@ -42,7 +46,7 @@ for (i = 0; i < header.fileCount; ++i)
         byte hour;
         byte minute;
         byte second;
-        byte milisecond;
+        byte pad;
         
         string fileName <bgcolor=cLtPurple>;
 
@@ -53,6 +57,7 @@ for (i = 0; i < header.fileCount; ++i)
     } entry <bgcolor=cLtBlue,read=entryName,optimize=false>;
 }
 
-string entryName(Entry &entry) {
+string entryName(Entry &entry)
+{
     return entry.fileName;
 }

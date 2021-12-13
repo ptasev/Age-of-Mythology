@@ -379,16 +379,13 @@ namespace AoMEngineLibrary.Graphics.Brg
                 var vec1 = Vertices[index2] - Vertices[index1];
 
                 // Get surface normal by taking the cross product.
-                if (vec0 == Vector3.Zero || vec1 == Vector3.Zero)
+                var normal = Vector3.Cross(vec0, vec1);
+                var length = normal.Length();
+                if (length != 0)
                 {
-                    faceNormals[i] = Vector3.Zero;
+                    normal /= length;
                 }
-                else
-                {
-                    var normal = Vector3.Cross(vec0, vec1);
-                    normal = Vector3.Normalize(normal);
-                    faceNormals[i] = normal;
-                }
+                faceNormals[i] = normal;
             }
 
             return (faces, faceNormals);

@@ -1,10 +1,12 @@
 ﻿using AoMEngineLibrary.Anim;
 using AoMEngineLibrary.Data.Bar;
+using AoMEngineLibrary.Data.XmbFile;
 using AoMEngineLibrary.Extensions;
 using AoMEngineLibrary.Graphics.Brg;
 using AoMEngineLibrary.Graphics.Prt;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Xml;
 
 namespace AoMFileConverter
@@ -88,10 +90,21 @@ namespace AoMFileConverter
                 using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read))
                 {
-                    PrtFile file = new PrtFile(fs);
+                    var file = new PrtFile(fs);
                     file.SerializeAsXml(fso);
                 }
                 Console.WriteLine("Success! Prt converted.");
+            }
+            else if (f.EndsWith(".xmb"))
+            {
+                using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read))
+                using (var xw = XmlWriter.Create(fso, XmbFile.XmlWriterSettings))
+                {
+                    var xml = XmbFile.Load(fs);
+                    xml.Save(xw);
+                }
+                Console.WriteLine("Success! Xmb converted.");
             }
             else if (f.EndsWith(".bar"))
             {
@@ -133,16 +146,16 @@ namespace AoMFileConverter
             }
             else if (magic == "BANG")
             {
-                string brgMtrlOutputPath = Path.Combine(Path.GetDirectoryName(f) ?? string.Empty, "materials");
+                var brgMtrlOutputPath = Path.Combine(Path.GetDirectoryName(f) ?? string.Empty, "materials");
                 if (!Directory.Exists(brgMtrlOutputPath))
                 {
                     Directory.CreateDirectory(brgMtrlOutputPath);
                 }
 
-                BrgFile file = new BrgFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                for (int i = 0; i < file.Materials.Count; ++i)
+                var file = new BrgFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                for (var i = 0; i < file.Materials.Count; ++i)
                 {
-                    MtrlFile mtrl = new MtrlFile(file.Materials[i]);
+                    var mtrl = new MtrlFile(file.Materials[i]);
                     using (var fs = File.Open(Path.Combine(brgMtrlOutputPath, Path.GetFileNameWithoutExtension(f) + "_" + i + ".mtrl"),
                         FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
@@ -171,7 +184,7 @@ namespace AoMFileConverter
                     }
                     Console.WriteLine("Success! Prt converted.");
                 }
-                else
+                else if (xmlDoc?.DocumentElement?.Name == "Material")
                 {
                     using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
                     using (var fso = File.Open(f + ".mtrl", FileMode.Create, FileAccess.Write, FileShare.Read))
@@ -180,6 +193,15 @@ namespace AoMFileConverter
                         file.Write(fso);
                     }
                     Console.WriteLine("Success! Mtrl converted.");
+                }
+                else
+                {
+                    using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var fso = File.Open(f + ".xmb", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        XmbFile.Save(fs, fso, CompressionLevel.SmallestSize);
+                    }
+                    Console.WriteLine("Success! Xmb converted.");
                 }
             }
         }

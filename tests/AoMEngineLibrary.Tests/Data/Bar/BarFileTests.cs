@@ -202,7 +202,7 @@ public class BarFileTests
             Assert.DoesNotContain(file.Entries, x => x.IsLoadedInMemory);
 
             // Make all files loaded in memory
-            file.LoadIntoMemory();
+            file.LoadInMemory();
             Assert.True(file.Entries.All(x => x.IsLoadedInMemory));
             Assert.True(file.IsLoadedInMemory);
 

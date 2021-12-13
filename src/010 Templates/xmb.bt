@@ -10,70 +10,124 @@ LittleEndian();
 SetBackColor(cLtGray);
 
 struct {
-    int16 magic;
+    ushort magic;
     int fileLength;
-    int16 magic2;
-    int four;
-    int seven;
+    ushort magic2;
+    int magic2dataSize;
+    ulong version;
 
-    //local int childElems = ReadInt(FTell());
-    //FSkip(4);
-    int numDefinitions;
+    if (version >= 2)
+    {
+        int numDefinitions;
+        struct XmlNodeDefinition {
+            int nameLength <bgcolor=cGreen>;
+            wchar_t name[nameLength] <bgcolor=cLtRed>;
+        } definition[numDefinitions] <bgcolor=cLtBlue,read=definitionName,optimize=false>;
+    }
 
-    //while (ReadByte(FTell()) != 88 && ReadByte(FTell() + 1) != 78) {
-    struct XmlNodeDefinition {
-        int nameLength <bgcolor=cGreen>;
-        char name[nameLength * 2] <bgcolor=cLtRed>;
-    } definition[numDefinitions] <bgcolor=cLtBlue,read=definitionName,optimize=false>;
-    //}
-
-    int numAttrDefinitions;
-    struct XmlNodeDefinition attrDefinition[numAttrDefinitions] <bgcolor=cLtBlue,read=definitionName,optimize=false>;
+    if (version >= 3)
+    {
+        int numAttrDefinitions;
+        struct XmlNodeDefinition attrDefinition[numAttrDefinitions] <bgcolor=cLtBlue,read=definitionName,optimize=false>;
+    }
 
     struct XmlNode {
-        int16 magic;
+        ushort tag;
         int length <bgcolor=cGreen>;
 
         int valueLength <bgcolor=cGreen>;
-        char value[valueLength * 2] <bgcolor=cLtRed>;
-        int definitionIndex;
+        wchar_t value[valueLength] <bgcolor=cLtRed>;
+
+        if (version == 0)
+        {
+            int nameLength <bgcolor=cGreen>;
+            wchar_t name[nameLength] <bgcolor=cLtRed>;
+        }
+        else if (version >= 1)
+        {
+            int nameId;
+        }
+
+        // Not sure about this block
+        if (version == 0)
+        {
+            int unknown;
+        }
+
+        if (version >= 8)
+        {
+            int lineNumber;
+        }
 
         int attributeCount <bgcolor=cGreen>;
-        struct XmlAttributeNode {
-            int definitionIndex;
-            int valueLength <bgcolor=cGreen>;
-            char value[valueLength * 2] <bgcolor=cLtRed>;
-        } attributes[attributeCount] <bgcolor=cLtBlue,read=definitionAttributeNode,optimize=false>;
+        if (attributeCount > 0)
+        {
+            struct XmlAttributeNode {
+                if (version == 0)
+                {
+                    int nameLength <bgcolor=cGreen>;
+                    wchar_t name[nameLength] <bgcolor=cLtRed>;
+                }
+                else
+                {
+                    int nameId;
+                }
+                int valueLength <bgcolor=cGreen>;
+                wchar_t value[valueLength] <bgcolor=cLtRed>;
+            } attributes[attributeCount] <bgcolor=cLtBlue,read=definitionAttributeNode,optimize=false>;
+        }
 
         int childNodeCount;
-        struct XmlNode childNodes[childNodeCount] <bgcolor=cLtBlue,read=definitionNodeName,optimize=false>;
+        if (childNodeCount > 0)
+        {
+            struct XmlNode childNodes[childNodeCount] <bgcolor=cLtBlue,read=definitionNodeName,optimize=false>;
+        }
         
     } rootNode <bgcolor=cLtBlue,read=definitionNodeName,optimize=false>;
 } file;
 
-string definitionName(XmlNodeDefinition &node) {
-    local int i;
-    string s = "";
-    for (i = 0; i < sizeof(node.name); i+=2) {
-        s += node.name[i];
+wstring definitionName(const XmlNodeDefinition &def)
+{
+    if (def.nameLength > 0)
+        return def.name;
+    else
+        return "";
+}
+
+wstring definitionNodeName(const XmlNode &node)
+{
+    wstring s = "";
+    if (file.version == 0)
+    {
+        if (node.nameLength > 0)
+            s += node.name;
     }
+    else if (file.version >= 1)
+    {
+        if (node.nameId != -1 && file.definition[node.nameId].nameLength > 0)
+            s += file.definition[node.nameId].name;
+    }
+
+    if (node.valueLength > 0)
+        s += " = " + node.value;
     return s;
 }
 
-string definitionNodeName(XmlNode &node) {
+wstring definitionAttributeNode(const XmlAttributeNode &node) {
     local int i;
-    string s = "";
-    for (i = 0; i < sizeof(file.definition[node.definitionIndex].name); i+=2) {
-        s += file.definition[node.definitionIndex].name[i];
+    wstring s = "";
+    if (file.version == 0)
+    {
+        if (node.nameLength > 0)
+            s += node.name;
     }
-    return s;
-}
+    else
+    {
+        if (node.nameId != -1 && file.attrDefinition[node.nameId].nameLength > 0)
+            s += file.attrDefinition[node.nameId].name;
+    }
 
-string definitionAttributeNode(XmlAttributeNode &node) {
-    local int i;
-    string s = "";
-    for (i = 0; i < sizeof(file.attrDefinition[node.definitionIndex].name); i+=2) {
-        s += file.attrDefinition[node.definitionIndex].name[i];
-    }
+    if (node.valueLength > 0)
+        s += " = " + node.value;
     return s;
 }
