@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AoMModelEditor.Dialogs"
+        xmlns:reactiveUi="http://reactiveui.net"
         mc:Ignorable="d"
         Title="glTF Import" Height="auto" Width="auto" MaxWidth="600" MaxHeight="400" MinWidth="300" MinHeight="140" SizeToContent="WidthAndHeight"
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
@@ -14,7 +15,7 @@
                 <GroupBox Header="Animation">
                     <StackPanel>
                         <Label Content="Selected the animation to import, if any:"/>
-                        <ListBox x:Name="animationListBox" SelectionMode="Single" MinHeight="30">
+                        <ListBox x:Name="animationListBox" SelectionMode="Single" MinHeight="30" ItemsSource="{Binding Animations}" SelectedItem="{Binding SelectedAnimation}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Label Content="{Binding Name}" />
@@ -23,6 +24,9 @@
                         </ListBox>
                     </StackPanel>
                 </GroupBox>
+                <Grid>
+                    <reactiveUi:ViewModelViewHost ViewModel="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                </Grid>
                 <StackPanel Orientation="Horizontal">
                     <Button Margin="5 5 0 5" Padding="5" Content="OK" HorizontalAlignment="Right" Name="okButton" Click="okButton_Click"/>
                     <Button Margin="5 5 0 5" Padding="5" Content="Cancel" HorizontalAlignment="Right" MinWidth="40" IsCancel="True"/>

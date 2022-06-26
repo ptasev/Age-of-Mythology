@@ -19,9 +19,9 @@ namespace AoMModelEditor.Models.Brg
     /// Interaction logic for BrgSettingsView.xaml
     /// </summary>
 #nullable disable
-    public partial class BrgSettingsView : ReactiveUserControl<BrgSettingsViewModel>
+    public partial class BrgGltfImportSettingsView : ReactiveUserControl<BrgGltfImportSettingsViewModel>
     {
-        public BrgSettingsView()
+        public BrgGltfImportSettingsView()
         {
             InitializeComponent();
 

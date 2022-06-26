@@ -31,9 +31,6 @@ namespace AoMModelEditor.Dialogs
             InitializeComponent();
         }
 
-        private void okButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = true;
-        }
+        private void okButton_Click(object sender, RoutedEventArgs e) => DialogResult = true;
     }
 }

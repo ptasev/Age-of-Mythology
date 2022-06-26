@@ -73,10 +73,6 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Models\Grn\GrnSettingsView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="Models\Grn\GrnMeshesView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
@@ -88,6 +84,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Models\Grn\GrnBoneView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Models\Brg\BrgGltfImportSettingsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Models\Grn\GrnGltfImportSettingsView.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

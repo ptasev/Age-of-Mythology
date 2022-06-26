@@ -7,9 +7,9 @@ namespace AoMModelEditor.Models.Grn
     /// Interaction logic for GrnSettingsView.xaml
     /// </summary>
 #nullable disable
-    public partial class GrnSettingsView : ReactiveUserControl<GrnSettingsViewModel>
+    public partial class GrnGltfImportSettingsView : ReactiveUserControl<GrnGltfImportSettingsViewModel>
     {
-        public GrnSettingsView()
+        public GrnGltfImportSettingsView()
         {
             InitializeComponent();
 

@@ -40,7 +40,7 @@ namespace AoMModelEditor.Configuration
             // Locator.CurrentMutable start using the locator.
             serviceCollection.UseMicrosoftDependencyResolver();
 
-            // These .InitializeX() methods will add ReactiveUI platform 
+            // These .InitializeX() methods will add ReactiveUI platform
             // registrations to your container. They MUST be present if
             // you *override* the default Locator.
             Locator.CurrentMutable.InitializeSplat();
@@ -50,7 +50,6 @@ namespace AoMModelEditor.Configuration
 
             Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
 
-            serviceCollection.AddSingleton<GltfImportDialogService>();
             serviceCollection.AddSingleton<FileDialogService>();
             serviceCollection.AddSingleton<AppSettings>();
 

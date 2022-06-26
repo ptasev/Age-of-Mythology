@@ -8,6 +8,7 @@ using AoMModelEditor.Settings;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SharpGLTF.Schema2;
+using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,11 +28,10 @@ namespace AoMModelEditor.Models
         private readonly object _modelLock = new object();
         private readonly AppSettings _appSettings;
         private readonly FileDialogService _fileDialogService;
-        private readonly GltfImportDialogService _gltfDialogService;
         private readonly ILogger<ModelsViewModel> _logger;
         private readonly TextureManager _textureManager;
-        private readonly BrgSettingsViewModel _brgSettingsViewModel;
-        private readonly GrnSettingsViewModel _grnSettingsViewModel;
+        private readonly BrgGltfImportSettingsViewModel _brgGltfImportSettingsViewModel;
+        private readonly GrnGltfImportSettingsViewModel _grnGltfImportSettingsViewModel;
 
         public bool IsBrg => _brg != null;
         public bool IsGrn => _grn != null;
@@ -45,15 +45,16 @@ namespace AoMModelEditor.Models
         public ReactiveCommand<Unit, Unit> ExportBrgMtrlFilesCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyGrnAnimationCommand { get; }
 
-        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService, GltfImportDialogService gltfDialogService, ILogger<ModelsViewModel> logger)
+        public Interaction<GltfImportSettingsViewModel, bool> ImportGltf { get; }
+
+        public ModelsViewModel(AppSettings appSettings, FileDialogService fileDialogService, ILogger<ModelsViewModel> logger)
         {
             _appSettings = appSettings;
             _fileDialogService = fileDialogService;
-            _gltfDialogService = gltfDialogService;
             _logger = logger;
             _textureManager = new TextureManager(_appSettings.GameDirectory);
-            _brgSettingsViewModel = new BrgSettingsViewModel();
-            _grnSettingsViewModel = new GrnSettingsViewModel();
+            _brgGltfImportSettingsViewModel = new BrgGltfImportSettingsViewModel();
+            _grnGltfImportSettingsViewModel = new GrnGltfImportSettingsViewModel();
             _modelObjects = new ObservableCollection<IModelObject>();
 
             ExportGltfCommand = ReactiveCommand.Create(ExportGltf,
@@ -65,8 +66,7 @@ namespace AoMModelEditor.Models
             ApplyGrnAnimationCommand = ReactiveCommand.Create(ApplyGrnAnimation,
                 this.WhenAnyValue(vm => vm.IsGrn));
 
-            _modelObjects.Add(_brgSettingsViewModel);
-            _modelObjects.Add(_grnSettingsViewModel);
+            ImportGltf = new Interaction<GltfImportSettingsViewModel, bool>();
         }
 
         public BrgFile GetBrg()
@@ -107,9 +107,6 @@ namespace AoMModelEditor.Models
                 _grn = null;
                 this.RaisePropertyChanged(nameof(IsBrg));
                 this.RaisePropertyChanged(nameof(IsGrn));
-
-                _modelObjects.Add(_brgSettingsViewModel);
-                _modelObjects.Add(_grnSettingsViewModel);
 
                 var statsVM = new BrgStatsViewModel(brg);
                 _modelObjects.Add(statsVM);
@@ -157,9 +154,6 @@ namespace AoMModelEditor.Models
                 _grn = grn;
                 this.RaisePropertyChanged(nameof(IsBrg));
                 this.RaisePropertyChanged(nameof(IsGrn));
-
-                _modelObjects.Add(_brgSettingsViewModel);
-                _modelObjects.Add(_grnSettingsViewModel);
 
                 var statsVM = new GrnStatsViewModel(grn);
                 _modelObjects.Add(statsVM);
@@ -260,7 +254,7 @@ namespace AoMModelEditor.Models
 
             BrgGltfConverter conv = new BrgGltfConverter();
             var gltf = conv.Convert(brg, parms, _textureManager);
-            gltf.Save(filePath);
+            gltf.Save(filePath, new WriteSettings() { Validation = ValidationMode.Strict });
             _logger.LogInformation("Finished exporting gltf file as brg.");
         }
         private void ExportGrnToGltf(string filePath)
@@ -270,16 +264,17 @@ namespace AoMModelEditor.Models
 
             GrnGltfConverter conv = new GrnGltfConverter();
             var gltf = conv.Convert(grn, _textureManager);
-            gltf.Save(filePath);
+            gltf.Save(filePath, new WriteSettings() { Validation = ValidationMode.Strict });
             _logger.LogInformation("Finished exporting gltf file as grn.");
         }
 
-        private void ImportGltfToBrg()
+        private async void ImportGltfToBrg()
         {
             try
             {
                 var ofd = _fileDialogService.GetModelOpenFileDialog();
-                ofd.Filter = "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
+                ofd.Filter =
+                    "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 // Load gltf file
                 var dr = ofd.ShowDialog();
@@ -287,15 +282,14 @@ namespace AoMModelEditor.Models
 
                 _fileDialogService.SetLastModelFilePath(ofd.FileName);
                 _logger.LogInformation("Loading gltf file.");
-                var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = SharpGLTF.Validation.ValidationMode.Strict });
+                var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = ValidationMode.Strict });
                 _logger.LogInformation("Finished loading gltf file.");
 
                 // Get settings and convert
-                var gltfImportResult = _gltfDialogService.OpenImportDialog(gltf);
-                if (gltfImportResult is null) return;
-
-                var settings = _brgSettingsViewModel.CreateGltfBrgParameters();
-                settings.AnimationIndex = gltfImportResult.Animation?.LogicalIndex ?? 0;
+                _brgGltfImportSettingsViewModel.SetGltfModel(gltf);
+                var importResult = await ImportGltf.Handle(_brgGltfImportSettingsViewModel);
+                if (!importResult) return;
+                var settings = _brgGltfImportSettingsViewModel.CreateGltfBrgParameters();
 
                 _logger.LogInformation("Converting gltf file to brg.");
                 var conv = new GltfBrgConverter();
@@ -308,16 +302,20 @@ namespace AoMModelEditor.Models
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to import gltf file as brg.");
-                MessageBox.Show($"Failed to import gltf file as brg.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
-                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to import gltf file as brg.{Environment.NewLine}{ex.Message}",
+                    Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK,
+                    MessageBoxOptions.DefaultDesktopOnly);
             }
         }
-        private void ImportGltfToGrn()
+
+        private async void ImportGltfToGrn()
         {
             try
             {
                 var ofd = _fileDialogService.GetModelOpenFileDialog();
-                ofd.Filter = "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
+                ofd.Filter =
+                    "Glb/Gltf files (*.glb, *.gltf)|*.glb;*.gltf|Glb files (*.glb)|*.glb|Gltf files (*.gltf)|*.gltf|All files (*.*)|*.*";
 
                 // Load gltf file
                 var dr = ofd.ShowDialog();
@@ -325,15 +323,14 @@ namespace AoMModelEditor.Models
 
                 _fileDialogService.SetLastModelFilePath(ofd.FileName);
                 _logger.LogInformation("Loading gltf file.");
-                var gltf = ModelRoot.Load(ofd.FileName);
+                var gltf = ModelRoot.Load(ofd.FileName, new ReadSettings() { Validation = ValidationMode.Strict });
                 _logger.LogInformation("Finished loading gltf file.");
 
                 // Get settings and convert
-                var gltfImportResult = _gltfDialogService.OpenImportDialog(gltf);
-                if (gltfImportResult is null) return;
-
-                var settings = _grnSettingsViewModel.CreateGltfGrnParameters();
-                settings.AnimationIndex = gltfImportResult.Animation?.LogicalIndex ?? 0;
+                _grnGltfImportSettingsViewModel.SetGltfModel(gltf);
+                var importResult = await ImportGltf.Handle(_grnGltfImportSettingsViewModel);
+                if (!importResult) return;
+                var settings = _grnGltfImportSettingsViewModel.CreateGltfGrnParameters();
 
                 _logger.LogInformation("Converting gltf file to grn.");
                 var conv = new GltfGrnConverter();
@@ -346,8 +343,10 @@ namespace AoMModelEditor.Models
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to import gltf file as grn.");
-                MessageBox.Show($"Failed to import gltf file as grn.{Environment.NewLine}{ex.Message}", Properties.Resources.AppTitleLong,
-                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show($"Failed to import gltf file as grn.{Environment.NewLine}{ex.Message}",
+                    Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK,
+                    MessageBoxOptions.DefaultDesktopOnly);
             }
         }
 

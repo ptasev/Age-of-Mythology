@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using AoMModelEditor.Dialogs;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
@@ -31,6 +32,13 @@ namespace AoMModelEditor.Models
                     viewModel => viewModel.ModelObjects,
                     view => view.modelObjectTreeView.ItemsSource)
                     .DisposeWith(disposableRegistration);
+
+                ViewModel?.ImportGltf.RegisterHandler(interaction =>
+                {
+                    var dialog = new GltfImportDialogBox { DataContext = interaction.Input };
+                    var result = dialog.ShowDialog();
+                    interaction.SetOutput(result is true);
+                }).DisposeWith(disposableRegistration);
             });
         }
     }
