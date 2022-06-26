@@ -1,11 +1,9 @@
-﻿using SharpGLTF.Animations;
-using SharpGLTF.Geometry;
+﻿using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
-using SharpGLTF.Transforms;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -218,23 +216,10 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             IMeshBuilder<MaterialBuilder> mb = CreateMeshBuilder(brg.Meshes[0].Header.Flags);
             mb.Name = $"{parameters.ModelName}Mesh";
-            ConvertMesh(brg.Meshes[0], primitives, mb);
+            ConvertMesh(brg.Meshes, primitives, mb);
 
             if (brg.Meshes.Count > 1)
             {
-                // Each mesh is really a morph target after the first one
-                for (int i = 1; i < brg.Meshes.Count; ++i)
-                {
-                    var mt = mb.UseMorphTarget(i - 1);
-                    var mesh = brg.Meshes[i];
-                    for (int v = 0; v < mesh.Vertices.Count; ++v)
-                    {
-                        var baseVal = GetVertexGeometry(brg.Meshes[0], v);
-                        var morphVal = GetVertexGeometry(mesh, v);
-                        mt.SetVertexDelta(baseVal.Position, morphVal.Subtract(baseVal));
-                    }
-                }
-
                 // Create the node with morphing
                 var nb = nodeBuilder.CreateNode($"{parameters.ModelName}Model");
                 var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
@@ -280,40 +265,88 @@ namespace AoMEngineLibrary.Graphics.Brg
                 return new GltfMeshBuilder4();
             }
         }
-        private void ConvertMesh(BrgMesh mesh, IEnumerable<(MaterialBuilder Material, List<BrgFace> Faces)> primitives, IMeshBuilder<MaterialBuilder> mb)
+
+        private void ConvertMesh(IReadOnlyList<BrgMesh> meshes, IEnumerable<(MaterialBuilder Material, List<BrgFace> Faces)> primitives, IMeshBuilder<MaterialBuilder> mb)
         {
+            var mesh = meshes[0];
+            var vertexBuilders = new Dictionary<int, IVertexBuilder>(mesh.Vertices.Count);
             foreach (var prim in primitives)
             {
                 var pb = mb.UsePrimitive(prim.Material);
-                
+
                 foreach (var face in prim.Faces)
                 {
-                    pb.AddTriangle(GetVertexBuilder(mesh, face.A), GetVertexBuilder(mesh, face.C), GetVertexBuilder(mesh, face.B));
+                    if (!vertexBuilders.TryGetValue(face.A, out var vbA))
+                    {
+                        vbA = GetVertexBuilder(mesh, face.A);
+                        vertexBuilders.Add(face.A, vbA);
+                    }
+
+                    if (!vertexBuilders.TryGetValue(face.B, out var vbB))
+                    {
+                        vbB = GetVertexBuilder(mesh, face.B);
+                        vertexBuilders.Add(face.B, vbB);
+                    }
+
+                    if (!vertexBuilders.TryGetValue(face.C, out var vbC))
+                    {
+                        vbC = GetVertexBuilder(mesh, face.C);
+                        vertexBuilders.Add(face.C, vbC);
+                    }
+
+                    var pbTri = pb.AddTriangle(vbA, vbC, vbB);
+
+                    // Each mesh is really a morph target after the first one
+                    for (var i = 1; i < meshes.Count; ++i)
+                    {
+                        var mgA = GetVertexGeometry(meshes[i], face.A);
+                        var mgB = GetVertexGeometry(meshes[i], face.B);
+                        var mgC = GetVertexGeometry(meshes[i], face.C);
+
+                        if (((!meshes[i].Header.Flags.HasFlag(BrgMeshFlag.Secondary) ||
+                              meshes[i].Header.Flags.HasFlag(BrgMeshFlag.AnimTxCoords) ||
+                              meshes[i].Header.Flags.HasFlag(BrgMeshFlag.ParticleSystem)) &&
+                             meshes[i].Header.Flags.HasFlag(BrgMeshFlag.Texture1)) ||
+                            (((meshes[i].Header.Flags.HasFlag(BrgMeshFlag.AlphaChannel) ||
+                               meshes[i].Header.Flags.HasFlag(BrgMeshFlag.ColorChannel)) &&
+                              !meshes[i].Header.Flags.HasFlag(BrgMeshFlag.Secondary)) ||
+                             meshes[i].Header.Flags.HasFlag(BrgMeshFlag.AnimVertexColor)))
+                        {
+                            var mmA = GetVertexMaterial(meshes[i], face.A);
+                            var mmB = GetVertexMaterial(meshes[i], face.B);
+                            var mmC = GetVertexMaterial(meshes[i], face.C);
+
+                            pb.SetVertexDelta(i - 1, pbTri.A, mgA.Subtract(vbA.GetGeometry()),
+                                mmA.Subtract(vbA.GetMaterial()));
+
+                            pb.SetVertexDelta(i - 1, pbTri.C, mgB.Subtract(vbB.GetGeometry()),
+                                mmB.Subtract(vbB.GetMaterial()));
+
+                            pb.SetVertexDelta(i - 1, pbTri.B, mgC.Subtract(vbC.GetGeometry()),
+                                mmC.Subtract(vbC.GetMaterial()));
+                        }
+                        else
+                        {
+                            pb.SetVertexDelta(i - 1, pbTri.A, mgA.Subtract(vbA.GetGeometry()),
+                                VertexMaterialDelta.Zero);
+
+                            pb.SetVertexDelta(i - 1, pbTri.C, mgB.Subtract(vbB.GetGeometry()),
+                                VertexMaterialDelta.Zero);
+
+                            pb.SetVertexDelta(i - 1, pbTri.B, mgC.Subtract(vbC.GetGeometry()),
+                                VertexMaterialDelta.Zero);
+                        }
+                    }
                 }
             }
         }
+
         private GltfVertexBuilder GetVertexBuilder(BrgMesh mesh, int index)
         {
             var vb = new GltfVertexBuilder();
 
-            var vert = mesh.Vertices[index];
-            var norm = mesh.Normals[index];
-
-            vb.Geometry = new VertexPositionNormal(-vert.X, vert.Y, vert.Z, -norm.X, norm.Y, norm.Z);
-
-            if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
-            {
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.Texture1))
-                {
-                    vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[index].X, 1 - mesh.TextureCoordinates[index].Y);
-                }
-
-                if (mesh.Header.Flags.HasFlag(BrgMeshFlag.AlphaChannel) ||
-                    mesh.Header.Flags.HasFlag(BrgMeshFlag.ColorChannel))
-                {
-                    vb.Material.Color = mesh.Colors[index];
-                }
-            }
+            vb.Geometry = GetVertexGeometry(mesh, index);
+            vb.Material = GetVertexMaterial(mesh, index);
 
             return vb;
         }
@@ -323,6 +356,28 @@ namespace AoMEngineLibrary.Graphics.Brg
             var norm = mesh.Normals[index];
 
             return new VertexPositionNormal(-vert.X, vert.Y, vert.Z, -norm.X, norm.Y, norm.Z);
+        }
+        private VertexColor1Texture1 GetVertexMaterial(BrgMesh mesh, int index)
+        {
+            var vm = new VertexColor1Texture1();
+
+            if ((!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary) ||
+                 mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimTxCoords) ||
+                 mesh.Header.Flags.HasFlag(BrgMeshFlag.ParticleSystem)) &&
+                mesh.Header.Flags.HasFlag(BrgMeshFlag.Texture1))
+            {
+                vm.TexCoord = new Vector2(mesh.TextureCoordinates[index].X, 1 - mesh.TextureCoordinates[index].Y);
+            }
+
+            if (((mesh.Header.Flags.HasFlag(BrgMeshFlag.AlphaChannel) ||
+                  mesh.Header.Flags.HasFlag(BrgMeshFlag.ColorChannel)) &&
+                 !mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary)) ||
+                mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimVertexColor))
+            {
+                vm.Color = mesh.Colors[index];
+            }
+
+            return vm;
         }
 
         private void ConvertMaterials(BrgFile brg, TextureManager textureManager, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
@@ -340,10 +395,11 @@ namespace AoMEngineLibrary.Graphics.Brg
                     var mb = new MaterialBuilder(GetMaterialNameWithFlags(brgMat));
                     mb.WithMetallicRoughnessShader();
                     var cb = mb.UseChannel(KnownChannel.MetallicRoughness);
-                    cb.Parameter = new Vector4(0.1f, 0.5f, 0, 0);
-                    cb = mb.UseChannel(KnownChannel.BaseColor);
-                    cb.Parameter = new Vector4(brgMat.DiffuseColor, brgMat.Opacity);
+                    cb.Parameters[KnownProperty.MetallicFactor] = 0.1f;
+                    cb.Parameters[KnownProperty.RoughnessFactor] = 0.5f;
 
+                    cb = mb.UseChannel(KnownChannel.BaseColor);
+                    cb.Parameters[KnownProperty.RGBA] = new Vector4(brgMat.DiffuseColor, brgMat.Opacity);
                     if (!string.IsNullOrWhiteSpace(matGroup.TexName))
                     {
                         var tb = cb.UseTexture();
@@ -353,8 +409,12 @@ namespace AoMEngineLibrary.Graphics.Brg
                         tb.WithPrimaryImage(texData.Image);
                     }
 
+                    cb = mb.UseChannel(KnownChannel.SpecularColor);
+                    cb.Parameters[KnownProperty.RGB] = brgMat.SpecularColor;
+
                     cb = mb.UseChannel(KnownChannel.Emissive);
-                    cb.Parameter = new Vector4(brgMat.EmissiveColor, 0);
+                    cb.Parameters[KnownProperty.RGB] = brgMat.EmissiveColor;
+                    cb.Parameters[KnownProperty.EmissiveStrength] = 1.0f;
 
                     if (brgMat.Flags.HasFlag(BrgMatFlag.TwoSided))
                     {
@@ -379,7 +439,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                         mb.WithAlpha(SharpGLTF.Materials.AlphaMode.MASK);
                     }
 
-                    matIdMatBuilderMap.Add(brgMat.Id, mb);
+                    // Some brgs have multiple materials with the same ID, use the latest one
+                    matIdMatBuilderMap[brgMat.Id] = mb;
                 }
             }
         }

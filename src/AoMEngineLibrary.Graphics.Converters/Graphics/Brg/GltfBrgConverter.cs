@@ -1,4 +1,5 @@
-﻿using SharpGLTF.Runtime;
+﻿using SharpGLTF.Materials;
+using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 using System;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-
+using AlphaMode = SharpGLTF.Schema2.AlphaMode;
 using GltfMaterial = SharpGLTF.Schema2.Material;
 using GltfAnimation = SharpGLTF.Schema2.Animation;
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
@@ -115,31 +116,51 @@ namespace AoMEngineLibrary.Graphics.Brg
                 brg.UpdateMeshSettings(i, brg.Meshes[0].Header.Flags, brg.Meshes[0].Header.Format, brg.Meshes[0].Header.AnimationType, brg.Meshes[0].Header.InterpolationType);
             }
 
-            OptimizeMesh(brg.Meshes);
+            BrgMeshOptimizer.Optimize(brg.Meshes);
         }
 
         private static void ConvertSceneToMeshFrame(Scene scene, SceneInstance instance, Predicate<string> nodeNameSelector,
             BrgFile brg, BrgMesh mesh, Dictionary<int, int> matIdMapping)
         {
-            // Get all meshes in scene and compute some data
-            var meshes = scene.LogicalParent.LogicalMeshes;
-            var sceneHasTexCoords = meshes
-                .SelectMany(m => m.Primitives)
-                .Any(p => p.VertexAccessors.Keys.Any(k => k.StartsWith("TEXCOORD_", StringComparison.InvariantCulture)));
-
             // Add every drawable instance in the scene to the mesh frame
             var drawableInstances = instance
-                .Where(d => nodeNameSelector(d.Template.NodeName));
+                .Where(d => nodeNameSelector(d.Template.NodeName))
+                .ToArray();
+
+            // Get all meshes in scene and compute some data
+            var meshes = drawableInstances
+                .Select(d => scene.LogicalParent.LogicalMeshes[d.Template.LogicalMeshIndex])
+                .ToArray();
+            var sceneHasTexCoords = meshes
+                .Where(m => nodeNameSelector(m.Name))
+                .SelectMany(m => m.Primitives)
+                .Any(p => p.VertexAccessors.Keys.Any(k => k.StartsWith("TEXCOORD_", StringComparison.Ordinal)));
+            var sceneHasColors = meshes
+                .Where(m => nodeNameSelector(m.Name))
+                .SelectMany(m => m.Primitives)
+                .Any(p => p.VertexAccessors.Keys.Any(k => k.StartsWith("COLOR_", StringComparison.Ordinal)));
+            var sceneHasAnimTexCoords = meshes
+                .Where(m => nodeNameSelector(m.Name))
+                .SelectMany(m => m.Primitives)
+                .SelectMany(p => Enumerable.Range(0, p.MorphTargetsCount).Select(p.GetMorphTargetAccessors))
+                .Any(a => a.Keys.Any(k => k.StartsWith("TEXCOORD_", StringComparison.Ordinal)));
+            var sceneHasAnimColors = meshes
+                .Where(m => nodeNameSelector(m.Name))
+                .SelectMany(m => m.Primitives)
+                .SelectMany(p => Enumerable.Range(0, p.MorphTargetsCount).Select(p.GetMorphTargetAccessors))
+                .Any(a => a.Keys.Any(k => k.StartsWith("COLOR_", StringComparison.Ordinal)));
+
             foreach (var drawableInstance in drawableInstances)
             {
-                var gltfMesh = meshes[drawableInstance.Template.LogicalMeshIndex];
+                var gltfMesh = scene.LogicalParent.LogicalMeshes[drawableInstance.Template.LogicalMeshIndex];
                 var decoder = gltfMesh.Decode();
 
                 // Create brg materials and a way to map their ids
                 var gltfMats = decoder.Primitives.Select(p => p.Material);
                 ConvertMaterials(gltfMats, brg, matIdMapping);
 
-                ConvertMesh(decoder, drawableInstance.Transform, sceneHasTexCoords, mesh, matIdMapping);
+                ConvertMesh(decoder, drawableInstance.Transform, sceneHasTexCoords, sceneHasColors,
+                    sceneHasAnimTexCoords, sceneHasAnimColors, mesh, matIdMapping);
             }
 
             // Update header data
@@ -166,13 +187,15 @@ namespace AoMEngineLibrary.Graphics.Brg
             // Update header values
             centerPos /= mesh.Vertices.Count;
             Vector3 bbox = (maxExtent - minExtent) / 2;
-            mesh.Header.CenterPosition = new Vector3(-centerPos.X, centerPos.Y, centerPos.Z);
+            mesh.Header.CenterPosition = centerPos;
             mesh.Header.MinimumExtent = -bbox;
             mesh.Header.MaximumExtent = bbox;
             mesh.Header.CenterRadius = Math.Max(Math.Max(bbox.X, bbox.Y), bbox.Z);
         }
 
-        private static void ConvertMesh(IMeshDecoder<GltfMaterial> decoder, IGeometryTransform transform, bool sceneHasTexCoords, BrgMesh mesh, Dictionary<int, int> matIdMapping)
+        private static void ConvertMesh(IMeshDecoder<GltfMaterial> decoder, IGeometryTransform transform,
+            bool sceneHasTexCoords, bool sceneHasColors, bool sceneHasAnimTexCoords, bool sceneHasAnimColors,
+            BrgMesh mesh, Dictionary<int, int> matIdMapping)
         {
             foreach (var p in decoder.Primitives)
             {
@@ -196,13 +219,35 @@ namespace AoMEngineLibrary.Graphics.Brg
                     // the scene may have tex coords, but maybe not each primitive
                     // the API will simply get a tex coord with (0, 0) for ones that don't
                     mesh.Header.Flags |= BrgMeshFlag.Texture1;
-                    if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
+                    if (sceneHasAnimTexCoords) mesh.Header.Flags |= BrgMeshFlag.AnimTxCoords;
+
+                    if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary) ||
+                        mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimTxCoords))
                     {
                         var texCoordSet = GetDiffuseBaseColorTexCoordSet(p.Material);
-                        for (int i = 0; i < p.VertexCount; ++i)
+                        for (var i = 0; i < p.VertexCount; ++i)
                         {
-                            var tc = p.GetTextureCoord(i, texCoordSet);
+                            var tc = p.GetTextureCoord(i, texCoordSet, transform);
                             mesh.TextureCoordinates.Add(new Vector2(tc.X, 1 - tc.Y));
+                        }
+                    }
+                }
+
+                // Get Colors
+                if (sceneHasColors)
+                {
+                    // the scene may have colors, but maybe not each primitive
+                    // the API will simply get a color with (1, 1, 1, 1) for ones that don't
+                    mesh.Header.Flags |= BrgMeshFlag.ColorChannel | BrgMeshFlag.AlphaChannel;
+                    if (sceneHasAnimColors) mesh.Header.Flags |= BrgMeshFlag.AnimVertexColor;
+
+                    if (!mesh.Header.Flags.HasFlag(BrgMeshFlag.Secondary) ||
+                        mesh.Header.Flags.HasFlag(BrgMeshFlag.AnimVertexColor))
+                    {
+                        for (var i = 0; i < p.VertexCount; ++i)
+                        {
+                            var color = p.GetColor(i, 0, transform);
+                            mesh.Colors.Add(color);
                         }
                     }
                 }
@@ -213,7 +258,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                     mesh.Header.Flags |= BrgMeshFlag.Material;
                     mesh.VertexMaterials.AddRange(Enumerable.Repeat((short)0, mesh.Vertices.Count));
 
-                    short faceMatIndex = 0;
+                    short faceMatIndex;
                     var faceMatId = p.Material.LogicalIndex;
                     if (matIdMapping.ContainsKey(faceMatId))
                     {
@@ -230,7 +275,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                         var b = System.Convert.ToUInt16(B + baseVertexIndex);
                         var c = System.Convert.ToUInt16(C + baseVertexIndex);
 
-                        var f = new BrgFace(a, c, b) { MaterialIndex = faceMatIndex };
+                        var f = new BrgFace(a, c, b) {MaterialIndex = faceMatIndex};
                         mesh.Faces.Add(f);
 
                         mesh.VertexMaterials[f.A] = f.MaterialIndex;
@@ -238,129 +283,6 @@ namespace AoMEngineLibrary.Graphics.Brg
                         mesh.VertexMaterials[f.C] = f.MaterialIndex;
                     }
                 }
-            }
-        }
-
-        private static void OptimizeMesh(IReadOnlyList<BrgMesh> frames)
-        {
-            if (frames.Count <= 0) return;
-            var indexMap = new Dictionary<int, int>();
-
-            // Pos, Norm, TexCoord, and in the future potentially color
-            var frameVertices = Enumerable.Repeat(false, frames.Count)
-                .Select(_ => new List<(Vector3, Vector3, Vector2)>())
-                .ToArray();
-
-            // Optimize vertices
-            var baseMesh = frames.First();
-            var vertexCount = baseMesh.Vertices.Count;
-            for (int i = 0; i < vertexCount; ++i)
-            {
-                int existingIndex = GetExistingIndex(frames, i, frameVertices);
-
-                if (existingIndex < 0)
-                {
-                    // vertex is not duplicate add to each frame
-                    indexMap.Add(i, frameVertices[0].Count);
-                    for (int f = 0; f < frames.Count; ++f)
-                    {
-                        var frame = frames[f];
-                        var frameVerts = frameVertices[f];
-
-                        var vertex = (frame.Vertices[i], frame.Normals[i], f == 0 ? frame.TextureCoordinates[i] : Vector2.Zero);
-                        frameVerts.Add(vertex);
-                    }
-                }
-                else
-                {
-                    // vertex is a duplicate, just add to index map
-                    indexMap.Add(i, existingIndex);
-                }
-            }
-
-            HashSet<(int a, int b, int c)> indices = new();
-            List<BrgFace> faces = new();
-
-            foreach (var face in baseMesh.Faces)
-            {
-                var a = indexMap[face.A];
-                var b = indexMap[face.B];
-                var c = indexMap[face.C];
-                var triAdded = indices.Add((a, b, c));
-
-                var newFace = new BrgFace((ushort)a, (ushort)b, (ushort)c)
-                {
-                    MaterialIndex = face.MaterialIndex
-                };
-
-                // if the triangle was unique then add
-                if (triAdded)
-                {
-                    faces.Add(newFace);
-                }
-            }
-
-            // Update the data in the frames
-            for (int f = 0; f < frames.Count; ++f)
-            {
-                var frame = frames[f];
-                var verts = frameVertices[f];
-
-                frame.Vertices = verts.Select(v => v.Item1).ToList();
-                frame.Normals = verts.Select(v => v.Item2).ToList();
-
-                if (!frame.Header.Flags.HasFlag(BrgMeshFlag.Secondary))
-                {
-                    frame.TextureCoordinates = verts.Select(v => v.Item3).ToList();
-                }
-
-                frame.Header.NumVertices = (ushort)frame.Vertices.Count;
-                frame.Header.NumFaces = (ushort)faces.Count;
-            }
-
-            // Update base mesh faces
-            baseMesh.Faces = faces;
-            baseMesh.VertexMaterials = Enumerable.Repeat((short)0, baseMesh.Vertices.Count).ToList();
-            foreach (var face in baseMesh.Faces)
-            {
-                baseMesh.VertexMaterials[face.A] = face.MaterialIndex;
-                baseMesh.VertexMaterials[face.B] = face.MaterialIndex;
-                baseMesh.VertexMaterials[face.C] = face.MaterialIndex;
-            }
-
-            static int GetExistingIndex(IReadOnlyList<BrgMesh> frames, int vertIndex, List<(Vector3, Vector3, Vector2)>[] frameVertices)
-            {
-                int existingIndex = -1;
-                for (int i = 0; i < frames.Count; ++i)
-                {
-                    var frame = frames[i];
-                    var vertexMap = frameVertices[i];
-
-                    var vertex = (frame.Vertices[vertIndex], frame.Normals[vertIndex], i == 0 ? frame.TextureCoordinates[vertIndex] : Vector2.Zero);
-                    int frameVertIndex = vertexMap.IndexOf(vertex);
-                    if (frameVertIndex >= 0)
-                    {
-                        // Vertex is not unique in this frame
-                        if (existingIndex == -1)
-                        {
-                            // set the existing index for first time
-                            existingIndex = frameVertIndex;
-                        }
-                        else if (existingIndex != frameVertIndex)
-                        {
-                            // this frame's vert index does not match other frame's existing index
-                            // this means the vert is not a duplicate across all frames
-                            return -1;
-                        }
-                    }
-                    else
-                    {
-                        // if a single frame can't find an existing index, then the vert is not a duplicate
-                        return -1;
-                    }
-                }
-
-                return existingIndex;
             }
         }
 
@@ -456,42 +378,11 @@ namespace AoMEngineLibrary.Graphics.Brg
                 mat.Flags |= BrgMatFlag.Alpha;
             }
 
-            //int opacityType = Maxscript.QueryInteger("mat.opacityType");
-            //if (opacityType == 1)
-            //{
-            //    mat.Flags |= BrgMatFlag.SubtractiveBlend;
-            //}
-            //else if (opacityType == 2)
-            //{
-            //    mat.Flags |= BrgMatFlag.AdditiveBlend;
-            //}
-
             if (glMat.DoubleSided)
             {
                 mat.Flags |= BrgMatFlag.TwoSided;
             }
 
-            //if (Maxscript.QueryBoolean("mat.faceMap"))
-            //{
-            //    mat.Flags |= BrgMatFlag.FaceMap;
-            //}
-
-            //if (Maxscript.QueryBoolean("(classof mat.reflectionMap) == BitmapTexture"))
-            //{
-            //    mat.Flags |= BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1 | BrgMatFlag.REFLECTIONTEXTURE;
-            //    BrgMatSFX sfxMap = new BrgMatSFX();
-            //    sfxMap.Id = 30;
-            //    sfxMap.Name = Maxscript.QueryString("getFilenameFile(mat.reflectionMap.filename)") + ".cub";
-            //    mat.sfx.Add(sfxMap);
-            //}
-            //if (Maxscript.QueryBoolean("(classof mat.bumpMap) == BitmapTexture"))
-            //{
-            //    mat.BumpMap = Maxscript.QueryString("getFilenameFile(mat.bumpMap.filename)");
-            //    if (mat.BumpMap.Length > 0)
-            //    {
-            //        mat.Flags |= BrgMatFlag.WrapUTx3 | BrgMatFlag.WrapVTx3 | BrgMatFlag.BumpMap;
-            //    }
-            //}
             mat.DiffuseMapName = GetDiffuseTexture(glMat, out BrgMatFlag wrapFlags);
             int parenthIndex = mat.DiffuseMapName.IndexOf('(');
             if (parenthIndex >= 0)
@@ -512,32 +403,22 @@ namespace AoMEngineLibrary.Graphics.Brg
         }
         private static Vector3 GetSpecularColor(GltfMaterial srcMaterial)
         {
-            var mr = srcMaterial.FindChannel("MetallicRoughness");
-            if (!mr.HasValue) return Vector3.Zero;
-
-            var diffuse = GetDiffuseColor(srcMaterial);
-            var metallic = mr.Value.Parameter.X;
-            var roughness = mr.Value.Parameter.Y;
-
-            var k = Vector3.Zero;
-            k += Vector3.Lerp(diffuse, Vector3.Zero, roughness);
-            k += Vector3.Lerp(diffuse, Vector3.One, metallic);
-            k *= 0.5f;
-            return k;
+            var mr = srcMaterial.FindChannel("SpecularColor");
+            return !mr.HasValue ? Vector3.Zero : new Vector3(mr.Value.Color.X, mr.Value.Color.Y, mr.Value.Color.Z);
         }
         private static Vector3 GetEmissiveColor(GltfMaterial srcMaterial)
         {
             var emissive = srcMaterial.FindChannel("Emissive");
             if (!emissive.HasValue) return Vector3.Zero;
-            return new Vector3(emissive.Value.Parameter.X, emissive.Value.Parameter.Y, emissive.Value.Parameter.Z);
+            return new Vector3(emissive.Value.Color.X, emissive.Value.Color.Y, emissive.Value.Color.Z);
         }
         private static float GetSpecularPower(GltfMaterial srcMaterial)
         {
             var mr = srcMaterial.FindChannel("MetallicRoughness");
             if (!mr.HasValue) return 0;
 
-            var metallic = mr.Value.Parameter.X;
-            var roughness = mr.Value.Parameter.Y;
+            var metallic = mr.Value.GetFactor(KnownProperty.MetallicFactor.ToString());
+            var roughness = mr.Value.GetFactor(KnownProperty.RoughnessFactor.ToString());
             var mult = metallic - roughness;
 
             return mult <= 0 ? 0 : 25 * mult;
@@ -547,18 +428,15 @@ namespace AoMEngineLibrary.Graphics.Brg
             if (srcMaterial.Alpha == AlphaMode.OPAQUE) return 1;
 
             var baseColor = srcMaterial.FindChannel("BaseColor");
-
             if (baseColor == null) return 1;
-
-            return baseColor.Value.Parameter.W;
+            return baseColor.Value.Color.W;
         }
         private static string GetDiffuseTexture(GltfMaterial srcMaterial, out BrgMatFlag wrapFlags)
         {
             wrapFlags = BrgMatFlag.WrapUTx1 | BrgMatFlag.WrapVTx1;
 
             var tex = srcMaterial.GetDiffuseTexture();
-            if (tex == null) return string.Empty;
-            if (tex.PrimaryImage == null) return string.Empty;
+            if (tex?.PrimaryImage == null) return string.Empty;
 
             if (tex.Sampler != null)
             {

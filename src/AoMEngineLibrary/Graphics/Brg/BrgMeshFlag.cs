@@ -83,7 +83,7 @@ namespace AoMEngineLibrary.Graphics.Brg
         AlphaChannel = 0x4000,
 
         /// <summary>
-        /// Mesh has nimated vertex color alpha channel that snaps between key-frames.
+        /// Mesh has animated vertex color alpha channel that snaps between key-frames.
         /// </summary>
         AnimVertexColorSnap = 0x8000
     };
