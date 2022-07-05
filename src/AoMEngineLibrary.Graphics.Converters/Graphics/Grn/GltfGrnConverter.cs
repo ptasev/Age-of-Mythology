@@ -30,14 +30,17 @@ namespace AoMEngineLibrary.Graphics.Grn
             GrnFile grn = new GrnFile();
             var model = gltfFile;
 
-            // We'll only export the default scene and the chosen animation
+            // Pick the chosen scene and animation
+            var scene = parameters.SceneIndex < 0 || parameters.SceneIndex >= model.LogicalScenes.Count
+                ? model.DefaultScene
+                : model.LogicalScenes[parameters.SceneIndex];
             var animIndex = parameters.AnimationIndex;
             if (animIndex < 0 || animIndex >= model.LogicalAnimations.Count) animIndex = 0;
             var anim = model.LogicalAnimations.Count > 0 ? model.LogicalAnimations[animIndex] : null;
 
             // Get a list of nodes in the default scene as a flat list
             Dictionary<int, int> nodeBoneIndexMap = new Dictionary<int, int>();
-            var nodeFlatList = Node.Flatten(model.DefaultScene);
+            var nodeFlatList = Node.Flatten(scene);
             var nodes = nodeFlatList.ToList();
 
             ConvertSkeleton(grn, nodes, nodeBoneIndexMap);

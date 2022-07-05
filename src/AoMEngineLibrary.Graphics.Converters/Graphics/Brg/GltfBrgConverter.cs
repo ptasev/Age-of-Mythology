@@ -32,8 +32,10 @@ namespace AoMEngineLibrary.Graphics.Brg
             BrgFile brg = new BrgFile();
             var model = gltfFile;
 
-            // We'll only export the default scene and the chosen animation
-            var scene = model.DefaultScene;
+            // Pick the chosen scene and animation
+            var scene = parameters.SceneIndex < 0 || parameters.SceneIndex >= model.LogicalScenes.Count
+                ? model.DefaultScene
+                : model.LogicalScenes[parameters.SceneIndex];
             var animIndex = parameters.AnimationIndex;
             if (animIndex < 0 || animIndex >= model.LogicalAnimations.Count) animIndex = 0;
             var anim = model.LogicalAnimations.Count > 0 ? model.LogicalAnimations[animIndex] : null;

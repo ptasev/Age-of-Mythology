@@ -39,7 +39,9 @@ public class GrnGltfImportSettingsViewModel : GltfImportSettingsViewModel
         return new GltfGrnParameters()
         {
             ConvertMeshes = ConvertMeshes,
-            ConvertAnimations = ConvertAnimation
+            ConvertAnimations = ConvertAnimation,
+            AnimationIndex = SelectedAnimation?.LogicalIndex ?? 0,
+            SceneIndex = SelectedScene?.LogicalIndex ?? 0
         };
     }
 }

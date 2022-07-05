@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace AoMEngineLibrary.Graphics.Brg;
 
-namespace AoMEngineLibrary.Graphics.Brg
+public class GltfBrgParameters
 {
-    public class GltfBrgParameters
+    public float SampleRateFps { get; set; }
+
+    public int AnimationIndex { get; set; }
+
+    public int SceneIndex { get; set; }
+
+    public GltfBrgParameters()
     {
-        public float SampleRateFps { get; set; }
-
-        public int AnimationIndex { get; set; }
-
-        public GltfBrgParameters()
-        {
-            SampleRateFps = 15.0f;
-            AnimationIndex = 0;
-        }
+        SampleRateFps = 15.0f;
+        AnimationIndex = 0;
+        SceneIndex = 0;
     }
 }

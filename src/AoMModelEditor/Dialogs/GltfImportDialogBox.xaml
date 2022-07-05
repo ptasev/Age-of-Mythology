@@ -12,13 +12,35 @@
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
-                <GroupBox Header="Animation">
+                <GroupBox Header="glTF Settings">
                     <StackPanel>
-                        <Label Content="Selected the animation to import, if any:"/>
-                        <ListBox x:Name="animationListBox" SelectionMode="Single" MinHeight="30" ItemsSource="{Binding Animations}" SelectedItem="{Binding SelectedAnimation}">
+                        <Label Content="Select the scene to import:"/>
+                        <ListBox SelectionMode="Single" MinHeight="30" ItemsSource="{Binding Scenes}" SelectedItem="{Binding SelectedScene}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Label Content="{Binding Name}" />
+                                    <TextBlock VerticalAlignment="Center" Padding="5">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0} {1}">
+                                                <Binding Path="LogicalIndex" />
+                                                <Binding Path="Name" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Label Content="Select the animation to import, if any:"/>
+                        <ListBox SelectionMode="Single" MinHeight="30" ItemsSource="{Binding Animations}" SelectedItem="{Binding SelectedAnimation}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" Padding="5">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0} {1}">
+                                                <Binding Path="LogicalIndex" />
+                                                <Binding Path="Name" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -28,7 +50,7 @@
                     <reactiveUi:ViewModelViewHost ViewModel="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
                 </Grid>
                 <StackPanel Orientation="Horizontal">
-                    <Button Margin="5 5 0 5" Padding="5" Content="OK" HorizontalAlignment="Right" Name="okButton" Click="okButton_Click"/>
+                    <Button Margin="5 5 0 5" Padding="5" Content="OK" HorizontalAlignment="Right" Click="okButton_Click"/>
                     <Button Margin="5 5 0 5" Padding="5" Content="Cancel" HorizontalAlignment="Right" MinWidth="40" IsCancel="True"/>
                 </StackPanel>
             </StackPanel>

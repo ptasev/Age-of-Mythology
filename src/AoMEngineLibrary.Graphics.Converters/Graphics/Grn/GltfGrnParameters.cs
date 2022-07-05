@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace AoMEngineLibrary.Graphics.Grn;
 
-namespace AoMEngineLibrary.Graphics.Grn
+public class GltfGrnParameters
 {
-    public class GltfGrnParameters
+    public bool ConvertMeshes { get; set; }
+
+    public bool ConvertAnimations { get; set; }
+
+    public int AnimationIndex { get; set; }
+
+    public int SceneIndex { get; set; }
+
+    public GltfGrnParameters()
     {
-        public bool ConvertMeshes { get; set; }
-
-        public bool ConvertAnimations { get; set; }
-
-        public int AnimationIndex { get; set; }
-
-        public GltfGrnParameters()
-        {
-            ConvertMeshes = true;
-            ConvertAnimations = false;
-            AnimationIndex = 0;
-        }
+        ConvertMeshes = true;
+        ConvertAnimations = false;
+        AnimationIndex = 0;
+        SceneIndex = 0;
     }
 }

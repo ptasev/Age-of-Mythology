@@ -31,7 +31,8 @@ public class BrgGltfImportSettingsViewModel : GltfImportSettingsViewModel
         return new GltfBrgParameters()
         {
             SampleRateFps = SampleRateFps,
-            AnimationIndex = SelectedAnimation?.LogicalIndex ?? 0
+            AnimationIndex = SelectedAnimation?.LogicalIndex ?? 0,
+            SceneIndex = SelectedScene?.LogicalIndex ?? 0
         };
     }
 }
