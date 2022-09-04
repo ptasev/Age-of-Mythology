@@ -7,10 +7,8 @@
     <ApplicationIcon>Resources\Chimera.ico</ApplicationIcon>
     <AssemblyName>AoM File Converter</AssemblyName>
     <Authors>Petar Tasev</Authors>
-    <Copyright>Copyright © Petar Tasev 2016</Copyright>
-    <Version>1.3.1+20210502</Version>
-    <AssemblyVersion>1.3.1.0</AssemblyVersion>
-    <FileVersion>1.3.1.0</FileVersion>
+    <Copyright>Copyright © Petar Tasev 2016 - 2022</Copyright>
+    <Version>1.4.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
