@@ -14,7 +14,7 @@ namespace AoMEngineLibrary.Data.Bar;
 /// <remarks>
 /// Only the BAR archive entry headers are kept in memory, and not the data.
 /// The entry data can be forced to be loaded and kept in memory by calling <see cref="LoadInMemory"/>.
-/// If the all of the data is loaded in memory (<see cref="IsLoadedInMemory"/>), then the underlying
+/// If all of the data is loaded in memory (<see cref="IsLoadedInMemory"/>), then the underlying
 /// stream will be closed if the instance has ownership of it.
 /// </remarks>
 public class BarFile : IDisposable
@@ -29,8 +29,6 @@ public class BarFile : IDisposable
     /// Whether the entire file is loaded into memory.
     /// </summary>
     public bool IsLoadedInMemory { get; private set; }
-
-    public int Unknown { get; private set; }
 
     public int Version { get; private set; }
 
@@ -163,7 +161,7 @@ public class BarFile : IDisposable
             // Ignore first 8 bytes (appear to be all 0s)
             _ = reader.ReadBytes(8);
 
-            Unknown = reader.ReadInt32(); // checksum??
+            reader.ReadInt32(); // Adler32 checksum
             var entryCount = reader.ReadInt32();
             _ = reader.ReadInt32(); // entry headers length
             var entryOffsetsOffset = reader.ReadInt32();
@@ -244,7 +242,7 @@ public class BarFile : IDisposable
         {
             ReadOnlySpan<byte> emptyBytes = stackalloc byte[8];
             writer.Write(emptyBytes);
-            writer.Write(Unknown);
+            writer.Write(0); // Adler32 checksum, fill in after
             writer.Write(_entries.Count);
             writer.Write(0); // entry headers length will fill in after
             writer.Write(0); // entry offsets offset will fill in after
@@ -286,6 +284,13 @@ public class BarFile : IDisposable
             writer.BaseStream.Seek(16, SeekOrigin.Begin);
             writer.Write(entryHeadersLength);
             writer.Write(entryOffsetsOffset);
+            writer.BaseStream.Seek(endOfFile, SeekOrigin.Begin);
+
+            // Calculate Adler32 on everything after header and update - note it starts from 0 as opposed to typical 1
+            writer.BaseStream.Seek(28, SeekOrigin.Begin);
+            var checksum = Adler32.Update(0, stream);
+            writer.BaseStream.Seek(8, SeekOrigin.Begin);
+            writer.Write(checksum);
             writer.BaseStream.Seek(endOfFile, SeekOrigin.Begin);
 
             // Writing finished, commit data offsets to entries

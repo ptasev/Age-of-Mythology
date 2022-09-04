@@ -8,7 +8,7 @@ using System.Text;
 
 namespace AoMModelEditor.Models.Brg
 {
-    public class BrgDummyViewModel : TreeViewItemModelObject
+    public sealed class BrgDummyViewModel : TreeViewItemModelObject
     {
         private readonly List<BrgDummy> _dummies;
         private BrgDummy _dummy;

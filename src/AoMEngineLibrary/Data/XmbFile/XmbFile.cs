@@ -1,5 +1,4 @@
 ﻿using AoMEngineLibrary.Extensions;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -12,13 +11,11 @@ namespace AoMEngineLibrary.Data.XmbFile;
 
 public static class XmbFile
 {
-    // spells l33t in ASCII
-    private static ReadOnlySpan<byte> CompressedTag => new byte[] {0x6C, 0x33, 0x33, 0x74};
     private const string XmbTag = "X1";
     private const string RootTag = "XR";
     private const string NodeTag = "XN";
 
-    public static XmlWriterSettings XmlWriterSettings => new XmlWriterSettings()
+    public static XmlWriterSettings XmlWriterSettings => new()
     {
         Indent = true,
         IndentChars = "\t",
@@ -27,7 +24,7 @@ public static class XmbFile
 
     public static XDocument Load(Stream stream)
     {
-        var input = DecompressIfNecessary(stream, out var createdNewStream);
+        var input = stream.DecompressIfNecessary(out var createdNewStream);
         using (var br = new BinaryReader(input, Encoding.UTF8, !createdNewStream))
         using (var reader = new ChunkReader(br))
         {
@@ -66,37 +63,6 @@ public static class XmbFile
             reader.ValidateChunkRead(XmbTag);
 
             return xml;
-        }
-
-        static Stream DecompressIfNecessary(Stream input, out bool createdNewStream)
-        {
-            Span<byte> tag = stackalloc byte[4];
-            input.ReadExactly(tag);
-
-            if (tag.SequenceEqual(CompressedTag))
-            {
-                // This is a compressed xmb, decompress first
-                createdNewStream = true;
-
-                // Next 4 bytes is original file length
-                input.ReadExactly(tag);
-                var originalFileLength = BitConverter.ToInt32(tag);
-
-                var output = new MemoryStream(originalFileLength);
-                using (var ds = new ZLibStream(input, CompressionMode.Decompress, true))
-                {
-                    ds.CopyTo(output);
-                }
-
-                output.Seek(0, SeekOrigin.Begin);
-                return output;
-            }
-            else
-            {
-                input.Seek(-tag.Length, SeekOrigin.Current);
-                createdNewStream = false;
-                return input;
-            }
         }
     }
 
@@ -222,21 +188,11 @@ public static class XmbFile
 
             writer.WriteSize(XmbTag, fileSizePosition);
             bw.Flush();
-            var endPosition = bw.BaseStream.Position;
 
             if (compress)
             {
-                output.Write(CompressedTag);
-                Span<byte> sizeBytes = stackalloc byte[sizeof(int)];
-                var fileSize = Convert.ToInt32(endPosition - startPosition);
-                BitConverter.TryWriteBytes(sizeBytes, fileSize);
-                output.Write(sizeBytes);
-
-                using (var zs = new ZLibStream(output, compressionLevel, true))
-                {
-                    bw.BaseStream.Seek(0, SeekOrigin.Begin);
-                    bw.BaseStream.CopyTo(zs);
-                }
+                bw.BaseStream.Seek(startPosition, SeekOrigin.Begin);
+                bw.BaseStream.CompressTo(output, compressionLevel);
             }
         }
 

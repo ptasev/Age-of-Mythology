@@ -20,8 +20,6 @@ namespace AoMEngineLibrary.Graphics.Brg
 {
     public class GltfBrgConverter
     {
-        private record GltfMeshData(GltfMeshBuilder MeshBuilder, bool HasTexCoords);
-
         public GltfBrgConverter()
         {
 

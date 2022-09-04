@@ -21,7 +21,7 @@ namespace AoMFileConverter
                 if (args.Length == 0)
                 {
                     Console.WriteLine("No input arguments were found!");
-                    Console.WriteLine($"Drag and drop one or more files on the EXE to convert.{Environment.NewLine}Supported: anim.txt, ddt, bti, cub, prt, mtrl, brg");
+                    Console.WriteLine($"Drag and drop one or more files on the EXE to convert.{Environment.NewLine}Supported: anim.txt, ddt, bti, cub, prt, mtrl, brg, bar, xmb, scn, scx");
                 }
 
                 foreach (var f in args)
@@ -65,9 +65,20 @@ namespace AoMFileConverter
                 }
             }
 
-            if (f.EndsWith("anim.txt"))
+            if (isDirectory)
             {
-                AnimFile.ConvertToXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                using (var bar = new BarFile())
+                using (var fso = File.Open(f + ".bar", FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                {
+                    bar.AddEntriesFromDirectory(f);
+                    bar.Write(fso, false);
+                }
+                Console.WriteLine("Success! Bar file created.");
+            }
+            else if (f.EndsWith("anim.txt"))
+            {
+                AnimFile.ConvertToXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read),
+                    File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
                 Console.WriteLine("Success! Anim converted.");
             }
             else if (f.EndsWith(".ddt"))
@@ -95,7 +106,7 @@ namespace AoMFileConverter
                 }
                 Console.WriteLine("Success! Prt converted.");
             }
-            else if (f.EndsWith(".xmb"))
+            else if (f.EndsWith(".xmb", StringComparison.OrdinalIgnoreCase))
             {
                 using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read))
@@ -123,15 +134,22 @@ namespace AoMFileConverter
                     Console.WriteLine("Failed to compute output file name.");
                 }
             }
-            else if (isDirectory)
+            else if (magic.AsSpan(0, 2).SequenceEqual("BG"))
             {
-                using (var bar = new BarFile())
-                using (var fso = File.Open(f + ".bar", FileMode.Create, FileAccess.Write, FileShare.Read))
-                {
-                    bar.AddEntriesFromDirectory(f);
-                    bar.Write(fso, false);
-                }
-                Console.WriteLine("Success! Bar file created.");
+                var ext = Path.GetExtension(f);
+                ext = ext is { Length: 0 } ? ".scx" : ext;
+                using var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fso = File.Open(f + ext, FileMode.Create, FileAccess.Write, FileShare.Read);
+                fs.CompressTo(fso, CompressionLevel.Optimal);
+                Console.WriteLine("Success! Scenario compressed.");
+            }
+            else if (f.EndsWith(".scn") || f.EndsWith(".scx"))
+            {
+                var ext = Path.GetExtension(f);
+                using var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fso = File.Open(f + ".r" + ext, FileMode.Create, FileAccess.Write, FileShare.Read);
+                fs.DecompressTo(fso);
+                Console.WriteLine("Success! Scenario decompressed.");
             }
             else if (magic == "MTRL")
             {
@@ -171,7 +189,8 @@ namespace AoMFileConverter
 
                 if (xmlDoc?.DocumentElement?.Name == "AnimFile")
                 {
-                    AnimFile.ConvertToAnim(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), File.Open(f + ".txt", FileMode.Create, FileAccess.Write, FileShare.Read));
+                    AnimFile.ConvertToAnim(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read),
+                        File.Open(f + ".txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                     Console.WriteLine("Success! Anim converted.");
                 }
                 else if (xmlDoc?.DocumentElement?.Name == "ParticleFile")
@@ -199,7 +218,7 @@ namespace AoMFileConverter
                     using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
                     using (var fso = File.Open(f + ".xmb", FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
-                        XmbFile.Save(fs, fso, CompressionLevel.SmallestSize);
+                        XmbFile.Save(fs, fso, CompressionLevel.Optimal);
                     }
                     Console.WriteLine("Success! Xmb converted.");
                 }
