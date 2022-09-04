@@ -1,6 +1,4 @@
 ﻿using AoMEngineLibrary.Graphics.Textures;
-using ICSharpCode.SharpZipLib;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Microsoft.Toolkit.HighPerformance;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 using SixLabors.ImageSharp;
@@ -266,7 +264,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
                         image.Mutate(p => p.Flip(FlipMode.Vertical));
                         faceImages.Add(image);
                     }
-                    catch (SharpZipBaseException ex) when (ex.Message.StartsWith("Unexpected EOF") && mip > 0)
+                    catch (ArgumentException ex) when (ex.Message.StartsWith("The pixel bytes length is smaller") && mip > 0)
                     {
                         // For some reason these textures seem to be broken in certain lower mips. Skip the remaining
                         break;
@@ -280,7 +278,7 @@ namespace AoMEngineLibrary.Graphics.Ddt
         private static IMemoryOwner<byte> ZlibDecompress(ReadOnlyMemory<byte> data)
         {
             using (var ss = data.AsStream())
-            using (var iis = new InflaterInputStream(ss))
+            using (var iis = new ZLibStream(ss, CompressionMode.Decompress, true))
             {
                 var bufferWriter = new ArrayPoolBufferWriter<byte>(data.Length);
 

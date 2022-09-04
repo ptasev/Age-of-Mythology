@@ -1,14 +1,13 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.ImageSharp;
 using BCnEncoder.Shared;
-using ICSharpCode.SharpZipLib.Zip.Compression;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace AoMEngineLibrary.Graphics.Ddt
@@ -161,11 +160,10 @@ namespace AoMEngineLibrary.Graphics.Ddt
         private static byte[] ZlibCompress(ReadOnlySpan<byte> data)
         {
             using (var mso = new MemoryStream())
-            using (var dos = new DeflaterOutputStream(mso, new Deflater(Deflater.BEST_COMPRESSION)))
+            using (var dos = new ZLibStream(mso, CompressionLevel.Optimal))
             {
                 dos.Write(data);
                 dos.Flush();
-                dos.Finish();
                 return mso.ToArray();
             }
         }

@@ -114,6 +114,8 @@ namespace AoMModelViewer
             }
             var imgConv = new DdtImageConverter();
             var tex = imgConv.Convert(ddt);
+            var ddtConv = new ImageDdtConverter();
+            var img = ddtConv.Convert(new[] {tex.Images[0][0]}, ddt.GetTextureInfo());
             tex.Images[0][0].SaveAsPng($"{System.IO.Path.GetFileName(fname)}.png");
         }
         private void GrnToGltfAnimation()
