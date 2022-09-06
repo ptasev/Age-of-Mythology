@@ -1,6 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using System;
     using System.Numerics;
 
     public class PrtColorStage

@@ -1,7 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using System;
-
     public class PrtScaleStage
     {
         public float Scale { get; set; }

@@ -1,7 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using System;
-
     public class PrtForces
     {
         public bool RandomOrientation { get; set; }

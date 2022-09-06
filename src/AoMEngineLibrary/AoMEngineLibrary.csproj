@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <IsTrimmable>true</IsTrimmable>
     <Authors>Petar Tasev</Authors>
     <Company>Petar Tasev</Company>
     <Product>AoM Engine Library</Product>

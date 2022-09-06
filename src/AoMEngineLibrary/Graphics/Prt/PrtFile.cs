@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml.Serialization;
 using XmlCommentSerialization;
 
 namespace AoMEngineLibrary.Graphics.Prt
 {
-    [XmlRootAttribute("ParticleFile", IsNullable = false)]
+    [XmlRoot("ParticleFile", IsNullable = false)]
     public class PrtFile
     {
         [XmlAttribute]
@@ -126,15 +127,34 @@ namespace AoMEngineLibrary.Graphics.Prt
             }
         }
 
-
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtAppearance))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtAppearanceType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtCollision))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtCollisionType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtColor))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtColorStage))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtEmitter))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtFile))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtForces))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtMaterialType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtOpacity))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtOpacityStage))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtScale))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtScaleStage))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtShape))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtShapeType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtTerrainInteractionType))]
+        [UnconditionalSuppressMessage("Trimming",
+            "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+            Justification = "Annotated with dynamic types above.")]
         public void SerializeAsXml(Stream stream)
         {
-            using (XmlCommentWriter writer = new XmlCommentWriter(stream, new System.Xml.XmlWriterSettings() { Indent = true, CloseOutput = false }))
+            using (var writer = new XmlCommentWriter(stream, new System.Xml.XmlWriterSettings() { Indent = true, CloseOutput = false }))
             {
                 writer.Alphabetize = true;
                 writer.Metadata = false;
                 writer.Repeat = true;
-                XmlSerializer serializer = new XmlSerializer(typeof(PrtFile));
+                var serializer = new XmlSerializer(typeof(PrtFile));
                 serializer.Serialize(writer, this);
             }
             //XmlSerializer serializer = new XmlSerializer(typeof(PrtFile));
@@ -144,12 +164,33 @@ namespace AoMEngineLibrary.Graphics.Prt
             //}
         }
 
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtAppearance))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtAppearanceType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtCollision))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtCollisionType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtColor))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtColorStage))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtEmitter))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtFile))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtForces))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtMaterialType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtOpacity))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtOpacityStage))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtScale))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtScaleStage))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtShape))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtShapeType))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrtTerrainInteractionType))]
+        [UnconditionalSuppressMessage("Trimming",
+            "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+            Justification = "Annotated with dynamic types above.")]
         public static PrtFile DeserializeAsXml(Stream stream)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(PrtFile));
+            var deserializer = new XmlSerializer(typeof(PrtFile));
             using (TextReader reader = new StreamReader(stream, null, true, -1, true))
             {
-                return (PrtFile?)deserializer.Deserialize(reader) ?? new PrtFile();
+                return (PrtFile?)deserializer.Deserialize(reader) ??
+                       throw new InvalidOperationException("Failed to deserialize particle file.");
             }
         }
 

@@ -1,7 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using System;
-
     public class PrtOpacityStage
     {
         public float Opacity { get; set; }

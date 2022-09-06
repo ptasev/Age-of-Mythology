@@ -1,7 +1,5 @@
 ﻿namespace AoMEngineLibrary.Graphics.Prt
 {
-    using System;
-
     public enum PrtShapeType
     {
         Invalid = -1,
