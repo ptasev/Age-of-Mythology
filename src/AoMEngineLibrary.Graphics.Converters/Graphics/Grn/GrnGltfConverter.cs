@@ -1,5 +1,4 @@
-﻿using SharpGLTF.Geometry;
-using SharpGLTF.Geometry.VertexTypes;
+﻿using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
@@ -12,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using GltfMeshBuilder = SharpGLTF.Geometry.MeshBuilder<
     SharpGLTF.Geometry.VertexTypes.VertexPositionNormal,
     SharpGLTF.Geometry.VertexTypes.VertexTexture1,
@@ -59,9 +57,8 @@ namespace AoMEngineLibrary.Graphics.Grn
             return sceneBuilder.ToGltf2();
         }
 
-        private NodeBuilder?[] ConvertSkeleton(GrnFile grn)
+        private static NodeBuilder?[] ConvertSkeleton(GrnFile grn)
         {
-            var mb = CreateBoneMesh();
             var nodeBuilders = new NodeBuilder?[grn.Bones.Count];
 
             // The parent index will always be higher than the child index
@@ -85,77 +82,16 @@ namespace AoMEngineLibrary.Graphics.Grn
                         var parent = nodeBuilders[bone.ParentIndex] ?? throw new InvalidDataException($"The parent of bone {bone.Name} cannot be null.");
                         node = parent.CreateNode(bone.Name);
                     }
+                    
                     ConvertBone(bone, node);
                     nodeBuilders[i] = node;
-
-                    // No longer add mesh to bone nodes since Blender will replace them with its bone mesh
-                    //sceneBuilder.AddRigidMesh(mb, node);
                 }
             }
 
             return nodeBuilders;
         }
-        private MeshBuilder<VertexPosition, VertexColor1> CreateBoneMesh()
-        {
-            var mb = new MeshBuilder<VertexPosition, VertexColor1>("attachpointMesh");
-            var pb = mb.UsePrimitive(MaterialBuilder.CreateDefault(), 3);
-
-            // AoM dummy axes and colors
-            //AddAxisToMesh(pb, new Vector3(-0.5f, 0.005f, 0.005f), new Vector4(0, 0, 1, 1));
-            //AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, 0.5f), new Vector4(0, 1, 0, 1));
-            //AddAxisToMesh(pb, new Vector3(0.005f, -0.5f, 0.005f), new Vector4(1, 0, 0, 1));
-            // Blender/3ds Max axes and colors
-            AddAxisToMesh(pb, new Vector3(0.25f, 0.005f, 0.005f), new Vector4(1, 0, 0, 1));
-            AddAxisToMesh(pb, new Vector3(0.005f, 0.25f, 0.005f), new Vector4(0, 1, 0, 1));
-            AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, 0.25f), new Vector4(0, 0, 1, 1));
-
-            return mb;
-
-            void AddAxisToMesh(IPrimitiveBuilder pb, Vector3 length, Vector4 color)
-            {
-                var verts = new Vector3[]
-                {
-                    new Vector3(0, 0, 0),
-                    new Vector3(length.X, 0, 0),
-                    new Vector3(length.X, length.Y, 0),
-                    new Vector3(0, length.Y, 0),
-                    new Vector3(0, length.Y, length.Z),
-                    new Vector3(length.X, length.Y, length.Z),
-                    new Vector3(length.X, 0, length.Z),
-                    new Vector3(0, 0, length.Z)
-                };
-
-                var vbs = verts.Select(v =>
-                {
-                    var vb = new VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>();
-                    vb.Geometry.Position = v;
-                    vb.Material.Color = color;
-                    return vb;
-                }).ToList();
-
-                var faces = new List<int>[]
-                {
-                    new List<int>() { 0, 2, 1 },
-                    new List<int>() { 0, 3, 2 },
-                    new List<int>() { 2, 3, 4 },
-                    new List<int>() { 2, 4, 5 },
-                    new List<int>() { 1, 2, 5 },
-                    new List<int>() { 1, 5, 6 },
-                    new List<int>() { 0, 7, 4 },
-                    new List<int>() { 0, 4, 3 },
-                    new List<int>() { 5, 4, 7 },
-                    new List<int>() { 5, 7, 6 },
-                    new List<int>() { 0, 6, 7 },
-                    new List<int>() { 0, 1, 6 }
-                };
-
-                foreach (var face in faces)
-                {
-                    pb.AddTriangle(vbs[face[0]], vbs[face[1]], vbs[face[2]]);
-                }
-            }
-        }
-        private void ConvertBone(GrnBone bone, NodeBuilder nodeBuilder)
+        
+        private static void ConvertBone(GrnBone bone, NodeBuilder nodeBuilder)
         {
             // Grn uses the Blender/3ds Max right handed coord system where X+ left, Y+ back, Z+ up
             // this is different from gltf so let's adjust
@@ -166,7 +102,8 @@ namespace AoMEngineLibrary.Graphics.Grn
             nodeBuilder.UseScale().Value = new Vector3(bone.Scale.M11, bone.Scale.M22, bone.Scale.M33);
         }
 
-        private void ConvertMeshes(GrnFile grn, TextureManager textureManager, SceneBuilder sceneBuilder, NodeBuilder?[] nodeBuilders)
+        private static void ConvertMeshes(GrnFile grn, TextureManager textureManager, SceneBuilder sceneBuilder,
+            IReadOnlyList<NodeBuilder?> nodeBuilders)
         {
             var matIdMatBuilderMap = ConvertMaterials(grn, textureManager);
 
@@ -180,13 +117,15 @@ namespace AoMEngineLibrary.Graphics.Grn
                 var joints = mesh.BoneBindings.Select(bb =>
                 {
                     var nb = nodeBuilders[bb.BoneIndex];
-                    if (nb == null) throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
+                    if (nb == null)
+                        throw new InvalidDataException($"A mesh ({mesh.Name}) skin cannot reference a null bone.");
                     return (nb, nb.GetInverseBindMatrix(Matrix4x4.Identity));
                 }).ToArray();
                 var inst = sceneBuilder.AddSkinnedMesh(mb, joints).WithName(mb.Name);
             }
         }
-        private GltfMeshBuilder ConvertMesh(GrnMesh mesh, Dictionary<int, MaterialBuilder> matIdMatBuilderMap)
+
+        private static GltfMeshBuilder ConvertMesh(GrnMesh mesh, IReadOnlyDictionary<int, MaterialBuilder> matIdMatBuilderMap)
         {
             var primitives = from face in mesh.Faces
                              group face by face.MaterialIndex into faceGroup
@@ -206,7 +145,8 @@ namespace AoMEngineLibrary.Graphics.Grn
 
             return mb;
         }
-        private GltfVertexBuilder GetVertexBuilder(GrnMesh mesh, GrnFace face, int index)
+        
+        private static GltfVertexBuilder GetVertexBuilder(GrnMesh mesh, GrnFace face, int index)
         {
             var vb = new GltfVertexBuilder();
 
@@ -217,14 +157,14 @@ namespace AoMEngineLibrary.Graphics.Grn
             vb.Material.TexCoord = new Vector2(mesh.TextureCoordinates[face.TextureIndices[index]].X, mesh.TextureCoordinates[face.TextureIndices[index]].Y);
 
             var vertWeight = mesh.VertexWeights[face.Indices[index]];
-            var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights, (First, Second) => (First, Second)).Where(vw => vw.Second > 0).ToArray();
+            var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights).Where(vw => vw.Second > 0).ToArray();
             if (vws.Length > 4) throw new NotSupportedException("A vertex cannot be bound to more than 4 bones.");
             vb.Skinning.SetBindings(SparseWeight8.Create(vws));
 
             return vb;
         }
 
-        private Dictionary<int, MaterialBuilder> ConvertMaterials(GrnFile grn, TextureManager textureManager)
+        private static Dictionary<int, MaterialBuilder> ConvertMaterials(GrnFile grn, TextureManager textureManager)
         {
             var textureImageMap = ConvertTextures(grn, textureManager);
 
@@ -235,9 +175,10 @@ namespace AoMEngineLibrary.Graphics.Grn
                 var mb = new MaterialBuilder(mat.Name);
                 mb.WithMetallicRoughnessShader();
                 var cb = mb.UseChannel(KnownChannel.MetallicRoughness);
-                cb.Parameter = new Vector4(0.1f, 0.5f, 0, 0);
+                cb.Parameters[KnownProperty.MetallicFactor] = 0.1f;
+                cb.Parameters[KnownProperty.RoughnessFactor] = 0.5f;
                 cb = mb.UseChannel(KnownChannel.BaseColor);
-                cb.Parameter = new Vector4(0.5f, 0.5f, 0.5f, 1);
+                cb.Parameters[KnownProperty.RGBA] = new Vector4(0.5f, 0.5f, 0.5f, 1);
 
                 Texture? tex = null;
                 if (textureImageMap.ContainsKey(mat.DiffuseTexture))
@@ -270,7 +211,8 @@ namespace AoMEngineLibrary.Graphics.Grn
             return matIdMatBuilderMap;
         }
 
-        private Dictionary<GrnTexture, (ImageBuilder Image, Texture? Texture)> ConvertTextures(GrnFile grn, TextureManager textureManager)
+        private static Dictionary<GrnTexture, (ImageBuilder Image, Texture? Texture)> ConvertTextures(GrnFile grn,
+            TextureManager textureManager)
         {
             var textureImageMap = new Dictionary<GrnTexture, (ImageBuilder Image, Texture? Texture)>();
             for (int i = 0; i < grn.Textures.Count; ++i)
@@ -303,7 +245,7 @@ namespace AoMEngineLibrary.Graphics.Grn
                         // TODO: log exception
 
                         // Write minimal image
-                        var image = new SixLabors.ImageSharp.Image<L8>(1, 1, new L8(128));
+                        var image = new Image<L8>(1, 1, new L8(128));
                         using (var ms = new MemoryStream())
                         {
                             image.SaveAsPng(ms);
@@ -319,7 +261,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             return textureImageMap;
         }
 
-        private void ConvertAnimation(GrnFile grn, NodeBuilder?[] nodeBuilders)
+        private static void ConvertAnimation(GrnFile grn, IReadOnlyList<NodeBuilder?> nodeBuilders)
         {
             for (int i = 0; i < grn.Animation.BoneTracks.Count; ++i)
             {

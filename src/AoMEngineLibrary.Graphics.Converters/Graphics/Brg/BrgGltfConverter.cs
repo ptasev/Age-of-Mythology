@@ -48,19 +48,19 @@ namespace AoMEngineLibrary.Graphics.Brg
             var sceneBuilder = new SceneBuilder();
             var rootNodeBuilder = new NodeBuilder($"{parameters.ModelName}Container");
 
-            Dictionary<int, MaterialBuilder> matIdMatBuilderMap = new Dictionary<int, MaterialBuilder>();
+            var matIdMatBuilderMap = new Dictionary<int, MaterialBuilder>();
             ConvertMaterials(brg, textureManager, matIdMatBuilderMap);
 
             ConvertMeshes(brg, parameters, sceneBuilder, rootNodeBuilder, matIdMatBuilderMap);
 
-            ConvertAttachpoints(brg, sceneBuilder, rootNodeBuilder);
+            ConvertDummies(brg, sceneBuilder, rootNodeBuilder);
 
             return sceneBuilder.ToGltf2();
         }
 
-        private void ConvertAttachpoints(BrgFile brg, SceneBuilder sceneBuilder, NodeBuilder nodeBuilder)
+        private void ConvertDummies(BrgFile brg, SceneBuilder sceneBuilder, NodeBuilder nodeBuilder)
         {
-            var mb = CreateAttachpointMesh();
+            var mb = CreateDummyMesh();
 
             // Create hotspot
             var hnb = nodeBuilder.CreateNode("Dummy_hotspot");
@@ -78,19 +78,16 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             for (var i = 0; i < brg.Meshes[0].Dummies.Count; ++i)
             {
-                var nb = ConvertAttachpoint(brg, i, nodeBuilder);
+                var nb = ConvertDummy(brg, i, nodeBuilder);
                 sceneBuilder.AddRigidMesh(mb, nb);
             }
         }
-        private MeshBuilder<VertexPosition, VertexColor1> CreateAttachpointMesh()
+        
+        private static MeshBuilder<VertexPosition, VertexColor1> CreateDummyMesh()
         {
-            var mb = new MeshBuilder<VertexPosition, VertexColor1>("attachpointMesh");
+            var mb = new MeshBuilder<VertexPosition, VertexColor1>("dummyMesh");
             var pb = mb.UsePrimitive(MaterialBuilder.CreateDefault(), 3);
 
-            // AoM dummy axes and colors
-            //AddAxisToMesh(pb, new Vector3(-0.5f, 0.005f, 0.005f), new Vector4(0, 0, 1, 1));
-            //AddAxisToMesh(pb, new Vector3(0.005f, 0.5f, 0.005f), new Vector4(0, 1, 0, 1));
-            //AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, 0.5f), new Vector4(1, 0, 0, 1));
             // Blender/3ds Max axes and colors
             AddAxisToMesh(pb, new Vector3(0.25f, 0.005f, 0.005f), new Vector4(1, 0, 0, 1));
             AddAxisToMesh(pb, new Vector3(0.005f, 0.005f, -0.25f), new Vector4(0, 1, 0, 1));
@@ -98,21 +95,21 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             return mb;
 
-            void AddAxisToMesh(IPrimitiveBuilder pb, Vector3 length, Vector4 color)
+            static void AddAxisToMesh(IPrimitiveBuilder pb, Vector3 length, Vector4 color)
             {
-                var verts = new Vector3[]
+                var positions = new Vector3[]
                 {
-                    new Vector3(0, 0, 0),
-                    new Vector3(length.X, 0, 0),
-                    new Vector3(length.X, length.Y, 0),
-                    new Vector3(0, length.Y, 0),
-                    new Vector3(0, length.Y, length.Z),
-                    new Vector3(length.X, length.Y, length.Z),
-                    new Vector3(length.X, 0, length.Z),
-                    new Vector3(0, 0, length.Z)
+                    new(0, 0, 0),
+                    new(length.X, 0, 0),
+                    new(length.X, length.Y, 0),
+                    new(0, length.Y, 0),
+                    new(0, length.Y, length.Z),
+                    new(length.X, length.Y, length.Z),
+                    new(length.X, 0, length.Z),
+                    new(0, 0, length.Z)
                 };
 
-                var vbs = verts.Select(v =>
+                var vbs = positions.Select(v =>
                 {
                     var vb = new VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>();
                     vb.Geometry.Position = v;
@@ -122,18 +119,18 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 var faces = new List<BrgFace>()
                 {
-                    new BrgFace(0, 2, 1),
-                    new BrgFace(0, 3, 2),
-                    new BrgFace(2, 3, 4),
-                    new BrgFace(2, 4, 5),
-                    new BrgFace(1, 2, 5),
-                    new BrgFace(1, 5, 6),
-                    new BrgFace(0, 7, 4),
-                    new BrgFace(0, 4, 3),
-                    new BrgFace(5, 4, 7),
-                    new BrgFace(5, 7, 6),
-                    new BrgFace(0, 6, 7),
-                    new BrgFace(0, 1, 6)
+                    new(0, 2, 1),
+                    new(0, 3, 2),
+                    new(2, 3, 4),
+                    new(2, 4, 5),
+                    new(1, 2, 5),
+                    new(1, 5, 6),
+                    new(0, 7, 4),
+                    new(0, 4, 3),
+                    new(5, 4, 7),
+                    new(5, 7, 6),
+                    new(0, 6, 7),
+                    new(0, 1, 6)
                 };
 
                 foreach (var face in faces)
@@ -142,34 +139,13 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
             }
         }
-        private MeshBuilder<VertexPosition, VertexColor1> CreateAttachpointLineMesh()
+        
+        private NodeBuilder ConvertDummy(BrgFile brg, int dummyIndex, NodeBuilder nodeBuilder)
         {
-            var mb = new MeshBuilder<VertexPosition, VertexColor1>("attachpointMesh");
-            var pb = mb.UsePrimitive(MaterialBuilder.CreateDefault(), 2);
+            var dummy = brg.Meshes[0].Dummies[dummyIndex];
+            var nb = nodeBuilder.CreateNode("Dummy_" + dummy.Name);
 
-            var vb1 = new VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>();
-            var vb2 = new VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>();
-            vb1.Material.Color = new Vector4(0, 0, 1, 1);
-            vb2.Geometry.Position = new Vector3(-0.5f, 0, 0);
-            vb2.Material.Color = vb1.Material.Color;
-            pb.AddLine(vb1, vb2);
-            vb1.Material.Color = new Vector4(0, 1, 0, 1);
-            vb2.Geometry.Position = new Vector3(0, 0.5f, 0);
-            vb2.Material.Color = vb1.Material.Color;
-            pb.AddLine(vb1, vb2);
-            vb1.Material.Color = new Vector4(1, 0, 0, 1);
-            vb2.Geometry.Position = new Vector3(0, 0, 0.5f);
-            vb2.Material.Color = vb1.Material.Color;
-            pb.AddLine(vb1, vb2);
-
-            return mb;
-        }
-        private NodeBuilder ConvertAttachpoint(BrgFile brg, int attpIndex, NodeBuilder nodeBuilder)
-        {
-            var attp = brg.Meshes[0].Dummies[attpIndex];
-            var nb = nodeBuilder.CreateNode("Dummy_" + attp.Name);
-
-            var worldMatrix = GetAttachpointWorldMatrix(attp);
+            var worldMatrix = GetDummyWorldMatrix(dummy);
             Matrix4x4.Decompose(worldMatrix, out Vector3 scale, out Quaternion rot, out Vector3 trans);
             nb.UseTranslation().Value = trans;
             nb.UseRotation().Value = rot;
@@ -187,8 +163,8 @@ namespace AoMEngineLibrary.Graphics.Brg
 
                 for (int i = 1; i < brg.Meshes.Count; ++i)
                 {
-                    attp = brg.Meshes[i].Dummies[attpIndex];
-                    worldMatrix = GetAttachpointWorldMatrix(attp);
+                    dummy = brg.Meshes[i].Dummies[dummyIndex];
+                    worldMatrix = GetDummyWorldMatrix(dummy);
                     Matrix4x4.Decompose(worldMatrix, out scale, out rot, out trans);
                     ttb.SetPoint(brg.Animation.MeshKeys[i], trans);
                     rtb.SetPoint(brg.Animation.MeshKeys[i], rot);
@@ -198,13 +174,16 @@ namespace AoMEngineLibrary.Graphics.Brg
 
             return nb;
         }
-        private Matrix4x4 GetAttachpointWorldMatrix(BrgDummy attp)
+        
+        private static Matrix4x4 GetDummyWorldMatrix(BrgDummy dummy)
         {
-            var mat = new Matrix4x4();
-            mat.M11 = attp.Right.X; mat.M12 = attp.Right.Y; mat.M13 = attp.Right.Z;
-            mat.M21 = attp.Up.X; mat.M22 = attp.Up.Y; mat.M23 = attp.Up.Z;
-            mat.M31 = attp.Forward.X; mat.M32 = attp.Forward.Y; mat.M33 = attp.Forward.Z;
-            mat.M41 = -attp.Position.X; mat.M42 = attp.Position.Y; mat.M43 = attp.Position.Z; mat.M44 = 1;
+            var mat = new Matrix4x4
+            {
+                M11 = dummy.Right.X, M12 = dummy.Right.Y, M13 = dummy.Right.Z,
+                M21 = dummy.Up.X, M22 = dummy.Up.Y, M23 = dummy.Up.Z,
+                M31 = dummy.Forward.X, M32 = dummy.Forward.Y, M33 = dummy.Forward.Z,
+                M41 = -dummy.Position.X, M42 = dummy.Position.Y, M43 = dummy.Position.Z, M44 = 1
+            };
             return mat;
         }
 
@@ -243,7 +222,8 @@ namespace AoMEngineLibrary.Graphics.Brg
                 var instBuilder = sceneBuilder.AddRigidMesh(mb, nb);
             }
         }
-        private IMeshBuilder<MaterialBuilder> CreateMeshBuilder(BrgMeshFlag flags)
+        
+        private static IMeshBuilder<MaterialBuilder> CreateMeshBuilder(BrgMeshFlag flags)
         {
             bool hasColor = flags.HasFlag(BrgMeshFlag.AlphaChannel) || flags.HasFlag(BrgMeshFlag.ColorChannel);
             bool hasTex = flags.HasFlag(BrgMeshFlag.Texture1);
@@ -341,23 +321,24 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
-        private GltfVertexBuilder GetVertexBuilder(BrgMesh mesh, int index)
+        private static GltfVertexBuilder GetVertexBuilder(BrgMesh mesh, int index)
         {
-            var vb = new GltfVertexBuilder();
-
-            vb.Geometry = GetVertexGeometry(mesh, index);
-            vb.Material = GetVertexMaterial(mesh, index);
+            var vb = new GltfVertexBuilder
+            {
+                Geometry = GetVertexGeometry(mesh, index),
+                Material = GetVertexMaterial(mesh, index)
+            };
 
             return vb;
         }
-        private VertexPositionNormal GetVertexGeometry(BrgMesh mesh, int index)
+        private static VertexPositionNormal GetVertexGeometry(BrgMesh mesh, int index)
         {
             var vert = mesh.Vertices[index];
             var norm = mesh.Normals[index];
 
             return new VertexPositionNormal(-vert.X, vert.Y, vert.Z, -norm.X, norm.Y, norm.Z);
         }
-        private VertexColor1Texture1 GetVertexMaterial(BrgMesh mesh, int index)
+        private static VertexColor1Texture1 GetVertexMaterial(BrgMesh mesh, int index)
         {
             var vm = new VertexColor1Texture1();
 
@@ -445,7 +426,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
-        private string GetMaterialNameWithFlags(BrgMaterial mat)
+        private static string GetMaterialNameWithFlags(BrgMaterial mat)
         {
             var sb = new StringBuilder(Path.GetFileNameWithoutExtension(mat.DiffuseMapName));
             sb.Append('(');
@@ -493,7 +474,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             return sb.ToString();
         }
 
-        private (ImageBuilder Image, Texture? Texture) CreateMemoryImage(string imageFile, TextureManager textureManager)
+        private static (ImageBuilder Image, Texture? Texture) CreateMemoryImage(string imageFile, TextureManager textureManager)
         {
             ImageBuilder imageBuilder;
             Texture? tex = null;

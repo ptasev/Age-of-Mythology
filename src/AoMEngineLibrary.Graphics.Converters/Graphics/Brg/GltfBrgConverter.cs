@@ -27,7 +27,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         public BrgFile Convert(ModelRoot gltfFile, GltfBrgParameters parameters)
         {
-            BrgFile brg = new BrgFile();
+            var brg = new BrgFile();
             var model = gltfFile;
 
             // Pick the chosen scene and animation
@@ -56,7 +56,7 @@ namespace AoMEngineLibrary.Graphics.Brg
                 brg.Animation.MeshKeys.Add(i * spf);
             }
 
-            // Convert meshes, materials and attachpoints
+            // Convert meshes, materials and dummies
             ConvertMeshes(scene, anim, brg);
 
             // Perform final processing
@@ -74,14 +74,15 @@ namespace AoMEngineLibrary.Graphics.Brg
             return brg;
         }
 
-        private void ConvertMeshes(Scene gltfScene, GltfAnimation? gltfAnimation, BrgFile brg)
+        private static void ConvertMeshes(Scene gltfScene, GltfAnimation? gltfAnimation, BrgFile brg)
         {
-            Dictionary<int, int> matIdMapping = new Dictionary<int, int>();
+            var matIdMapping = new Dictionary<int, int>();
 
             var sceneTemplate = SceneTemplate.Create(gltfScene, new RuntimeOptions() { IsolateMemory = false });
             var instance = sceneTemplate.CreateInstance();
 
-            Predicate<string> noDummySelector = nodeName => !nodeName.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase);
+            Predicate<string> noDummySelector = nodeName =>
+                !nodeName.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase);
 
             // Mesh Frames
             for (int i = 0; i < brg.Header.NumMeshes; i++)
@@ -97,17 +98,19 @@ namespace AoMEngineLibrary.Graphics.Brg
                 }
 
                 // Add a new mesh (frame)
-                var mesh = new BrgMesh();
-                mesh.Header.Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength;
-                mesh.ExtendedHeader.AnimationLength = brg.Animation.Duration;
+                var mesh = new BrgMesh
+                {
+                    Header = { Format = BrgMeshFormat.HasFaceNormals | BrgMeshFormat.AnimationLength },
+                    ExtendedHeader = { AnimationLength = brg.Animation.Duration }
+                };
                 if (i > 0)
                 {
                     mesh.Header.Flags |= BrgMeshFlag.Secondary;
                 }
                 brg.Meshes.Add(mesh);
 
-                // Convert all the attachpoints in the scene
-                ConvertAttachpoints(gltfScene, instance, mesh);
+                // Convert all the dummies in the scene
+                ConvertDummies(gltfScene, instance, mesh);
 
                 // Evaluate the entire gltf scene
                 ConvertSceneToMeshFrame(gltfScene, instance, noDummySelector, brg, mesh, matIdMapping);
@@ -195,7 +198,7 @@ namespace AoMEngineLibrary.Graphics.Brg
 
         private static void ConvertMesh(IMeshDecoder<GltfMaterial> decoder, IGeometryTransform transform,
             bool sceneHasTexCoords, bool sceneHasColors, bool sceneHasAnimTexCoords, bool sceneHasAnimColors,
-            BrgMesh mesh, Dictionary<int, int> matIdMapping)
+            BrgMesh mesh, IReadOnlyDictionary<int, int> matIdMapping)
         {
             foreach (var p in decoder.Primitives)
             {
@@ -286,10 +289,11 @@ namespace AoMEngineLibrary.Graphics.Brg
             }
         }
 
-        private void ConvertAttachpoints(Scene scene, SceneInstance sceneInstance, BrgMesh mesh)
+        private static void ConvertDummies(Scene scene, SceneInstance sceneInstance, BrgMesh mesh)
         {
-            // Convert Attachpoints
-            var dummies = sceneInstance.Armature.LogicalNodes.Where(n => n.Name.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase));
+            // Convert dummies
+            var dummies = sceneInstance.Armature.LogicalNodes.Where(n =>
+                n.Name.StartsWith("dummy_", StringComparison.InvariantCultureIgnoreCase));
 
             if (dummies.Any())
             {
@@ -331,8 +335,7 @@ namespace AoMEngineLibrary.Graphics.Brg
             {
                 if (gltfMat == null) continue;
 
-                var mat = new BrgMaterial();
-                mat.Id = brg.Materials.Count + 1;
+                var mat = new BrgMaterial { Id = brg.Materials.Count + 1 };
                 ConvertMaterial(gltfMat, mat);
 
                 int matListIndex = brg.Materials.IndexOf(mat);
