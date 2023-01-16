@@ -1,0 +1,29 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="BCnEncoder.Net.ImageSharp" Version="1.0.4" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageVersion Include="CommunityToolkit.HighPerformance" Version="8.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="3.1.0" />
+    <PackageVersion Include="FCTB" Version="2.16.24" />
+    <PackageVersion Include="HelixToolkit.Core.Wpf" Version="2.20.0" />
+    <PackageVersion Include="JonSkeet.MiscUtil" Version="0.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageVersion Include="ObjectListView.Official" Version="2.9.1" />
+    <PackageVersion Include="PropertyTools.Wpf" Version="3.1.0" />
+    <PackageVersion Include="ReactiveUI.Events.WPF" Version="15.1.1" />
+    <PackageVersion Include="ReactiveUI.WPF" Version="17.1.4" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0027" />
+    <PackageVersion Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.1" />
+    <PackageVersion Include="Splat.Serilog" Version="14.1.1" />
+    <PackageVersion Include="System.IO.Packaging" Version="6.0.0" />
+    <PackageVersion Include="xunit" Version="2.4.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.3" />
+  </ItemGroup>
+</Project>

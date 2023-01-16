@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HelixToolkit.Core.Wpf" Version="2.20.0" />
+    <PackageReference Include="HelixToolkit.Core.Wpf" />
   </ItemGroup>
 
   <ItemGroup>

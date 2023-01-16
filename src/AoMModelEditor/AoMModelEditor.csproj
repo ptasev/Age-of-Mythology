@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -29,14 +29,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="PropertyTools.Wpf" Version="3.1.0" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="17.1.4" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.1" />
-    <PackageReference Include="Splat.Serilog" Version="14.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="PropertyTools.Wpf" />
+    <PackageReference Include="ReactiveUI.Events.WPF" />
+    <PackageReference Include="ReactiveUI.WPF" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Splat.Serilog" />
   </ItemGroup>
 
   <ItemGroup>
