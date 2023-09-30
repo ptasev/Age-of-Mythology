@@ -1,14 +1,12 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>AME - Readme</title>
-    <style type="text/css">
+    <style>
         body
         {
-            margin: 0;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
             width: 990px;
             background: #111111;
             color: #dddddd;
@@ -28,8 +26,7 @@
 
         div#top
         {
-            margin: 0;
-            margin-bottom: 10px;
+            margin: 0 0 10px;
             padding: 10px;
             width: auto;
             background: #000000;
@@ -40,8 +37,7 @@
 
         div.readme-main
         {
-            margin: 0;
-            margin-bottom: 10px;
+            margin: 0 0 10px;
             padding: 10px;
             width: auto;
             background: #000000;
@@ -115,21 +111,21 @@
         </ol>
     </div>
     <div class="readme-main">
-        <h2><a name="Reqs"></a>Requirements</h2>
+        <h2><a id="Reqs"></a>Requirements</h2>
         <ul>
-            <li>.NET 5.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
+            <li>.NET 6.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
         </ul>
-        <h2><a name="Inst"></a>Installation</h2>
+        <h2><a id="Inst"></a>Installation</h2>
         <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>AoM Model Editor.exe</em> file.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="EdIn"></a>Editor Information</h2>
+        <h2><a id="EdIn"></a>Editor Information</h2>
         <p>
             Use this application to edit 3D model files for the Age of Mythology and the Extended Edition games.
             Age of Mythology uses brg files and grn files for 3D models. Brg files use vertex morph animation, while grn files use skeleton/bone based animation.
             The application will help you edit and convert brg/grn files to and from glTF files.
         </p>
-        <h2><a name="Usag"></a>Usage</h2>
+        <h2><a id="Usag"></a>Usage</h2>
         <p>
             glTF files are a common 3D model format supported by many 3D modelling applications such as 3ds Max, and Blender.
             glTF files can be saved in two different formats or file extensions. They can be saved with the glb extension which contains all the data in a binary format.
@@ -140,11 +136,11 @@
         <ol>
             <li>Find a plugin, or see if your favorite modelling software supports exporting gltf files.</li>
             <li>After you've created your model, export the model as either glb, or gltf with your modelling software.</li>
-            <li>In the AoM Model Editor, check the Brg or Grn Settings and change them as you see fit.</li>
-            <li>Under the Model menu select either Import GLTF as BRG, or Import GLTF as GRN to convert the glTF file into an AoM model format.</li>
+            <li>In the AoM Model Editor under the Model menu select either Import GLTF as BRG, or Import GLTF as GRN to convert the glTF file into an AoM model format.</li>
+            <li>In the import dialog check the Brg or Grn Settings and change them as you see fit.</li>
             <li>Use the user interface edit any of the model data.</li>
             <li>Use the File menu to save the data as an AoM model format.</li>
-            <li>If you are saving a brg file and are modding AoMEE, use the Model menu to extract the MTRL files, and place them in teh materials folder of your mod's directory.</li>
+            <li>If you are saving a brg file and are modding AoMEE, use the Model menu to extract the MTRL files, and place them in the materials folder of your mod's directory.</li>
         </ol>
         <p>For viewing existing AoM models, use the following workflow:</p>
         <ol>
@@ -154,7 +150,7 @@
             <li>Use the Model menu, and select Export as GLTF to save the model data as a glTF file.</li>
             <li>Now you may use your favorite glTF viewer or editor to view or edit the model.</li>
         </ol>
-        <h2><a name="Help"></a>Helpful Information</h2>
+        <h2><a id="Help"></a>Helpful Information</h2>
         <ul>
             <li>You can use the <a href="https://sandbox.babylonjs.com/">babylon.js Sandbox</a> web app to quickly view gltf files.</li>
             <li>You can use the official <a href="https://github.khronos.org/glTF-Validator/">glTF Validator</a> to make sure that your glTF files are properly formed.</li>
@@ -179,23 +175,26 @@
         </ul>
     </div>
     <div class="readme-main">
-        <h2><a name="Supp"></a>Support</h2>
+        <h2><a id="Supp"></a>Support</h2>
         <p>You can get support by asking in the modding channels of the following communities:</p>
         <ul>
-            <li><a href="https://aom.heavengames.com/cgi-bin/forums/display.cgi?action=t&fn=19" target="_blank">AoM HeavenGames Forum</a></li>
             <li><a href="https://discord.gg/jPDPukY" target="_blank">Fan Created AoM Discord</a></li>
             <li><a href="https://discord.gg/rNhDrm5" target="_blank">Official AoM Discord</a></li>
+            <li><a href="https://aom.heavengames.com/cgi-bin/forums/display.cgi?action=t&fn=19" target="_blank">AoM HeavenGames Forum</a></li>
         </ul>
         <p>If you think you've found a bug, post an issue <a href="https://petar.page/l/aom-ame-code" target="_blank">here</a> with as much information as possible.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="Chan"></a>Changelog</h2>
+        <h2><a id="Chan"></a>Changelog</h2>
         <ul>
             <li>
-                <strong>vNext</strong>
+                <strong>1.2.0+20230930</strong>
                 <ul>
-                    <li>Improved handling of reading texture/material names from gltf files.</li>
-                    <li>Fixed bugs with converting alpha/beta brg files to gltf.</li>
+                    <li>Improved handling of reading texture/material names from glTF files.</li>
+                    <li>Integrated brg/grn import settings into import dialog.</li>
+                    <li>Added glTF scene selection into glTF import dialog.</li>
+                    <li>Fixed bug exporting brg files to glTF with multiple materials using the same id.</li>
+                    <li>Fixed bugs with converting alpha/beta brg files to glTF.</li>
                 </ul>
             </li>
             <li>
@@ -213,7 +212,7 @@
                 </ul>
             </li>
         </ul>
-        <h2><a name="Ackn"></a>Acknowledgements</h2>
+        <h2><a id="Ackn"></a>Acknowledgements</h2>
         <ul>
             <li>Alexastor</li>
             <li>Android GRRR</li>

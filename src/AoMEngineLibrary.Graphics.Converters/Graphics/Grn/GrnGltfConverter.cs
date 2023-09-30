@@ -218,7 +218,7 @@ namespace AoMEngineLibrary.Graphics.Grn
             for (int i = 0; i < grn.Textures.Count; ++i)
             {
                 var texture = grn.Textures[i];
-                if (!string.IsNullOrWhiteSpace(texture.FileName))
+                if (!string.IsNullOrWhiteSpace(texture.FileName) && !textureImageMap.ContainsKey(texture))
                 {
                     // Remove everything after first parenthesis
                     string imageFile = Path.GetFileName(texture.FileName);

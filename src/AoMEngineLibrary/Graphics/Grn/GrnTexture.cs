@@ -60,14 +60,11 @@ namespace AoMEngineLibrary.Graphics.Grn
                 return false;
             }
 
-            return Name == tex.Name &&
-                FileName == tex.FileName &&
-                Width == tex.Width &&
-                Height == tex.Height;
+            return Name == tex.Name && FileName == tex.FileName;
         }
 
         public override bool Equals(object? obj) => Equals(obj as GrnTexture);
 
-        public override int GetHashCode() => HashCode.Combine(Name, FileName, Width, Height);
+        public override int GetHashCode() => HashCode.Combine(Name, FileName);
     }
 }

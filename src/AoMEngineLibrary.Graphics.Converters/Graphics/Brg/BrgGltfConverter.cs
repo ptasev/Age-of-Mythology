@@ -275,6 +275,15 @@ namespace AoMEngineLibrary.Graphics.Brg
                     }
 
                     var pbTri = pb.AddTriangle(vbA, vbC, vbB);
+                    if (pbTri.A == -1 || pbTri.B == -1 || pbTri.C == -1)
+                    {
+                        // The primitive builder returns (-1, -1, -1) if a triangle with the given vertices already
+                        // exists. This may be a premature optimization because two triangles could be the same in the
+                        // base mesh, but they could animate in a different way through morph targets.
+                        // Future: consider adding a really small adjustment to one of the vertex positions to avoid
+                        // this optimization
+                        continue;
+                    }
 
                     // Each mesh is really a morph target after the first one
                     for (var i = 1; i < meshes.Count; ++i)
