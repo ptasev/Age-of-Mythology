@@ -300,11 +300,19 @@ namespace AoMEngineLibrary.Graphics.Brg
                 mesh.Header.Flags |= BrgMeshFlag.DummyObjects;
                 foreach (var dummy in dummies)
                 {
-                    var aName = dummy.Name;
-                    if (!BrgDummyTypeInfo.TryGetByName(aName.Substring(6), out var typeInfo))
+                    var dummyName = dummy.Name[6..];
+                    
+                    // Blender adds a number like .001 if multiple dummies with same name
+                    var dotIndex = dummyName.LastIndexOf('.');
+                    if (dotIndex != -1)
+                    {
+                        dummyName = dummyName[..dotIndex];
+                    }
+                    
+                    if (!BrgDummyTypeInfo.TryGetByName(dummyName, out var typeInfo))
                     {
                         // Check if it's hotspot
-                        if (aName.Equals("Dummy_hotspot", StringComparison.InvariantCultureIgnoreCase))
+                        if (dummyName.Equals("hotspot", StringComparison.InvariantCultureIgnoreCase))
                         {
                             var trans = dummy.ModelMatrix.Translation;
                             mesh.Header.HotspotPosition = new Vector3(-trans.X, trans.Y, trans.Z);
